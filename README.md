@@ -26,6 +26,13 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Development environment
+
+```bash
+Node.js >= 12.x
+NPM >= 6.x
+```
+
 ## Installation
 
 ```bash
