@@ -1,3 +1,4 @@
 export const jwtConstants = {
-  secret: 'secretKey',
+  secret: 'repi-api-secretKey',
+  expried_on: '1d',
 };

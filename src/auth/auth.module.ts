@@ -8,17 +8,19 @@ import { jwtConstants } from './constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
-const expried_on = '1d';
 @Module({
   imports: [
+    // 서로 참조하는 경우 순환참조라고 하며, Call Back과 같은 문제가 발생할 수 있음. 
+    // forwardRef()를 사용하여 서로 imports 해준다
     forwardRef(() => UsersModule),
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: expried_on },
+      signOptions: { expiresIn: jwtConstants.expried_on },
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy, CommonService],
+  // imports만으로는 해당 서비스 사용이 불가능하며 exports를 해야 사용 가능
   exports: [AuthService],
 })
 export class AuthModule { }

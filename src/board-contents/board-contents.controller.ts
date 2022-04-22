@@ -18,9 +18,11 @@ import {
   ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import { map } from 'lodash';
+import { GetUser } from 'src/auth/getuser.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { commonUtils } from 'src/common/common-utils';
 import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
+import { UsersEntity } from 'src/users/entities/user.entity';
 import { BoardContentsService } from './board-contents.service';
 import { CreateBoardContentDto } from './dto/create-board-content.dto';
 import { UpdateBoardContentDto } from './dto/update-board-content.dto';
@@ -41,8 +43,8 @@ export class BoardContentsController {
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async create(@Param('bd_idx') bd_idx: number, @Request() req, @Body() createBoardContentDto: CreateBoardContentDto) {
-    return await this.boardContentsService.create(bd_idx, req.user.user_id, createBoardContentDto);
+  async create(@Param('bd_idx') bd_idx: number, @GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
+    return await this.boardContentsService.create(bd_idx, user.user_id, createBoardContentDto);
   }
 
   @Get()

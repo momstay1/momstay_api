@@ -7,7 +7,10 @@ import { ResponseAuthDto } from './dto/response-auth.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UsersService, private jwtService: JwtService) { }
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService
+  ) { }
 
   async validateUser(id: string, password: string): Promise<any> {
     const user = await this.userService.findOne(id);

@@ -33,6 +33,8 @@ import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ResponseErrDto } from 'src/error/dto/response-err.dto';
 import { ProfileUserDto } from './dto/profile-user.dto';
+import { GetUser } from 'src/auth/getuser.decorator';
+import { UsersEntity } from './entities/user.entity';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -62,8 +64,8 @@ export class UsersController {
   @ApiBody({ type: LoginUserDto })
   @ApiCreatedResponse({ type: ResponseAuthDto })
   @ApiUnauthorizedResponse({ type: ResponseErrDto })
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@GetUser() user: UsersEntity) {
+    return this.authService.login(user);
   }
 
   // 회원 정보 가져오기
@@ -71,9 +73,9 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileUserDto })
-  async getProfile(@Request() req) {
-    const user = await this.usersService.findOne(req.user.user_id);
-    return this.sanitizeUsers(user);
+  async getProfile(@GetUser() user: UsersEntity) {
+    const data = await this.usersService.findOne(user.user_id);
+    return this.sanitizeUsers(data);
   }
 
   // 회원 리스트 조회

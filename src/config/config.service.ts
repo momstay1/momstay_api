@@ -1,3 +1,7 @@
+/*  
+ * Find, FindOne, Save와 같은 Repository API는 로직이 간단하거나 사용하기 쉬운 추상화에 적합
+ * 복잡한 Query가 필요한 경우 QueryBuilder를 사용
+ * */
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
