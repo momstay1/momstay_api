@@ -1,0 +1,23 @@
+import { Module } from '@nestjs/common';
+import { BoardContentsService } from './board-contents.service';
+import { BoardContentsController } from './board-contents.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BoardContentsEntity } from './entities/board-content.entity';
+import { UsersModule } from 'src/users/users.module';
+import { BoardCategoriesModule } from 'src/board-categories/board-categories.module';
+import { BoardsModule } from 'src/boards/boards.module';
+import { BoardSelectedCategoriesModule } from 'src/board-selected-categories/board-selected-categories.module';
+import { NoticeContentsController } from './notice-contents.controller';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([BoardContentsEntity]),
+    UsersModule,
+    BoardsModule,
+    BoardSelectedCategoriesModule,
+    BoardCategoriesModule
+  ],
+  controllers: [BoardContentsController, NoticeContentsController],
+  providers: [BoardContentsService]
+})
+export class BoardContentsModule { }
