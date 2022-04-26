@@ -34,7 +34,7 @@ export class BoardContentsController {
   constructor(private readonly boardContentsService: BoardContentsService) { }
 
   sanitizeBoardContent = (bc) => {
-    return commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateModel());
+    return commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateColumn());
   };
 
   @Post(':bd_idx')

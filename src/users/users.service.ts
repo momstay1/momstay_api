@@ -45,12 +45,12 @@ export class UsersService {
 
   async remove(id: string) {
     const user = await this.findOne(id);
-    user.user_status = usersConstant.status.del;
+    user.user_status = usersConstant.status.delete;
     await this.usersRepository.save(user);
   }
 
-  getPrivateModel(): string[] {
-    return usersConstant.privateModel;
+  getPrivateColumn(): string[] {
+    return usersConstant.privateColumn;
   }
 
   //회원 정보 저장

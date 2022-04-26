@@ -15,7 +15,7 @@ export class NoticeContentsController {
   constructor(private readonly boardContentsService: BoardContentsService) { }
 
   sanitizeBoardContent = (bc) => {
-    return commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateModel());
+    return commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateColumn());
   };
 
   @Get()

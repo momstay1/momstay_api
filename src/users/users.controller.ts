@@ -44,8 +44,8 @@ export class UsersController {
     private readonly usersService: UsersService
   ) { }
 
-  sanitizeUsers = (user) => {
-    return commonUtils.sanitizeEntity(user, this.usersService.getPrivateModel());
+  sanitizeUsers(user) {
+    return commonUtils.sanitizeEntity(user, this.usersService.getPrivateColumn());
   };
 
   // 회원 생성

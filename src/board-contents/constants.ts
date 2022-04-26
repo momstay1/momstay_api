@@ -1,7 +1,15 @@
-export const bcConstants = {
+export const bcConstants: any = {
   prefix: 'bc',
-  privateModel: ['bc_password'],
-  notNoticeType: [2, 3], // 일반 게시글, 비밀 게시글
-  noticeType: 1, // 공지사항 게시글
-  regStatus: 1, // 등록된 게시글 상태
+  privateColumn: ['bc_password'],
+  type: {
+    notice: 1, // 공지사항
+    basic: 2, // 일반게시글
+    secret: 3, // 비밀글
+    link: 4, // 외부링크 게시글
+  },
+  status: {
+    delete: 0, // 게시글 삭제
+    uncertified: 1, // 게시글 미인증 상태
+    registration: 2, // 게시글 등록 상태
+  },
 };
