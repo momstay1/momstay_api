@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
-import { commonUtils } from 'src/common/common-utils';
+import { commonUtils } from 'src/common/common.utils';
 import { Repository } from 'typeorm';
 import { usersConstant } from './constants';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -27,7 +27,10 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<UsersEntity | undefined> {
-    const user = await this.usersRepository.findOne({ user_id: id });
+    const user = await this.usersRepository.findOne({
+      where: { user_id: id },
+      relations: ['user_group'],
+    });
     if (!user) {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
@@ -56,6 +59,7 @@ export class UsersService {
   //회원 정보 저장
   private async saveUser(createUserDto): Promise<any> {
     const addPrefixUserDto = commonUtils.addPrefix(usersConstant.prefix, createUserDto);
+    addPrefixUserDto.user_group = usersConstant.default.group_idx;
     const user = await this.usersRepository.create({ ...addPrefixUserDto });
     return await this.usersRepository.save(user);
   }

@@ -8,4 +8,7 @@ export const usersConstant = {
     dormant: 5, // 회원 휴면 상태
     leave: 9, // 회원 탈퇴 상태
   },
+  default: {
+    group_idx: 1, // 회원 기본 그룹
+  }
 };

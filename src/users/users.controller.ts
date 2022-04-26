@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
   HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -16,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { commonUtils } from 'src/common/common-utils';
+import { commonUtils } from 'src/common/common.utils';
 import { map } from 'lodash';
 import {
   ApiBearerAuth,
@@ -35,6 +34,8 @@ import { ResponseErrDto } from 'src/error/dto/response-err.dto';
 import { ProfileUserDto } from './dto/profile-user.dto';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from './entities/user.entity';
+import { RoleGuard } from 'src/auth/guards/role-auth.guard';
+import { Role } from 'src/common/decorator/role.decorator';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -68,23 +69,28 @@ export class UsersController {
     return this.authService.login(user);
   }
 
+  // 회원 리스트 조회
+  @Get()
+  @Role(['genuio'])
+  @UseGuards(RoleGuard)
+  @UseGuards(JwtAuthGuard)
+  async findAll() {
+    const users = await this.usersService.findAll();
+    return map(users, (obj) => {
+      return this.sanitizeUsers(obj);
+    });
+  }
+
   // 회원 정보 가져오기
   @Get('profile')
+  @UseGuards(RoleGuard)
+  @Role(['genuio'])
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {
     const data = await this.usersService.findOne(user.user_id);
     return this.sanitizeUsers(data);
-  }
-
-  // 회원 리스트 조회
-  @Get()
-  async findAll() {
-    const users = await this.usersService.findAll();
-    return map(users, (obj) => {
-      return this.sanitizeUsers(obj);
-    });
   }
 
   // 회원 아이디 조회

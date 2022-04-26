@@ -5,7 +5,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { map } from 'lodash';
-import { commonUtils } from 'src/common/common-utils';
+import { commonUtils } from 'src/common/common.utils';
 import { BoardContentsService } from './board-contents.service';
 import { BoardContentsEntity } from './entities/board-content.entity';
 

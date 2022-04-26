@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { commonBcrypt } from 'src/common/common-bcrypt';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
+import { commonBcrypt } from 'src/common/common.bcrypt';
+import { GroupsService } from 'src/groups/groups.service';
 import { UsersService } from 'src/users/users.service';
 import { ResponseAuthDto } from './dto/response-auth.dto';
 
@@ -9,7 +9,8 @@ import { ResponseAuthDto } from './dto/response-auth.dto';
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly groupsService: GroupsService
   ) { }
 
   async validateUser(id: string, password: string): Promise<any> {
@@ -23,7 +24,9 @@ export class AuthService {
   }
 
   async login(user): Promise<ResponseAuthDto> {
-    const payload = { userId: user.user_id, userName: user.user_name };
+    const userInfo = await this.userService.findOne(user.user_id);
+    const group = await this.groupsService.findOne(userInfo.user_group.grp_idx);
+    const payload = { userId: userInfo.user_id, userName: userInfo.user_name, userGrp: group.grp_id };
     return {
       access_token: this.jwtService.sign(payload),
     };

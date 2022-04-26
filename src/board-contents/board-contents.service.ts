@@ -9,7 +9,7 @@ import { CreateBoardContentDto } from './dto/create-board-content.dto';
 import { UpdateBoardContentDto } from './dto/update-board-content.dto';
 import { BoardContentsEntity } from './entities/board-content.entity';
 import { bcConstants } from './constants';
-import { commonUtils } from 'src/common/common-utils';
+import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { constants } from 'buffer';
 import { isArray } from 'lodash';

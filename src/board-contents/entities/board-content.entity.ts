@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BoardSelectedCategoriesEntity } from 'src/board-selected-categories/entities/board-selected-categories.entity';
 import { BoardsEntity } from 'src/boards/entities/board.entity';
-import { commonBcrypt } from 'src/common/common-bcrypt';
+import { commonBcrypt } from 'src/common/common.bcrypt';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import {
   BeforeInsert,
@@ -28,12 +28,12 @@ export class BoardContentsEntity {
   @ApiProperty({ description: '게시글 작성한 회원 idx' })
   bc_user_idx: number;
 
-  @Column({ default: 1 })
-  @ApiProperty({ description: '게시글 상태 0: 삭제, 1:등록' })
+  @Column({ default: 2 })
+  @ApiProperty({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' })
   bc_status: number;
 
   @Column({ default: 2 })
-  @ApiProperty({ description: '게시글 타입 1: 공지사항, 2: 일반글, 3: 비밀글' })
+  @ApiProperty({ description: '게시글 타입 1: 공지사항, 2: 일반글, 3: 비밀글, 4: 외부링크' })
   bc_type: number;
 
   @Column()
@@ -43,10 +43,6 @@ export class BoardContentsEntity {
   @Column({ length: 255 })
   @ApiProperty({ description: '게시글 제목' })
   bc_title: string;
-
-  @Column({ default: 0 })
-  @ApiProperty({ description: '게시글 링크 상태' })
-  bc_link_status: number;
 
   @Column({ length: 255, default: '' })
   @ApiProperty({ description: '게시글 링크' })

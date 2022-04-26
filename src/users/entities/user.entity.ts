@@ -1,10 +1,12 @@
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
-import { commonBcrypt } from 'src/common/common-bcrypt';
+import { commonBcrypt } from 'src/common/common.bcrypt';
+import { GroupsEntity } from 'src/groups/entities/group.entity';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -15,7 +17,7 @@ export class UsersEntity {
   @PrimaryGeneratedColumn()
   user_idx: number;
 
-  @Column({ default: 1 })
+  @Column({ default: 2 })
   user_status: number;
 
   @Column({ default: 'default' })
@@ -43,6 +45,12 @@ export class UsersEntity {
 
   @OneToMany(() => BoardContentsEntity, (bc) => bc.user)
   board_contents: undefined;
+
+  @ManyToOne(() => GroupsEntity, (group) => group.grp_users, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION',
+  })
+  user_group: GroupsEntity;
 
   @CreateDateColumn()
   user_createdAt: Date;

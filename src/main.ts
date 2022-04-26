@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
 import { ConfigService } from './config/config.service';
-import { commonUtils } from './common/common-utils';
+import { commonUtils } from './common/common.utils';
 
 async function bootstrap() {
   await makeOrmConfig();

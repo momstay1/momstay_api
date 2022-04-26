@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { CommonService } from 'src/common/common.service';
+import { GroupsModule } from 'src/groups/groups.module';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
@@ -14,6 +15,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     // forwardRef()를 사용하여 서로 imports 해준다
     forwardRef(() => UsersModule),
     PassportModule,
+    GroupsModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expried_on },

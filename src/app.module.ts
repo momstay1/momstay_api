@@ -12,6 +12,7 @@ import { BoardsModule } from './boards/boards.module';
 import { BoardContentsModule } from './board-contents/board-contents.module';
 import { BoardCategoriesModule } from './board-categories/board-categories.module';
 import { BoardSelectedCategoriesModule } from './board-selected-categories/board-selected-categories.module';
+import { GroupsModule } from './groups/groups.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { BoardSelectedCategoriesModule } from './board-selected-categories/board
     BoardContentsModule,
     BoardCategoriesModule,
     BoardSelectedCategoriesModule,
+    GroupsModule,
   ],
   controllers: [],
   providers: [CommonService],
