@@ -34,8 +34,7 @@ import { ResponseErrDto } from 'src/error/dto/response-err.dto';
 import { ProfileUserDto } from './dto/profile-user.dto';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from './entities/user.entity';
-import { RoleGuard } from 'src/auth/guards/role-auth.guard';
-import { Role } from 'src/common/decorator/role.decorator';
+import { Auth } from 'src/common/decorator/role.decorator';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -71,9 +70,7 @@ export class UsersController {
 
   // 회원 리스트 조회
   @Get()
-  @Role(['genuio'])
-  @UseGuards(RoleGuard)
-  @UseGuards(JwtAuthGuard)
+  @Auth(['root'])
   async findAll() {
     const users = await this.usersService.findAll();
     return map(users, (obj) => {
@@ -83,9 +80,7 @@ export class UsersController {
 
   // 회원 정보 가져오기
   @Get('profile')
-  @UseGuards(RoleGuard)
-  @Role(['genuio'])
-  @UseGuards(JwtAuthGuard)
+  @Auth(['root'])
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {

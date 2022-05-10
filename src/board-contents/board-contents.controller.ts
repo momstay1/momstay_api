@@ -6,8 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
-  Request,
   Query
 } from '@nestjs/common';
 import {
@@ -17,10 +15,10 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import { GetUser } from 'src/auth/getuser.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { commonUtils } from 'src/common/common.utils';
+import { Auth } from 'src/common/decorator/role.decorator';
 import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { BoardContentsService } from './board-contents.service';
@@ -37,14 +35,14 @@ export class BoardContentsController {
     return commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateColumn());
   };
 
-  @Post(':bd_idx')
+  @Post()
   @ApiOperation({ summary: '게시글 생성 API' })
   @ApiCreatedResponse({ type: CreateBoardContentDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async create(@Param('bd_idx') bd_idx: number, @GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
-    return await this.boardContentsService.create(bd_idx, user.user_id, createBoardContentDto);
+  @Auth(['Any'])
+  async create(@GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
+    return await this.boardContentsService.create(user.user_id, createBoardContentDto);
   }
 
   @Get()

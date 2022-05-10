@@ -1,4 +1,4 @@
-import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotAcceptableException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardCategoriesService } from 'src/board-categories/board-categories.service';
 import { BoardSelectedCategoriesService } from 'src/board-selected-categories/board-selected-categories.service';
@@ -12,7 +12,7 @@ import { bcConstants } from './constants';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { constants } from 'buffer';
-import { isArray } from 'lodash';
+import { get, isArray } from 'lodash';
 
 @Injectable()
 export class BoardContentsService {
@@ -24,16 +24,23 @@ export class BoardContentsService {
     private readonly bcatsService: BoardCategoriesService
   ) { }
 
-  async create(bd_idx: number, user_id, createBoardContentDto: CreateBoardContentDto) {
+  async create(user_id, createBoardContentDto: CreateBoardContentDto) {
+    // 게시판 정보 가져오기
+    const board = await this.boardsService.findBoard({ bd_idx: createBoardContentDto.bd_idx });
+    const write_auth = board.bd_write_auth.split("|");
+
     // 회원정보 가져오기
     const user = await this.usersService.findOne(user_id);
+
+    // 게시글 쓰기 권한 여부 확인
+    if (!write_auth.includes(get(user, ['user_group', 'grp_id']))) {
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+
     // 카테고리정보 가져오기
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In(createBoardContentDto.category) }
     });
-
-    // 게시판 정보 가져오기
-    const board = await this.boardsService.findBoard({ bd_idx: bd_idx });
 
     // 게시글 저장
     const boardContent = await this.saveBoardContent({ user, board }, createBoardContentDto)

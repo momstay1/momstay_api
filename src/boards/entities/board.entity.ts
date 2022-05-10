@@ -29,6 +29,15 @@ export class BoardsEntity {
   @Column({ default: 10 })
   bd_order: number;
 
+  @Column({ default: 'root' })
+  bd_lists_auth: string;
+
+  @Column({ default: 'root' })
+  bd_write_auth: string;
+
+  @Column({ default: 'root' })
+  bd_view_auth: string;
+
   @CreateDateColumn()
   bd_createdAt: Date;
 

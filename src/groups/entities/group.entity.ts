@@ -6,8 +6,8 @@ export class GroupsEntity {
   @PrimaryGeneratedColumn()
   grp_idx: number;
 
-  @Column({ default: 1 })
-  grp_status: number;
+  @Column({ length: 30 })
+  grp_type: string;
 
   @Column({ length: 30 })
   grp_id: string;
