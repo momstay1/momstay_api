@@ -172,4 +172,8 @@ export class BoardContentsService {
     arr.push(bcConstants.type.link);
     return arr;
   }
+
+  // 비회원 글쓰기
+  // 비회원 글수정
+  // 비회원 글삭제
 }
