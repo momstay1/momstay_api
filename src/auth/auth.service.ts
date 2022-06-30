@@ -25,11 +25,20 @@ export class AuthService {
     return null;
   }
 
+  async validateAdmin(id: string, password: string): Promise<any> {
+    const admin = await this.adminService.findOne(id);
+    const isHashValid = await commonBcrypt.isHashValid(password, admin.admin_password);
+    if (admin && isHashValid) {
+      const { admin_password, ...result } = admin;
+      return result;
+    }
+    return null;
+  }
+
   async login(user): Promise<ResponseAuthDto> {
     const userInfo = await this.userService.findOne(user.user_id);
     const group = await this.groupsService.findOne(userInfo.user_group.grp_idx);
     const payload = { userId: userInfo.user_id, userName: userInfo.user_name, userGrp: group.grp_id };
-    console.log({ payload });
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -37,7 +46,6 @@ export class AuthService {
 
   async admin_login(admin): Promise<ResponseAuthDto> {
     const userInfo = await this.adminService.findOne(admin.admin_id);
-    console.log({ userInfo });
     const group = await this.groupsService.findOne(userInfo.admin_group.grp_idx);
     const payload = { userId: userInfo.admin_id, userName: userInfo.admin_name, userGrp: group.grp_id };
     return {

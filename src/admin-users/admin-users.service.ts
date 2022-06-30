@@ -21,10 +21,8 @@ export class AdminUsersService {
     //회원 아이디 중복 체크
     const user = await this.checkAdminExists(createUserDto.id);
     if (user) {
-      console.log(2222);
       throw new UnprocessableEntityException('아이디가 중복 됩니다.');
     }
-    console.log(1111);
     //회원 정보 저장
     return await this.saveAdmin(createUserDto);
   }

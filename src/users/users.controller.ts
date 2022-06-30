@@ -3,19 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
-  HttpCode,
-  ConsoleLogger,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { commonUtils } from 'src/common/common.utils';
 import { get, map } from 'lodash';
 import {
@@ -72,14 +66,24 @@ export class UsersController {
   }
 
   // 회원 리스트 조회
-  // @Get()
-  // @Auth(['root'])
-  // async findAll() {
-  //   const users = await this.usersService.findAll();
-  //   return map(users, (obj) => {
-  //     return this.sanitizeUsers(obj);
-  //   });
-  // }
+  @Get()
+  @Auth(['root'])
+  @ApiOperation({ summary: '회원 리스트 API' })
+  @ApiBearerAuth()
+  async findAll(@Query('take') take: number, @Query('page') page: number) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.usersService.findAll({ take, page });
+    return {
+      results: map(results, (obj) => {
+        return this.sanitizeUsers(obj);
+      }),
+      total,
+      pageTotal
+    };
+  }
 
   // 회원 정보 가져오기
   @Get('profile')

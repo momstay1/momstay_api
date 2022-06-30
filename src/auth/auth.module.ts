@@ -7,6 +7,7 @@ import { GroupsModule } from 'src/groups/groups.module';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
+import { AdminStrategy } from './strategies/admin.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
@@ -23,7 +24,7 @@ import { LocalStrategy } from './strategies/local.strategy';
       signOptions: { expiresIn: jwtConstants.expried_on },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, CommonService],
+  providers: [AuthService, LocalStrategy, AdminStrategy, JwtStrategy, CommonService],
   // imports만으로는 해당 서비스 사용이 불가능하며 exports를 해야 사용 가능
   exports: [AuthService],
 })

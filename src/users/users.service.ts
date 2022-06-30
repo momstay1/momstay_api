@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
-import { AdminUsersEntity } from 'src/admin-users/entities/admin-user.entity';
 import { commonUtils } from 'src/common/common.utils';
+import { Pagination, PaginationOptions } from 'src/paginate';
 import { Repository } from 'typeorm';
 import { usersConstant } from './constants';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,8 +26,20 @@ export class UsersService {
     return await this.saveUser(createUserDto);;
   }
 
-  async findAll() {
-    return await this.usersRepository.find();
+  async findAll(options: PaginationOptions) {
+    // return await this.usersRepository.find();
+    const { take, page } = options;
+    const [results, total] = await this.usersRepository.findAndCount({
+      order: { user_createdAt: 'DESC' },
+      where: { user_status: usersConstant.status.registration },
+      relations: ['user_group'],
+      take: take,
+      skip: take * (page - 1)
+    });
+    return new Pagination({
+      results,
+      total,
+    })
   }
 
   async findOne(id: string): Promise<UsersEntity | undefined> {
