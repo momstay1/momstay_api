@@ -1,4 +1,4 @@
-# REPI 솔루션 API 서버
+# 소소하자 API 서버
 
 ## Development environment
 
@@ -51,6 +51,6 @@ master 브랜치로 이동후 develop 브랜치와 merge 후 npm run build 실�
 [master] git purh origin master<br>
 
 서버접속<br>
-su repi_api<br>
-pm2 reload repi-api<br>
+su sosohaja_api<br>
+pm2 reload sosohaja-api<br>
 <br><br><br>
