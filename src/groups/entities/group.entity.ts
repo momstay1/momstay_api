@@ -1,3 +1,4 @@
+import { AdminUsersEntity } from "src/admin-users/entities/admin-user.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -8,6 +9,9 @@ export class GroupsEntity {
 
   @Column({ length: 30 })
   grp_type: string;
+
+  @Column()
+  grp_status: string;
 
   @Column({ length: 30 })
   grp_id: string;
@@ -23,4 +27,10 @@ export class GroupsEntity {
     (user) => user.user_group,
   )
   grp_users: undefined;
+
+  @OneToMany(
+    () => AdminUsersEntity,
+    (grp_admin) => grp_admin.admin_group,
+  )
+  grp_admin: undefined;
 }

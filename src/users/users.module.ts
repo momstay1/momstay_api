@@ -7,7 +7,10 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CommonService } from 'src/common/common.service';
 
 @Module({
-  imports: [forwardRef(() => AuthModule), TypeOrmModule.forFeature([UsersEntity])],
+  imports: [
+    forwardRef(() => AuthModule),
+    TypeOrmModule.forFeature([UsersEntity]),
+  ],
   controllers: [UsersController],
   providers: [UsersService, CommonService],
   exports: [UsersService],

@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 import { CommonService } from 'src/common/common.service';
 import { GroupsModule } from 'src/groups/groups.module';
 import { UsersModule } from 'src/users/users.module';
@@ -14,6 +15,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     // 서로 참조하는 경우 순환참조라고 하며, Call Back과 같은 문제가 발생할 수 있음. 
     // forwardRef()를 사용하여 서로 imports 해준다
     forwardRef(() => UsersModule),
+    forwardRef(() => AdminUsersModule),
     PassportModule,
     GroupsModule,
     JwtModule.register({

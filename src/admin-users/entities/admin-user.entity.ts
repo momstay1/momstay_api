@@ -12,58 +12,52 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('users')
-export class UsersEntity {
+@Entity('admin_users')
+export class AdminUsersEntity {
   @PrimaryGeneratedColumn()
-  user_idx: number;
+  admin_idx: number;
 
   @Column({ default: 2 })
-  user_status: number;
+  admin_status: number;
 
   @Column({ default: 'default' })
-  user_type: string;
+  admin_type: string;
 
   @Column({ length: 30 })
-  user_id: string;
+  admin_id: string;
 
   @Column({ length: 30 })
-  user_name: string;
+  admin_name: string;
 
   @Column({ length: 60 })
-  user_email: string;
+  admin_email: string;
 
   @Column({ length: 60 })
   user_phone: string;
 
   @Column({ length: 255 })
-  user_password: string;
+  admin_password: string;
 
   @BeforeInsert()
   async setPassword(password: string) {
-    this.user_password = await commonBcrypt.setBcryptPassword(password || this.user_password);
+    this.admin_password = await commonBcrypt.setBcryptPassword(password || this.admin_password);
   }
 
   @Column({ type: 'text' })
-  user_memo: string;
+  admin_memo: string;
 
-  @Column({ length: 60 })
-  user_signupVerifyToken: string;
-
-  @Column()
-  user_place_idx: number;
-
-  @OneToMany(() => BoardContentsEntity, (bc) => bc.user)
+  @OneToMany(() => BoardContentsEntity, (bc) => bc.admin)
   board_contents: undefined;
 
   @ManyToOne(() => GroupsEntity, (group) => group.grp_users, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION',
   })
-  user_group: GroupsEntity;
+  admin_group: GroupsEntity;
 
   @CreateDateColumn()
-  user_createdAt: Date;
+  admin_createdAt: Date;
 
   @UpdateDateColumn()
-  user_updatedAt: Date;
+  admin_updatedAt: Date;
 }

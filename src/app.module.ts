@@ -13,6 +13,8 @@ import { BoardContentsModule } from './board-contents/board-contents.module';
 import { BoardCategoriesModule } from './board-categories/board-categories.module';
 import { BoardSelectedCategoriesModule } from './board-selected-categories/board-selected-categories.module';
 import { GroupsModule } from './groups/groups.module';
+import { AdminUsersController } from './admin-users/admin-users.controller';
+import { AdminUsersModule } from './admin-users/admin-users.module';
 
 @Module({
   imports: [
@@ -35,8 +37,8 @@ import { GroupsModule } from './groups/groups.module';
     BoardCategoriesModule,
     BoardSelectedCategoriesModule,
     GroupsModule,
+    AdminUsersModule,
   ],
-  controllers: [],
   providers: [CommonService],
 })
 export class AppModule implements NestModule {

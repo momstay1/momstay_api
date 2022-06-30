@@ -29,6 +29,17 @@ export class CreateUserDto {
   @ApiPropertyOptional({ description: '이메일' })
   readonly email: string;
 
+  @IsOptional()
+  @IsEmpty()
+  @IsString()
+  @IsEmail()
+  @ApiPropertyOptional({ description: '연락처' })
+  readonly phone: string;
+
+  @IsString()
+  @ApiProperty({ description: '회원 메모' })
+  readonly memo: string;
+
   @IsString()
   @Matches(/^[a-z\d!@#$%^&*()]{8,30}$/)
   @ApiProperty({ description: '비밀번호' })
@@ -38,4 +49,14 @@ export class CreateUserDto {
   @IsOptional()
   @ApiProperty({ description: '회원 타입' })
   readonly type: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '회원 그룹' })
+  readonly group: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '회원 담당현장' })
+  readonly place_idx: string;
 }

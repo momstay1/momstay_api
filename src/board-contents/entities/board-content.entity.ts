@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AdminUsersEntity } from 'src/admin-users/entities/admin-user.entity';
 import { BoardSelectedCategoriesEntity } from 'src/board-selected-categories/entities/board-selected-categories.entity';
 import { BoardsEntity } from 'src/boards/entities/board.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
@@ -81,6 +82,12 @@ export class BoardContentsEntity {
     onUpdate: 'NO ACTION'
   })
   user: UsersEntity;
+
+  @ManyToOne(() => UsersEntity, (admin) => admin.board_contents, {
+    onDelete: 'NO ACTION',
+    onUpdate: 'NO ACTION'
+  })
+  admin: AdminUsersEntity;
 
   @ManyToOne(() => BoardsEntity, (board) => board.board_contents, {
     onDelete: 'NO ACTION',

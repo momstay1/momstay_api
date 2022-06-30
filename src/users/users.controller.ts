@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   HttpCode,
+  ConsoleLogger,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,7 +17,7 @@ import { LocalAuthGuard } from 'src/auth/guards/local-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { commonUtils } from 'src/common/common.utils';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -55,11 +56,13 @@ export class UsersController {
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
-    return this.authService.login(user);
+    // return this.authService.login(user);
+    return this.sanitizeUsers(user);
   }
 
   // 회원 로그인
   @Post('login')
+  @ApiOperation({ summary: '로그인 API' })
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: LoginUserDto })
   @ApiCreatedResponse({ type: ResponseAuthDto })
@@ -69,52 +72,45 @@ export class UsersController {
   }
 
   // 회원 리스트 조회
-  @Get()
-  @Auth(['root'])
-  async findAll() {
-    const users = await this.usersService.findAll();
-    return map(users, (obj) => {
-      return this.sanitizeUsers(obj);
-    });
-  }
+  // @Get()
+  // @Auth(['root'])
+  // async findAll() {
+  //   const users = await this.usersService.findAll();
+  //   return map(users, (obj) => {
+  //     return this.sanitizeUsers(obj);
+  //   });
+  // }
 
   // 회원 정보 가져오기
   @Get('profile')
-  @Auth(['root'])
+  @Auth(['basic'])
+  @ApiOperation({ summary: '회원 정보 API' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {
-    const data = await this.usersService.findOne(user.user_id);
+    const data = await this.usersService.findOne(get(user, 'user_id', ''));
     return this.sanitizeUsers(data);
   }
 
   // 회원 아이디 조회
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const user = await this.usersService.findOne(id);
-    return this.sanitizeUsers(user);
-  }
+  // @Get(':id')
+  // async findOne(@Param('id') id: string) {
+  //   const user = await this.usersService.findOne(id);
+  //   return this.sanitizeUsers(user);
+  // }
 
   // 회원 수정
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.update(id, updateUserDto);
-    return this.sanitizeUsers(user);
-  }
+  // @Patch(':id')
+  // async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  //   const user = await this.usersService.update(id, updateUserDto);
+  //   return this.sanitizeUsers(user);
+  // }
 
   // 회원 삭제(탈퇴)
-  @Delete(':id')
-  @HttpCode(204)
-  async remove(@Param('id') id: string) {
-    await this.usersService.remove(id);
-  }
+  // @Delete(':id')
+  // @HttpCode(204)
+  // async remove(@Param('id') id: string) {
+  //   await this.usersService.remove(id);
+  // }
 
-  // 비밀번호 찾기 기능 (아이디, 이메일 또는 휴대폰 본인인증)
-  // 비밀번호 변경 기능 (비밀번호 찾기 이후 새로운 비밀번호로 설정하는 기능)
-  // 아이디 찾기 기능 (가입이메일 또는 휴대폰 본인인증)
-  // 이메일 인증회원가입
-  // 휴대폰 본인인증
-  // sns 회원가입
-  // sns 로그인
-  // 휴면 회원 활성화
 }
