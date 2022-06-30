@@ -65,26 +65,6 @@ export class UsersController {
     return this.authService.login(user);
   }
 
-  // 회원 리스트 조회
-  @Get()
-  @Auth(['root'])
-  @ApiOperation({ summary: '회원 리스트 API' })
-  @ApiBearerAuth()
-  async findAll(@Query('take') take: number, @Query('page') page: number) {
-    const {
-      results,
-      total,
-      pageTotal
-    } = await this.usersService.findAll({ take, page });
-    return {
-      results: map(results, (obj) => {
-        return this.sanitizeUsers(obj);
-      }),
-      total,
-      pageTotal
-    };
-  }
-
   // 회원 정보 가져오기
   @Get('profile')
   @Auth(['basic'])

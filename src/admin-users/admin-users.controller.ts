@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
-import { get } from 'lodash';
+import { get, map } from 'lodash';
 import { AuthService } from 'src/auth/auth.service';
 import { ResponseAuthDto } from 'src/auth/dto/response-auth.dto';
 import { GetUser } from 'src/auth/getuser.decorator';
@@ -12,6 +12,7 @@ import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { ProfileUserDto } from 'src/users/dto/profile-user.dto';
+import { UsersService } from 'src/users/users.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminUsersEntity } from './entities/admin-user.entity';
 
@@ -20,7 +21,8 @@ import { AdminUsersEntity } from './entities/admin-user.entity';
 export class AdminUsersController {
   constructor(
     private authService: AuthService,
-    private readonly adminUsersService: AdminUsersService
+    private readonly adminUsersService: AdminUsersService,
+    private readonly usersService: UsersService,
   ) { }
 
   sanitizeUsers(admin) {
@@ -49,6 +51,26 @@ export class AdminUsersController {
     return this.authService.admin_login(admin);
   }
 
+  // 회원 리스트 조회
+  @Get()
+  @Auth(['root'])
+  @ApiOperation({ summary: '회원 리스트 API' })
+  @ApiBearerAuth()
+  async findAll(@Query('take') take: number, @Query('page') page: number) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.usersService.findAll({ take, page });
+    return {
+      results: map(results, (obj) => {
+        return this.sanitizeUsers(obj);
+      }),
+      total,
+      pageTotal
+    };
+  }
+
   // 회원 정보 가져오기
   @Get('profile')
   @Auth(['root'])
@@ -59,4 +81,5 @@ export class AdminUsersController {
     const data = await this.adminUsersService.findOne(get(user, 'user_id', ''));
     return this.sanitizeUsers(data);
   }
+
 }

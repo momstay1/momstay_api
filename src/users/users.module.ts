@@ -5,10 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersEntity } from './entities/user.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { CommonService } from 'src/common/common.service';
+import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    forwardRef(() => AdminUsersModule),
     TypeOrmModule.forFeature([UsersEntity]),
   ],
   controllers: [UsersController],
