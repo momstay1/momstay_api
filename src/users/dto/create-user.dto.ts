@@ -22,17 +22,18 @@ export class CreateUserDto {
   @ApiProperty({ description: '이름' })
   readonly name: string;
 
+  @IsString()
+  @ApiProperty({ description: '상태' })
+  readonly status: string;
+
   @IsOptional()
-  @IsEmpty()
   @IsString()
   @IsEmail()
   @ApiPropertyOptional({ description: '이메일' })
   readonly email: string;
 
   @IsOptional()
-  @IsEmpty()
   @IsString()
-  @IsEmail()
   @ApiPropertyOptional({ description: '연락처' })
   readonly phone: string;
 

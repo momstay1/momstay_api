@@ -10,10 +10,13 @@ import { AdminUsersEntity } from './entities/admin-user.entity';
 @Injectable()
 export class AdminUsersService {
   constructor(
-    @InjectRepository(AdminUsersEntity) private adminRepository: Repository<AdminUsersEntity>
+    @InjectRepository(AdminUsersEntity) private adminRepository: Repository<AdminUsersEntity>,
   ) { }
 
   getPrivateColumn(): string[] {
+    return usersConstant.privateColumn;
+  }
+  getAdminPrivateColumn(): string[] {
     return usersConstant.adminPrivateColumn;
   }
 
