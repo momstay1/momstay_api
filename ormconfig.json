@@ -1,10 +1,10 @@
 {
   "type": "mysql",
-  "host": "localhost",
+  "host": "127.0.0.1",
   "port": 3306,
-  "username": "root",
-  "password": "root123",
-  "database": "repi_api",
+  "username": "sosohaja_api",
+  "password": "Ththgkwk123!",
+  "database": "sosohaja_api",
   "entities": [
     "dist/**/*.entity{.ts,.js}"
   ],
@@ -17,5 +17,5 @@
   },
   "synchronize": true,
   "ssl": false,
-  "logging": true
+  "logging": false
 }
