@@ -18,9 +18,9 @@ export class PlaceController {
 
   // 현장 등록
   @Post()
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
-  @ApiOperation({ summary: '현장등록 API' })
+  @ApiOperation({ summary: '관리자_현장등록 API' })
   @ApiBody({ type: CreatePlaceDto })
   async create(@Body() createPlaceDto: CreatePlaceDto) {
     const place = await this.placeService.create(createPlaceDto);
@@ -29,9 +29,9 @@ export class PlaceController {
 
   // 현장 리스트
   @Get()
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
-  @ApiOperation({ summary: '현장 리스트 API' })
+  @ApiOperation({ summary: '관리자_현장 리스트 API' })
   async findAll(@Query('take') take: number, @Query('page') page: number) {
     const {
       results,
@@ -49,7 +49,7 @@ export class PlaceController {
 
   // 현장 상세
   @Get(':idx')
-  @Auth(['root'])
+  @Auth(['root', 'admin', 'basic'])
   @ApiOperation({ summary: '현장 정보 API' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: PlaceEntity })
@@ -60,9 +60,9 @@ export class PlaceController {
 
   // 현장 상태 일괄 변경
   @Patch()
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
-  @ApiOperation({ summary: '현장상태 일괄 변경 API' })
+  @ApiOperation({ summary: '관리자_현장상태 일괄 변경 API' })
   @HttpCode(204)
   async statusUpdate(@Body('idxs') idxs: [], @Body('status') status: string) {
     await this.placeService.statusUpdate(idxs, status);
@@ -70,9 +70,9 @@ export class PlaceController {
 
   // 현장 수정
   @Patch(':idx')
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
-  @ApiOperation({ summary: '현장수정 API' })
+  @ApiOperation({ summary: '관리자_현장수정 API' })
   @ApiBody({ type: CreatePlaceDto })
   async update(@Param('idx') idx: string, @Body() updatePlaceDto: UpdatePlaceDto) {
     const place = await this.placeService.update(+idx, updatePlaceDto);
@@ -81,7 +81,7 @@ export class PlaceController {
 
   // 현장 삭제
   @Delete()
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '현장삭제 API' })
   @HttpCode(204)
