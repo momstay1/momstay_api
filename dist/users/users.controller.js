@@ -15,14 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
-const create_user_dto_1 = require("./dto/create-user.dto");
 const local_auth_guard_1 = require("../auth/guards/local-auth.guard");
 const auth_service_1 = require("../auth/auth.service");
 const common_utils_1 = require("../common/common.utils");
 const lodash_1 = require("lodash");
 const swagger_1 = require("@nestjs/swagger");
 const response_auth_dto_1 = require("../auth/dto/response-auth.dto");
-const response_error_dto_1 = require("../error/dto/response-error.dto");
 const login_user_dto_1 = require("./dto/login-user.dto");
 const response_err_dto_1 = require("../error/dto/response-err.dto");
 const profile_user_dto_1 = require("./dto/profile-user.dto");
@@ -38,10 +36,6 @@ let UsersController = class UsersController {
         return common_utils_1.commonUtils.sanitizeEntity(user, this.usersService.getPrivateColumn());
     }
     ;
-    async create(createUserDto) {
-        const user = await this.usersService.create(createUserDto);
-        return this.sanitizeUsers(user);
-    }
     async login(user) {
         return this.authService.login(user);
     }
@@ -50,16 +44,6 @@ let UsersController = class UsersController {
         return this.sanitizeUsers(data);
     }
 };
-__decorate([
-    (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: '회원 생성 API' }),
-    (0, swagger_1.ApiCreatedResponse)({ type: response_auth_dto_1.ResponseAuthDto }),
-    (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)('login'),
     (0, swagger_1.ApiOperation)({ summary: '로그인 API' }),

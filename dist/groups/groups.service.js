@@ -24,11 +24,22 @@ let GroupsService = class GroupsService {
     create(createGroupDto) {
         return 'This action adds a new group';
     }
-    findAll() {
-        return `This action returns all groups`;
+    async findAll(user) {
+        const grp = await this.findOneName(user.user_group);
+        return await this.groupsRepository.createQueryBuilder()
+            .select()
+            .where("grp_idx >= :grp_idx", { grp_idx: grp.grp_idx })
+            .getMany();
     }
     async findOne(idx) {
         const group = await this.groupsRepository.findOne(idx);
+        if (!group) {
+            throw new common_1.NotFoundException('존재하지 않는 그룹 입니다.');
+        }
+        return group;
+    }
+    async findOneName(name) {
+        const group = await this.groupsRepository.findOne({ grp_id: name });
         if (!group) {
             throw new common_1.NotFoundException('존재하지 않는 그룹 입니다.');
         }

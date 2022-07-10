@@ -23,6 +23,7 @@ const board_categories_module_1 = require("./board-categories/board-categories.m
 const board_selected_categories_module_1 = require("./board-selected-categories/board-selected-categories.module");
 const groups_module_1 = require("./groups/groups.module");
 const admin_users_module_1 = require("./admin-users/admin-users.module");
+const place_module_1 = require("./place/place.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/users');
@@ -51,6 +52,7 @@ AppModule = __decorate([
             board_selected_categories_module_1.BoardSelectedCategoriesModule,
             groups_module_1.GroupsModule,
             admin_users_module_1.AdminUsersModule,
+            place_module_1.PlaceModule,
         ],
         providers: [common_service_1.CommonService],
     })

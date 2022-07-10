@@ -94,9 +94,11 @@ let UsersService = class UsersService {
         await this.usersRepository.save(user);
     }
     async removes(ids) {
-        for (const key in ids) {
-            this.remove(ids[key]);
-        }
+        await this.usersRepository.createQueryBuilder()
+            .update(user_entity_1.UsersEntity)
+            .set({ user_status: Number(constants_1.usersConstant.status.delete) })
+            .where(" place_idx IN (:idxs)", { idxs: ids })
+            .execute();
     }
     getPrivateColumn() {
         return constants_1.usersConstant.privateColumn;

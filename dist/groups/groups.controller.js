@@ -17,6 +17,10 @@ const common_1 = require("@nestjs/common");
 const groups_service_1 = require("./groups.service");
 const create_group_dto_1 = require("./dto/create-group.dto");
 const update_group_dto_1 = require("./dto/update-group.dto");
+const group_entity_1 = require("./entities/group.entity");
+const role_decorator_1 = require("../common/decorator/role.decorator");
+const swagger_1 = require("@nestjs/swagger");
+const getuser_decorator_1 = require("../auth/getuser.decorator");
 let GroupsController = class GroupsController {
     constructor(groupsService) {
         this.groupsService = groupsService;
@@ -24,8 +28,8 @@ let GroupsController = class GroupsController {
     create(createGroupDto) {
         return this.groupsService.create(createGroupDto);
     }
-    findAll() {
-        return this.groupsService.findAll();
+    async findAll(user) {
+        return await this.groupsService.findAll(user);
     }
     findOne(id) {
         return this.groupsService.findOne(+id);
@@ -46,9 +50,14 @@ __decorate([
 ], GroupsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'basic']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '그룹 리스트 API' }),
+    (0, swagger_1.ApiOkResponse)({ type: group_entity_1.GroupsEntity }),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
 ], GroupsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),

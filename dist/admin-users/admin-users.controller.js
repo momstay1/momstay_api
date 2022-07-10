@@ -79,7 +79,8 @@ let AdminUsersController = class AdminUsersController {
 };
 __decorate([
     (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: '관리자 생성 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_생성 API' }),
     (0, swagger_1.ApiCreatedResponse)({ type: response_auth_dto_1.ResponseAuthDto }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
     __param(0, (0, common_1.Body)()),
@@ -89,7 +90,7 @@ __decorate([
 ], AdminUsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)('login'),
-    (0, swagger_1.ApiOperation)({ summary: '관리자 로그인 API' }),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_로그인 API' }),
     (0, swagger_1.ApiBody)({ type: login_user_dto_1.LoginUserDto }),
     (0, swagger_1.ApiCreatedResponse)({ type: response_auth_dto_1.ResponseAuthDto }),
     (0, swagger_1.ApiUnauthorizedResponse)({ type: response_err_dto_1.ResponseErrDto }),
@@ -101,8 +102,8 @@ __decorate([
 ], AdminUsersController.prototype, "login", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, role_decorator_1.Auth)(['root']),
-    (0, swagger_1.ApiOperation)({ summary: '회원 리스트 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_회원 리스트 API' }),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
@@ -112,8 +113,8 @@ __decorate([
 ], AdminUsersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('profile'),
-    (0, role_decorator_1.Auth)(['root']),
-    (0, swagger_1.ApiOperation)({ summary: '관리자 정보 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_정보 API' }),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
@@ -123,8 +124,8 @@ __decorate([
 ], AdminUsersController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, role_decorator_1.Auth)(['root']),
-    (0, swagger_1.ApiOperation)({ summary: '관리자 회원상세정보 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_회원상세정보 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -133,8 +134,8 @@ __decorate([
 ], AdminUsersController.prototype, "findId", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, role_decorator_1.Auth)(['root']),
-    (0, swagger_1.ApiOperation)({ summary: '관리자 회원정보수정 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보수정 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -144,8 +145,8 @@ __decorate([
 ], AdminUsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(),
-    (0, role_decorator_1.Auth)(['root']),
-    (0, swagger_1.ApiOperation)({ summary: '관리자 회원정보삭제 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보삭제 API' }),
     (0, common_1.HttpCode)(204),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
