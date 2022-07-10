@@ -35,7 +35,8 @@ export class AdminUsersController {
 
   // 회원 생성
   @Post()
-  @ApiOperation({ summary: '관리자 생성 API' })
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_생성 API' })
   @ApiCreatedResponse({ type: ResponseAuthDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   async create(@Body() createUserDto: CreateUserDto) {
@@ -46,7 +47,7 @@ export class AdminUsersController {
 
   // 회원 로그인
   @Post('login')
-  @ApiOperation({ summary: '관리자 로그인 API' })
+  @ApiOperation({ summary: '관리자_로그인 API' })
   @ApiBody({ type: LoginUserDto })
   @ApiCreatedResponse({ type: ResponseAuthDto })
   @ApiUnauthorizedResponse({ type: ResponseErrDto })
@@ -56,8 +57,8 @@ export class AdminUsersController {
 
   // 회원 리스트 조회
   @Get()
-  @Auth(['root'])
-  @ApiOperation({ summary: '회원 리스트 API' })
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_회원 리스트 API' })
   @ApiBearerAuth()
   async findAll(@Query('take') take: number, @Query('page') page: number) {
     const {
@@ -76,8 +77,8 @@ export class AdminUsersController {
 
   // 회원 정보 가져오기
   @Get('profile')
-  @Auth(['root'])
-  @ApiOperation({ summary: '관리자 정보 API' })
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_정보 API' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: AdminUsersEntity) {
@@ -87,8 +88,8 @@ export class AdminUsersController {
 
   // 회원 정보 가져오기
   @Get(':id')
-  @Auth(['root'])
-  @ApiOperation({ summary: '관리자 회원상세정보 API' })
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_회원상세정보 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async findId(@Param('id') id: string) {
     const data = await this.usersService.findOne(id);
@@ -97,8 +98,8 @@ export class AdminUsersController {
 
   // 회원 수정
   @Patch(':id')
-  @Auth(['root'])
-  @ApiOperation({ summary: '관리자 회원정보수정 API' })
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_회원정보수정 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const user = await this.usersService.update(id, updateUserDto);
@@ -107,8 +108,8 @@ export class AdminUsersController {
 
   // 회원 삭제
   @Delete()
-  @Auth(['root'])
-  @ApiOperation({ summary: '관리자 회원정보삭제 API' })
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_회원정보삭제 API' })
   @HttpCode(204)
   async remove(@Body() body) {
     await this.usersService.removes(body.ids);

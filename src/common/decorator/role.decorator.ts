@@ -2,7 +2,7 @@ import { applyDecorators, SetMetadata, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { RoleGuard } from "src/auth/guards/role-auth.guard";
 
-export type AllowedRole = 'root' | 'basic' | 'Any';
+export type AllowedRole = 'root' | 'admin' | 'basic' | 'Any';
 
 export const Role = (roles: AllowedRole[]) => SetMetadata('roles', roles);
 

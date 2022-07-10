@@ -14,6 +14,7 @@ import { BoardCategoriesModule } from './board-categories/board-categories.modul
 import { BoardSelectedCategoriesModule } from './board-selected-categories/board-selected-categories.module';
 import { GroupsModule } from './groups/groups.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
+import { PlaceModule } from './place/place.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
     BoardSelectedCategoriesModule,
     GroupsModule,
     AdminUsersModule,
+    PlaceModule,
   ],
   providers: [CommonService],
 })

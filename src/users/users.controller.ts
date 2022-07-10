@@ -44,15 +44,15 @@ export class UsersController {
   };
 
   // 회원 생성
-  @Post()
-  @ApiOperation({ summary: '회원 생성 API' })
-  @ApiCreatedResponse({ type: ResponseAuthDto })
-  @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
-  async create(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.create(createUserDto);
-    // return this.authService.login(user);
-    return this.sanitizeUsers(user);
-  }
+  // @Post()
+  // @ApiOperation({ summary: '회원 생성 API' })
+  // @ApiCreatedResponse({ type: ResponseAuthDto })
+  // @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
+  // async create(@Body() createUserDto: CreateUserDto) {
+  //   const user = await this.usersService.create(createUserDto);
+  //   // return this.authService.login(user);
+  //   return this.sanitizeUsers(user);
+  // }
 
   // 회원 로그인
   @Post('login')
