@@ -121,7 +121,7 @@ export class PlaceService {
       = get(addPrefixPlaceDto, 'place_type')
         ? get(addPrefixPlaceDto, 'place_type')
         : placeConstant.default.type;
-    const user = await this.placeRepository.create({ ...addPrefixPlaceDto });
-    return await this.placeRepository.save(user);
+    const place = await this.placeRepository.create({ ...addPrefixPlaceDto });
+    return await this.placeRepository.save(place);
   }
 }

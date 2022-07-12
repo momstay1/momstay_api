@@ -3,12 +3,13 @@ import { PlaceService } from './place.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { Auth } from 'src/common/decorator/role.decorator';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { commonUtils } from 'src/common/common.utils';
 import { map } from 'lodash';
 import { PlaceEntity } from './entities/place.entity';
 
 @Controller('place')
+@ApiTags('현장 API')
 export class PlaceController {
   constructor(private readonly placeService: PlaceService) { }
 
