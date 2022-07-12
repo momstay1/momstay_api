@@ -15,6 +15,8 @@ import { BoardSelectedCategoriesModule } from './board-selected-categories/board
 import { GroupsModule } from './groups/groups.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { PlaceModule } from './place/place.module';
+import { DefectModule } from './defect/defect.module';
+import { DefectPlaceModule } from './defect-place/defect-place.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { PlaceModule } from './place/place.module';
     GroupsModule,
     AdminUsersModule,
     PlaceModule,
+    DefectModule,
+    DefectPlaceModule,
   ],
   providers: [CommonService],
 })

@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { DefectPlaceEntity } from "src/defect-place/entities/defect-place.entity";
+import { DefectEntity } from "src/defect/entities/defect.entity";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('place')
 export class PlaceEntity {
@@ -25,4 +27,7 @@ export class PlaceEntity {
 
   @UpdateDateColumn()
   place_updatedAt: Date;
+
+  @OneToMany(() => DefectPlaceEntity, (dfp) => dfp.place)
+  defect_place: undefined;
 }
