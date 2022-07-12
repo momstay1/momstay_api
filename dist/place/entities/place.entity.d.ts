@@ -7,4 +7,5 @@ export declare class PlaceEntity {
     place_memo: string;
     place_createdAt: Date;
     place_updatedAt: Date;
+    defect_place: undefined;
 }

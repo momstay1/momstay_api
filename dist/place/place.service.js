@@ -111,8 +111,8 @@ let PlaceService = class PlaceService {
             = (0, lodash_1.get)(addPrefixPlaceDto, 'place_type')
                 ? (0, lodash_1.get)(addPrefixPlaceDto, 'place_type')
                 : constants_1.placeConstant.default.type;
-        const user = await this.placeRepository.create(Object.assign({}, addPrefixPlaceDto));
-        return await this.placeRepository.save(user);
+        const place = await this.placeRepository.create(Object.assign({}, addPrefixPlaceDto));
+        return await this.placeRepository.save(place);
     }
 };
 PlaceService = __decorate([

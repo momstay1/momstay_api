@@ -129,6 +129,7 @@ __decorate([
 ], PlaceController.prototype, "remove", null);
 PlaceController = __decorate([
     (0, common_1.Controller)('place'),
+    (0, swagger_1.ApiTags)('현장 API'),
     __metadata("design:paramtypes", [place_service_1.PlaceService])
 ], PlaceController);
 exports.PlaceController = PlaceController;
