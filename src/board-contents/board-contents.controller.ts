@@ -47,32 +47,14 @@ export class BoardContentsController {
     return await this.boardContentsService.create(user, createBoardContentDto);
   }
 
-  @Get()
-  @ApiOperation({ summary: '게시글 전체 리스트 API' })
-  @ApiCreatedResponse({ type: BoardContentsEntity })
-  async findAll(@Query('take') take: number, @Query('page') page: number) {
-    const {
-      results,
-      total,
-      pageTotal
-    } = await this.boardContentsService.findAll({ take, page });
-    const data = map(results, (obj) => {
-      return this.sanitizeBoardContent(obj);
-    });
-    return {
-      results: data,
-      total,
-      pageTotal
-    };
-  }
-
-  @Get(':category')
-  @ApiOperation({ summary: '게시글 카테고리 리스트 API' })
+  @Get(':bd_idx')
+  @ApiOperation({ summary: '게시글 리스트 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
   async findCategoryAll(
+    @Param('bd_idx') bd_idx: string,
+    @Query('category') category: string,
     @Query('take') take: number,
     @Query('page') page: number,
-    @Param('category') category: string
   ) {
     const {
       bc: {
@@ -81,29 +63,29 @@ export class BoardContentsController {
         pageTotal
       },
       bcats
-    } = await this.boardContentsService.findCategoryAll({ take, page }, category);
+    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page });
     const data = map(results, (obj) => {
       return this.sanitizeBoardContent(obj);
     });
     return { bcats, results: data, total, pageTotal };
   }
 
-  @Get(':idx')
+  @Get(':bd_idx/:bc_idx')
   @ApiOperation({ summary: '게시글 상세 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
-  async findOne(@Param('idx') idx: number) {
-    const bc = await this.boardContentsService.findOne(idx);
+  async findOne(@Param('bd_idx') bd_idx: number, @Param('bc_idx') bc_idx: number) {
+    const bc = await this.boardContentsService.findOne(bc_idx);
     return this.sanitizeBoardContent(bc);
   }
 
-  @Patch(':idx')
+  @Patch(':bc_idx')
   @Auth(['Any'])
   async update(
     @GetUser() user: UsersEntity,
-    @Param('idx') idx: string,
+    @Param('bc_idx') bc_idx: string,
     @Body() updateBoardContentDto: UpdateBoardContentDto
   ) {
-    return await this.boardContentsService.update(user, +idx, updateBoardContentDto);
+    return await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
   }
 
   @Delete(':category/:id')

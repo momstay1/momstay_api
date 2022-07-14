@@ -87,7 +87,7 @@ export class BoardContentsEntity {
   })
   user: UsersEntity;
 
-  @ManyToOne(() => UsersEntity, (admin) => admin.board_contents, {
+  @ManyToOne(() => AdminUsersEntity, (admin) => admin.board_contents, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION'
   })

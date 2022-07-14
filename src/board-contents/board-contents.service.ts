@@ -64,12 +64,16 @@ export class BoardContentsService {
     return boardContent;
   }
 
-  async findAll(options: PaginationOptions) {
+  async findAll(idx, options: PaginationOptions) {
     const { take, page } = options;
     const [results, total] = await this.bcRepository.findAndCount({
       order: { bc_createdAt: 'DESC' },
-      where: { bc_status: bcConstants.status.registration, bc_type: In(this.getNoneNoticeType()) },
-      relations: ['user', 'board', 'bscats'],
+      where: {
+        bc_bd_idx: idx,
+        bc_status: bcConstants.status.registration,
+        bc_type: In(this.getNoneNoticeType())
+      },
+      relations: ['user', 'board', 'bscats', 'admin'],
       take: take,
       skip: take * (page - 1)
     });
@@ -79,15 +83,20 @@ export class BoardContentsService {
     })
   }
 
-  async findNoticeAll() {
+  async findNoticeAll(bd_idx) {
+    console.log({ bd_idx });
     return await this.bcRepository.find({
       order: { bc_createdAt: 'DESC' },
-      where: { bc_status: bcConstants.status.registration, bc_type: bcConstants.type.notice },
-      relations: ['user', 'board', 'bscats']
+      where: {
+        bc_status: bcConstants.status.registration,
+        bc_type: bcConstants.type.notice,
+        bc_bd_idx: bd_idx
+      },
+      relations: ['user', 'board', 'bscats', 'admin']
     });
   }
 
-  async findCategoryAll(options: PaginationOptions, category: string) {
+  async findCategoryAll(idx, category: string, options: PaginationOptions) {
     const { take, page } = options;
 
     const bcats = await this.bcatsService.searching({
@@ -97,11 +106,14 @@ export class BoardContentsService {
     const [results, total] = await this.bcRepository.findAndCount({
       order: { bc_createdAt: 'DESC' },
       where: (qb) => {
-        qb.where('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: idx })
+        if (get(bcats, [0, 'bcat_idx'])) {
+          qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        }
         qb.andWhere('bc_status = :bc_status', { bc_status: bcConstants.status.registration })
         qb.andWhere('bc_type IN (:bc_type)', { bc_type: this.getNoneNoticeType() })
       },
-      relations: ['user', 'board', 'bscats'],
+      relations: ['user', 'board', 'bscats', 'admin'],
       take: take,
       skip: take * (page - 1)
     });
@@ -115,23 +127,26 @@ export class BoardContentsService {
     }
   }
 
-  async findNoticeCategoryAll(category: string) {
+  async findNoticeCategoryAll(bd_idx: string, category: string) {
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([category]) }
     });
     return await this.bcRepository.find({
       order: { bc_createdAt: 'DESC' },
       where: (qb) => {
-        qb.where('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: bd_idx })
+        if (get(bcats, [0, 'bcat_idx'])) {
+          qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        }
         qb.andWhere('bc_status = :bc_status', { bc_status: bcConstants.status.registration })
         qb.andWhere('bc_type = :bc_type', { bc_type: bcConstants.type.notice })
       },
-      relations: ['user', 'board', 'bscats'],
+      relations: ['user', 'board', 'bscats', 'admin'],
     });
   }
 
-  async findOne(idx: number) {
-    const bc = await this.findIndex(idx);
+  async findOne(bc_idx: number) {
+    const bc = await this.findIndex(bc_idx);
     if (bc.bc_status !== bcConstants.status.registration) {
       throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
     }
@@ -141,19 +156,20 @@ export class BoardContentsService {
   async findIndex(idx: number) {
     const bc = await this.bcRepository.findOne({
       where: { bc_idx: idx },
-      relations: ['user', 'board', 'bscats']
+      relations: ['user', 'board', 'bscats', 'admin']
     });
+    console.log({ bc });
     if (!bc) {
       throw new NotFoundException('존재하지 않는 게시글 입니다.');
     }
     return bc;
   }
 
-  async update(userInfo, idx: number, updateBoardContentDto: UpdateBoardContentDto) {
+  async update(userInfo, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto) {
     // 게시판 정보 가져오기
     const board = await this.boardsService.findBoard({ bd_idx: updateBoardContentDto.bd_idx });
     // 게시글 정보 가져오기
-    const bc = await this.findIndex(idx);
+    const bc = await this.findIndex(bc_idx);
     // 카테고리정보 가져오기 (bcat_idx를 키값으로 재정렬)
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([updateBoardContentDto.category]) }
@@ -170,7 +186,7 @@ export class BoardContentsService {
         throw new UnauthorizedException('권한이 없습니다.');
       }
     }
-    bc.bc_idx = idx;
+    bc.bc_idx = bc_idx;
     bc.bc_status = get(updateBoardContentDto, ['status'], 2);
     bc.bc_type = get(updateBoardContentDto, ['type'], 1);
     bc.bc_write_name = get(updateBoardContentDto, ['write_name'], '');
@@ -252,9 +268,11 @@ export class BoardContentsService {
 
   getPrivateColumn(): any[] {
     const userPrivateColumn = this.usersService.getPrivateColumn();
+    const adminPrivateColumn = this.AdminService.getAdminPrivateColumn();
     return [
       ...bcConstants.privateColumn,
-      ...userPrivateColumn
+      ...userPrivateColumn,
+      ...adminPrivateColumn
     ];
   }
 
