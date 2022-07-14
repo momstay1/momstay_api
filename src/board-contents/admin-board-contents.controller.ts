@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiOperation,
   ApiTags,
@@ -49,6 +50,14 @@ export class AdminBoardContentsController {
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['root', 'basic'])
+  @ApiBody({
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        bc_idxs: { example: [] }
+      }
+    }
+  })
   async statusChange(@Body() statusChange) {
     return await this.boardContentsService.statusChange(statusChange);
   }
