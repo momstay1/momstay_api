@@ -10,6 +10,7 @@ import { BoardSelectedCategoriesModule } from 'src/board-selected-categories/boa
 import { NoticeContentsController } from './notice-contents.controller';
 import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 import { GroupsModule } from 'src/groups/groups.module';
+import { AdminBoardContentsController } from './admin-board-contents.controller';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { GroupsModule } from 'src/groups/groups.module';
     AdminUsersModule,
     GroupsModule
   ],
-  controllers: [BoardContentsController, NoticeContentsController],
+  controllers: [BoardContentsController, NoticeContentsController, AdminBoardContentsController],
   providers: [BoardContentsService]
 })
 export class BoardContentsModule { }

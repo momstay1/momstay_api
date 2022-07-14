@@ -25,9 +25,14 @@ export class BoardContentsService {
     private readonly bscatsService: BoardSelectedCategoriesService,
     private readonly bcatsService: BoardCategoriesService,
     private readonly AdminService: AdminUsersService,
-    private readonly groupsService: GroupsService
   ) { }
 
+  /****************** 
+   * 
+   * 사용자 기능 
+   * 
+  *******************/
+  // 게시글 생성
   async create(userInfo, bc: CreateBoardContentDto) {
     // 게시판 정보 가져오기
     const board = await this.boardsService.findBoard({ bd_idx: bc.bd_idx });
@@ -64,38 +69,17 @@ export class BoardContentsService {
     return boardContent;
   }
 
-  async findAll(idx, options: PaginationOptions) {
-    const { take, page } = options;
-    const [results, total] = await this.bcRepository.findAndCount({
-      order: { bc_createdAt: 'DESC' },
-      where: {
-        bc_bd_idx: idx,
-        bc_status: bcConstants.status.registration,
-        bc_type: In(this.getNoneNoticeType())
-      },
-      relations: ['user', 'board', 'bscats', 'admin'],
-      take: take,
-      skip: take * (page - 1)
-    });
-    return new Pagination({
-      results,
-      total,
-    })
+  // 게시글 상태 일괄 변경 (수정, 삭제)
+  async statusChange(statusChange) {
+    console.log({ statusChange });
+    await this.bcRepository.createQueryBuilder()
+      .update(BoardContentsEntity)
+      .set({ bc_status: Number(statusChange.status) })
+      .where(" bc_idx IN (:bc_idx)", { bc_idx: statusChange.bc_idxs })
+      .execute()
   }
 
-  async findNoticeAll(bd_idx) {
-    console.log({ bd_idx });
-    return await this.bcRepository.find({
-      order: { bc_createdAt: 'DESC' },
-      where: {
-        bc_status: bcConstants.status.registration,
-        bc_type: bcConstants.type.notice,
-        bc_bd_idx: bd_idx
-      },
-      relations: ['user', 'board', 'bscats', 'admin']
-    });
-  }
-
+  // 게시글 리스트 가져오기
   async findCategoryAll(idx, category: string, options: PaginationOptions) {
     const { take, page } = options;
 
@@ -127,6 +111,7 @@ export class BoardContentsService {
     }
   }
 
+  // 공지사항 게시글 리스트 가져오기
   async findNoticeCategoryAll(bd_idx: string, category: string) {
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([category]) }
@@ -158,7 +143,6 @@ export class BoardContentsService {
       where: { bc_idx: idx },
       relations: ['user', 'board', 'bscats', 'admin']
     });
-    console.log({ bc });
     if (!bc) {
       throw new NotFoundException('존재하지 않는 게시글 입니다.');
     }
@@ -202,10 +186,50 @@ export class BoardContentsService {
     return boardContent;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} boardContent`;
+  /****************** 
+   * 
+   * 관리자 기능 
+   * 
+  *******************/
+
+  // 관리자용 게시글 리스트 가져오기
+  async adminFindCategoryAll(idx, category: string, options: PaginationOptions) {
+    const { take, page } = options;
+
+    const bcats = await this.bcatsService.searching({
+      where: { bcat_id: In([category]) }
+    });
+
+    const [results, total] = await this.bcRepository.findAndCount({
+      order: { bc_createdAt: 'DESC' },
+      where: (qb) => {
+        qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: idx })
+        if (get(bcats, [0, 'bcat_idx'])) {
+          qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        }
+        // qb.andWhere('bc_type IN (:bc_type)', { bc_type: this.getNoneNoticeType() })
+      },
+      relations: ['user', 'board', 'bscats', 'admin'],
+      take: take,
+      skip: take * (page - 1)
+    });
+
+    return {
+      bcats: bcats,
+      bc: new Pagination({
+        results,
+        total,
+      })
+    }
   }
 
+  /****************** 
+   * 
+   * 기타 기능
+   * 
+  *******************/
+
+  // 게시글 카테고리 수정
   private async bscatsChange(updateBscats, bc) {
     const bscats = [];
     const deleteBscats = [];
@@ -266,6 +290,7 @@ export class BoardContentsService {
     return await this.bcRepository.save(newBc);
   }
 
+  // 숨김처리할 개인정보
   getPrivateColumn(): any[] {
     const userPrivateColumn = this.usersService.getPrivateColumn();
     const adminPrivateColumn = this.AdminService.getAdminPrivateColumn();
@@ -276,6 +301,7 @@ export class BoardContentsService {
     ];
   }
 
+  // 공지사항이 아닌 게시글 타입
   getNoneNoticeType(): number[] {
     const arr: number[] = [];
     arr.push(bcConstants.type.basic);
