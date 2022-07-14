@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOperation,
@@ -18,21 +18,14 @@ export class NoticeContentsController {
     return commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateColumn());
   };
 
-  @Get()
-  @ApiOperation({ summary: '공지사항 게시글 전체 리스트 API' })
-  @ApiCreatedResponse({ type: BoardContentsEntity })
-  async findAll() {
-    const bc = await this.boardContentsService.findNoticeAll();
-    return map(bc, (obj) => {
-      return this.sanitizeBoardContent(obj);
-    });
-  }
-
-  @Get(':category')
+  @Get(':bd_idx')
   @ApiOperation({ summary: '공지사항 게시글 카테고리 리스트 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
-  async findCategoryAll(@Param('category') category: string) {
-    const bc = await this.boardContentsService.findNoticeCategoryAll(category);
+  async findCategoryAll(
+    @Param('bd_idx') bd_idx: string,
+    @Query('category') category: string
+  ) {
+    const bc = await this.boardContentsService.findNoticeCategoryAll(bd_idx, category);
     return map(bc, (obj) => {
       return this.sanitizeBoardContent(obj);
     });

@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { DefectService } from './defect.service';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
 
 @Controller('defect')
+@ApiTags('하자관리 API')
 export class DefectController {
-  constructor(private readonly defectService: DefectService) {}
+  constructor(private readonly defectService: DefectService) { }
 
   @Post()
   create(@Body() createDefectDto: CreateDefectDto) {

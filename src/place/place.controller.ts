@@ -64,6 +64,14 @@ export class PlaceController {
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '관리자_현장상태 일괄 변경 API' })
+  @ApiBody({
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        idxs: { example: [] }
+      }
+    }
+  })
   @HttpCode(204)
   async statusUpdate(@Body('idxs') idxs: [], @Body('status') status: string) {
     await this.placeService.statusUpdate(idxs, status);

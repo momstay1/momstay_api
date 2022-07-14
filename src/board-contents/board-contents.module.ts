@@ -8,6 +8,9 @@ import { BoardCategoriesModule } from 'src/board-categories/board-categories.mod
 import { BoardsModule } from 'src/boards/boards.module';
 import { BoardSelectedCategoriesModule } from 'src/board-selected-categories/board-selected-categories.module';
 import { NoticeContentsController } from './notice-contents.controller';
+import { AdminUsersModule } from 'src/admin-users/admin-users.module';
+import { GroupsModule } from 'src/groups/groups.module';
+import { AdminBoardContentsController } from './admin-board-contents.controller';
 
 @Module({
   imports: [
@@ -15,9 +18,11 @@ import { NoticeContentsController } from './notice-contents.controller';
     UsersModule,
     BoardsModule,
     BoardSelectedCategoriesModule,
-    BoardCategoriesModule
+    BoardCategoriesModule,
+    AdminUsersModule,
+    GroupsModule
   ],
-  controllers: [BoardContentsController, NoticeContentsController],
+  controllers: [BoardContentsController, NoticeContentsController, AdminBoardContentsController],
   providers: [BoardContentsService]
 })
 export class BoardContentsModule { }
