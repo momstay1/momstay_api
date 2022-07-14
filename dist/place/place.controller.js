@@ -97,6 +97,14 @@ __decorate([
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_현장상태 일괄 변경 API' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                status: { type: 'string' },
+                idxs: { example: [] }
+            }
+        }
+    }),
     (0, common_1.HttpCode)(204),
     __param(0, (0, common_1.Body)('idxs')),
     __param(1, (0, common_1.Body)('status')),

@@ -26,34 +26,21 @@ let NoticeContentsController = class NoticeContentsController {
             return common_utils_1.commonUtils.sanitizeEntity(bc, this.boardContentsService.getPrivateColumn());
         };
     }
-    async findAll() {
-        const bc = await this.boardContentsService.findNoticeAll();
-        return (0, lodash_1.map)(bc, (obj) => {
-            return this.sanitizeBoardContent(obj);
-        });
-    }
-    async findCategoryAll(category) {
-        const bc = await this.boardContentsService.findNoticeCategoryAll(category);
+    async findCategoryAll(bd_idx, category) {
+        const bc = await this.boardContentsService.findNoticeCategoryAll(bd_idx, category);
         return (0, lodash_1.map)(bc, (obj) => {
             return this.sanitizeBoardContent(obj);
         });
     }
 };
 __decorate([
-    (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: '공지사항 게시글 전체 리스트 API' }),
-    (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], NoticeContentsController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':category'),
+    (0, common_1.Get)(':bd_idx'),
     (0, swagger_1.ApiOperation)({ summary: '공지사항 게시글 카테고리 리스트 API' }),
     (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
-    __param(0, (0, common_1.Param)('category')),
+    __param(0, (0, common_1.Param)('bd_idx')),
+    __param(1, (0, common_1.Query)('category')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], NoticeContentsController.prototype, "findCategoryAll", null);
 NoticeContentsController = __decorate([

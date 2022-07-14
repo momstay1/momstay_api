@@ -22,5 +22,5 @@ export declare class AdminUsersController {
     getProfile(user: AdminUsersEntity): Promise<any[]>;
     findId(id: string): Promise<any[]>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<any[]>;
-    remove(body: any): Promise<void>;
+    remove(ids: any): Promise<void>;
 }

@@ -1,12 +1,14 @@
 export declare class CreateBoardContentDto {
-    readonly status: number;
-    readonly type: number;
-    readonly bd_idx: number;
-    readonly write_name: string;
-    readonly title: string;
-    readonly link_status: number;
-    readonly link: string;
-    readonly content: string;
-    readonly password: string;
-    readonly category: string[];
+    status: number;
+    type: number;
+    bd_idx: number;
+    user_idx: number;
+    admin_idx: number;
+    write_name: string;
+    title: string;
+    link_status: number;
+    link: string;
+    content: string;
+    password: string;
+    category: string[];
 }

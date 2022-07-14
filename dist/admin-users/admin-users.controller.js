@@ -24,6 +24,7 @@ const role_decorator_1 = require("../common/decorator/role.decorator");
 const response_err_dto_1 = require("../error/dto/response-err.dto");
 const response_error_dto_1 = require("../error/dto/response-error.dto");
 const create_user_dto_1 = require("../users/dto/create-user.dto");
+const delete_user_dto_1 = require("../users/dto/delete-user.dto");
 const login_user_dto_1 = require("../users/dto/login-user.dto");
 const profile_user_dto_1 = require("../users/dto/profile-user.dto");
 const update_user_dto_1 = require("../users/dto/update-user.dto");
@@ -73,8 +74,8 @@ let AdminUsersController = class AdminUsersController {
         const user = await this.usersService.update(id, updateUserDto);
         return this.sanitizeUsers(user);
     }
-    async remove(body) {
-        await this.usersService.removes(body.ids);
+    async remove(ids) {
+        await this.usersService.removes(ids);
     }
 };
 __decorate([
@@ -137,6 +138,7 @@ __decorate([
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보수정 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
+    (0, swagger_1.ApiBody)({ type: update_user_dto_1.UpdateUserDto }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -147,8 +149,9 @@ __decorate([
     (0, common_1.Delete)(),
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보삭제 API' }),
+    (0, swagger_1.ApiBody)({ type: delete_user_dto_1.DeleteUserDto }),
     (0, common_1.HttpCode)(204),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)('ids')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)

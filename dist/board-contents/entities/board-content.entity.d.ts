@@ -6,6 +6,7 @@ export declare class BoardContentsEntity {
     bc_idx: number;
     bc_bd_idx: number;
     bc_user_idx: number;
+    bc_admin_idx: number;
     bc_status: number;
     bc_type: number;
     bc_write_name: string;

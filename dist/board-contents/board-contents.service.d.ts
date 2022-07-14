@@ -7,25 +7,32 @@ import { CreateBoardContentDto } from './dto/create-board-content.dto';
 import { UpdateBoardContentDto } from './dto/update-board-content.dto';
 import { BoardContentsEntity } from './entities/board-content.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
+import { AdminUsersService } from 'src/admin-users/admin-users.service';
 export declare class BoardContentsService {
     private bcRepository;
     private readonly usersService;
     private readonly boardsService;
     private readonly bscatsService;
     private readonly bcatsService;
-    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService);
-    create(user_id: any, createBoardContentDto: CreateBoardContentDto): Promise<any>;
-    findAll(options: PaginationOptions): Promise<Pagination<BoardContentsEntity>>;
-    findNoticeAll(): Promise<BoardContentsEntity[]>;
-    findCategoryAll(options: PaginationOptions, category: string): Promise<{
+    private readonly AdminService;
+    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService, AdminService: AdminUsersService);
+    create(userInfo: any, bc: CreateBoardContentDto): Promise<any>;
+    statusChange(statusChange: any): Promise<void>;
+    findCategoryAll(idx: any, category: string, options: PaginationOptions): Promise<{
         bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
         bc: Pagination<BoardContentsEntity>;
     }>;
-    findNoticeCategoryAll(category: string): Promise<BoardContentsEntity[]>;
-    findOne(idx: number): Promise<BoardContentsEntity>;
-    update(id: number, updateBoardContentDto: UpdateBoardContentDto): string;
-    remove(id: number): string;
+    findNoticeCategoryAll(bd_idx: string, category: string): Promise<BoardContentsEntity[]>;
+    findOne(bc_idx: number): Promise<BoardContentsEntity>;
+    findIndex(idx: number): Promise<BoardContentsEntity>;
+    update(userInfo: any, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
+    adminFindCategoryAll(idx: any, category: string, options: PaginationOptions): Promise<{
+        bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
+        bc: Pagination<BoardContentsEntity>;
+    }>;
+    private bscatsChange;
     private saveBoardContent;
+    private updateBoardContent;
     getPrivateColumn(): any[];
     getNoneNoticeType(): number[];
 }

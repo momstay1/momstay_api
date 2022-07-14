@@ -38,6 +38,11 @@ __decorate([
     __metadata("design:type", Number)
 ], BoardContentsEntity.prototype, "bc_user_idx", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, swagger_1.ApiProperty)({ description: '게시글 작성한 관리자 idx' }),
+    __metadata("design:type", Number)
+], BoardContentsEntity.prototype, "bc_admin_idx", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 2 }),
     (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' }),
     __metadata("design:type", Number)
@@ -105,7 +110,7 @@ __decorate([
     __metadata("design:type", user_entity_1.UsersEntity)
 ], BoardContentsEntity.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.UsersEntity, (admin) => admin.board_contents, {
+    (0, typeorm_1.ManyToOne)(() => admin_user_entity_1.AdminUsersEntity, (admin) => admin.board_contents, {
         onDelete: 'NO ACTION',
         onUpdate: 'NO ACTION'
     }),

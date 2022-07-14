@@ -25,53 +25,51 @@ const constants_1 = require("./constants");
 const common_utils_1 = require("../common/common.utils");
 const paginate_1 = require("../paginate");
 const lodash_1 = require("lodash");
+const admin_users_service_1 = require("../admin-users/admin-users.service");
+const common_bcrypt_1 = require("../common/common.bcrypt");
 let BoardContentsService = class BoardContentsService {
-    constructor(bcRepository, usersService, boardsService, bscatsService, bcatsService) {
+    constructor(bcRepository, usersService, boardsService, bscatsService, bcatsService, AdminService) {
         this.bcRepository = bcRepository;
         this.usersService = usersService;
         this.boardsService = boardsService;
         this.bscatsService = bscatsService;
         this.bcatsService = bcatsService;
+        this.AdminService = AdminService;
     }
-    async create(user_id, createBoardContentDto) {
-        const board = await this.boardsService.findBoard({ bd_idx: createBoardContentDto.bd_idx });
-        const write_auth = board.bd_write_auth.split("|");
-        const user = await this.usersService.findOne(user_id);
-        if (!write_auth.includes((0, lodash_1.get)(user, ['user_group', 'grp_id']))) {
-            throw new common_1.UnauthorizedException('권한이 없습니다.');
-        }
+    async create(userInfo, bc) {
+        const board = await this.boardsService.findBoard({ bd_idx: bc.bd_idx });
         const bcats = await this.bcatsService.searching({
-            where: { bcat_id: (0, typeorm_2.In)(createBoardContentDto.category) }
+            where: { bcat_id: (0, typeorm_2.In)(bc.category) }
         });
-        const boardContent = await this.saveBoardContent({ user, board }, createBoardContentDto);
+        const write_auth = board.bd_write_auth.split("|");
+        if (!['root', 'admin'].includes(userInfo.user_group)) {
+            const user = await this.usersService.findOne(userInfo.user_id);
+            if (!write_auth.includes((0, lodash_1.get)(user, ['user_group', 'grp_idx']).toString())) {
+                throw new common_1.UnauthorizedException('권한이 없습니다.');
+            }
+            bc.user_idx = (0, lodash_1.get)(user, ['user_idx']);
+        }
+        else {
+            const admin = await this.AdminService.findOne(userInfo.user_id);
+            bc.admin_idx = (0, lodash_1.get)(admin, ['admin_idx']);
+        }
+        bc.bd_idx = bc.bd_idx;
+        const boardContent = await this.saveBoardContent(bc);
         boardContent.bscats = [];
         for (const key in bcats) {
             boardContent.bscats.push(await this.bscatsService.saveToBscat(bcats[key], boardContent));
         }
         return boardContent;
     }
-    async findAll(options) {
-        const { take, page } = options;
-        const [results, total] = await this.bcRepository.findAndCount({
-            order: { bc_createdAt: 'DESC' },
-            where: { bc_status: constants_1.bcConstants.status.registration, bc_type: (0, typeorm_2.In)(this.getNoneNoticeType()) },
-            relations: ['user', 'board', 'bscats'],
-            take: take,
-            skip: take * (page - 1)
-        });
-        return new paginate_1.Pagination({
-            results,
-            total,
-        });
+    async statusChange(statusChange) {
+        console.log({ statusChange });
+        await this.bcRepository.createQueryBuilder()
+            .update(board_content_entity_1.BoardContentsEntity)
+            .set({ bc_status: Number(statusChange.status) })
+            .where(" bc_idx IN (:bc_idx)", { bc_idx: statusChange.bc_idxs })
+            .execute();
     }
-    async findNoticeAll() {
-        return await this.bcRepository.find({
-            order: { bc_createdAt: 'DESC' },
-            where: { bc_status: constants_1.bcConstants.status.registration, bc_type: constants_1.bcConstants.type.notice },
-            relations: ['user', 'board', 'bscats']
-        });
-    }
-    async findCategoryAll(options, category) {
+    async findCategoryAll(idx, category, options) {
         const { take, page } = options;
         const bcats = await this.bcatsService.searching({
             where: { bcat_id: (0, typeorm_2.In)([category]) }
@@ -79,11 +77,14 @@ let BoardContentsService = class BoardContentsService {
         const [results, total] = await this.bcRepository.findAndCount({
             order: { bc_createdAt: 'DESC' },
             where: (qb) => {
-                qb.where('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx });
+                qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: idx });
+                if ((0, lodash_1.get)(bcats, [0, 'bcat_idx'])) {
+                    qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx });
+                }
                 qb.andWhere('bc_status = :bc_status', { bc_status: constants_1.bcConstants.status.registration });
                 qb.andWhere('bc_type IN (:bc_type)', { bc_type: this.getNoneNoticeType() });
             },
-            relations: ['user', 'board', 'bscats'],
+            relations: ['user', 'board', 'bscats', 'admin'],
             take: take,
             skip: take * (page - 1)
         });
@@ -95,50 +96,136 @@ let BoardContentsService = class BoardContentsService {
             })
         };
     }
-    async findNoticeCategoryAll(category) {
+    async findNoticeCategoryAll(bd_idx, category) {
         const bcats = await this.bcatsService.searching({
             where: { bcat_id: (0, typeorm_2.In)([category]) }
         });
         return await this.bcRepository.find({
             order: { bc_createdAt: 'DESC' },
             where: (qb) => {
-                qb.where('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx });
+                qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: bd_idx });
+                if ((0, lodash_1.get)(bcats, [0, 'bcat_idx'])) {
+                    qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx });
+                }
                 qb.andWhere('bc_status = :bc_status', { bc_status: constants_1.bcConstants.status.registration });
                 qb.andWhere('bc_type = :bc_type', { bc_type: constants_1.bcConstants.type.notice });
             },
-            relations: ['user', 'board', 'bscats'],
+            relations: ['user', 'board', 'bscats', 'admin'],
         });
     }
-    async findOne(idx) {
-        const bc = await this.bcRepository.findOne({
-            where: { bc_idx: idx },
-            relations: ['user', 'board', 'bscats']
-        });
-        if (!bc) {
-            throw new common_1.NotFoundException('존재하지 않는 게시글 입니다.');
-        }
-        if (bc['bc_status'] !== constants_1.bcConstants.status.registration) {
+    async findOne(bc_idx) {
+        const bc = await this.findIndex(bc_idx);
+        if (bc.bc_status !== constants_1.bcConstants.status.registration) {
             throw new common_1.NotAcceptableException('접근 할 수 없는 게시글 입니다.');
         }
         return bc;
     }
-    update(id, updateBoardContentDto) {
-        return `This action updates a #${id} boardContent`;
+    async findIndex(idx) {
+        const bc = await this.bcRepository.findOne({
+            where: { bc_idx: idx },
+            relations: ['user', 'board', 'bscats', 'admin']
+        });
+        if (!bc) {
+            throw new common_1.NotFoundException('존재하지 않는 게시글 입니다.');
+        }
+        return bc;
     }
-    remove(id) {
-        return `This action removes a #${id} boardContent`;
+    async update(userInfo, bc_idx, updateBoardContentDto) {
+        const board = await this.boardsService.findBoard({ bd_idx: updateBoardContentDto.bd_idx });
+        const bc = await this.findIndex(bc_idx);
+        const bcats = await this.bcatsService.searching({
+            where: { bcat_id: (0, typeorm_2.In)([updateBoardContentDto.category]) }
+        });
+        const write_auth = board.bd_write_auth.split("|");
+        if (!['root', 'admin'].includes(userInfo.user_group)) {
+            const user = await this.usersService.findOne(userInfo.user_id);
+            if (!write_auth.includes((0, lodash_1.get)(userInfo, ['user_group', 'grp_idx']))
+                || (0, lodash_1.get)(bc, ['user', 'user_idx']) != (0, lodash_1.get)(user, ['user_idx'])) {
+                throw new common_1.UnauthorizedException('권한이 없습니다.');
+            }
+        }
+        bc.bc_idx = bc_idx;
+        bc.bc_status = (0, lodash_1.get)(updateBoardContentDto, ['status'], 2);
+        bc.bc_type = (0, lodash_1.get)(updateBoardContentDto, ['type'], 1);
+        bc.bc_write_name = (0, lodash_1.get)(updateBoardContentDto, ['write_name'], '');
+        bc.bc_title = (0, lodash_1.get)(updateBoardContentDto, ['title'], '');
+        bc.bc_link = (0, lodash_1.get)(updateBoardContentDto, ['link'], '');
+        bc.bc_content = (0, lodash_1.get)(updateBoardContentDto, ['content'], '');
+        const boardContent = await this.updateBoardContent(bc);
+        boardContent.bscats = await this.bscatsChange(bcats, boardContent);
+        return boardContent;
     }
-    async saveBoardContent(relation, createBoardContentDto) {
+    async adminFindCategoryAll(idx, category, options) {
+        const { take, page } = options;
+        const bcats = await this.bcatsService.searching({
+            where: { bcat_id: (0, typeorm_2.In)([category]) }
+        });
+        const [results, total] = await this.bcRepository.findAndCount({
+            order: { bc_createdAt: 'DESC' },
+            where: (qb) => {
+                qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: idx });
+                if ((0, lodash_1.get)(bcats, [0, 'bcat_idx'])) {
+                    qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx });
+                }
+            },
+            relations: ['user', 'board', 'bscats', 'admin'],
+            take: take,
+            skip: take * (page - 1)
+        });
+        return {
+            bcats: bcats,
+            bc: new paginate_1.Pagination({
+                results,
+                total,
+            })
+        };
+    }
+    async bscatsChange(updateBscats, bc) {
+        const bscats = [];
+        const deleteBscats = [];
+        const bcats = (0, lodash_1.keyBy)(updateBscats, o => {
+            return o.bcat_idx;
+        });
+        for (const key in bc.bscats) {
+            if (bcats[bc.bscats[key].bscat_bcat_idx]) {
+                delete bcats[bc.bscats[key].bscat_bcat_idx];
+            }
+            else {
+                deleteBscats.push(bc.bscats[key].bscat_idx);
+            }
+        }
+        if (deleteBscats.length > 0) {
+            this.bscatsService.removes(deleteBscats);
+        }
+        for (const key in bcats) {
+            bscats.push(await this.bscatsService.saveToBscat(bcats[key], bc));
+        }
+        return bscats;
+    }
+    async saveBoardContent(createBoardContentDto) {
         const addPrefixBcDto = common_utils_1.commonUtils.addPrefix(constants_1.bcConstants.prefix, createBoardContentDto);
-        const bc = Object.assign(Object.assign({ bc_bd_idx: relation.board.bd_idx, bc_user_idx: relation.user.user_idx, bc_status: constants_1.bcConstants.status.registration }, addPrefixBcDto), relation);
+        const bc = Object.assign({ user: (0, lodash_1.get)(createBoardContentDto, ['user_idx']), admin: (0, lodash_1.get)(createBoardContentDto, ['admin_idx']), board: (0, lodash_1.get)(createBoardContentDto, ['bd_idx'], 0) }, addPrefixBcDto);
+        if ((0, lodash_1.get)(createBoardContentDto, ['password'])) {
+            bc.bc_password = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(createBoardContentDto, 'password'));
+        }
+        const newBc = await this.bcRepository.save(bc);
+        return await this.bcRepository.save(newBc);
+    }
+    async updateBoardContent(updateBoardContentDto) {
+        const bc = Object.assign({ user: (0, lodash_1.get)(updateBoardContentDto, ['user_idx']), admin: (0, lodash_1.get)(updateBoardContentDto, ['admin_idx']), board: (0, lodash_1.get)(updateBoardContentDto, ['bd_idx'], 0) }, updateBoardContentDto);
+        if ((0, lodash_1.get)(updateBoardContentDto, ['password'])) {
+            bc.bc_password = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(updateBoardContentDto, 'password'));
+        }
         const newBc = await this.bcRepository.save(bc);
         return await this.bcRepository.save(newBc);
     }
     getPrivateColumn() {
         const userPrivateColumn = this.usersService.getPrivateColumn();
+        const adminPrivateColumn = this.AdminService.getAdminPrivateColumn();
         return [
             ...constants_1.bcConstants.privateColumn,
-            ...userPrivateColumn
+            ...userPrivateColumn,
+            ...adminPrivateColumn
         ];
     }
     getNoneNoticeType() {
@@ -156,7 +243,8 @@ BoardContentsService = __decorate([
         users_service_1.UsersService,
         boards_service_1.BoardsService,
         board_selected_categories_service_1.BoardSelectedCategoriesService,
-        board_categories_service_1.BoardCategoriesService])
+        board_categories_service_1.BoardCategoriesService,
+        admin_users_service_1.AdminUsersService])
 ], BoardContentsService);
 exports.BoardContentsService = BoardContentsService;
 //# sourceMappingURL=board-contents.service.js.map

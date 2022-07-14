@@ -3,6 +3,5 @@ export declare class NoticeContentsController {
     private readonly boardContentsService;
     constructor(boardContentsService: BoardContentsService);
     sanitizeBoardContent: (bc: any) => any[];
-    findAll(): Promise<any[][]>;
-    findCategoryAll(category: string): Promise<any[][]>;
+    findCategoryAll(bd_idx: string, category: string): Promise<any[][]>;
 }

@@ -15,8 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GroupsController = void 0;
 const common_1 = require("@nestjs/common");
 const groups_service_1 = require("./groups.service");
-const create_group_dto_1 = require("./dto/create-group.dto");
-const update_group_dto_1 = require("./dto/update-group.dto");
 const group_entity_1 = require("./entities/group.entity");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const swagger_1 = require("@nestjs/swagger");
@@ -25,29 +23,10 @@ let GroupsController = class GroupsController {
     constructor(groupsService) {
         this.groupsService = groupsService;
     }
-    create(createGroupDto) {
-        return this.groupsService.create(createGroupDto);
-    }
     async findAll(user) {
         return await this.groupsService.findAll(user);
     }
-    findOne(id) {
-        return this.groupsService.findOne(+id);
-    }
-    update(id, updateGroupDto) {
-        return this.groupsService.update(+id, updateGroupDto);
-    }
-    remove(id) {
-        return this.groupsService.remove(+id);
-    }
 };
-__decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_group_dto_1.CreateGroupDto]),
-    __metadata("design:returntype", void 0)
-], GroupsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     (0, role_decorator_1.Auth)(['root', 'admin', 'basic']),
@@ -59,30 +38,9 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], GroupsController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], GroupsController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_group_dto_1.UpdateGroupDto]),
-    __metadata("design:returntype", void 0)
-], GroupsController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], GroupsController.prototype, "remove", null);
 GroupsController = __decorate([
     (0, common_1.Controller)('groups'),
+    (0, swagger_1.ApiTags)('회원그룹 API'),
     __metadata("design:paramtypes", [groups_service_1.GroupsService])
 ], GroupsController);
 exports.GroupsController = GroupsController;

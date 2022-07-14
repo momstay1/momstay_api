@@ -14,7 +14,7 @@ export declare class UsersService {
     findOne(id: string): Promise<UsersEntity | undefined>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<UsersEntity>;
     remove(id: string): Promise<void>;
-    removes(ids: []): Promise<void>;
+    removes(ids: any): Promise<void>;
     getPrivateColumn(): string[];
     private saveUser;
     private checkUserExists;

@@ -7,4 +7,5 @@ export declare class BoardSelectedCategoriesService {
     constructor(bscatsRepository: Repository<BoardSelectedCategoriesEntity>, bcatsService: BoardCategoriesService);
     create(createbscatContentDto: BoardSelectedCategoriesEntity): Promise<BoardSelectedCategoriesEntity>;
     saveToBscat(bcat: any, boardContent: any): Promise<BoardSelectedCategoriesEntity>;
+    removes(idxs: any): Promise<void>;
 }

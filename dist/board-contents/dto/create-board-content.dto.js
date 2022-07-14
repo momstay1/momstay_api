@@ -33,6 +33,18 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateBoardContentDto.prototype, "bd_idx", void 0);
 __decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '회원 idx' }),
+    __metadata("design:type", Number)
+], CreateBoardContentDto.prototype, "user_idx", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '관리자 idx' }),
+    __metadata("design:type", Number)
+], CreateBoardContentDto.prototype, "admin_idx", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 작성자' }),
     __metadata("design:type", String)

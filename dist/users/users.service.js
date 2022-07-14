@@ -97,7 +97,7 @@ let UsersService = class UsersService {
         await this.usersRepository.createQueryBuilder()
             .update(user_entity_1.UsersEntity)
             .set({ user_status: Number(constants_1.usersConstant.status.delete) })
-            .where(" place_idx IN (:idxs)", { idxs: ids })
+            .where(" user_id IN (:ids)", { ids: ids })
             .execute();
     }
     getPrivateColumn() {

@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefectController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const defect_service_1 = require("./defect.service");
 const create_defect_dto_1 = require("./dto/create-defect.dto");
 const update_defect_dto_1 = require("./dto/update-defect.dto");
@@ -74,6 +75,7 @@ __decorate([
 ], DefectController.prototype, "remove", null);
 DefectController = __decorate([
     (0, common_1.Controller)('defect'),
+    (0, swagger_1.ApiTags)('하자관리 API'),
     __metadata("design:paramtypes", [defect_service_1.DefectService])
 ], DefectController);
 exports.DefectController = DefectController;
