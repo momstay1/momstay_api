@@ -9,6 +9,7 @@ import { Auth } from 'src/common/decorator/role.decorator';
 import { ResponseErrDto } from 'src/error/dto/response-err.dto';
 import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { DeleteUserDto } from 'src/users/dto/delete-user.dto';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { ProfileUserDto } from 'src/users/dto/profile-user.dto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
@@ -101,6 +102,7 @@ export class AdminUsersController {
   @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_회원정보수정 API' })
   @ApiOkResponse({ type: ProfileUserDto })
+  @ApiBody({ type: UpdateUserDto })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const user = await this.usersService.update(id, updateUserDto);
     return this.sanitizeUsers(user);
@@ -110,9 +112,10 @@ export class AdminUsersController {
   @Delete()
   @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_회원정보삭제 API' })
+  @ApiBody({ type: DeleteUserDto })
   @HttpCode(204)
-  async remove(@Body() body) {
-    await this.usersService.removes(body.ids);
+  async remove(@Body('ids') ids) {
+    await this.usersService.removes(ids);
   }
 
 }

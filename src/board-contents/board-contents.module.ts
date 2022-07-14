@@ -8,6 +8,8 @@ import { BoardCategoriesModule } from 'src/board-categories/board-categories.mod
 import { BoardsModule } from 'src/boards/boards.module';
 import { BoardSelectedCategoriesModule } from 'src/board-selected-categories/board-selected-categories.module';
 import { NoticeContentsController } from './notice-contents.controller';
+import { AdminUsersModule } from 'src/admin-users/admin-users.module';
+import { GroupsModule } from 'src/groups/groups.module';
 
 @Module({
   imports: [
@@ -15,7 +17,9 @@ import { NoticeContentsController } from './notice-contents.controller';
     UsersModule,
     BoardsModule,
     BoardSelectedCategoriesModule,
-    BoardCategoriesModule
+    BoardCategoriesModule,
+    AdminUsersModule,
+    GroupsModule
   ],
   controllers: [BoardContentsController, NoticeContentsController],
   providers: [BoardContentsService]

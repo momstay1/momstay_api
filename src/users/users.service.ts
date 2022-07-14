@@ -93,16 +93,12 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  async removes(ids: []) {
+  async removes(ids) {
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
       .set({ user_status: Number(usersConstant.status.delete) })
-      .where(" place_idx IN (:idxs)", { idxs: ids })
+      .where(" user_id IN (:ids)", { ids: ids })
       .execute()
-    // 현장 일괄 삭제하는 기능 정상동작하는 경우 동일하게 수정
-    // for (const key in ids) {
-    //   this.remove(ids[key]);
-    // }
   }
 
   getPrivateColumn(): string[] {

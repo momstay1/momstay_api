@@ -29,6 +29,10 @@ export class BoardContentsEntity {
   @ApiProperty({ description: '게시글 작성한 회원 idx' })
   bc_user_idx: number;
 
+  @Column({ default: 0 })
+  @ApiProperty({ description: '게시글 작성한 관리자 idx' })
+  bc_admin_idx: number;
+
   @Column({ default: 2 })
   @ApiProperty({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' })
   bc_status: number;

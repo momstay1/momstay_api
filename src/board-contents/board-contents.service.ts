@@ -11,8 +11,10 @@ import { BoardContentsEntity } from './entities/board-content.entity';
 import { bcConstants } from './constants';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
-import { constants } from 'buffer';
-import { get, isArray } from 'lodash';
+import { get, keyBy } from 'lodash';
+import { AdminUsersService } from 'src/admin-users/admin-users.service';
+import { GroupsService } from 'src/groups/groups.service';
+import { commonBcrypt } from 'src/common/common.bcrypt';
 
 @Injectable()
 export class BoardContentsService {
@@ -21,29 +23,36 @@ export class BoardContentsService {
     private readonly usersService: UsersService,
     private readonly boardsService: BoardsService,
     private readonly bscatsService: BoardSelectedCategoriesService,
-    private readonly bcatsService: BoardCategoriesService
+    private readonly bcatsService: BoardCategoriesService,
+    private readonly AdminService: AdminUsersService,
+    private readonly groupsService: GroupsService
   ) { }
 
-  async create(user_id, createBoardContentDto: CreateBoardContentDto) {
+  async create(userInfo, bc: CreateBoardContentDto) {
     // 게시판 정보 가져오기
-    const board = await this.boardsService.findBoard({ bd_idx: createBoardContentDto.bd_idx });
+    const board = await this.boardsService.findBoard({ bd_idx: bc.bd_idx });
+    // 카테고리정보 가져오기
+    const bcats = await this.bcatsService.searching({
+      where: { bcat_id: In(bc.category) }
+    });
     const write_auth = board.bd_write_auth.split("|");
 
     // 회원정보 가져오기
-    const user = await this.usersService.findOne(user_id);
-
-    // 게시글 쓰기 권한 여부 확인
-    if (!write_auth.includes(get(user, ['user_group', 'grp_id']))) {
-      throw new UnauthorizedException('권한이 없습니다.');
+    if (!['root', 'admin'].includes(userInfo.user_group)) {
+      const user = await this.usersService.findOne(userInfo.user_id);
+      // 게시글 쓰기 권한 여부 확인
+      if (!write_auth.includes(get(user, ['user_group', 'grp_idx']).toString())) {
+        throw new UnauthorizedException('권한이 없습니다.');
+      }
+      bc.user_idx = get(user, ['user_idx']);
+    } else {
+      const admin = await this.AdminService.findOne(userInfo.user_id);
+      bc.admin_idx = get(admin, ['admin_idx']);
     }
-
-    // 카테고리정보 가져오기
-    const bcats = await this.bcatsService.searching({
-      where: { bcat_id: In(createBoardContentDto.category) }
-    });
+    bc.bd_idx = bc.bd_idx;
 
     // 게시글 저장
-    const boardContent = await this.saveBoardContent({ user, board }, createBoardContentDto)
+    const boardContent = await this.saveBoardContent(bc)
 
     // 셀렉트 카테고리 저장하기
     boardContent.bscats = [];
@@ -122,6 +131,14 @@ export class BoardContentsService {
   }
 
   async findOne(idx: number) {
+    const bc = await this.findIndex(idx);
+    if (bc.bc_status !== bcConstants.status.registration) {
+      throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
+    }
+    return bc;
+  }
+
+  async findIndex(idx: number) {
     const bc = await this.bcRepository.findOne({
       where: { bc_idx: idx },
       relations: ['user', 'board', 'bscats']
@@ -129,29 +146,105 @@ export class BoardContentsService {
     if (!bc) {
       throw new NotFoundException('존재하지 않는 게시글 입니다.');
     }
-    if (bc['bc_status'] !== bcConstants.status.registration) {
-      throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
-    }
     return bc;
   }
 
-  update(id: number, updateBoardContentDto: UpdateBoardContentDto) {
-    return `This action updates a #${id} boardContent`;
+  async update(userInfo, idx: number, updateBoardContentDto: UpdateBoardContentDto) {
+    // 게시판 정보 가져오기
+    const board = await this.boardsService.findBoard({ bd_idx: updateBoardContentDto.bd_idx });
+    // 게시글 정보 가져오기
+    const bc = await this.findIndex(idx);
+    // 카테고리정보 가져오기 (bcat_idx를 키값으로 재정렬)
+    const bcats = await this.bcatsService.searching({
+      where: { bcat_id: In([updateBoardContentDto.category]) }
+    });
+
+    const write_auth = board.bd_write_auth.split("|");
+    // 게시글 쓰기 권한 여부 확인
+    if (!['root', 'admin'].includes(userInfo.user_group)) {
+      // 회원정보 가져오기
+      const user = await this.usersService.findOne(userInfo.user_id);
+      // 쓰기 권한 혹은 자신의 글이 아닌 경우
+      if (!write_auth.includes(get(userInfo, ['user_group', 'grp_idx']))
+        || get(bc, ['user', 'user_idx']) != get(user, ['user_idx'])) {
+        throw new UnauthorizedException('권한이 없습니다.');
+      }
+    }
+    bc.bc_idx = idx;
+    bc.bc_status = get(updateBoardContentDto, ['status'], 2);
+    bc.bc_type = get(updateBoardContentDto, ['type'], 1);
+    bc.bc_write_name = get(updateBoardContentDto, ['write_name'], '');
+    bc.bc_title = get(updateBoardContentDto, ['title'], '');
+    bc.bc_link = get(updateBoardContentDto, ['link'], '');
+    bc.bc_content = get(updateBoardContentDto, ['content'], '');
+    // 게시글 저장
+    const boardContent = await this.updateBoardContent(bc)
+
+    // 카테고리 수정
+    boardContent.bscats = await this.bscatsChange(bcats, boardContent);
+
+    return boardContent;
   }
 
   remove(id: number) {
     return `This action removes a #${id} boardContent`;
   }
 
-  //회원 정보 저장
-  private async saveBoardContent(relation, createBoardContentDto): Promise<any> {
+  private async bscatsChange(updateBscats, bc) {
+    const bscats = [];
+    const deleteBscats = [];
+
+    const bcats = keyBy(updateBscats, o => {
+      return o.bcat_idx;
+    });
+
+    for (const key in bc.bscats) {
+      if (bcats[bc.bscats[key].bscat_bcat_idx]) {
+        delete bcats[bc.bscats[key].bscat_bcat_idx];
+      } else {
+        deleteBscats.push(bc.bscats[key].bscat_idx);
+      }
+    }
+
+    if (deleteBscats.length > 0) {
+      this.bscatsService.removes(deleteBscats);
+    }
+
+    // 셀렉트 카테고리 저장하기
+    for (const key in bcats) {
+      bscats.push(
+        await this.bscatsService.saveToBscat(bcats[key], bc)
+      );
+    }
+    return bscats;
+  }
+
+  // 게시글 등록
+  private async saveBoardContent(createBoardContentDto): Promise<any> {
     const addPrefixBcDto = commonUtils.addPrefix(bcConstants.prefix, createBoardContentDto);
     const bc = {
-      bc_bd_idx: relation.board.bd_idx,
-      bc_user_idx: relation.user.user_idx,
-      bc_status: bcConstants.status.registration,
+      user: get(createBoardContentDto, ['user_idx']),
+      admin: get(createBoardContentDto, ['admin_idx']),
+      board: get(createBoardContentDto, ['bd_idx'], 0),
       ...addPrefixBcDto,
-      ...relation,
+    }
+    if (get(createBoardContentDto, ['password'])) {
+      bc.bc_password = await commonBcrypt.setBcryptPassword(get(createBoardContentDto, 'password'));
+    }
+    const newBc = await this.bcRepository.save(bc);
+    return await this.bcRepository.save(newBc);
+  }
+
+  // 게시글 수정
+  private async updateBoardContent(updateBoardContentDto): Promise<any> {
+    const bc = {
+      user: get(updateBoardContentDto, ['user_idx']),
+      admin: get(updateBoardContentDto, ['admin_idx']),
+      board: get(updateBoardContentDto, ['bd_idx'], 0),
+      ...updateBoardContentDto,
+    }
+    if (get(updateBoardContentDto, ['password'])) {
+      bc.bc_password = await commonBcrypt.setBcryptPassword(get(updateBoardContentDto, 'password'));
     }
     const newBc = await this.bcRepository.save(bc);
     return await this.bcRepository.save(newBc);

@@ -26,4 +26,11 @@ export class BoardSelectedCategoriesService {
     bscatsEntity.bc = boardContent;
     return await this.create(bscatsEntity);
   }
+
+  async removes(idxs) {
+    await this.bscatsRepository.createQueryBuilder()
+      .delete()
+      .where(" bscat_idx IN (:idxs)", { idxs: idxs })
+      .execute()
+  }
 }

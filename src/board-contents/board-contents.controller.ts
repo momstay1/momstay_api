@@ -16,6 +16,7 @@ import {
   ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
 import { get, map } from 'lodash';
+import { AdminUsersEntity } from 'src/admin-users/entities/admin-user.entity';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { commonUtils } from 'src/common/common.utils';
 import { Auth } from 'src/common/decorator/role.decorator';
@@ -41,8 +42,9 @@ export class BoardContentsController {
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['Any'])
-  async create(@GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
-    return await this.boardContentsService.create(user.user_id, createBoardContentDto);
+  async create(@GetUser() user: UsersEntity | AdminUsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
+    console.log({ user });
+    return await this.boardContentsService.create(user, createBoardContentDto);
   }
 
   @Get()
@@ -94,9 +96,14 @@ export class BoardContentsController {
     return this.sanitizeBoardContent(bc);
   }
 
-  @Patch(':category/:id')
-  update(@Param('id') id: string, @Body() updateBoardContentDto: UpdateBoardContentDto) {
-    return this.boardContentsService.update(+id, updateBoardContentDto);
+  @Patch(':idx')
+  @Auth(['Any'])
+  async update(
+    @GetUser() user: UsersEntity,
+    @Param('idx') idx: string,
+    @Body() updateBoardContentDto: UpdateBoardContentDto
+  ) {
+    return await this.boardContentsService.update(user, +idx, updateBoardContentDto);
   }
 
   @Delete(':category/:id')
