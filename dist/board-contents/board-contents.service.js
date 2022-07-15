@@ -44,7 +44,7 @@ let BoardContentsService = class BoardContentsService {
         const write_auth = board.bd_write_auth.split("|");
         if (!['root', 'admin'].includes(userInfo.user_group)) {
             const user = await this.usersService.findOne(userInfo.user_id);
-            if (!write_auth.includes((0, lodash_1.get)(user, ['user_group', 'grp_idx']).toString())) {
+            if (!write_auth.includes((0, lodash_1.get)(user, ['user_group', 'grp_id']))) {
                 throw new common_1.UnauthorizedException('권한이 없습니다.');
             }
             bc.user_idx = (0, lodash_1.get)(user, ['user_idx']);
@@ -139,7 +139,7 @@ let BoardContentsService = class BoardContentsService {
         const write_auth = board.bd_write_auth.split("|");
         if (!['root', 'admin'].includes(userInfo.user_group)) {
             const user = await this.usersService.findOne(userInfo.user_id);
-            if (!write_auth.includes((0, lodash_1.get)(userInfo, ['user_group', 'grp_idx']))
+            if (!write_auth.includes((0, lodash_1.get)(userInfo, ['user_group', 'grp_id']))
                 || (0, lodash_1.get)(bc, ['user', 'user_idx']) != (0, lodash_1.get)(user, ['user_idx'])) {
                 throw new common_1.UnauthorizedException('권한이 없습니다.');
             }
