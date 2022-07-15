@@ -93,11 +93,11 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  async removes(ids) {
+  async removes(user_ids) {
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
       .set({ user_status: Number(usersConstant.status.delete) })
-      .where(" user_id IN (:ids)", { ids: ids })
+      .where(" user_id IN (:user_ids)", { user_ids: user_ids })
       .execute()
   }
 

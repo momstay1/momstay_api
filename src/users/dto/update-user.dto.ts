@@ -17,4 +17,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   readonly memo: string;
   @ApiProperty({ description: '그룹' })
   readonly group: string;
+  @ApiProperty({ description: '현장정보 수정' })
+  readonly place_idx: string;
 }
