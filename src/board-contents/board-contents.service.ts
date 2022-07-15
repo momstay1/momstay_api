@@ -49,10 +49,10 @@ export class BoardContentsService {
       if (!write_auth.includes(get(user, ['user_group', 'grp_id']))) {
         throw new UnauthorizedException('권한이 없습니다.');
       }
-      bc.user_idx = get(user, ['user_idx']);
+      bc.user_idx = get(user, ['user_idx']).toString();
     } else {
       const admin = await this.AdminService.findOne(userInfo.user_id);
-      bc.admin_idx = get(admin, ['admin_idx']);
+      bc.admin_idx = get(admin, ['admin_idx']).toString();
     }
     bc.bd_idx = bc.bd_idx;
 
@@ -156,7 +156,7 @@ export class BoardContentsService {
     const bc = await this.findIndex(bc_idx);
     // 카테고리정보 가져오기 (bcat_idx를 키값으로 재정렬)
     const bcats = await this.bcatsService.searching({
-      where: { bcat_id: In([updateBoardContentDto.category]) }
+      where: { bcat_id: In(updateBoardContentDto.category) }
     });
 
     const write_auth = board.bd_write_auth.split("|");
@@ -171,12 +171,13 @@ export class BoardContentsService {
       }
     }
     bc.bc_idx = bc_idx;
-    bc.bc_status = get(updateBoardContentDto, ['status'], 2);
-    bc.bc_type = get(updateBoardContentDto, ['type'], 1);
+    bc.bc_status = +get(updateBoardContentDto, ['status'], 2);
+    bc.bc_type = +get(updateBoardContentDto, ['type'], 1);
     bc.bc_write_name = get(updateBoardContentDto, ['write_name'], '');
     bc.bc_title = get(updateBoardContentDto, ['title'], '');
     bc.bc_link = get(updateBoardContentDto, ['link'], '');
     bc.bc_content = get(updateBoardContentDto, ['content'], '');
+
     // 게시글 저장
     const boardContent = await this.updateBoardContent(bc)
 

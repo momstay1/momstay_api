@@ -42,7 +42,7 @@ export class BoardContentsController {
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['Any'])
-  async create(@GetUser() user: UsersEntity | AdminUsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
+  async create(@GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
     return await this.boardContentsService.create(user, createBoardContentDto);
   }
 
@@ -79,11 +79,13 @@ export class BoardContentsController {
 
   @Patch(':bc_idx')
   @Auth(['Any'])
+  @ApiBearerAuth()
   async update(
     @GetUser() user: UsersEntity,
     @Param('bc_idx') bc_idx: string,
     @Body() updateBoardContentDto: UpdateBoardContentDto
   ) {
-    return await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+    const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+    return this.sanitizeBoardContent(bc);
   }
 }

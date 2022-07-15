@@ -76,7 +76,7 @@ export class AdminUsersController {
     };
   }
 
-  // 회원 정보 가져오기
+  // 관리자 정보 가져오기
   @Get('profile')
   @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_정보 API' })
@@ -114,8 +114,8 @@ export class AdminUsersController {
   @ApiOperation({ summary: '관리자_회원정보삭제 API' })
   @ApiBody({ type: DeleteUserDto })
   @HttpCode(204)
-  async remove(@Body('ids') ids) {
-    await this.usersService.removes(ids);
+  async remove(@Body('user_ids') user_ids) {
+    await this.usersService.removes(user_ids);
   }
 
 }

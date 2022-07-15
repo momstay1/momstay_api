@@ -7,29 +7,29 @@ import {
 } from 'class-validator';
 export class CreateBoardContentDto {
   @IsOptional()
-  @IsNumber()
-  @ApiProperty({ description: '게시글 상태 0: 삭제, 1:등록' })
-  status: number;
+  @IsString()
+  @ApiProperty({ description: '게시글 상태 0: 삭제, 1:미등록, 2:등록' })
+  status: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @ApiProperty({ description: '게시판 타입 1: 공지사항, 2: 일반글 3: 비밀글' })
-  type: number;
+  type: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @ApiProperty({ description: '게시판 index' })
-  bd_idx: number;
+  bd_idx: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
   @ApiProperty({ description: '회원 idx' })
-  user_idx: number;
+  user_idx: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
   @ApiProperty({ description: '관리자 idx' })
-  admin_idx: number;
+  admin_idx: string;
 
   @IsString()
   @ApiProperty({ description: '게시글 작성자' })
@@ -40,9 +40,9 @@ export class CreateBoardContentDto {
   title: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @ApiProperty({ description: '게시글 링크 상태' })
-  link_status: number;
+  link_status: string;
 
   @IsOptional()
   @IsString()
