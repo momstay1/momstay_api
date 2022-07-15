@@ -27,7 +27,7 @@ import { UpdateBoardContentDto } from './dto/update-board-content.dto';
 import { BoardContentsEntity } from './entities/board-content.entity';
 
 @Controller('admin/board-contents')
-@ApiTags('게시글 API')
+@ApiTags('관리자 게시글 API')
 export class AdminBoardContentsController {
   constructor(private readonly boardContentsService: BoardContentsService) { }
 
@@ -102,6 +102,7 @@ export class AdminBoardContentsController {
     @Param('bc_idx') bc_idx: string,
     @Body() updateBoardContentDto: UpdateBoardContentDto
   ) {
-    return await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+    const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+    return this.sanitizeBoardContent(bc);
   }
 }

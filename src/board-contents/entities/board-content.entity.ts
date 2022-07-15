@@ -50,6 +50,10 @@ export class BoardContentsEntity {
   bc_title: string;
 
   @Column({ length: 255, default: '' })
+  @ApiProperty({ description: '게시글 링크 사용여부' })
+  bc_link_status: string;
+
+  @Column({ length: 255, default: '' })
   @ApiProperty({ description: '게시글 링크' })
   bc_link: string;
 
