@@ -16,33 +16,33 @@ class CreateBoardContentDto {
 }
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:등록' }),
-    __metadata("design:type", Number)
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록, 2:등록' }),
+    __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시판 타입 1: 공지사항, 2: 일반글 3: 비밀글' }),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "type", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시판 index' }),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "bd_idx", void 0);
 __decorate([
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '회원 idx' }),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "user_idx", void 0);
 __decorate([
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '관리자 idx' }),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "admin_idx", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
@@ -56,9 +56,9 @@ __decorate([
 ], CreateBoardContentDto.prototype, "title", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 링크 상태' }),
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "link_status", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

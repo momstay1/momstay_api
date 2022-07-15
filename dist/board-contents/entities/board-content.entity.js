@@ -64,6 +64,11 @@ __decorate([
 ], BoardContentsEntity.prototype, "bc_title", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
+    (0, swagger_1.ApiProperty)({ description: '게시글 링크 사용여부' }),
+    __metadata("design:type", String)
+], BoardContentsEntity.prototype, "bc_link_status", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 255, default: '' }),
     (0, swagger_1.ApiProperty)({ description: '게시글 링크' }),
     __metadata("design:type", String)
 ], BoardContentsEntity.prototype, "bc_link", void 0);

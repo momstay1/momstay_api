@@ -1,3 +1,3 @@
 export declare class DeleteUserDto {
-    readonly ids: Array<string>;
+    readonly user_ids: Array<string>;
 }

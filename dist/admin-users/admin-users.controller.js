@@ -74,8 +74,8 @@ let AdminUsersController = class AdminUsersController {
         const user = await this.usersService.update(id, updateUserDto);
         return this.sanitizeUsers(user);
     }
-    async remove(ids) {
-        await this.usersService.removes(ids);
+    async remove(user_ids) {
+        await this.usersService.removes(user_ids);
     }
 };
 __decorate([
@@ -151,7 +151,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보삭제 API' }),
     (0, swagger_1.ApiBody)({ type: delete_user_dto_1.DeleteUserDto }),
     (0, common_1.HttpCode)(204),
-    __param(0, (0, common_1.Body)('ids')),
+    __param(0, (0, common_1.Body)('user_ids')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)

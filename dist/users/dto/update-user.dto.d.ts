@@ -8,5 +8,6 @@ export declare class UpdateUserDto extends UpdateUserDto_base {
     readonly phone: string;
     readonly memo: string;
     readonly group: string;
+    readonly place_idx: string;
 }
 export {};

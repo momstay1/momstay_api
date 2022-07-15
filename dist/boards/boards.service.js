@@ -16,6 +16,7 @@ exports.BoardsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const constants_1 = require("./constants");
 const board_entity_1 = require("./entities/board.entity");
 let BoardsService = class BoardsService {
     constructor(boardRepository) {
@@ -24,8 +25,12 @@ let BoardsService = class BoardsService {
     create(createBoardDto) {
         return 'This action adds a new board';
     }
-    findAll() {
-        return `This action returns all boards`;
+    async findAll() {
+        return await this.boardRepository.find({
+            where: qb => {
+                qb.where('bd_status != :bd_status', { bd_status: constants_1.bdConstants.status.delete });
+            }
+        });
     }
     async findOne(id) {
         const board = await this.findBoard({ bd_id: id });
@@ -43,6 +48,11 @@ let BoardsService = class BoardsService {
             throw new common_1.NotFoundException('존재하지 않는 게시판 입니다.');
         }
         return board;
+    }
+    getPrivateColumn() {
+        return [
+            ...constants_1.bdConstants.privateColumn,
+        ];
     }
 };
 BoardsService = __decorate([

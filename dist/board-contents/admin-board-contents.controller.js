@@ -50,7 +50,8 @@ let AdminBoardContentsController = class AdminBoardContentsController {
         return this.sanitizeBoardContent(bc);
     }
     async update(user, bc_idx, updateBoardContentDto) {
-        return await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+        const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+        return this.sanitizeBoardContent(bc);
     }
 };
 __decorate([
@@ -121,7 +122,7 @@ __decorate([
 ], AdminBoardContentsController.prototype, "update", null);
 AdminBoardContentsController = __decorate([
     (0, common_1.Controller)('admin/board-contents'),
-    (0, swagger_1.ApiTags)('게시글 API'),
+    (0, swagger_1.ApiTags)('관리자 게시글 API'),
     __metadata("design:paramtypes", [board_contents_service_1.BoardContentsService])
 ], AdminBoardContentsController);
 exports.AdminBoardContentsController = AdminBoardContentsController;

@@ -47,7 +47,8 @@ let BoardContentsController = class BoardContentsController {
         return this.sanitizeBoardContent(bc);
     }
     async update(user, bc_idx, updateBoardContentDto) {
-        return await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+        const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
+        return this.sanitizeBoardContent(bc);
     }
 };
 __decorate([
@@ -60,7 +61,7 @@ __decorate([
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, create_board_content_dto_1.CreateBoardContentDto]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, create_board_content_dto_1.CreateBoardContentDto]),
     __metadata("design:returntype", Promise)
 ], BoardContentsController.prototype, "create", null);
 __decorate([
@@ -88,6 +89,7 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(':bc_idx'),
     (0, role_decorator_1.Auth)(['Any']),
+    (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Param)('bc_idx')),
     __param(2, (0, common_1.Body)()),

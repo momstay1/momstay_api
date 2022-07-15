@@ -1,12 +1,12 @@
 export declare class CreateBoardContentDto {
-    status: number;
-    type: number;
-    bd_idx: number;
-    user_idx: number;
-    admin_idx: number;
+    status: string;
+    type: string;
+    bd_idx: string;
+    user_idx: string;
+    admin_idx: string;
     write_name: string;
     title: string;
-    link_status: number;
+    link_status: string;
     link: string;
     content: string;
     password: string;

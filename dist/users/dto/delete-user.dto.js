@@ -16,6 +16,6 @@ class DeleteUserDto {
 __decorate([
     (0, swagger_1.ApiProperty)({ description: '아이디' }),
     __metadata("design:type", Array)
-], DeleteUserDto.prototype, "ids", void 0);
+], DeleteUserDto.prototype, "user_ids", void 0);
 exports.DeleteUserDto = DeleteUserDto;
 //# sourceMappingURL=delete-user.dto.js.map

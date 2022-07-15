@@ -15,5 +15,5 @@ export declare class AdminBoardContentsController {
         pageTotal: number;
     }>;
     findOne(bd_idx: number, bc_idx: number): Promise<any[]>;
-    update(user: AdminUsersEntity, bc_idx: string, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
+    update(user: AdminUsersEntity, bc_idx: string, updateBoardContentDto: UpdateBoardContentDto): Promise<any[]>;
 }

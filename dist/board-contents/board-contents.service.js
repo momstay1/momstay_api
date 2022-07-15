@@ -47,11 +47,11 @@ let BoardContentsService = class BoardContentsService {
             if (!write_auth.includes((0, lodash_1.get)(user, ['user_group', 'grp_id']))) {
                 throw new common_1.UnauthorizedException('권한이 없습니다.');
             }
-            bc.user_idx = (0, lodash_1.get)(user, ['user_idx']);
+            bc.user_idx = (0, lodash_1.get)(user, ['user_idx']).toString();
         }
         else {
             const admin = await this.AdminService.findOne(userInfo.user_id);
-            bc.admin_idx = (0, lodash_1.get)(admin, ['admin_idx']);
+            bc.admin_idx = (0, lodash_1.get)(admin, ['admin_idx']).toString();
         }
         bc.bd_idx = bc.bd_idx;
         const boardContent = await this.saveBoardContent(bc);
@@ -134,7 +134,7 @@ let BoardContentsService = class BoardContentsService {
         const board = await this.boardsService.findBoard({ bd_idx: updateBoardContentDto.bd_idx });
         const bc = await this.findIndex(bc_idx);
         const bcats = await this.bcatsService.searching({
-            where: { bcat_id: (0, typeorm_2.In)([updateBoardContentDto.category]) }
+            where: { bcat_id: (0, typeorm_2.In)(updateBoardContentDto.category) }
         });
         const write_auth = board.bd_write_auth.split("|");
         if (!['root', 'admin'].includes(userInfo.user_group)) {
@@ -145,8 +145,8 @@ let BoardContentsService = class BoardContentsService {
             }
         }
         bc.bc_idx = bc_idx;
-        bc.bc_status = (0, lodash_1.get)(updateBoardContentDto, ['status'], 2);
-        bc.bc_type = (0, lodash_1.get)(updateBoardContentDto, ['type'], 1);
+        bc.bc_status = +(0, lodash_1.get)(updateBoardContentDto, ['status'], 2);
+        bc.bc_type = +(0, lodash_1.get)(updateBoardContentDto, ['type'], 1);
         bc.bc_write_name = (0, lodash_1.get)(updateBoardContentDto, ['write_name'], '');
         bc.bc_title = (0, lodash_1.get)(updateBoardContentDto, ['title'], '');
         bc.bc_link = (0, lodash_1.get)(updateBoardContentDto, ['link'], '');

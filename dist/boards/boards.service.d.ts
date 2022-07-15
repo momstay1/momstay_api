@@ -6,9 +6,10 @@ export declare class BoardsService {
     private boardRepository;
     constructor(boardRepository: Repository<BoardsEntity>);
     create(createBoardDto: CreateBoardDto): string;
-    findAll(): string;
+    findAll(): Promise<BoardsEntity[]>;
     findOne(id: string): Promise<BoardsEntity | undefined>;
     update(id: number, updateBoardDto: UpdateBoardDto): string;
     remove(id: number): string;
     findBoard(where: any): Promise<BoardsEntity | undefined>;
+    getPrivateColumn(): any[];
 }

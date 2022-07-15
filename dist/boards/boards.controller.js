@@ -15,64 +15,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BoardsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const common_utils_1 = require("../common/common.utils");
 const boards_service_1 = require("./boards.service");
-const create_board_dto_1 = require("./dto/create-board.dto");
-const update_board_dto_1 = require("./dto/update-board.dto");
 let BoardsController = class BoardsController {
     constructor(boardsService) {
         this.boardsService = boardsService;
+        this.sanitizeBoard = (bc) => {
+            return common_utils_1.commonUtils.sanitizeEntity(bc, this.boardsService.getPrivateColumn());
+        };
     }
-    create(createBoardDto) {
-        return this.boardsService.create(createBoardDto);
-    }
-    findAll() {
-        return this.boardsService.findAll();
+    async findAll() {
+        const data = await this.boardsService.findAll();
+        return this.sanitizeBoard(data);
     }
     async findOne(id) {
-        return await this.boardsService.findOne(id);
-    }
-    update(id, updateBoardDto) {
-        return this.boardsService.update(+id, updateBoardDto);
-    }
-    remove(id) {
-        return this.boardsService.remove(+id);
+        const data = await this.boardsService.findOne(id);
+        return this.sanitizeBoard(data);
     }
 };
 __decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_board_dto_1.CreateBoardDto]),
-    __metadata("design:returntype", void 0)
-], BoardsController.prototype, "create", null);
-__decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '게시판 리스트 API' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], BoardsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: '게시판 정보 API' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BoardsController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_board_dto_1.UpdateBoardDto]),
-    __metadata("design:returntype", void 0)
-], BoardsController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], BoardsController.prototype, "remove", null);
 BoardsController = __decorate([
     (0, common_1.Controller)('boards'),
     (0, swagger_1.ApiTags)('게시판 API'),

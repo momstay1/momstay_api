@@ -11,6 +11,7 @@ export declare class BoardContentsEntity {
     bc_type: number;
     bc_write_name: string;
     bc_title: string;
+    bc_link_status: string;
     bc_link: string;
     bc_content: string;
     bc_password: string;

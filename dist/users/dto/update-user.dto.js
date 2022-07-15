@@ -43,5 +43,9 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: '그룹' }),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "group", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '현장정보 수정' }),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "place_idx", void 0);
 exports.UpdateUserDto = UpdateUserDto;
 //# sourceMappingURL=update-user.dto.js.map
