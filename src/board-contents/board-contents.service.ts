@@ -46,7 +46,7 @@ export class BoardContentsService {
     if (!['root', 'admin'].includes(userInfo.user_group)) {
       const user = await this.usersService.findOne(userInfo.user_id);
       // 게시글 쓰기 권한 여부 확인
-      if (!write_auth.includes(get(user, ['user_group', 'grp_idx']).toString())) {
+      if (!write_auth.includes(get(user, ['user_group', 'grp_id']))) {
         throw new UnauthorizedException('권한이 없습니다.');
       }
       bc.user_idx = get(user, ['user_idx']);
@@ -165,7 +165,7 @@ export class BoardContentsService {
       // 회원정보 가져오기
       const user = await this.usersService.findOne(userInfo.user_id);
       // 쓰기 권한 혹은 자신의 글이 아닌 경우
-      if (!write_auth.includes(get(userInfo, ['user_group', 'grp_idx']))
+      if (!write_auth.includes(get(userInfo, ['user_group', 'grp_id']))
         || get(bc, ['user', 'user_idx']) != get(user, ['user_idx'])) {
         throw new UnauthorizedException('권한이 없습니다.');
       }
