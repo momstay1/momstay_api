@@ -46,7 +46,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ length: 60 }),
     __metadata("design:type", String)
-], AdminUsersEntity.prototype, "user_phone", void 0);
+], AdminUsersEntity.prototype, "admin_phone", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255 }),
     __metadata("design:type", String)

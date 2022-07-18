@@ -6,7 +6,7 @@ export declare class AdminUsersEntity {
     admin_id: string;
     admin_name: string;
     admin_email: string;
-    user_phone: string;
+    admin_phone: string;
     admin_password: string;
     setPassword(password: string): Promise<void>;
     admin_memo: string;
