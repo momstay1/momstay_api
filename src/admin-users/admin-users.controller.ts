@@ -36,14 +36,13 @@ export class AdminUsersController {
 
   // 회원 생성
   @Post()
-  @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_생성 API' })
-  @ApiCreatedResponse({ type: ResponseAuthDto })
+  @ApiCreatedResponse({ type: CreateUserDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.adminUsersService.create(createUserDto);
     // return this.authService.admin_login(user);
-    return user;
+    return this.sanitizeAdmin(user);
   }
 
   // 회원 로그인
