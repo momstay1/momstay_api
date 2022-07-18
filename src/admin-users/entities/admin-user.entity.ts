@@ -33,7 +33,7 @@ export class AdminUsersEntity {
   admin_email: string;
 
   @Column({ length: 60 })
-  user_phone: string;
+  admin_phone: string;
 
   @Column({ length: 255 })
   admin_password: string;
