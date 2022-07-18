@@ -48,7 +48,7 @@ export class UsersController {
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '회원 생성 API' })
-  @ApiCreatedResponse({ type: ResponseAuthDto })
+  @ApiCreatedResponse({ type: CreateUserDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
