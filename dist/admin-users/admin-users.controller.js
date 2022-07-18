@@ -47,7 +47,7 @@ let AdminUsersController = class AdminUsersController {
     ;
     async create(createUserDto) {
         const user = await this.adminUsersService.create(createUserDto);
-        return user;
+        return this.sanitizeAdmin(user);
     }
     async login(id, password) {
         return this.authService.admin_login(id, password);
@@ -80,9 +80,8 @@ let AdminUsersController = class AdminUsersController {
 };
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiOperation)({ summary: '관리자_생성 API' }),
-    (0, swagger_1.ApiCreatedResponse)({ type: response_auth_dto_1.ResponseAuthDto }),
+    (0, swagger_1.ApiCreatedResponse)({ type: create_user_dto_1.CreateUserDto }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),

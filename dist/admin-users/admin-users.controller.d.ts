@@ -12,7 +12,7 @@ export declare class AdminUsersController {
     constructor(authService: AuthService, adminUsersService: AdminUsersService, usersService: UsersService);
     sanitizeUsers(admin: any): any[];
     sanitizeAdmin(admin: any): any[];
-    create(createUserDto: CreateUserDto): Promise<AdminUsersEntity | import("@nestjs/common").UnprocessableEntityException>;
+    create(createUserDto: CreateUserDto): Promise<any[]>;
     login(id: string, password: string): Promise<ResponseAuthDto>;
     findAll(take: number, page: number): Promise<{
         results: any[][];

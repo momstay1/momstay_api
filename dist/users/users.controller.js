@@ -55,7 +55,7 @@ __decorate([
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '회원 생성 API' }),
-    (0, swagger_1.ApiCreatedResponse)({ type: response_auth_dto_1.ResponseAuthDto }),
+    (0, swagger_1.ApiCreatedResponse)({ type: create_user_dto_1.CreateUserDto }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
