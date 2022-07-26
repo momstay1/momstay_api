@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlaceEntity = void 0;
 const defect_place_entity_1 = require("../../defect-place/entities/defect-place.entity");
+const defect_entity_1 = require("../../defect/entities/defect.entity");
 const typeorm_1 = require("typeorm");
 let PlaceEntity = class PlaceEntity {
 };
@@ -50,6 +51,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => defect_place_entity_1.DefectPlaceEntity, (dfp) => dfp.place),
     __metadata("design:type", void 0)
 ], PlaceEntity.prototype, "defect_place", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => defect_entity_1.DefectEntity, (dft) => dft.place),
+    __metadata("design:type", void 0)
+], PlaceEntity.prototype, "defect", void 0);
 PlaceEntity = __decorate([
     (0, typeorm_1.Entity)('place')
 ], PlaceEntity);

@@ -6,6 +6,7 @@ export declare class DefectPlaceController {
     constructor(defectPlaceService: DefectPlaceService);
     sanitizeDefectPlace(data: any): any[];
     create(createDefectPlaceDto: CreateDefectPlaceDto): Promise<any[]>;
+    uploadExcel(idx: string, excel: any): Promise<void>;
     findAll(place: number, take: number, page: number): Promise<{
         results: any[][];
         total: number;
@@ -15,5 +16,4 @@ export declare class DefectPlaceController {
     findOne(idx: string): Promise<any[]>;
     update(idx: string, updateDefectPlaceDto: UpdateDefectPlaceDto): Promise<any[]>;
     remove(idxs: []): Promise<void>;
-    uploadExcel(idx: string, excel: any): Promise<void>;
 }

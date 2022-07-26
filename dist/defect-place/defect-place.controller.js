@@ -31,8 +31,11 @@ let DefectPlaceController = class DefectPlaceController {
     }
     ;
     async create(createDefectPlaceDto) {
-        const dfp = this.defectPlaceService.create(createDefectPlaceDto);
-        return this.sanitizeDefectPlace(dfp);
+        const dfp = await this.defectPlaceService.create(createDefectPlaceDto);
+        return await this.sanitizeDefectPlace(dfp);
+    }
+    async uploadExcel(idx, excel) {
+        return await this.defectPlaceService.uploadExcel(idx, excel);
     }
     async findAll(place, take, page) {
         const { results, total, pageTotal } = await this.defectPlaceService.findAll(place, { take, page });
@@ -58,9 +61,6 @@ let DefectPlaceController = class DefectPlaceController {
     async remove(idxs) {
         return await this.defectPlaceService.removes(idxs);
     }
-    async uploadExcel(idx, excel) {
-        return await this.defectPlaceService.uploadExcel(idx, excel);
-    }
 };
 __decorate([
     (0, common_1.Post)(),
@@ -73,6 +73,18 @@ __decorate([
     __metadata("design:paramtypes", [create_defect_place_dto_1.CreateDefectPlaceDto]),
     __metadata("design:returntype", Promise)
 ], DefectPlaceController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)("excel/:idx"),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('excel')),
+    (0, swagger_1.ApiOperation)({ summary: '하자현장엑셀 업로드 API' }),
+    __param(0, (0, common_1.Param)('idx')),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], DefectPlaceController.prototype, "uploadExcel", null);
 __decorate([
     (0, common_1.Get)(),
     (0, role_decorator_1.Auth)(['root', 'admin']),
@@ -128,18 +140,6 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
 ], DefectPlaceController.prototype, "remove", null);
-__decorate([
-    (0, common_1.Post)("excel/:idx"),
-    (0, role_decorator_1.Auth)(['root', 'admin']),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('excel')),
-    (0, swagger_1.ApiOperation)({ summary: '하자현장엑셀 업로드 API' }),
-    __param(0, (0, common_1.Param)('idx')),
-    __param(1, (0, common_1.UploadedFile)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], DefectPlaceController.prototype, "uploadExcel", null);
 DefectPlaceController = __decorate([
     (0, common_1.Controller)('defect-place'),
     (0, swagger_1.ApiTags)('하자현장 API'),

@@ -17,13 +17,15 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
 const common_utils_1 = require("../common/common.utils");
+const defect_service_1 = require("../defect/defect.service");
 const paginate_1 = require("../paginate");
 const typeorm_2 = require("typeorm");
 const constants_1 = require("./constants");
 const place_entity_1 = require("./entities/place.entity");
 let PlaceService = class PlaceService {
-    constructor(placeRepository) {
+    constructor(placeRepository, defectService) {
         this.placeRepository = placeRepository;
+        this.defectService = defectService;
     }
     getPrivateColumn() {
         return constants_1.placeConstant.privateColumn;
@@ -37,12 +39,8 @@ let PlaceService = class PlaceService {
         ;
     }
     async findAll(options) {
-        const status_arr = [];
-        for (const key in constants_1.placeConstant.status) {
-            if (key != 'delete') {
-                status_arr.push(constants_1.placeConstant.status[key]);
-            }
-        }
+        const exception_status = [constants_1.placeConstant.status.delete];
+        const status_arr = await this.getStatus(exception_status);
         const { take, page } = options;
         const [results, total] = await this.placeRepository.findAndCount({
             order: { place_createdAt: 'DESC' },
@@ -54,6 +52,20 @@ let PlaceService = class PlaceService {
             results,
             total,
         });
+    }
+    async findAllDefect(options) {
+        const places = await this.findAll(options);
+        const place_idxs = (0, lodash_1.map)(places.results, (obj) => {
+            return obj.place_idx;
+        });
+        const dft_place_cnt = (0, lodash_1.keyBy)(await this.defectService.findAllPlace(place_idxs), (o) => {
+            return o.dft_place_idx;
+        });
+        places.results = (0, lodash_1.map)(places.results, (obj) => {
+            obj['place_defect_cnt'] = dft_place_cnt[obj.place_idx].defect_cnt;
+            return obj;
+        });
+        return places;
     }
     async findOne(idx) {
         if (!idx) {
@@ -114,11 +126,21 @@ let PlaceService = class PlaceService {
         const place = await this.placeRepository.create(Object.assign({}, addPrefixPlaceDto));
         return await this.placeRepository.save(place);
     }
+    async getStatus(exceptionStatus) {
+        const status_arr = [];
+        for (const key in constants_1.placeConstant.status) {
+            if (!exceptionStatus.includes(constants_1.placeConstant.status[key])) {
+                status_arr.push(constants_1.placeConstant.status[key]);
+            }
+        }
+        return status_arr;
+    }
 };
 PlaceService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(place_entity_1.PlaceEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        defect_service_1.DefectService])
 ], PlaceService);
 exports.PlaceService = PlaceService;
 //# sourceMappingURL=place.service.js.map

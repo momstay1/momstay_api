@@ -3,7 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.commonUtils = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const lodash_1 = require("lodash");
+const constants_1 = require("../users/constants");
 exports.commonUtils = {
+    getConstants: (str) => {
+        let constants;
+        switch (str) {
+            case 'user':
+                constants = constants_1.usersConstant;
+                break;
+        }
+        return constants;
+    },
     getPrefix: (str) => {
         return str.split('_')[0];
     },

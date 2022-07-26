@@ -130,6 +130,16 @@ let BoardContentsService = class BoardContentsService {
         }
         return bc;
     }
+    async findBdBcIndex(bd_idx, bc_idx) {
+        const bc = await this.bcRepository.findOne({
+            where: { bc_bd_idx: bd_idx, bc_idx: bc_idx },
+            relations: ['user', 'board', 'bscats', 'admin']
+        });
+        if (!bc) {
+            throw new common_1.NotFoundException('존재하지 않는 게시글 입니다.');
+        }
+        return bc;
+    }
     async update(userInfo, bc_idx, updateBoardContentDto) {
         const board = await this.boardsService.findBoard({ bd_idx: updateBoardContentDto.bd_idx });
         const bc = await this.findIndex(bc_idx);

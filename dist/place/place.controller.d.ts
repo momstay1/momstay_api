@@ -11,6 +11,11 @@ export declare class PlaceController {
         total: number;
         pageTotal: number;
     }>;
+    findAllDefect(take: number, page: number): Promise<{
+        results: any[][];
+        total: number;
+        pageTotal: number;
+    }>;
     findOne(idx: string): Promise<any[]>;
     statusUpdate(idxs: [], status: string): Promise<void>;
     update(idx: string, updatePlaceDto: UpdatePlaceDto): Promise<any[]>;

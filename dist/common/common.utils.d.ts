@@ -1,5 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 export declare const commonUtils: {
+    getConstants: (str: string) => any;
     getPrefix: (str: string) => string;
     addPrefix: (prefix: string, array: any) => any;
     removePrefix: (str: string) => string;

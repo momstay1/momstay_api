@@ -25,6 +25,7 @@ export declare class BoardContentsService {
     findNoticeCategoryAll(bd_idx: string, category: string): Promise<BoardContentsEntity[]>;
     findOne(bc_idx: number): Promise<BoardContentsEntity>;
     findIndex(idx: number): Promise<BoardContentsEntity>;
+    findBdBcIndex(bd_idx: number, bc_idx: number): Promise<BoardContentsEntity>;
     update(userInfo: any, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
     adminFindCategoryAll(idx: any, category: string, options: PaginationOptions): Promise<{
         bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];

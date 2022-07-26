@@ -22,6 +22,7 @@ __decorate([
 ], CreatePlaceDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '타입' }),
     __metadata("design:type", String)
 ], CreatePlaceDto.prototype, "type", void 0);

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersEntity = void 0;
 const board_content_entity_1 = require("../../board-contents/entities/board-content.entity");
 const common_bcrypt_1 = require("../../common/common.bcrypt");
+const defect_entity_1 = require("../../defect/entities/defect.entity");
 const group_entity_1 = require("../../groups/entities/group.entity");
 const typeorm_1 = require("typeorm");
 let UsersEntity = class UsersEntity {
@@ -62,7 +63,7 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "user_memo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 60 }),
+    (0, typeorm_1.Column)({ length: 60, default: '' }),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "user_signupVerifyToken", void 0);
 __decorate([
@@ -73,6 +74,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => board_content_entity_1.BoardContentsEntity, (bc) => bc.user),
     __metadata("design:type", void 0)
 ], UsersEntity.prototype, "board_contents", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => defect_entity_1.DefectEntity, (dft) => dft.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "defect", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => group_entity_1.GroupsEntity, (group) => group.grp_users, {
         onDelete: 'NO ACTION',

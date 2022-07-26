@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefectController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const lodash_1 = require("lodash");
+const common_utils_1 = require("../common/common.utils");
+const role_decorator_1 = require("../common/decorator/role.decorator");
 const defect_service_1 = require("./defect.service");
 const create_defect_dto_1 = require("./dto/create-defect.dto");
 const update_defect_dto_1 = require("./dto/update-defect.dto");
@@ -22,11 +25,22 @@ let DefectController = class DefectController {
     constructor(defectService) {
         this.defectService = defectService;
     }
+    sanitizeDefect(data) {
+        return common_utils_1.commonUtils.sanitizeEntity(data, this.defectService.getPrivateColumn());
+    }
+    ;
     create(createDefectDto) {
         return this.defectService.create(createDefectDto);
     }
-    findAll() {
-        return this.defectService.findAll();
+    async findAll(place, take, page, order, sort, search) {
+        const { results, total, pageTotal } = await this.defectService.findAll(place, { take, page }, { order, sort }, search);
+        return {
+            results: (0, lodash_1.map)(results, (obj) => {
+                return this.sanitizeDefect(obj);
+            }),
+            total,
+            pageTotal
+        };
     }
     findOne(id) {
         return this.defectService.findOne(+id);
@@ -47,9 +61,18 @@ __decorate([
 ], DefectController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_현장 하자관리 리스트 API' }),
+    __param(0, (0, common_1.Query)('place')),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('order')),
+    __param(4, (0, common_1.Query)('sort')),
+    __param(5, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Number, Number, Number, String, String, Array]),
+    __metadata("design:returntype", Promise)
 ], DefectController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),

@@ -13,6 +13,7 @@ export declare class UsersEntity {
     user_signupVerifyToken: string;
     user_place_idx: number;
     board_contents: undefined;
+    defect: undefined;
     user_group: GroupsEntity;
     user_createdAt: Date;
     user_updatedAt: Date;

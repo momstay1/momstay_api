@@ -44,6 +44,16 @@ let PlaceController = class PlaceController {
             pageTotal
         };
     }
+    async findAllDefect(take, page) {
+        const { results, total, pageTotal } = await this.placeService.findAllDefect({ take, page });
+        return {
+            results: (0, lodash_1.map)(results, (obj) => {
+                return this.sanitizePlace(obj);
+            }),
+            total,
+            pageTotal
+        };
+    }
     async findOne(idx) {
         const place = await this.placeService.findOne(+idx);
         return this.sanitizePlace(place);
@@ -81,6 +91,17 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number]),
     __metadata("design:returntype", Promise)
 ], PlaceController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('/defect'),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_현장별 하자관리 리스트 API' }),
+    __param(0, (0, common_1.Query)('take')),
+    __param(1, (0, common_1.Query)('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:returntype", Promise)
+], PlaceController.prototype, "findAllDefect", null);
 __decorate([
     (0, common_1.Get)(':idx'),
     (0, role_decorator_1.Auth)(['root', 'admin', 'basic']),
@@ -130,6 +151,13 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '현장삭제 API' }),
     (0, common_1.HttpCode)(204),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                idxs: { example: [] }
+            }
+        }
+    }),
     __param(0, (0, common_1.Body)('idxs')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array]),

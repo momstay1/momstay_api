@@ -46,7 +46,7 @@ let AdminBoardContentsController = class AdminBoardContentsController {
         return { bcats, results: data, total, pageTotal };
     }
     async findOne(bd_idx, bc_idx) {
-        const bc = await this.boardContentsService.findIndex(bc_idx);
+        const bc = await this.boardContentsService.findBdBcIndex(bd_idx, bc_idx);
         return this.sanitizeBoardContent(bc);
     }
     async update(user, bc_idx, updateBoardContentDto) {

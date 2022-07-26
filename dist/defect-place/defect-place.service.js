@@ -22,6 +22,7 @@ const typeorm_2 = require("typeorm");
 const constants_1 = require("./constants");
 const defect_place_entity_1 = require("./entities/defect-place.entity");
 const XLSX = require("xlsx");
+const path = require("path");
 let DefectPlaceService = class DefectPlaceService {
     constructor(dfpRepository, placeService, connection) {
         this.dfpRepository = dfpRepository;
@@ -106,11 +107,9 @@ let DefectPlaceService = class DefectPlaceService {
         });
     }
     async sampleExcel(res) {
-        const wb = XLSX.utils.book_new();
-        const newWorksheet = XLSX.utils.json_to_sheet(constants_1.dfpConstant.sampleExcel);
-        XLSX.utils.book_append_sheet(wb, newWorksheet, '하자등록샘플');
-        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-        res.end(Buffer.from(wbout, 'base64'));
+        const filename = 'defect-place.xlsx';
+        const filepath = path.join(__dirname, '..', '..', 'data', 'sample', filename);
+        res.download(filepath, filename);
     }
 };
 DefectPlaceService = __decorate([

@@ -10,12 +10,21 @@ exports.DefectModule = void 0;
 const common_1 = require("@nestjs/common");
 const defect_service_1 = require("./defect.service");
 const defect_controller_1 = require("./defect.controller");
+const common_service_1 = require("../common/common.service");
+const defect_entity_1 = require("./entities/defect.entity");
+const typeorm_1 = require("@nestjs/typeorm");
+const users_module_1 = require("../users/users.module");
 let DefectModule = class DefectModule {
 };
 DefectModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([defect_entity_1.DefectEntity]),
+            users_module_1.UsersModule
+        ],
         controllers: [defect_controller_1.DefectController],
-        providers: [defect_service_1.DefectService]
+        providers: [defect_service_1.DefectService, common_service_1.CommonService],
+        exports: [defect_service_1.DefectService],
     })
 ], DefectModule);
 exports.DefectModule = DefectModule;
