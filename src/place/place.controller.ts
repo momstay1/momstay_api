@@ -94,6 +94,13 @@ export class PlaceController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '현장삭제 API' })
   @HttpCode(204)
+  @ApiBody({
+    schema: {
+      properties: {
+        idxs: { example: [] }
+      }
+    }
+  })
   async remove(@Body('idxs') idxs: []) {
     await this.placeService.removes(idxs);
   }

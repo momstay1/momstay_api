@@ -9,6 +9,8 @@ import { CreateDefectPlaceDto } from './dto/create-defect-place.dto';
 import { UpdateDefectPlaceDto } from './dto/update-defect-place.dto';
 import { DefectPlaceEntity } from './entities/defect-place.entity';
 import * as XLSX from 'xlsx';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class DefectPlaceService {
@@ -115,20 +117,51 @@ export class DefectPlaceService {
 
   }
 
+  // async sampleExcel(res) {
+  //   // workbook 생성
+  //   const wb = XLSX.utils.book_new();
+  //   // 시트 만들기
+  //   const newWorksheet = XLSX.utils.json_to_sheet(dfpConstant.sampleExcel);
+
+  //   // workbook에 새로만든 워크시트에 이름을 주고 붙임
+  //   XLSX.utils.book_append_sheet(wb, newWorksheet, '하자등록샘플');
+
+  //   // const wbOptions = { bookType: 'xlsx', type: 'base64' };
+  //   // 파일을 생성(메모리에만 저장)
+  //   const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+  //   // 파일을 respons한다
+  //   res.end(Buffer.from(wbout, 'base64'));
+  // }
+
+  // async sampleExcel1(res) {
+  //   // workbook 생성
+  //   const wb = XLSX.utils.book_new();
+  //   // 시트 만들기
+  //   const newWorksheet = XLSX.utils.json_to_sheet(dfpConstant.sampleExcel);
+
+  //   // workbook에 새로만든 워크시트에 이름을 주고 붙임
+  //   XLSX.utils.book_append_sheet(wb, newWorksheet, '하자등록샘플');
+
+  //   // const wbOptions = { bookType: 'xlsx', type: 'binary' };
+
+  //   const filename = '/data/sample/defect-place.xlsx';
+
+  //   // 파일을 로컬에 생성
+  //   XLSX.writeFile(wb, filename, { bookType: 'xlsx', type: 'binary' });
+
+  //   return true;
+
+  //   // 파일을 생성(메모리에만 저장)
+  //   // const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+  //   // 파일을 respons한다
+  //   // res.end(Buffer.from(wbout, 'base64'));
+  // }
+
   async sampleExcel(res) {
-    // workbook 생성
-    const wb = XLSX.utils.book_new();
-    // 시트 만들기
-    const newWorksheet = XLSX.utils.json_to_sheet(dfpConstant.sampleExcel);
-
-    // workbook에 새로만든 워크시트에 이름을 주고 붙임
-    XLSX.utils.book_append_sheet(wb, newWorksheet, '하자등록샘플');
-
-    // const wbOptions = { bookType: 'xlsx', type: 'base64' };
-    // 파일을 생성(메모리에만 저장)
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-
-    // 파일을 respons한다
-    res.end(Buffer.from(wbout, 'base64'));
+    const filename = 'defect-place.xlsx';
+    const filepath = path.join(__dirname, '..', '..', 'data', 'sample', filename);
+    res.download(filepath, filename);
   }
 }

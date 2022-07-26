@@ -46,7 +46,7 @@ export class UsersEntity {
   @Column({ type: 'text' })
   user_memo: string;
 
-  @Column({ length: 60 })
+  @Column({ length: 60, default: '' })
   user_signupVerifyToken: string;
 
   @Column()
