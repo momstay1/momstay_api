@@ -1,5 +1,6 @@
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
+import { DefectEntity } from 'src/defect/entities/defect.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 import {
   BeforeInsert,
@@ -54,6 +55,9 @@ export class UsersEntity {
 
   @OneToMany(() => BoardContentsEntity, (bc) => bc.user)
   board_contents: undefined;
+
+  @OneToMany(() => DefectEntity, (dft) => dft.user)
+  defect: undefined;
 
   @ManyToOne(() => GroupsEntity, (group) => group.grp_users, {
     onDelete: 'NO ACTION',

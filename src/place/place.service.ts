@@ -1,7 +1,8 @@
 import { Injectable, NotAcceptableException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _, { get } from 'lodash';
+import _, { get, keyBy, map } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
+import { DefectService } from 'src/defect/defect.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { In, Repository } from 'typeorm';
 import { placeConstant } from './constants';
@@ -13,6 +14,7 @@ import { PlaceEntity } from './entities/place.entity';
 export class PlaceService {
   constructor(
     @InjectRepository(PlaceEntity) private placeRepository: Repository<PlaceEntity>,
+    private readonly defectService: DefectService,
   ) { }
 
   getPrivateColumn(): string[] {
@@ -29,12 +31,8 @@ export class PlaceService {
   }
 
   async findAll(options: PaginationOptions) {
-    const status_arr: number[] = [];
-    for (const key in placeConstant.status) {
-      if (key != 'delete') {
-        status_arr.push(placeConstant.status[key]);
-      }
-    }
+    const exception_status = [placeConstant.status.delete];
+    const status_arr = await this.getStatus(exception_status);
 
     const { take, page } = options;
     const [results, total] = await this.placeRepository.findAndCount({
@@ -48,6 +46,31 @@ export class PlaceService {
       results,
       total,
     })
+  }
+
+  async findAllDefect(options: PaginationOptions) {
+    // 현장 목록 가져오기
+    const places = await this.findAll(options);
+
+    // 현장 idx 추출
+    const place_idxs = map(places.results, (obj) => {
+      return obj.place_idx;
+    });
+
+    // 현장별 하자건수 가져오기
+    const dft_place_cnt = keyBy(
+      await this.defectService.findAllPlace(place_idxs),
+      (o) => {
+        return o.dft_place_idx;
+      }
+    );
+
+    places.results = map(places.results, (obj) => {
+      obj['place_defect_cnt'] = dft_place_cnt[obj.place_idx].defect_cnt;
+      return obj;
+    });
+
+    return places;
   }
 
   async findOne(idx: number) {
@@ -123,5 +146,16 @@ export class PlaceService {
         : placeConstant.default.type;
     const place = await this.placeRepository.create({ ...addPrefixPlaceDto });
     return await this.placeRepository.save(place);
+  }
+
+  private async getStatus(exceptionStatus: Array<Number>) {
+    const status_arr: number[] = [];
+    for (const key in placeConstant.status) {
+      if (!exceptionStatus.includes(placeConstant.status[key])) {
+        status_arr.push(placeConstant.status[key]);
+      }
+    }
+
+    return status_arr;
   }
 }
