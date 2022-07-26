@@ -149,6 +149,17 @@ export class BoardContentsService {
     return bc;
   }
 
+  async findBdBcIndex(bd_idx: number, bc_idx: number) {
+    const bc = await this.bcRepository.findOne({
+      where: { bc_bd_idx: bd_idx, bc_idx: bc_idx },
+      relations: ['user', 'board', 'bscats', 'admin']
+    });
+    if (!bc) {
+      throw new NotFoundException('존재하지 않는 게시글 입니다.');
+    }
+    return bc;
+  }
+
   async update(userInfo, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto) {
     // 게시판 정보 가져오기
     const board = await this.boardsService.findBoard({ bd_idx: updateBoardContentDto.bd_idx });

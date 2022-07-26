@@ -48,6 +48,26 @@ export class PlaceController {
     };
   }
 
+  // 현장별 하자관리 리스트
+  @Get('/defect')
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '관리자_현장별 하자관리 리스트 API' })
+  async findAllDefect(@Query('take') take: number, @Query('page') page: number) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.placeService.findAllDefect({ take, page });
+    return {
+      results: map(results, (obj) => {
+        return this.sanitizePlace(obj);
+      }),
+      total,
+      pageTotal
+    };
+  }
+
   // 현장 상세
   @Get(':idx')
   @Auth(['root', 'admin', 'basic'])
@@ -94,6 +114,13 @@ export class PlaceController {
   @ApiBearerAuth()
   @ApiOperation({ summary: '현장삭제 API' })
   @HttpCode(204)
+  @ApiBody({
+    schema: {
+      properties: {
+        idxs: { example: [] }
+      }
+    }
+  })
   async remove(@Body('idxs') idxs: []) {
     await this.placeService.removes(idxs);
   }

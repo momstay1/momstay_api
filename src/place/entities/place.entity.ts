@@ -30,4 +30,7 @@ export class PlaceEntity {
 
   @OneToMany(() => DefectPlaceEntity, (dfp) => dfp.place)
   defect_place: undefined;
+
+  @OneToMany(() => DefectEntity, (dft) => dft.place)
+  defect: undefined;
 }

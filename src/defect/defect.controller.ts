@@ -1,5 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { map } from 'lodash';
+import { commonUtils } from 'src/common/common.utils';
+import { Auth } from 'src/common/decorator/role.decorator';
 import { DefectService } from './defect.service';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
@@ -9,14 +12,39 @@ import { UpdateDefectDto } from './dto/update-defect.dto';
 export class DefectController {
   constructor(private readonly defectService: DefectService) { }
 
+  sanitizeDefect(data) {
+    return commonUtils.sanitizeEntity(data, this.defectService.getPrivateColumn());
+  };
+
   @Post()
   create(@Body() createDefectDto: CreateDefectDto) {
     return this.defectService.create(createDefectDto);
   }
 
   @Get()
-  findAll() {
-    return this.defectService.findAll();
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '관리자_현장 하자관리 리스트 API' })
+  async findAll(
+    @Query('place') place: number,
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('order') order: string,
+    @Query('sort') sort: string,
+    @Query('search') search: string[],
+  ) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.defectService.findAll(place, { take, page }, { order, sort }, search);
+    return {
+      results: map(results, (obj) => {
+        return this.sanitizeDefect(obj);
+      }),
+      total,
+      pageTotal
+    };
   }
 
   @Get(':id')

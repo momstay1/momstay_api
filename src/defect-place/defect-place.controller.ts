@@ -7,6 +7,7 @@ import { Auth } from 'src/common/decorator/role.decorator';
 import { DefectPlaceService } from './defect-place.service';
 import { CreateDefectPlaceDto } from './dto/create-defect-place.dto';
 import { UpdateDefectPlaceDto } from './dto/update-defect-place.dto';
+import * as path from 'path';
 
 @Controller('defect-place')
 @ApiTags('하자현장 API')
@@ -23,8 +24,18 @@ export class DefectPlaceController {
   @ApiOperation({ summary: '관리자_하자현장등록 API' })
   @ApiBody({ type: CreateDefectPlaceDto })
   async create(@Body() createDefectPlaceDto: CreateDefectPlaceDto) {
-    const dfp = this.defectPlaceService.create(createDefectPlaceDto);
-    return this.sanitizeDefectPlace(dfp);
+    const dfp = await this.defectPlaceService.create(createDefectPlaceDto);
+    return await this.sanitizeDefectPlace(dfp);
+  }
+
+  // 엑셀로 등록하는 기능
+  @Post("excel/:idx")
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('excel'))
+  @ApiOperation({ summary: '하자현장엑셀 업로드 API' })
+  async uploadExcel(@Param('idx') idx: string, @UploadedFile() excel) {
+    return await this.defectPlaceService.uploadExcel(idx, excel);
   }
 
   @Get()
@@ -54,6 +65,8 @@ export class DefectPlaceController {
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @Header('Content-Disposition', 'attachment; filename=defect_place_sample.xlsx')
   async sampleExcel(@Res() res) {
+    // await this.defectPlaceService.sampleExcel(res);
+    // return await this.defectPlaceService.sampleExcel1(res);
     await this.defectPlaceService.sampleExcel(res);
   }
 
@@ -84,15 +97,5 @@ export class DefectPlaceController {
   @HttpCode(204)
   async remove(@Body('idxs') idxs: []) {
     return await this.defectPlaceService.removes(idxs);
-  }
-
-  // 엑셀로 등록하는 기능
-  @Post("excel/:idx")
-  @Auth(['root', 'admin'])
-  @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('excel'))
-  @ApiOperation({ summary: '하자현장엑셀 업로드 API' })
-  async uploadExcel(@Param('idx') idx: string, @UploadedFile() excel) {
-    return await this.defectPlaceService.uploadExcel(idx, excel);
   }
 }
