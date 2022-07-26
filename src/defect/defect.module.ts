@@ -4,10 +4,12 @@ import { DefectController } from './defect.controller';
 import { CommonService } from 'src/common/common.service';
 import { DefectEntity } from './entities/defect.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DefectEntity]),
+    UsersModule
   ],
   controllers: [DefectController],
   providers: [DefectService, CommonService],

@@ -29,7 +29,7 @@ export class DefectEntity {
   dft_replacement_sheet: string;
 
   @Column()
-  dft_shooting_day: Date;
+  dft_shooting_day: string;
 
   @CreateDateColumn()
   dft_createdAt: Date;

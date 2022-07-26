@@ -1,8 +1,18 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { isArray, isObject } from "lodash";
+import { isObject } from "lodash";
+import { usersConstant } from "src/users/constants";
 
 export const commonUtils = {
+  getConstants: (str: string): any => {
+    let constants;
+    switch (str) {
+      case 'user':
+        constants = usersConstant
+        break;
+    }
+    return constants;
+  },
   getPrefix: (str: string): string => {
     return str.split('_')[0];
   },
