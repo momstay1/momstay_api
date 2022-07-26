@@ -89,7 +89,7 @@ export class AdminBoardContentsController {
   @ApiOperation({ summary: '관리자 게시글 상세 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
   async findOne(@Param('bd_idx') bd_idx: number, @Param('bc_idx') bc_idx: number) {
-    const bc = await this.boardContentsService.findIndex(bc_idx);
+    const bc = await this.boardContentsService.findBdBcIndex(bd_idx, bc_idx);
     return this.sanitizeBoardContent(bc);
   }
 
