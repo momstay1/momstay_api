@@ -42,13 +42,18 @@ export class DefectService {
     // 정렬 설정
     const order = {};
     if (alignment['order'] && alignment['sort']) {
-      order[dftConstant.prefix + '_' + alignment['order']] = alignment['sort'].toUpperCase();
+      if (alignment['order'] == 'filename') {
+        for (let i = 1; i <= 3; i++) {
+          order[dftConstant.prefix + '_sort' + i] = alignment['sort'].toUpperCase();
+        }
+      } else {
+        order[dftConstant.prefix + '_' + alignment['order']] = alignment['sort'].toUpperCase();
+      }
     }
     order['dft_createdAt'] = 'DESC';
 
     // 조건 설정
     const where = {};
-    console.log(search);
     if (search) {
       search = isArray(search) ? search : [search];
       map(search, (obj) => {

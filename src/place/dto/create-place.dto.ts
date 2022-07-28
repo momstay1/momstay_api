@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreatePlaceDto {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ description: '상태' })
-  readonly status: string;
+  readonly status: number;
 
   @IsString()
   @IsOptional()
