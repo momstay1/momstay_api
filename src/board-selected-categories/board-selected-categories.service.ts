@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardCategoriesService } from 'src/board-categories/board-categories.service';
 import { Repository } from 'typeorm';
@@ -28,6 +28,9 @@ export class BoardSelectedCategoriesService {
   }
 
   async removes(idxs) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
     await this.bscatsRepository.createQueryBuilder()
       .delete()
       .where(" bscat_idx IN (:idxs)", { idxs: idxs })

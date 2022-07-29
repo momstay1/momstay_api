@@ -94,6 +94,9 @@ export class UsersService {
   }
 
   async removes(user_ids) {
+    if (user_ids.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
       .set({ user_status: Number(usersConstant.status.delete) })

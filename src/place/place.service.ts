@@ -110,6 +110,9 @@ export class PlaceService {
   }
 
   async removes(idxs: []) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
     await this.placeRepository.createQueryBuilder()
       .update(PlaceEntity)
       .set({ place_status: placeConstant.status.delete })
