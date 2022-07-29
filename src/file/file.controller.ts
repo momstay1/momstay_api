@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 
 @Controller('file')
@@ -18,6 +18,19 @@ export class FileController {
   @Post('upload')
   async uploadImg(@UploadedFiles() files: Array<Express.Multer.File>) {
     return await this.fileService.uploadImg(files);
+    // return this.fileService.create(createFileDto);
+  }
+
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'dft_origin_img', maxCount: 10 },
+    { name: 'dft_info_img', maxCount: 10 },
+  ], multerOptions()))
+  @Post('upload1')
+  async uploadImg1(@UploadedFiles() files: Array<Express.Multer.File>) {
+    console.log({ files });
+    console.log(files['dft_origin_img']);
+    console.log(files['dft_info_img']);
+    return true;
     // return this.fileService.create(createFileDto);
   }
 

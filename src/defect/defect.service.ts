@@ -3,9 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { get, isArray, map } from 'lodash';
 import { AlignmentOptions } from 'src/alignment';
 import { commonUtils } from 'src/common/common.utils';
+import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { UsersService } from 'src/users/users.service';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { dftConstant } from './constants';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
@@ -16,6 +17,7 @@ export class DefectService {
   constructor(
     @InjectRepository(DefectEntity) private defectRepository: Repository<DefectEntity>,
     private readonly usersService: UsersService,
+    private readonly fileService: FileService,
   ) { }
 
   getPrivateColumn(): string[] {
@@ -26,8 +28,15 @@ export class DefectService {
     ];
   }
 
-  create(createDefectDto: CreateDefectDto) {
-    return 'This action adds a new defect';
+  async create(user, createDefectDto: CreateDefectDto, files) {
+    const addPrefixcreateDefectDto = commonUtils.addPrefix(dftConstant.prefix, createDefectDto);
+    addPrefixcreateDefectDto.place = addPrefixcreateDefectDto.dft_place_idx;
+    addPrefixcreateDefectDto.user = await this.usersService.findOne(user.user_id);
+
+    const dft = await this.defectRepository.create({ ...addPrefixcreateDefectDto });
+    await this.defectRepository.save(dft);
+    const file_info = await this.fileService.fileInfoInsert(files, dft['dft_idx']);
+    return { dft, file_info };
   }
 
   async findAll(

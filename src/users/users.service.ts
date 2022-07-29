@@ -53,7 +53,7 @@ export class UsersService {
 
   async findOne(id: string): Promise<UsersEntity | undefined> {
     if (!id) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('잘못된 정보 입니다.');
     }
     const user = await this.usersRepository.findOne({
       where: { user_id: id },

@@ -31,7 +31,7 @@ const storage = (): multer.StorageEngine => {
       cb(null, folder_name);
     },
     filename(req, file, cb) {
-      console.log(req.route);
+      // console.log(req.route);
       const file_name = uuidRandom(file);
       console.log('filename', { file_name });
       cb(null, file_name);
@@ -40,9 +40,9 @@ const storage = (): multer.StorageEngine => {
 };
 
 const fileFilter = (req, file, cb) => {
-  console.log('fileFilter');
-  console.log(req.route);
-  console.log({ file });
+  // console.log('fileFilter');
+  // console.log(req.route);
+  // console.log({ file });
   // api route에 따른 확장자 제한 기능
   // 업로드 실패
   // cb(null, false)

@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { map } from 'lodash';
+import { GetUser } from 'src/auth/getuser.decorator';
+import { multerOptions } from 'src/common/common.file';
 import { commonUtils } from 'src/common/common.utils';
 import { Auth } from 'src/common/decorator/role.decorator';
+import { UsersEntity } from 'src/users/entities/user.entity';
 import { DefectService } from './defect.service';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
@@ -17,8 +21,19 @@ export class DefectController {
   };
 
   @Post()
-  create(@Body() createDefectDto: CreateDefectDto) {
-    return this.defectService.create(createDefectDto);
+  @Auth(['root', 'admin', 'basic'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '하자 등록 API' })
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'dft_origin_img', maxCount: 10 },
+    { name: 'dft_info_img', maxCount: 10 },
+  ], multerOptions()))
+  async create(
+    @GetUser() user: UsersEntity,
+    @Body() createDefectDto: CreateDefectDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.defectService.create(user, createDefectDto, files);
   }
 
   @Get()
