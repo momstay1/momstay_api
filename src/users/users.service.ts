@@ -53,7 +53,7 @@ export class UsersService {
 
   async findOne(id: string): Promise<UsersEntity | undefined> {
     if (!id) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('잘못된 정보 입니다.');
     }
     const user = await this.usersRepository.findOne({
       where: { user_id: id },
@@ -94,6 +94,9 @@ export class UsersService {
   }
 
   async removes(user_ids) {
+    if (user_ids.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
       .set({ user_status: Number(usersConstant.status.delete) })

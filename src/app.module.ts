@@ -17,6 +17,7 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
 import { PlaceModule } from './place/place.module';
 import { DefectModule } from './defect/defect.module';
 import { DefectPlaceModule } from './defect-place/defect-place.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { DefectPlaceModule } from './defect-place/defect-place.module';
     PlaceModule,
     DefectModule,
     DefectPlaceModule,
+    FileModule,
   ],
   providers: [CommonService],
 })

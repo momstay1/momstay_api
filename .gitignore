@@ -1,6 +1,8 @@
 # compiled output
 # /dist
 /node_modules
+/data/files
+/data/zip
 
 # Logs
 logs

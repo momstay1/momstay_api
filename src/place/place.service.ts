@@ -59,7 +59,7 @@ export class PlaceService {
 
     // 현장별 하자건수 가져오기
     const dft_place_cnt = keyBy(
-      await this.defectService.findAllPlace(place_idxs),
+      await this.defectService.findAllPlaceCount(place_idxs),
       (o) => {
         return o.dft_place_idx;
       }
@@ -110,6 +110,9 @@ export class PlaceService {
   }
 
   async removes(idxs: []) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
     await this.placeRepository.createQueryBuilder()
       .update(PlaceEntity)
       .set({ place_status: placeConstant.status.delete })
