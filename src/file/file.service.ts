@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { keyBy } from 'lodash';
 import * as path from 'path';
@@ -6,7 +6,11 @@ import { In, Repository } from 'typeorm';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileEntity } from './entities/file.entity';
+import * as zl from 'zip-lib';
+import { commonContants } from 'src/common/common.constants';
+import * as fs from 'fs';
 
+const img_url = '/file/img/';
 @Injectable()
 export class FileService {
   constructor(
@@ -25,8 +29,20 @@ export class FileService {
     return `This action returns all file`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} file`;
+  async findOne(name: string) {
+    // return `This action returns a #${id} file`;
+    const file = await this.fileRepository.findOne({
+      where: {
+        file_raw_name: name
+      }
+    });
+    if (!file) {
+      throw new NotFoundException('존재하지 않는 파일 입니다.');
+    }
+    if (file.file_is_img == '0') {
+      throw new UnsupportedMediaTypeException('이미지 파일이 아닙니다.');
+    }
+    return file;
   }
 
   async findCategory(category: string[], foreign_idx: string) {
@@ -43,6 +59,52 @@ export class FileService {
     });
 
     return result;
+  }
+
+  async findAllPlace(type: string, dft_idxs: number[]) {
+    const file_category = [];
+    if (type == 'all') {
+      file_category.push('dft_origin_img', 'dft_info_img');
+    } else {
+      file_category.push('dft_' + type + '_img');
+    }
+    const files = await this.fileRepository.find({
+      where: {
+        file_category: In(file_category),
+        file_foreign_idx: In(dft_idxs),
+      }
+    });
+
+    const zip = new zl.Zip();
+    for (const key in files) {
+      // 이미지 압축시 암호화된 파일명 origin 이름으로 수정 후 새파일 생성 후 압축
+      const change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
+      fs.rename(files[key].file_full_path, change_file_name, (rename_err) => {
+        fs.writeFile(change_file_name, '', 'utf-8', (write_err) => {
+        });
+      });
+      zip.addFile(change_file_name);
+    }
+    const zip_file_name = `${type}.zip`;
+    const zip_file_path = path.join(commonContants.zip_upload_path, zip_file_name);
+    await zip.archive(zip_file_path);
+
+    for (const key in files) {
+      // 위에서 origin 이름으로 만든 새 파일 제거
+      const change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
+      fs.exists(change_file_name, (exists) => {
+        if (!exists) {
+          console.log("삭제할 파일이 존재하지 않습니다.");
+        } else {
+          fs.unlink(change_file_name, (unlink_error) => {
+            console.log({ unlink_error });
+          });
+        }
+      });
+    }
+
+    return { file_name: zip_file_name, file_path: zip_file_path };
+
   }
 
   update(id: number, updateFileDto: UpdateFileDto) {
@@ -63,6 +125,7 @@ export class FileService {
     for (const i in files) {
       file_category.push(i); // 저장 후 조회할 파일 카테고리 정보
       for (const j in files[i]) {
+        const raw_name = files[i][j].filename.split('.')[0];
         files_data.push({
           file_category: i,
           file_foreign_idx: foreign_idx,
@@ -71,9 +134,9 @@ export class FileService {
           file_path: files[i][j].destination,
           file_full_path: files[i][j].path,
           file_html_path: '',
-          file_html_pull_path: '',
+          file_html_full_path: img_url + raw_name,
           file_html_thumb_path: '',
-          file_raw_name: files[i][j].filename.split('.')[0],
+          file_raw_name: raw_name,
           file_orig_name: files[i][j].originalname,
           file_client_name: files[i][j].originalname,
           file_ext: path.extname(files[i][j].originalname),

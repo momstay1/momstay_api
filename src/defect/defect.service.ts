@@ -96,7 +96,7 @@ export class DefectService {
     })
   }
 
-  async findAllPlace(place_idx: Array<Number>) {
+  async findAllPlaceCount(place_idx: Array<Number>) {
     const defect = await this.defectRepository.createQueryBuilder()
       .select('COUNT(dft_place_idx)', 'defect_cnt')
       .addSelect('dft_place_idx')
@@ -106,6 +106,18 @@ export class DefectService {
       .getRawMany()
 
     return defect;
+  }
+
+  async findAllPlaceIdxs(place_idx: Array<Number>) {
+    const defects = await this.defectRepository.createQueryBuilder()
+      .select('*')
+      .where('dft_place_idx IN (:place_idx)', { place_idx: place_idx })
+      .orderBy('dft_createdAt', 'DESC')
+      .getRawMany()
+    const dft_idxs = map(defects, (o) => {
+      return o.dft_idx;
+    });
+    return dft_idxs;
   }
 
   findOne(id: number) {

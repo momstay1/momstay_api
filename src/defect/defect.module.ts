@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { DefectService } from './defect.service';
 import { DefectController } from './defect.controller';
 import { CommonService } from 'src/common/common.service';
@@ -9,9 +9,9 @@ import { FileModule } from 'src/file/file.module';
 
 @Module({
   imports: [
+    forwardRef(() => FileModule),
     TypeOrmModule.forFeature([DefectEntity]),
     UsersModule,
-    FileModule
   ],
   controllers: [DefectController],
   providers: [DefectService, CommonService],

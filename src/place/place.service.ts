@@ -59,7 +59,7 @@ export class PlaceService {
 
     // 현장별 하자건수 가져오기
     const dft_place_cnt = keyBy(
-      await this.defectService.findAllPlace(place_idxs),
+      await this.defectService.findAllPlaceCount(place_idxs),
       (o) => {
         return o.dft_place_idx;
       }

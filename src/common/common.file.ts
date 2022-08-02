@@ -5,18 +5,19 @@ import * as fs from "fs";
 import * as moment from "moment";
 import { extname } from "path";
 import { v4 as uuid } from 'uuid';
+import { commonContants } from "./common.constants";
 
 const createFolder = (folder: string) => {
   console.log('createFolder', { folder });
   try {
-    fs.mkdirSync(path.join(__dirname, '..', '..', 'data', 'files')); //폴더를 만드는 명령어
+    fs.mkdirSync(commonContants.upload_path); //폴더를 만드는 명령어
   } catch (error) {
     console.log('The folder already exists...');
   }
 
   try {
     console.log(`Create a ${folder} uploads folder...`);
-    fs.mkdirSync(path.join(__dirname, '..', '..', 'data', `files/${folder}`)); //폴더 생성
+    fs.mkdirSync(path.join(commonContants.upload_path, `${folder}`)); //폴더 생성
   } catch (error) {
     console.log(`The ${folder} folder already exists...`);
   }
@@ -27,7 +28,7 @@ const storage = (): multer.StorageEngine => {
     destination(req, file, cb) {
       const folder = moment().format('YYYY-MM');
       createFolder(folder);
-      const folder_name = path.join(__dirname, '..', '..', 'data', 'files', folder);
+      const folder_name = path.join(commonContants.upload_path, folder);
       cb(null, folder_name);
     },
     filename(req, file, cb) {

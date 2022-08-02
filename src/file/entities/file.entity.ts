@@ -20,7 +20,7 @@ export class FileEntity {
   @Column({ default: '' })
   file_html_path: string;
   @Column({ default: '' })
-  file_html_pull_path: string;
+  file_html_full_path: string;
   @Column({ default: '' })
   file_html_thumb_path: string;
   @Column({ default: '' })
