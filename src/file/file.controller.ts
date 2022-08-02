@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, Res, StreamableFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFiles,
+  Res
+} from '@nestjs/common';
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -6,13 +17,11 @@ import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-expres
 import { multerOptions } from 'src/common/common.file';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
-import { DefectService } from 'src/defect/defect.service';
 
 @Controller('file')
 export class FileController {
   constructor(
     private readonly fileService: FileService,
-    private readonly defectService: DefectService,
   ) { }
 
   @Post()
@@ -65,8 +74,8 @@ export class FileController {
     description: 'all(전체)|origin(원본)|info(정보표시된)',
   })
   async downloadsFile(@Param('type') type: string, @Param('place_idx') place_idx: string, @Res() res) {
-    const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
-    const zip = await this.fileService.findAllPlace(type, dft_idxs);
+    // const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
+    const zip = await this.fileService.findAllPlace(type, +place_idx);
     res.set({
       'Content-Type': 'application/json',
       'Content-Disposition': 'attachment; filename="' + zip.file_name + '"',

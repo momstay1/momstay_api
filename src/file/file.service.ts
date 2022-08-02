@@ -1,13 +1,20 @@
-import { Injectable, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnsupportedMediaTypeException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { keyBy } from 'lodash';
-import * as path from 'path';
 import { In, Repository } from 'typeorm';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileEntity } from './entities/file.entity';
-import * as zl from 'zip-lib';
 import { commonContants } from 'src/common/common.constants';
+import { DefectService } from 'src/defect/defect.service';
+import * as path from 'path';
+import * as zl from 'zip-lib';
 import * as fs from 'fs';
 
 const img_url = '/file/img/';
@@ -15,6 +22,8 @@ const img_url = '/file/img/';
 export class FileService {
   constructor(
     @InjectRepository(FileEntity) private fileRepository: Repository<FileEntity>,
+    @Inject(forwardRef(() => DefectService))
+    private readonly defectService: DefectService,
   ) { }
 
   create(createFileDto: CreateFileDto) {
@@ -61,7 +70,9 @@ export class FileService {
     return result;
   }
 
-  async findAllPlace(type: string, dft_idxs: number[]) {
+  async findAllPlace(type: string, place_idx: number) {
+    const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
+
     const file_category = [];
     if (type == 'all') {
       file_category.push('dft_origin_img', 'dft_info_img');

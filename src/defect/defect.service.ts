@@ -11,10 +11,10 @@ import { dftConstant } from './constants';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
 import { DefectEntity } from './entities/defect.entity';
-import * as XLSX from 'xlsx';
-import * as path from 'path';
 import { PlaceService } from 'src/place/place.service';
 import { commonContants } from 'src/common/common.constants';
+import * as XLSX from 'xlsx';
+import * as path from 'path';
 import * as moment from 'moment';
 
 @Injectable()
