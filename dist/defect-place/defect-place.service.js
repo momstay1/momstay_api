@@ -74,6 +74,9 @@ let DefectPlaceService = class DefectPlaceService {
         return `This action removes a #${id} defectPlace`;
     }
     async removes(idxs) {
+        if (idxs.length <= 0) {
+            throw new common_1.NotFoundException('삭제할 정보가 없습니다.');
+        }
         await this.dfpRepository.createQueryBuilder()
             .delete()
             .where(" dfp_idx IN (:idxs)", { idxs: idxs })

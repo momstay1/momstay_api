@@ -15,10 +15,10 @@ const class_validator_1 = require("class-validator");
 class CreatePlaceDto {
 }
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({ description: '상태' }),
-    __metadata("design:type", String)
+    __metadata("design:type", Number)
 ], CreatePlaceDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),

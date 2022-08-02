@@ -58,7 +58,7 @@ let UsersService = class UsersService {
     }
     async findOne(id) {
         if (!id) {
-            throw new common_1.NotFoundException('존재하지 않는 아이디 입니다.');
+            throw new common_1.NotFoundException('잘못된 정보 입니다.');
         }
         const user = await this.usersRepository.findOne({
             where: { user_id: id },
@@ -94,6 +94,9 @@ let UsersService = class UsersService {
         await this.usersRepository.save(user);
     }
     async removes(user_ids) {
+        if (user_ids.length <= 0) {
+            throw new common_1.NotFoundException('삭제할 정보가 없습니다.');
+        }
         await this.usersRepository.createQueryBuilder()
             .update(user_entity_1.UsersEntity)
             .set({ user_status: Number(constants_1.usersConstant.status.delete) })

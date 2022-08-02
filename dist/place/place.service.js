@@ -58,7 +58,7 @@ let PlaceService = class PlaceService {
         const place_idxs = (0, lodash_1.map)(places.results, (obj) => {
             return obj.place_idx;
         });
-        const dft_place_cnt = (0, lodash_1.keyBy)(await this.defectService.findAllPlace(place_idxs), (o) => {
+        const dft_place_cnt = (0, lodash_1.keyBy)(await this.defectService.findAllPlaceCount(place_idxs), (o) => {
             return o.dft_place_idx;
         });
         places.results = (0, lodash_1.map)(places.results, (obj) => {
@@ -97,6 +97,9 @@ let PlaceService = class PlaceService {
         await this.placeRepository.save(place);
     }
     async removes(idxs) {
+        if (idxs.length <= 0) {
+            throw new common_1.NotFoundException('삭제할 정보가 없습니다.');
+        }
         await this.placeRepository.createQueryBuilder()
             .update(place_entity_1.PlaceEntity)
             .set({ place_status: constants_1.placeConstant.status.delete })

@@ -14,13 +14,17 @@ const common_service_1 = require("../common/common.service");
 const defect_entity_1 = require("./entities/defect.entity");
 const typeorm_1 = require("@nestjs/typeorm");
 const users_module_1 = require("../users/users.module");
+const file_module_1 = require("../file/file.module");
+const place_module_1 = require("../place/place.module");
 let DefectModule = class DefectModule {
 };
 DefectModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([defect_entity_1.DefectEntity]),
-            users_module_1.UsersModule
+            users_module_1.UsersModule,
+            (0, common_1.forwardRef)(() => file_module_1.FileModule),
+            (0, common_1.forwardRef)(() => place_module_1.PlaceModule),
         ],
         controllers: [defect_controller_1.DefectController],
         providers: [defect_service_1.DefectService, common_service_1.CommonService],

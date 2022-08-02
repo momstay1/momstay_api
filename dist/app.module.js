@@ -26,6 +26,7 @@ const admin_users_module_1 = require("./admin-users/admin-users.module");
 const place_module_1 = require("./place/place.module");
 const defect_module_1 = require("./defect/defect.module");
 const defect_place_module_1 = require("./defect-place/defect-place.module");
+const file_module_1 = require("./file/file.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/users');
@@ -57,6 +58,7 @@ AppModule = __decorate([
             place_module_1.PlaceModule,
             defect_module_1.DefectModule,
             defect_place_module_1.DefectPlaceModule,
+            file_module_1.FileModule,
         ],
         providers: [common_service_1.CommonService],
     })

@@ -6,26 +6,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PlaceModule = void 0;
+exports.FileModule = void 0;
 const common_1 = require("@nestjs/common");
-const place_service_1 = require("./place.service");
-const place_controller_1 = require("./place.controller");
+const file_service_1 = require("./file.service");
+const file_controller_1 = require("./file.controller");
 const typeorm_1 = require("@nestjs/typeorm");
-const place_entity_1 = require("./entities/place.entity");
-const common_service_1 = require("../common/common.service");
+const file_entity_1 = require("./entities/file.entity");
 const defect_module_1 = require("../defect/defect.module");
-let PlaceModule = class PlaceModule {
+let FileModule = class FileModule {
 };
-PlaceModule = __decorate([
+FileModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([place_entity_1.PlaceEntity]),
             (0, common_1.forwardRef)(() => defect_module_1.DefectModule),
+            typeorm_1.TypeOrmModule.forFeature([file_entity_1.FileEntity]),
         ],
-        controllers: [place_controller_1.PlaceController],
-        providers: [place_service_1.PlaceService, common_service_1.CommonService],
-        exports: [place_service_1.PlaceService],
+        controllers: [file_controller_1.FileController],
+        providers: [file_service_1.FileService],
+        exports: [file_service_1.FileService],
     })
-], PlaceModule);
-exports.PlaceModule = PlaceModule;
-//# sourceMappingURL=place.module.js.map
+], FileModule);
+exports.FileModule = FileModule;
+//# sourceMappingURL=file.module.js.map

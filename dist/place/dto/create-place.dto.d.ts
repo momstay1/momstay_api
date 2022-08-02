@@ -1,5 +1,5 @@
 export declare class CreatePlaceDto {
-    readonly status: string;
+    readonly status: number;
     readonly type: string;
     readonly name: string;
     readonly addr: string;
