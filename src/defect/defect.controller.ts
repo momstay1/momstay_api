@@ -1,6 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseInterceptors,
+  UploadedFiles,
+  Res
+} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { createReadStream } from 'fs';
 import { map } from 'lodash';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { multerOptions } from 'src/common/common.file';
@@ -60,6 +73,18 @@ export class DefectController {
       total,
       pageTotal
     };
+  }
+
+  // 하자리스트 엑셀 다운로드
+  @Get("excel/:place_idx")
+  @ApiOperation({ summary: '하자리스트 엑셀 다운로드 API' })
+  async sampleExcel(@Param('place_idx') place_idx, @Res() res) {
+    const excel_file = await this.defectService.excel(place_idx);
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition': 'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':id')

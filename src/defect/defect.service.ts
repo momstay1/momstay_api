@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get, isArray, map } from 'lodash';
 import { AlignmentOptions } from 'src/alignment';
@@ -11,6 +11,11 @@ import { dftConstant } from './constants';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
 import { DefectEntity } from './entities/defect.entity';
+import * as XLSX from 'xlsx';
+import * as path from 'path';
+import { PlaceService } from 'src/place/place.service';
+import { commonContants } from 'src/common/common.constants';
+import * as moment from 'moment';
 
 @Injectable()
 export class DefectService {
@@ -18,6 +23,8 @@ export class DefectService {
     @InjectRepository(DefectEntity) private defectRepository: Repository<DefectEntity>,
     private readonly usersService: UsersService,
     private readonly fileService: FileService,
+    @Inject(forwardRef(() => PlaceService))
+    private readonly placeService: PlaceService,
   ) { }
 
   getPrivateColumn(): string[] {
@@ -118,6 +125,76 @@ export class DefectService {
       return o.dft_idx;
     });
     return dft_idxs;
+  }
+
+  async findAllPlace(place_idx) {
+    return await this.defectRepository.createQueryBuilder()
+      .select('*')
+      .where('dft_place_idx IN (:place_idx)', { place_idx: place_idx })
+      .orderBy('dft_createdAt', 'DESC')
+      .getRawMany();
+  }
+
+  async excel(place_idx) {
+    const defect = await this.findAllPlace(place_idx);
+    const place = await this.placeService.findOne(place_idx);
+
+    const array_data = [
+      [
+        '동',
+        '호수',
+        '위치',
+        '작업상태',
+        '하자유형',
+        '내용',
+        '작업방법',
+        '교체면적(m2)',
+        '교체면적(장)',
+        // '파일명', 
+        '등록일'
+      ]
+    ];
+    for (const key in defect) {
+      array_data.push([
+        get(defect[key], 'dft_sort1', ''),                              // 동
+        get(defect[key], 'dft_sort2', ''),                              // 호수
+        get(defect[key], 'dft_sort3', ''),                              // 위치
+        get(dftConstant.status, defect[key].dft_status, ''),            // 작업상태
+        get(dftConstant.type, defect[key].dft_type, ''),                // 하자유형
+        get(defect[key], 'dft_content', ''),                            // 내용
+        get(dftConstant.work_method, defect[key].dft_work_method, ''),  // 작업방법
+        get(defect[key], 'dft_replacement_square_meter', ''),           // 교체면적(m2)
+        get(defect[key], 'dft_replacement_sheet', ''),                  // 교체면적(장)
+        // '',                                                          // 파일명
+        moment(defect[key].dft_createdAt).format('YYYY-MM-DD hh:mm:ss'),// 등록일
+      ]);
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(array_data);
+    worksheet['!cols'] = [
+      { wpx: 45 }, // 동
+      { wpx: 45 }, // 호수
+      { wpx: 45 }, // 위치
+      { wpx: 70 }, // 작업상태
+      { wpx: 50 }, // 하자유형
+      { wpx: 400 }, // 내용
+      { wpx: 70 }, // 작업방법
+      { wpx: 70 }, // 교체면적(m2)
+      { wpx: 70 }, // 교체면적(장)
+      // { wpx: 200 }, // 파일명
+      { wpx: 120 }, // 등록일
+    ];
+
+    const file_name = 'defect_excel.xlsx';
+    const file_path = path.join(commonContants.defect_excel_path, file_name);
+    console.log({ file_name });
+    console.log({ file_path });
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, place.place_name);
+    XLSX.writeFile(workbook, file_path);
+
+    return { file_name: file_name, file_path: file_path };
   }
 
   findOne(id: number) {

@@ -6,12 +6,14 @@ import { DefectEntity } from './entities/defect.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { FileModule } from 'src/file/file.module';
+import { PlaceModule } from 'src/place/place.module';
 
 @Module({
   imports: [
-    forwardRef(() => FileModule),
     TypeOrmModule.forFeature([DefectEntity]),
     UsersModule,
+    forwardRef(() => FileModule),
+    forwardRef(() => PlaceModule),
   ],
   controllers: [DefectController],
   providers: [DefectService, CommonService],
