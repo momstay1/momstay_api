@@ -48,7 +48,7 @@ export class AdminUsersService {
     return user;
   }
 
-  async dashboardAdminCount(user) {
+  async count(user) {
     const group = await this.groupService.findOneName(user.user_group);
 
     return await this.adminRepository.count({

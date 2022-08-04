@@ -18,6 +18,7 @@ import { PlaceModule } from './place/place.module';
 import { DefectModule } from './defect/defect.module';
 import { DefectPlaceModule } from './defect-place/defect-place.module';
 import { FileModule } from './file/file.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { FileModule } from './file/file.module';
     DefectModule,
     DefectPlaceModule,
     FileModule,
+    DashboardModule,
   ],
   providers: [CommonService],
 })

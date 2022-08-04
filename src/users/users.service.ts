@@ -51,7 +51,7 @@ export class UsersService {
     })
   }
 
-  async dashboardUserCount() {
+  async count() {
     return await this.usersRepository.count({ where: { user_status: usersConstant.status.registration } });
   }
 
