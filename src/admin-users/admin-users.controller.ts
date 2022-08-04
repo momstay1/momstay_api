@@ -75,6 +75,22 @@ export class AdminUsersController {
     };
   }
 
+  // 관리자 대시보드 정보
+  @Get('dashboard')
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_대시보드 회원 정보 API' })
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: ProfileUserDto })
+  async getUsersDashboard(@GetUser() user: AdminUsersEntity) {
+    const user_cnt = await this.usersService.dashboardUserCount();
+    const admin_cnt = await this.adminUsersService.dashboardAdminCount(user);
+    return {
+      total_cnt: user_cnt + admin_cnt,
+      user_cnt: user_cnt,
+      admin_cnt: admin_cnt
+    };
+  }
+
   // 관리자 정보 가져오기
   @Get('profile')
   @Auth(['root', 'admin'])
