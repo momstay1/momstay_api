@@ -17,7 +17,8 @@ export declare class DefectController {
         pageTotal: number;
     }>;
     sampleExcel(place_idx: any, res: any): Promise<void>;
-    findOne(id: string): string;
+    findOne(dft_idx: string): Promise<import("./entities/defect.entity").DefectEntity>;
     update(id: string, updateDefectDto: UpdateDefectDto): string;
     remove(id: string): string;
+    statusUpdate(idxs: []): Promise<void>;
 }

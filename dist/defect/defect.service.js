@@ -178,14 +178,27 @@ let DefectService = class DefectService {
         XLSX.writeFile(workbook, file_path);
         return { file_name: file_name, file_path: file_path };
     }
-    findOne(id) {
-        return `This action returns a #${id} defect`;
+    async findOne(dft_idx) {
+        const dft = await this.defectRepository.findOne({
+            where: { dft_idx: dft_idx },
+            relations: ['user'],
+        });
+        return dft;
     }
     update(id, updateDefectDto) {
         return `This action updates a #${id} defect`;
     }
     remove(id) {
         return `This action removes a #${id} defect`;
+    }
+    async removes(idxs) {
+        if (idxs.length <= 0) {
+            throw new common_1.NotFoundException('삭제할 정보가 없습니다.');
+        }
+        await this.defectRepository.createQueryBuilder()
+            .delete()
+            .where(" dft_idx IN (:idxs)", { idxs: idxs })
+            .execute();
     }
 };
 DefectService = __decorate([

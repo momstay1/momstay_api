@@ -11,6 +11,7 @@ export declare class UsersService {
     constructor(usersRepository: Repository<UsersEntity>, groupService: GroupsService);
     create(createUserDto: CreateUserDto): Promise<UsersEntity | UnprocessableEntityException>;
     findAll(options: PaginationOptions): Promise<Pagination<UsersEntity>>;
+    count(): Promise<number>;
     findOne(id: string): Promise<UsersEntity | undefined>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<UsersEntity>;
     remove(id: string): Promise<void>;

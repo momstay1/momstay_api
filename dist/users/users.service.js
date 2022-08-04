@@ -56,6 +56,9 @@ let UsersService = class UsersService {
             total,
         });
     }
+    async count() {
+        return await this.usersRepository.count({ where: { user_status: constants_1.usersConstant.status.registration } });
+    }
     async findOne(id) {
         if (!id) {
             throw new common_1.NotFoundException('잘못된 정보 입니다.');

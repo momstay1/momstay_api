@@ -38,11 +38,11 @@ let FileController = class FileController {
         return true;
     }
     async getFile(name, res) {
-        const file = await this.fileService.findOne(name);
+        const file = await this.fileService.findOneName(name);
         return res.sendFile(file.file_full_path);
     }
     async downloadFile(name, res) {
-        const file = await this.fileService.findOne(name);
+        const file = await this.fileService.findOneName(name);
         res.set({
             'Content-Type': 'application/json',
             'Content-Disposition': 'attachment; filename="' + file.file_orig_name + '"',
@@ -56,6 +56,9 @@ let FileController = class FileController {
             'Content-Disposition': 'attachment; filename="' + zip.file_name + '"',
         });
         (0, fs_1.createReadStream)(zip.file_path).pipe(res);
+    }
+    async getFileInfo(category, idx) {
+        return await this.fileService.findOne(category, idx);
     }
     update(id, updateFileDto) {
         return this.fileService.update(+id, updateFileDto);
@@ -122,6 +125,15 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "downloadsFile", null);
+__decorate([
+    (0, common_1.Get)(':category/:idx'),
+    (0, swagger_1.ApiOperation)({ summary: '파일 정보 API' }),
+    __param(0, (0, common_1.Param)('category')),
+    __param(1, (0, common_1.Param)('idx')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "getFileInfo", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),

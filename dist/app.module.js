@@ -27,6 +27,8 @@ const place_module_1 = require("./place/place.module");
 const defect_module_1 = require("./defect/defect.module");
 const defect_place_module_1 = require("./defect-place/defect-place.module");
 const file_module_1 = require("./file/file.module");
+const dashboard_module_1 = require("./dashboard/dashboard.module");
+const settings_module_1 = require("./settings/settings.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/users');
@@ -59,6 +61,8 @@ AppModule = __decorate([
             defect_module_1.DefectModule,
             defect_place_module_1.DefectPlaceModule,
             file_module_1.FileModule,
+            dashboard_module_1.DashboardModule,
+            settings_module_1.SettingsModule,
         ],
         providers: [common_service_1.CommonService],
     })

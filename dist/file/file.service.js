@@ -38,7 +38,7 @@ let FileService = class FileService {
     findAll() {
         return `This action returns all file`;
     }
-    async findOne(name) {
+    async findOneName(name) {
         const file = await this.fileRepository.findOne({
             where: {
                 file_raw_name: name
@@ -51,6 +51,18 @@ let FileService = class FileService {
             throw new common_1.UnsupportedMediaTypeException('이미지 파일이 아닙니다.');
         }
         return file;
+    }
+    async findOne(category, idx) {
+        const files = await this.fileRepository.find({
+            where: {
+                file_category: (0, typeorm_2.Like)('%' + category + '%'),
+                file_foreign_idx: idx
+            }
+        });
+        if (files.length <= 0) {
+            throw new common_1.NotFoundException('존재하지 않는 파일 입니다.');
+        }
+        return (0, lodash_1.keyBy)(files, (o) => o.file_category);
     }
     async findCategory(category, foreign_idx) {
         const files = await this.fileRepository.find({

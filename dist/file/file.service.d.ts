@@ -1,4 +1,5 @@
 /// <reference types="multer" />
+/// <reference types="lodash" />
 import { Repository } from 'typeorm';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -11,7 +12,8 @@ export declare class FileService {
     create(createFileDto: CreateFileDto): string;
     uploadImg(files: Express.Multer.File[]): Promise<void>;
     findAll(): string;
-    findOne(name: string): Promise<FileEntity>;
+    findOneName(name: string): Promise<FileEntity>;
+    findOne(category: string, idx: string): Promise<import("lodash").Dictionary<FileEntity>>;
     findCategory(category: string[], foreign_idx: string): Promise<{}>;
     findAllPlace(type: string, place_idx: number): Promise<{
         file_name: string;

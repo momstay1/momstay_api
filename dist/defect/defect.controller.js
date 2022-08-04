@@ -55,14 +55,17 @@ let DefectController = class DefectController {
         });
         (0, fs_1.createReadStream)(excel_file.file_path).pipe(res);
     }
-    findOne(id) {
-        return this.defectService.findOne(+id);
+    async findOne(dft_idx) {
+        return await this.defectService.findOne(+dft_idx);
     }
     update(id, updateDefectDto) {
         return this.defectService.update(+id, updateDefectDto);
     }
     remove(id) {
         return this.defectService.remove(+id);
+    }
+    async statusUpdate(idxs) {
+        await this.defectService.removes(idxs);
     }
 };
 __decorate([
@@ -108,11 +111,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DefectController.prototype, "sampleExcel", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(':dft_idx'),
+    __param(0, (0, common_1.Param)('dft_idx')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], DefectController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
@@ -129,6 +132,24 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], DefectController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Delete)(),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_하자 일괄 삭제 API' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                idxs: { example: [] }
+            }
+        }
+    }),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, common_1.Body)('idxs')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], DefectController.prototype, "statusUpdate", null);
 DefectController = __decorate([
     (0, common_1.Controller)('defect'),
     (0, swagger_1.ApiTags)('하자관리 API'),

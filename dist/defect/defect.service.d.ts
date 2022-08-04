@@ -26,7 +26,8 @@ export declare class DefectService {
         file_name: string;
         file_path: string;
     }>;
-    findOne(id: number): string;
+    findOne(dft_idx: number): Promise<DefectEntity>;
     update(id: number, updateDefectDto: UpdateDefectDto): string;
     remove(id: number): string;
+    removes(idxs: []): Promise<void>;
 }
