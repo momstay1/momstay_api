@@ -2,15 +2,17 @@ import { Injectable, NotFoundException, UnprocessableEntityException } from '@ne
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
+import { GroupsService } from 'src/groups/groups.service';
 import { usersConstant } from 'src/users/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { AdminUsersEntity } from './entities/admin-user.entity';
 
 @Injectable()
 export class AdminUsersService {
   constructor(
     @InjectRepository(AdminUsersEntity) private adminRepository: Repository<AdminUsersEntity>,
+    private readonly groupService: GroupsService,
   ) { }
 
   getPrivateColumn(): string[] {
@@ -44,6 +46,17 @@ export class AdminUsersService {
     }
 
     return user;
+  }
+
+  async count(user) {
+    const group = await this.groupService.findOneName(user.user_group);
+
+    return await this.adminRepository.count({
+      where: {
+        admin_status: usersConstant.status.registration,
+        admin_group: MoreThanOrEqual(group.grp_idx)
+      }
+    });
   }
 
   //관리자 존재 여부 체크

@@ -75,6 +75,7 @@ export class AdminUsersController {
     };
   }
 
+
   // 관리자 정보 가져오기
   @Get('profile')
   @Auth(['root', 'admin'])

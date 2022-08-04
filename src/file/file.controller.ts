@@ -8,7 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
-  Res
+  Res,
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
@@ -52,14 +52,14 @@ export class FileController {
   @Get('img/:name')
   @ApiOperation({ summary: '이미지 파일 API' })
   async getFile(@Param('name') name: string, @Res() res) {
-    const file = await this.fileService.findOne(name);
+    const file = await this.fileService.findOneName(name);
     return res.sendFile(file.file_full_path);
   }
 
   @Get('download/:name')
   @ApiOperation({ summary: '이미지 파일 다운로드 API' })
   async downloadFile(@Param('name') name: string, @Res() res) {
-    const file = await this.fileService.findOne(name);
+    const file = await this.fileService.findOneName(name);
     res.set({
       'Content-Type': 'application/json',
       'Content-Disposition': 'attachment; filename="' + file.file_orig_name + '"',
@@ -81,6 +81,15 @@ export class FileController {
       'Content-Disposition': 'attachment; filename="' + zip.file_name + '"',
     });
     createReadStream(zip.file_path).pipe(res);
+  }
+
+  @Get(':category/:idx')
+  @ApiOperation({ summary: '파일 정보 API' })
+  async getFileInfo(
+    @Param('category') category: string,
+    @Param('idx') idx: string
+  ) {
+    return await this.fileService.findOne(category, idx);
   }
 
   @Patch(':id')

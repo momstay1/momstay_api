@@ -51,6 +51,10 @@ export class UsersService {
     })
   }
 
+  async count() {
+    return await this.usersRepository.count({ where: { user_status: usersConstant.status.registration } });
+  }
+
   async findOne(id: string): Promise<UsersEntity | undefined> {
     if (!id) {
       throw new NotFoundException('잘못된 정보 입니다.');
