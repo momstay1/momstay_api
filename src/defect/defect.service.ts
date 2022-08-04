@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get, isArray, map } from 'lodash';
 import { AlignmentOptions } from 'src/alignment';
@@ -197,8 +197,13 @@ export class DefectService {
     return { file_name: file_name, file_path: file_path };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} defect`;
+  async findOne(dft_idx: number) {
+    const dft = await this.defectRepository.findOne({
+      where: { dft_idx: dft_idx },
+      relations: ['user'],
+    });
+
+    return dft;
   }
 
   update(id: number, updateDefectDto: UpdateDefectDto) {
@@ -207,5 +212,15 @@ export class DefectService {
 
   remove(id: number) {
     return `This action removes a #${id} defect`;
+  }
+
+  async removes(idxs: []) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
+    await this.defectRepository.createQueryBuilder()
+      .delete()
+      .where(" dft_idx IN (:idxs)", { idxs: idxs })
+      .execute()
   }
 }

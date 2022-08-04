@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { keyBy } from 'lodash';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileEntity } from './entities/file.entity';
@@ -38,7 +38,7 @@ export class FileService {
     return `This action returns all file`;
   }
 
-  async findOne(name: string) {
+  async findOneName(name: string) {
     // return `This action returns a #${id} file`;
     const file = await this.fileRepository.findOne({
       where: {
@@ -52,6 +52,19 @@ export class FileService {
       throw new UnsupportedMediaTypeException('이미지 파일이 아닙니다.');
     }
     return file;
+  }
+
+  async findOne(category: string, idx: string) {
+    const files = await this.fileRepository.find({
+      where: {
+        file_category: Like('%' + category + '%'),
+        file_foreign_idx: idx
+      }
+    });
+    if (files.length <= 0) {
+      throw new NotFoundException('존재하지 않는 파일 입니다.');
+    }
+    return keyBy(files, (o) => o.file_category);
   }
 
   async findCategory(category: string[], foreign_idx: string) {

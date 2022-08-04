@@ -9,10 +9,11 @@ import {
   Query,
   UseInterceptors,
   UploadedFiles,
-  Res
+  Res,
+  HttpCode
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { map } from 'lodash';
 import { GetUser } from 'src/auth/getuser.decorator';
@@ -87,9 +88,9 @@ export class DefectController {
     createReadStream(excel_file.file_path).pipe(res);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.defectService.findOne(+id);
+  @Get(':dft_idx')
+  async findOne(@Param('dft_idx') dft_idx: string) {
+    return await this.defectService.findOne(+dft_idx);
   }
 
   @Patch(':id')
@@ -100,5 +101,22 @@ export class DefectController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.defectService.remove(+id);
+  }
+
+  // 현장 상태 일괄 변경
+  @Delete()
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '관리자_하자 일괄 삭제 API' })
+  @ApiBody({
+    schema: {
+      properties: {
+        idxs: { example: [] }
+      }
+    }
+  })
+  @HttpCode(204)
+  async statusUpdate(@Body('idxs') idxs: []) {
+    await this.defectService.removes(idxs);
   }
 }
