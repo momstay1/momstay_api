@@ -75,6 +75,30 @@ export class AdminUsersController {
     };
   }
 
+  // 관리자 리스트 조회
+  @Get('admin')
+  @Auth(['root', 'admin'])
+  @ApiOperation({ summary: '관리자_관리자 리스트 API' })
+  @ApiBearerAuth()
+  async findAllAdmin(
+    @GetUser() user: AdminUsersEntity,
+    @Query('take') take: number,
+    @Query('page') page: number
+  ) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.adminUsersService.findAll(user, { take, page });
+    return {
+      results: map(results, (obj) => {
+        return this.sanitizeAdmin(obj);
+      }),
+      total,
+      pageTotal
+    };
+  }
+
 
   // 관리자 정보 가져오기
   @Get('profile')

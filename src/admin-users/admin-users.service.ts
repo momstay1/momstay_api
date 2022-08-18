@@ -3,9 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { GroupsService } from 'src/groups/groups.service';
+import { Pagination, PaginationOptions } from 'src/paginate';
 import { usersConstant } from 'src/users/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { AdminUsersEntity } from './entities/admin-user.entity';
 
 @Injectable()
@@ -30,6 +31,30 @@ export class AdminUsersService {
     }
     //회원 정보 저장
     return await this.saveAdmin(createUserDto);
+  }
+
+  async findAll(admin, options: PaginationOptions) {
+    // return await this.usersRepository.find();
+    const status_arr: number[] = [];
+    for (const key in usersConstant.status) {
+      if (key != 'delete') {
+        status_arr.push(usersConstant.status[key]);
+      }
+    }
+    const group = await this.groupService.findOneName(admin.user_group);
+
+    const { take, page } = options;
+    const [results, total] = await this.adminRepository.findAndCount({
+      order: { admin_createdAt: 'DESC' },
+      where: { admin_status: In(status_arr), admin_group: MoreThanOrEqual(group.grp_idx) },
+      relations: ['admin_group'],
+      take: take,
+      skip: take * (page - 1)
+    });
+    return new Pagination({
+      results,
+      total,
+    })
   }
 
   async findOne(id: string): Promise<AdminUsersEntity | undefined> {
