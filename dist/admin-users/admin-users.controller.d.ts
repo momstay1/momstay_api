@@ -19,6 +19,11 @@ export declare class AdminUsersController {
         total: number;
         pageTotal: number;
     }>;
+    findAllAdmin(user: AdminUsersEntity, take: number, page: number): Promise<{
+        results: any[][];
+        total: number;
+        pageTotal: number;
+    }>;
     getProfile(user: AdminUsersEntity): Promise<any[]>;
     findId(id: string): Promise<any[]>;
     update(id: string, updateUserDto: UpdateUserDto): Promise<any[]>;

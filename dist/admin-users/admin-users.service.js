@@ -18,6 +18,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
 const common_utils_1 = require("../common/common.utils");
 const groups_service_1 = require("../groups/groups.service");
+const paginate_1 = require("../paginate");
 const constants_1 = require("../users/constants");
 const typeorm_2 = require("typeorm");
 const admin_user_entity_1 = require("./entities/admin-user.entity");
@@ -38,6 +39,27 @@ let AdminUsersService = class AdminUsersService {
             throw new common_1.UnprocessableEntityException('아이디가 중복 됩니다.');
         }
         return await this.saveAdmin(createUserDto);
+    }
+    async findAll(admin, options) {
+        const status_arr = [];
+        for (const key in constants_1.usersConstant.status) {
+            if (key != 'delete') {
+                status_arr.push(constants_1.usersConstant.status[key]);
+            }
+        }
+        const group = await this.groupService.findOneName(admin.user_group);
+        const { take, page } = options;
+        const [results, total] = await this.adminRepository.findAndCount({
+            order: { admin_createdAt: 'DESC' },
+            where: { admin_status: (0, typeorm_2.In)(status_arr), admin_group: (0, typeorm_2.MoreThanOrEqual)(group.grp_idx) },
+            relations: ['admin_group'],
+            take: take,
+            skip: take * (page - 1)
+        });
+        return new paginate_1.Pagination({
+            results,
+            total,
+        });
     }
     async findOne(id) {
         if (!id) {

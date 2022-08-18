@@ -62,6 +62,16 @@ let AdminUsersController = class AdminUsersController {
             pageTotal
         };
     }
+    async findAllAdmin(user, take, page) {
+        const { results, total, pageTotal } = await this.adminUsersService.findAll(user, { take, page });
+        return {
+            results: (0, lodash_1.map)(results, (obj) => {
+                return this.sanitizeAdmin(obj);
+            }),
+            total,
+            pageTotal
+        };
+    }
     async getProfile(user) {
         const data = await this.adminUsersService.findOne((0, lodash_1.get)(user, 'user_id', ''));
         return this.sanitizeAdmin(data);
@@ -111,6 +121,18 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number]),
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('admin'),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_관리자 리스트 API' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [admin_user_entity_1.AdminUsersEntity, Number, Number]),
+    __metadata("design:returntype", Promise)
+], AdminUsersController.prototype, "findAllAdmin", null);
 __decorate([
     (0, common_1.Get)('profile'),
     (0, role_decorator_1.Auth)(['root', 'admin']),
