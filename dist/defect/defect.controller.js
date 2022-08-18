@@ -23,9 +23,11 @@ const common_file_1 = require("../common/common.file");
 const common_utils_1 = require("../common/common.utils");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const user_entity_1 = require("../users/entities/user.entity");
+const constants_1 = require("./constants");
 const defect_service_1 = require("./defect.service");
 const create_defect_dto_1 = require("./dto/create-defect.dto");
 const update_defect_dto_1 = require("./dto/update-defect.dto");
+const createDefectBody = constants_1.dftConstant.createDefectBody;
 let DefectController = class DefectController {
     constructor(defectService) {
         this.defectService = defectService;
@@ -77,6 +79,13 @@ __decorate([
         { name: 'dft_origin_img', maxCount: 10 },
         { name: 'dft_info_img', maxCount: 10 },
     ], (0, common_file_1.multerOptions)())),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: Object.assign({}, createDefectBody)
+        }
+    }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.UploadedFiles)()),

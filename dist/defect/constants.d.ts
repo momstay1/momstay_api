@@ -26,4 +26,60 @@ export declare const dftConstant: {
         care: string;
         replacement: string;
     };
+    createDefectBody: {
+        place_idx: {
+            type: string;
+            description: string;
+        };
+        sort1: {
+            type: string;
+            description: string;
+        };
+        sort2: {
+            type: string;
+            description: string;
+        };
+        sort3: {
+            type: string;
+            description: string;
+        };
+        status: {
+            type: string;
+            description: string;
+        };
+        type: {
+            type: string;
+            description: string;
+        };
+        content: {
+            type: string;
+            description: string;
+        };
+        work_method: {
+            type: string;
+            description: string;
+        };
+        replacement_square_meter: {
+            type: string;
+            description: string;
+        };
+        dft_replacement_sheet: {
+            type: string;
+            description: string;
+        };
+        shooting_day: {
+            type: string;
+            description: string;
+        };
+        dft_origin_img: {
+            type: string;
+            format: string;
+            description: string;
+        };
+        dft_info_img: {
+            type: string;
+            format: string;
+            description: string;
+        };
+    };
 };

@@ -28,6 +28,27 @@ exports.dftConstant = {
     work_method: {
         care: '손보기',
         replacement: '교체'
+    },
+    createDefectBody: {
+        place_idx: { type: 'string', description: '현장 idx' },
+        sort1: { type: 'string', description: '동' },
+        sort2: { type: 'string', description: '호수' },
+        sort3: { type: 'string', description: '위치' },
+        status: { type: 'string', description: '작업상태' },
+        type: { type: 'string', description: '하자유형' },
+        content: { type: 'string', description: '내용' },
+        work_method: { type: 'string', description: '작업방법' },
+        replacement_square_meter: { type: 'string', description: '교체면적(m)' },
+        dft_replacement_sheet: { type: 'string', description: '교체면적(장)' },
+        shooting_day: { type: 'string', description: '사진촬영일' },
+        dft_origin_img: {
+            type: 'string',
+            format: 'binary', description: '원본사진'
+        },
+        dft_info_img: {
+            type: 'string',
+            format: 'binary', description: '정뵤표시된 사진'
+        },
     }
 };
 //# sourceMappingURL=constants.js.map
