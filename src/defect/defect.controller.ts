@@ -13,7 +13,7 @@ import {
   HttpCode
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { map } from 'lodash';
 import { GetUser } from 'src/auth/getuser.decorator';
@@ -21,10 +21,12 @@ import { multerOptions } from 'src/common/common.file';
 import { commonUtils } from 'src/common/common.utils';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
+import { dftConstant } from './constants';
 import { DefectService } from './defect.service';
 import { CreateDefectDto } from './dto/create-defect.dto';
 import { UpdateDefectDto } from './dto/update-defect.dto';
 
+const createDefectBody = dftConstant.createDefectBody;
 @Controller('defect')
 @ApiTags('하자관리 API')
 export class DefectController {
@@ -42,6 +44,13 @@ export class DefectController {
     { name: 'dft_origin_img', maxCount: 10 },
     { name: 'dft_info_img', maxCount: 10 },
   ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { ...createDefectBody }
+    }
+  })
   async create(
     @GetUser() user: UsersEntity,
     @Body() createDefectDto: CreateDefectDto,
