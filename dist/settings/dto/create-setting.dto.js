@@ -15,16 +15,10 @@ const class_validator_1 = require("class-validator");
 class CreateSettingDto {
 }
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, swagger_1.ApiProperty)({ description: '설정 키값' }),
-    __metadata("design:type", String)
-], CreateSettingDto.prototype, "key", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsNotEmpty)(),
     (0, swagger_1.ApiProperty)({ description: '설정 값' }),
-    __metadata("design:type", String)
-], CreateSettingDto.prototype, "value", void 0);
+    __metadata("design:type", Array)
+], CreateSettingDto.prototype, "settings", void 0);
 exports.CreateSettingDto = CreateSettingDto;
 //# sourceMappingURL=create-setting.dto.js.map

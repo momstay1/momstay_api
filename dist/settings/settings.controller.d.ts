@@ -5,7 +5,7 @@ export declare class SettingsController {
     private readonly settingsService;
     constructor(settingsService: SettingsService);
     sanitizeSettings(data: any): any[];
-    create(createSettingDto: CreateSettingDto): Promise<any[]>;
+    create(createSettingDto: CreateSettingDto): Promise<CreateSettingDto>;
     findAll(): string;
     findOne(key: string): Promise<any[]>;
     update(id: string, updateSettingDto: UpdateSettingDto): string;

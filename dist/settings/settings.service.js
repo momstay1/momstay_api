@@ -16,7 +16,6 @@ exports.SettingsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
-const common_utils_1 = require("../common/common.utils");
 const typeorm_2 = require("typeorm");
 const constants_1 = require("./constants");
 const setting_entity_1 = require("./entities/setting.entity");
@@ -28,8 +27,11 @@ let SettingsService = class SettingsService {
         return constants_1.settingsConstant.privateColumn;
     }
     async create(createSettingDto) {
-        const addPrefixPlaceDto = common_utils_1.commonUtils.addPrefix(constants_1.settingsConstant.prefix, createSettingDto);
-        return await this.settingsRepository.save(addPrefixPlaceDto);
+        for (const index in createSettingDto.settings) {
+            const key = (0, lodash_1.keys)(createSettingDto.settings[index]);
+            await this.settingsRepository.save({ set_key: key[0], set_value: createSettingDto.settings[index][key[0]] });
+        }
+        return createSettingDto;
     }
     findAll() {
         return `This action returns all settings`;

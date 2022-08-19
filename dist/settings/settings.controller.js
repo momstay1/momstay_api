@@ -29,8 +29,7 @@ let SettingsController = class SettingsController {
     }
     ;
     async create(createSettingDto) {
-        const settings = await this.settingsService.create(createSettingDto);
-        return this.sanitizeSettings(settings);
+        return await this.settingsService.create(createSettingDto);
     }
     findAll() {
         return this.settingsService.findAll();
