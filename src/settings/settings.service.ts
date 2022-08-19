@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { keyBy } from 'lodash';
+import { get, keyBy, keys } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { Like, Repository } from 'typeorm';
 import { settingsConstant } from './constants';
@@ -19,8 +19,11 @@ export class SettingsService {
   }
 
   async create(createSettingDto: CreateSettingDto) {
-    const addPrefixPlaceDto = commonUtils.addPrefix(settingsConstant.prefix, createSettingDto);
-    return await this.settingsRepository.save(addPrefixPlaceDto);
+    for (const index in createSettingDto.settings) {
+      const key = keys(createSettingDto.settings[index]);
+      await this.settingsRepository.save({ set_key: key[0], set_value: createSettingDto.settings[index][key[0]] });
+    }
+    return createSettingDto;
   }
 
   findAll() {
