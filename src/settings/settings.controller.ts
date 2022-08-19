@@ -5,6 +5,7 @@ import { UpdateSettingDto } from './dto/update-setting.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { commonUtils } from 'src/common/common.utils';
+import { map } from 'lodash';
 
 @Controller('settings')
 @ApiTags('설정관련 API')
@@ -21,8 +22,7 @@ export class SettingsController {
   @ApiOperation({ summary: '관리자_환경설정 등록 API' })
   @ApiBody({ type: CreateSettingDto })
   async create(@Body() createSettingDto: CreateSettingDto) {
-    const settings = await this.settingsService.create(createSettingDto);
-    return this.sanitizeSettings(settings);
+    return await this.settingsService.create(createSettingDto);
   }
 
   @Get()
