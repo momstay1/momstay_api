@@ -64,9 +64,9 @@ export class PlaceService {
         return o.dft_place_idx;
       }
     );
-
+    console.log({ dft_place_cnt });
     places.results = map(places.results, (obj) => {
-      obj['place_defect_cnt'] = dft_place_cnt[obj.place_idx].defect_cnt;
+      obj['place_defect_cnt'] = get(dft_place_cnt, [obj.place_idx, 'defect_cnt'], 0);
       return obj;
     });
 
