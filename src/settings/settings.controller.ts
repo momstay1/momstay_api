@@ -31,7 +31,7 @@ export class SettingsController {
   }
 
   @Get(':key')
-  @Auth(['root', 'admin'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '관리자_환경설정 가져오기 API' })
   async findOne(@Param('key') key: string) {
