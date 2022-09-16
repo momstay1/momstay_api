@@ -1,7 +1,8 @@
 import { Injectable, NotAcceptableException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _, { get, keyBy, map } from 'lodash';
+import _, { filter, get, keyBy, map, mapValues, uniq } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
+import { DefectPlaceEntity } from 'src/defect-place/entities/defect-place.entity';
 import { DefectService } from 'src/defect/defect.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { In, Repository } from 'typeorm';
@@ -79,13 +80,40 @@ export class PlaceService {
     }
     const place = await this.placeRepository.findOne({
       where: { place_idx: idx },
-      // relations: ['user_group'],
+      relations: ['defect_place'],
     });
     if (!place) {
       throw new NotFoundException('존재하지 않는 현장 입니다.');
     }
 
+    const dftp = {};
+    if (get(place, 'defect_place')) {
+      const dfp = get(place, ['defect_place'], []);
+      for (const object of dfp) {
+        const sort1 = object.dfp_sort1.replace(/[^0-9]/g, "");
+        if (!get(dftp, [sort1], '')) {
+          dftp[sort1] = {};
+        }
+        dftp[sort1][object.dfp_idx] = { sort2: object.dfp_sort2, sort3: object.dfp_sort3 };
+      }
+    }
     return place;
+  }
+
+  async getDefectPlace(defect_place) {
+    const dftp = {};
+    if (defect_place) {
+      const dfp = defect_place;
+      for (const object of dfp) {
+        const sort1 = object.dfp_sort1.replace(/[^0-9]/g, "");
+        if (!get(dftp, [sort1], '')) {
+          dftp[sort1] = {};
+        }
+        dftp[sort1][object.dfp_idx] = { sort2: object.dfp_sort2, sort3: object.dfp_sort3 };
+      }
+    }
+
+    return dftp;
   }
 
   async update(idx: number, updatePlaceDto: UpdatePlaceDto) {
