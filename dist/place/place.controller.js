@@ -92,7 +92,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PlaceController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('/defect'),
+    (0, common_1.Get)('defect'),
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_현장별 하자관리 리스트 API' }),

@@ -64,7 +64,7 @@ __decorate([
 ], SettingsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':key'),
-    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_환경설정 가져오기 API' }),
     __param(0, (0, common_1.Param)('key')),

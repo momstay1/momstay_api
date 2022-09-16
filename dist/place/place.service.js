@@ -61,8 +61,9 @@ let PlaceService = class PlaceService {
         const dft_place_cnt = (0, lodash_1.keyBy)(await this.defectService.findAllPlaceCount(place_idxs), (o) => {
             return o.dft_place_idx;
         });
+        console.log({ dft_place_cnt });
         places.results = (0, lodash_1.map)(places.results, (obj) => {
-            obj['place_defect_cnt'] = dft_place_cnt[obj.place_idx].defect_cnt;
+            obj['place_defect_cnt'] = (0, lodash_1.get)(dft_place_cnt, [obj.place_idx, 'defect_cnt'], 0);
             return obj;
         });
         return places;

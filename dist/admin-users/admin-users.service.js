@@ -16,6 +16,7 @@ exports.AdminUsersService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
+const common_bcrypt_1 = require("../common/common.bcrypt");
 const common_utils_1 = require("../common/common.utils");
 const groups_service_1 = require("../groups/groups.service");
 const paginate_1 = require("../paginate");
@@ -74,6 +75,24 @@ let AdminUsersService = class AdminUsersService {
         }
         return user;
     }
+    async update(id, updateUserDto) {
+        const admin = await this.findOne(id);
+        let group_idx = updateUserDto.group;
+        if ((0, lodash_1.get)(updateUserDto, 'group') == "3") {
+            group_idx = "" + constants_1.usersConstant.admin.group_idx;
+        }
+        const group = await this.groupService.findOne(+group_idx);
+        admin.admin_name = updateUserDto.name;
+        admin.admin_status = +(0, lodash_1.get)(updateUserDto, 'status', constants_1.usersConstant.status.registration);
+        admin.admin_email = (0, lodash_1.get)(updateUserDto, 'email', '');
+        admin.admin_phone = (0, lodash_1.get)(updateUserDto, 'phone', '');
+        admin.admin_memo = (0, lodash_1.get)(updateUserDto, 'memo', '');
+        admin.admin_group = group;
+        if ((0, lodash_1.get)(updateUserDto, 'password')) {
+            admin.admin_password = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(updateUserDto, 'password'));
+        }
+        return await this.adminRepository.save(admin);
+    }
     async count(user) {
         const group = await this.groupService.findOneName(user.user_group);
         return await this.adminRepository.count({
@@ -82,6 +101,16 @@ let AdminUsersService = class AdminUsersService {
                 admin_group: (0, typeorm_2.MoreThanOrEqual)(group.grp_idx)
             }
         });
+    }
+    async removes(admin_ids) {
+        if (admin_ids.length <= 0) {
+            throw new common_1.NotFoundException('삭제할 정보가 없습니다.');
+        }
+        await this.adminRepository.createQueryBuilder()
+            .update()
+            .set({ admin_status: Number(constants_1.usersConstant.status.delete) })
+            .where(" admin_id IN (:admin_ids)", { admin_ids: admin_ids })
+            .execute();
     }
     async checkAdminExists(id) {
         return await this.adminRepository.findOne({ admin_id: id });

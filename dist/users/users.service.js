@@ -80,11 +80,11 @@ let UsersService = class UsersService {
         }
         const group = await this.groupService.findOne(Number(group_idx));
         user.user_name = updateUserDto.name;
-        user.user_status = Number((0, lodash_1.get)(updateUserDto, 'status', constants_1.usersConstant.status.registration));
+        user.user_status = +(0, lodash_1.get)(updateUserDto, 'status', constants_1.usersConstant.status.registration);
         user.user_email = (0, lodash_1.get)(updateUserDto, 'email', '');
         user.user_phone = (0, lodash_1.get)(updateUserDto, 'phone', '');
         user.user_memo = (0, lodash_1.get)(updateUserDto, 'memo', '');
-        user.user_place_idx = Number((0, lodash_1.get)(updateUserDto, 'place_idx', 0));
+        user.user_place_idx = +(0, lodash_1.get)(updateUserDto, 'place_idx', 0);
         user.user_group = group;
         if ((0, lodash_1.get)(updateUserDto, 'password')) {
             user.user_password = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(updateUserDto, 'password'));
@@ -111,7 +111,8 @@ let UsersService = class UsersService {
     }
     async saveUser(createUserDto) {
         const addPrefixUserDto = common_utils_1.commonUtils.addPrefix(constants_1.usersConstant.prefix, createUserDto);
-        addPrefixUserDto.user_group = (0, lodash_1.get)(createUserDto, 'group', constants_1.usersConstant.default.group_idx);
+        addPrefixUserDto.user_group = createUserDto.group ? createUserDto.group : constants_1.usersConstant.default.group_idx;
+        addPrefixUserDto.user_status = createUserDto.status ? +createUserDto.status : constants_1.usersConstant.status.registration;
         const user = await this.usersRepository.create(Object.assign({}, addPrefixUserDto));
         return await this.usersRepository.save(user);
     }

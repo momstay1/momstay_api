@@ -76,16 +76,33 @@ let AdminUsersController = class AdminUsersController {
         const data = await this.adminUsersService.findOne((0, lodash_1.get)(user, 'user_id', ''));
         return this.sanitizeAdmin(data);
     }
-    async findId(id) {
-        const data = await this.usersService.findOne(id);
-        return this.sanitizeUsers(data);
+    async findId(id, type) {
+        let data;
+        if (type == 'admin') {
+            data = this.sanitizeAdmin(await this.adminUsersService.findOne(id));
+        }
+        else {
+            data = this.sanitizeUsers(await this.usersService.findOne(id));
+        }
+        return data;
     }
-    async update(id, updateUserDto) {
-        const user = await this.usersService.update(id, updateUserDto);
-        return this.sanitizeUsers(user);
+    async update(id, updateUserDto, type) {
+        let user;
+        if (type == 'admin') {
+            user = this.sanitizeAdmin(await this.adminUsersService.update(id, updateUserDto));
+        }
+        else {
+            user = this.sanitizeUsers(await this.usersService.update(id, updateUserDto));
+        }
+        return user;
     }
-    async remove(user_ids) {
-        await this.usersService.removes(user_ids);
+    async remove(user_ids, type) {
+        if (type == 'admin') {
+            await this.adminUsersService.removes(user_ids);
+        }
+        else {
+            await this.usersService.removes(user_ids);
+        }
     }
 };
 __decorate([
@@ -150,8 +167,9 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원상세정보 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "findId", null);
 __decorate([
@@ -162,8 +180,9 @@ __decorate([
     (0, swagger_1.ApiBody)({ type: update_user_dto_1.UpdateUserDto }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto, String]),
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "update", null);
 __decorate([
@@ -173,8 +192,9 @@ __decorate([
     (0, swagger_1.ApiBody)({ type: delete_user_dto_1.DeleteUserDto }),
     (0, common_1.HttpCode)(204),
     __param(0, (0, common_1.Body)('user_ids')),
+    __param(1, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "remove", null);
 AdminUsersController = __decorate([
