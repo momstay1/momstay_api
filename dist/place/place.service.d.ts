@@ -13,6 +13,7 @@ export declare class PlaceService {
     findAll(options: PaginationOptions): Promise<Pagination<PlaceEntity>>;
     findAllDefect(options: PaginationOptions): Promise<Pagination<PlaceEntity>>;
     findOne(idx: number): Promise<PlaceEntity>;
+    getDefectPlace(defect_place: any): Promise<{}>;
     update(idx: number, updatePlaceDto: UpdatePlaceDto): Promise<PlaceEntity>;
     remove(idx: number): Promise<void>;
     removes(idxs: []): Promise<void>;

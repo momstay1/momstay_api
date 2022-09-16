@@ -74,11 +74,37 @@ let PlaceService = class PlaceService {
         }
         const place = await this.placeRepository.findOne({
             where: { place_idx: idx },
+            relations: ['defect_place'],
         });
         if (!place) {
             throw new common_1.NotFoundException('존재하지 않는 현장 입니다.');
         }
+        const dftp = {};
+        if ((0, lodash_1.get)(place, 'defect_place')) {
+            const dfp = (0, lodash_1.get)(place, ['defect_place'], []);
+            for (const object of dfp) {
+                const sort1 = object.dfp_sort1.replace(/[^0-9]/g, "");
+                if (!(0, lodash_1.get)(dftp, [sort1], '')) {
+                    dftp[sort1] = {};
+                }
+                dftp[sort1][object.dfp_idx] = { sort2: object.dfp_sort2, sort3: object.dfp_sort3 };
+            }
+        }
         return place;
+    }
+    async getDefectPlace(defect_place) {
+        const dftp = {};
+        if (defect_place) {
+            const dfp = defect_place;
+            for (const object of dfp) {
+                const sort1 = object.dfp_sort1.replace(/[^0-9]/g, "");
+                if (!(0, lodash_1.get)(dftp, [sort1], '')) {
+                    dftp[sort1] = {};
+                }
+                dftp[sort1][object.dfp_idx] = { sort2: object.dfp_sort2, sort3: object.dfp_sort3 };
+            }
+        }
+        return dftp;
     }
     async update(idx, updatePlaceDto) {
         const place = await this.findOne(idx);

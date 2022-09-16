@@ -16,7 +16,10 @@ export declare class PlaceController {
         total: number;
         pageTotal: number;
     }>;
-    findOne(idx: string): Promise<any[]>;
+    findOne(idx: string): Promise<{
+        place: any[];
+        dfp: {};
+    }>;
     statusUpdate(idxs: [], status: string): Promise<void>;
     update(idx: string, updatePlaceDto: UpdatePlaceDto): Promise<any[]>;
     remove(idxs: []): Promise<void>;

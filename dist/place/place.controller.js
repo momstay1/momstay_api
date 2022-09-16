@@ -56,7 +56,11 @@ let PlaceController = class PlaceController {
     }
     async findOne(idx) {
         const place = await this.placeService.findOne(+idx);
-        return this.sanitizePlace(place);
+        const dfp = await this.placeService.getDefectPlace((0, lodash_1.get)(place, ['defect_place'], {}));
+        return {
+            place: this.sanitizePlace(place),
+            dfp: dfp
+        };
     }
     async statusUpdate(idxs, status) {
         await this.placeService.statusUpdate(idxs, status);
