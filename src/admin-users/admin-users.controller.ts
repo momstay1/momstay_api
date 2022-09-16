@@ -116,9 +116,14 @@ export class AdminUsersController {
   @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_회원상세정보 API' })
   @ApiOkResponse({ type: ProfileUserDto })
-  async findId(@Param('id') id: string) {
-    const data = await this.usersService.findOne(id);
-    return this.sanitizeUsers(data);
+  async findId(@Param('id') id: string, @Query('type') type: string) {
+    let data;
+    if (type == 'admin') {
+      data = this.sanitizeAdmin(await this.adminUsersService.findOne(id));
+    } else {
+      data = this.sanitizeUsers(await this.usersService.findOne(id));
+    }
+    return data;
   }
 
   // 회원 수정
@@ -127,9 +132,14 @@ export class AdminUsersController {
   @ApiOperation({ summary: '관리자_회원정보수정 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   @ApiBody({ type: UpdateUserDto })
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.update(id, updateUserDto);
-    return this.sanitizeUsers(user);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Query('type') type: string) {
+    let user;
+    if (type == 'admin') {
+      user = this.sanitizeAdmin(await this.adminUsersService.update(id, updateUserDto));
+    } else {
+      user = this.sanitizeUsers(await this.usersService.update(id, updateUserDto));
+    }
+    return user;
   }
 
   // 회원 삭제
@@ -138,8 +148,12 @@ export class AdminUsersController {
   @ApiOperation({ summary: '관리자_회원정보삭제 API' })
   @ApiBody({ type: DeleteUserDto })
   @HttpCode(204)
-  async remove(@Body('user_ids') user_ids) {
-    await this.usersService.removes(user_ids);
+  async remove(@Body('user_ids') user_ids, @Query('type') type: string) {
+    if (type == 'admin') {
+      await this.adminUsersService.removes(user_ids);
+    } else {
+      await this.usersService.removes(user_ids);
+    }
   }
 
 }
