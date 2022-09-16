@@ -5,7 +5,7 @@ import { UpdatePlaceDto } from './dto/update-place.dto';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { commonUtils } from 'src/common/common.utils';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import { PlaceEntity } from './entities/place.entity';
 
 @Controller('place')
@@ -76,7 +76,11 @@ export class PlaceController {
   @ApiOkResponse({ type: PlaceEntity })
   async findOne(@Param('idx') idx: string) {
     const place = await this.placeService.findOne(+idx);
-    return this.sanitizePlace(place);
+    const dfp = await this.placeService.getDefectPlace(get(place, ['defect_place'], {}));
+    return {
+      place: this.sanitizePlace(place),
+      dfp: dfp
+    };
   }
 
   // 현장 상태 일괄 변경
