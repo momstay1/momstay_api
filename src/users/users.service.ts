@@ -79,11 +79,11 @@ export class UsersService {
     const group = await this.groupService.findOne(Number(group_idx));
 
     user.user_name = updateUserDto.name;
-    user.user_status = Number(get(updateUserDto, 'status', usersConstant.status.registration));
+    user.user_status = +get(updateUserDto, 'status', usersConstant.status.registration);
     user.user_email = get(updateUserDto, 'email', '');
     user.user_phone = get(updateUserDto, 'phone', '');
     user.user_memo = get(updateUserDto, 'memo', '');
-    user.user_place_idx = Number(get(updateUserDto, 'place_idx', 0));
+    user.user_place_idx = +get(updateUserDto, 'place_idx', 0);
     user.user_group = group;
     if (get(updateUserDto, 'password')) {
       user.user_password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
@@ -115,7 +115,8 @@ export class UsersService {
   //회원 정보 저장
   private async saveUser(createUserDto): Promise<any> {
     const addPrefixUserDto = commonUtils.addPrefix(usersConstant.prefix, createUserDto);
-    addPrefixUserDto.user_group = get(createUserDto, 'group', usersConstant.default.group_idx);
+    addPrefixUserDto.user_group = createUserDto.group ? createUserDto.group : usersConstant.default.group_idx;
+    addPrefixUserDto.user_status = createUserDto.status ? +createUserDto.status : usersConstant.status.registration;
     const user = await this.usersRepository.create({ ...addPrefixUserDto });
     return await this.usersRepository.save(user);
   }

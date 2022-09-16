@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
+import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
 import { GroupsService } from 'src/groups/groups.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { usersConstant } from 'src/users/constants';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { AdminUsersEntity } from './entities/admin-user.entity';
 
@@ -73,6 +75,26 @@ export class AdminUsersService {
     return user;
   }
 
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const admin = await this.findOne(id);
+    let group_idx = updateUserDto.group;
+    if (get(updateUserDto, 'group') == "3") {
+      group_idx = "" + usersConstant.admin.group_idx;
+    }
+    const group = await this.groupService.findOne(+group_idx);
+
+    admin.admin_name = updateUserDto.name;
+    admin.admin_status = +get(updateUserDto, 'status', usersConstant.status.registration);
+    admin.admin_email = get(updateUserDto, 'email', '');
+    admin.admin_phone = get(updateUserDto, 'phone', '');
+    admin.admin_memo = get(updateUserDto, 'memo', '');
+    admin.admin_group = group;
+    if (get(updateUserDto, 'password')) {
+      admin.admin_password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
+    }
+    return await this.adminRepository.save(admin);
+  }
+
   async count(user) {
     const group = await this.groupService.findOneName(user.user_group);
 
@@ -82,6 +104,17 @@ export class AdminUsersService {
         admin_group: MoreThanOrEqual(group.grp_idx)
       }
     });
+  }
+
+  async removes(admin_ids) {
+    if (admin_ids.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
+    await this.adminRepository.createQueryBuilder()
+      .update()
+      .set({ admin_status: Number(usersConstant.status.delete) })
+      .where(" admin_id IN (:admin_ids)", { admin_ids: admin_ids })
+      .execute()
   }
 
   //관리자 존재 여부 체크

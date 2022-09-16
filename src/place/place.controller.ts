@@ -49,7 +49,7 @@ export class PlaceController {
   }
 
   // 현장별 하자관리 리스트
-  @Get('/defect')
+  @Get('defect')
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '관리자_현장별 하자관리 리스트 API' })

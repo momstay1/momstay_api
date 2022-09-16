@@ -75,7 +75,11 @@ export class DefectService {
       map(search, (obj) => {
         if (obj) {
           const key_val = obj.split(':');
-          where[key_val[0]] = key_val[1];
+          if (key_val[1].indexOf(",") === -1) {
+            where[key_val[0]] = key_val[1];
+          } else {
+            where[key_val[0]] = key_val[1].split(",");
+          }
         }
       });
     }
@@ -87,11 +91,11 @@ export class DefectService {
         get(where, 'sort1', '') && qb.andWhere('dft_sort1 = :dft_sort1', { dft_sort1: get(where, 'sort1') });
         get(where, 'sort2', '') && qb.andWhere('dft_sort2 = :dft_sort2', { dft_sort2: get(where, 'sort2') });
         get(where, 'sort3', '') && qb.andWhere('dft_sort3 = :dft_sort3', { dft_sort3: get(where, 'sort3') });
-        get(where, 'status', '') && qb.andWhere('dft_status = :dft_status', { dft_status: get(where, 'status') });
+        get(where, 'status', '') && qb.andWhere('dft_status IN (:dft_status)', { dft_status: get(where, 'status') });
         get(where, 'type', '') && qb.andWhere('dft_type = :dft_type', { dft_type: get(where, 'type') });
         get(where, 'shooting_day_lte', '') && qb.andWhere('dft_shooting_day <= :dft_shooting_day_lte', { dft_shooting_day_lte: get(where, 'shooting_day_lte') });
         get(where, 'shooting_day_mte', '') && qb.andWhere('dft_shooting_day >= :dft_shooting_day_mte', { dft_shooting_day_mte: get(where, 'shooting_day_mte') });
-        get(where, 'name', '') && qb.andWhere('user_name = :user_name', { user_name: get(where, 'name') });
+        get(where, 'id', '') && qb.andWhere('user_id = :user_id', { user_id: get(where, 'id') });
       },
       relations: ['user'],
       take: take,
