@@ -69,5 +69,13 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: '사진촬영일' }),
     __metadata("design:type", String)
 ], CreateDefectDto.prototype, "shooting_day", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '원본 이미지' }),
+    __metadata("design:type", Object)
+], CreateDefectDto.prototype, "dft_origin_img", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: '정보 표시된 이미지' }),
+    __metadata("design:type", Object)
+], CreateDefectDto.prototype, "dft_info_img", void 0);
 exports.CreateDefectDto = CreateDefectDto;
 //# sourceMappingURL=create-defect.dto.js.map

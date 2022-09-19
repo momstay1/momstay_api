@@ -10,4 +10,6 @@ export declare class CreateDefectDto {
     readonly replacement_square_meter: string;
     readonly dft_replacement_sheet: string;
     readonly shooting_day: string;
+    readonly dft_origin_img: any;
+    readonly dft_info_img: any;
 }
