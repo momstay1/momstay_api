@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
 export class CreateDefectDto {
   @IsString()
@@ -28,9 +28,11 @@ export class CreateDefectDto {
   @ApiProperty({ description: '작업방법' })
   readonly work_method: string;
   @IsString()
+  @IsOptional()
   @ApiProperty({ description: '교체면적(m)' })
   readonly replacement_square_meter: string;
   @IsString()
+  @IsOptional()
   @ApiProperty({ description: '교체면적(장)' })
   readonly dft_replacement_sheet: string;
   @IsString()

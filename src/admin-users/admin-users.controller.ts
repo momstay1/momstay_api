@@ -112,7 +112,7 @@ export class AdminUsersController {
   }
 
   // 회원 정보 가져오기
-  @Get(':id')
+  @Get('admin/:id')
   @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_회원상세정보 API' })
   @ApiOkResponse({ type: ProfileUserDto })
@@ -127,7 +127,7 @@ export class AdminUsersController {
   }
 
   // 회원 수정
-  @Patch(':id')
+  @Patch('admin/:id')
   @Auth(['root', 'admin'])
   @ApiOperation({ summary: '관리자_회원정보수정 API' })
   @ApiOkResponse({ type: ProfileUserDto })
