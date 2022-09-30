@@ -135,6 +135,7 @@ export class BoardContentsService {
     if (bc.bc_status !== bcConstants.status.registration) {
       throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
     }
+    bc.bc_count = await this.countUp(bc.bc_idx, bc.bc_count);
     return bc;
   }
 
@@ -196,6 +197,18 @@ export class BoardContentsService {
     boardContent.bscats = await this.bscatsChange(bcats, boardContent);
 
     return boardContent;
+  }
+
+  async countUp(bc_idx, bc_count: number) {
+
+    // 게시글 저장
+    await this.bcRepository.createQueryBuilder()
+      .update(BoardContentsEntity)
+      .set({ bc_count: ++bc_count })
+      .where(" bc_idx IN (:bc_idx)", { bc_idx: [bc_idx] })
+      .execute()
+
+    return bc_count;
   }
 
   /****************** 
