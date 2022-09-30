@@ -56,11 +56,13 @@ __decorate([
 ], CreateDefectDto.prototype, "work_method", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '교체면적(m)' }),
     __metadata("design:type", String)
 ], CreateDefectDto.prototype, "replacement_square_meter", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '교체면적(장)' }),
     __metadata("design:type", String)
 ], CreateDefectDto.prototype, "dft_replacement_sheet", void 0);

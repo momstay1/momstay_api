@@ -162,7 +162,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "getProfile", null);
 __decorate([
-    (0, common_1.Get)(':id'),
+    (0, common_1.Get)('admin/:id'),
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원상세정보 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
@@ -173,7 +173,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "findId", null);
 __decorate([
-    (0, common_1.Patch)(':id'),
+    (0, common_1.Patch)('admin/:id'),
     (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보수정 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),

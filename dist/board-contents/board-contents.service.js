@@ -118,6 +118,7 @@ let BoardContentsService = class BoardContentsService {
         if (bc.bc_status !== constants_1.bcConstants.status.registration) {
             throw new common_1.NotAcceptableException('접근 할 수 없는 게시글 입니다.');
         }
+        bc.bc_count = await this.countUp(bc.bc_idx, bc.bc_count);
         return bc;
     }
     async findIndex(idx) {
@@ -164,6 +165,14 @@ let BoardContentsService = class BoardContentsService {
         const boardContent = await this.updateBoardContent(bc);
         boardContent.bscats = await this.bscatsChange(bcats, boardContent);
         return boardContent;
+    }
+    async countUp(bc_idx, bc_count) {
+        await this.bcRepository.createQueryBuilder()
+            .update(board_content_entity_1.BoardContentsEntity)
+            .set({ bc_count: ++bc_count })
+            .where(" bc_idx IN (:bc_idx)", { bc_idx: [bc_idx] })
+            .execute();
+        return bc_count;
     }
     async adminFindCategoryAll(idx, category, options) {
         const { take, page } = options;

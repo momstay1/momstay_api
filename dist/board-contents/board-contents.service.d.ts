@@ -27,6 +27,7 @@ export declare class BoardContentsService {
     findIndex(idx: number): Promise<BoardContentsEntity>;
     findBdBcIndex(bd_idx: number, bc_idx: number): Promise<BoardContentsEntity>;
     update(userInfo: any, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
+    countUp(bc_idx: any, bc_count: number): Promise<number>;
     adminFindCategoryAll(idx: any, category: string, options: PaginationOptions): Promise<{
         bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
         bc: Pagination<BoardContentsEntity>;
