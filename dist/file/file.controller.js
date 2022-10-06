@@ -45,7 +45,7 @@ let FileController = class FileController {
         const file = await this.fileService.findOneName(name);
         res.set({
             'Content-Type': 'application/json',
-            'Content-Disposition': 'attachment; filename="' + file.file_orig_name + '"',
+            'Content-Disposition': 'attachment; filename="' + encodeURI(file.file_orig_name) + '"',
         });
         (0, fs_1.createReadStream)(file.file_full_path).pipe(res);
     }

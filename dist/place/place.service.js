@@ -32,7 +32,7 @@ let PlaceService = class PlaceService {
     }
     async create(createPlaceDto) {
         const place = await this.checkPlaceExists(createPlaceDto.name);
-        if (place) {
+        if (place && place.place_status != constants_1.placeConstant.status.delete) {
             throw new common_1.UnprocessableEntityException('현장 이름이 중복 됩니다.');
         }
         return await this.savePlace(createPlaceDto);

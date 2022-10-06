@@ -183,6 +183,7 @@ let BoardContentsService = class BoardContentsService {
             order: { bc_createdAt: 'DESC' },
             where: (qb) => {
                 qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: idx });
+                qb.andWhere('bc_status = :bc_status', { bc_status: constants_1.bcConstants.status.uncertified });
                 if ((0, lodash_1.get)(bcats, [0, 'bcat_idx'])) {
                     qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx });
                 }
