@@ -24,7 +24,7 @@ export class PlaceService {
 
   async create(createPlaceDto: CreatePlaceDto) {
     const place = await this.checkPlaceExists(createPlaceDto.name);
-    if (place) {
+    if (place && place.place_status != placeConstant.status.delete) {
       throw new UnprocessableEntityException('현장 이름이 중복 됩니다.');
     }
     //현장 정보 저장
