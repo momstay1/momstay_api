@@ -31,7 +31,7 @@ const dashboard_module_1 = require("./dashboard/dashboard.module");
 const settings_module_1 = require("./settings/settings.module");
 let AppModule = class AppModule {
     configure(consumer) {
-        consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/users');
+        consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
     }
 };
 AppModule = __decorate([
