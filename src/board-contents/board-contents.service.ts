@@ -229,7 +229,7 @@ export class BoardContentsService {
       order: { bc_createdAt: 'DESC' },
       where: (qb) => {
         qb.where('bc_bd_idx = :bc_bd_idx', { bc_bd_idx: idx })
-        qb.andWhere('bc_status = :bc_status', { bc_status: bcConstants.status.delete })
+        qb.andWhere('bc_status > :bc_status', { bc_status: bcConstants.status.delete })
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('bscat_bcat_idx = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
