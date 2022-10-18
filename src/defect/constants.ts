@@ -38,6 +38,7 @@ export const dftConstant = {
     replacement_square_meter: { type: 'string', description: '교체면적(m)' },
     dft_replacement_sheet: { type: 'string', description: '교체면적(장)' },
     shooting_day: { type: 'string', description: '사진촬영일' },
+    device_key: { type: 'string', description: '단말기 고유 번호' },
     dft_origin_img: {
       type: 'string',
       format: 'binary', description: '원본사진'
