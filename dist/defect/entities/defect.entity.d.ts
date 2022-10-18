@@ -13,6 +13,7 @@ export declare class DefectEntity {
     dft_replacement_square_meter: string;
     dft_replacement_sheet: string;
     dft_shooting_day: string;
+    dft_device_key: string;
     dft_createdAt: Date;
     dft_updatedAt: Date;
     place: PlaceEntity;

@@ -144,6 +144,7 @@ let DefectService = class DefectService {
                 '작업방법',
                 '교체면적(m2)',
                 '교체면적(장)',
+                '단말기 고유 번호',
                 '등록일'
             ]
         ];
@@ -158,6 +159,7 @@ let DefectService = class DefectService {
                 (0, lodash_1.get)(constants_1.dftConstant.work_method, defect[key].dft_work_method, ''),
                 (0, lodash_1.get)(defect[key], 'dft_replacement_square_meter', ''),
                 (0, lodash_1.get)(defect[key], 'dft_replacement_sheet', ''),
+                (0, lodash_1.get)(defect[key], 'dft_device_key', ''),
                 moment(defect[key].dft_createdAt).format('YYYY-MM-DD hh:mm:ss'),
             ]);
         }
@@ -173,6 +175,7 @@ let DefectService = class DefectService {
             { wpx: 70 },
             { wpx: 70 },
             { wpx: 70 },
+            { wpx: 100 },
             { wpx: 120 },
         ];
         const file_name = 'defect_excel.xlsx';

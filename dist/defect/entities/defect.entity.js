@@ -64,6 +64,10 @@ __decorate([
     __metadata("design:type", String)
 ], DefectEntity.prototype, "dft_shooting_day", void 0);
 __decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], DefectEntity.prototype, "dft_device_key", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], DefectEntity.prototype, "dft_createdAt", void 0);

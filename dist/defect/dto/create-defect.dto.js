@@ -72,6 +72,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDefectDto.prototype, "shooting_day", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '단말기 고유 번호' }),
+    __metadata("design:type", String)
+], CreateDefectDto.prototype, "device_key", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: '원본 이미지' }),
     __metadata("design:type", Object)
 ], CreateDefectDto.prototype, "dft_origin_img", void 0);
