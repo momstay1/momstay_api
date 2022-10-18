@@ -31,6 +31,9 @@ export class DefectEntity {
   @Column()
   dft_shooting_day: string;
 
+  @Column()
+  dft_device_key: string;
+
   @CreateDateColumn()
   dft_createdAt: Date;
 

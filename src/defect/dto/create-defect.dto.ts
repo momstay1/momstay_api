@@ -38,6 +38,9 @@ export class CreateDefectDto {
   @IsString()
   @ApiProperty({ description: '사진촬영일' })
   readonly shooting_day: string;
+  @IsString()
+  @ApiProperty({ description: '단말기 고유 번호' })
+  readonly device_key: string;
   @ApiProperty({ description: '원본 이미지' })
   readonly dft_origin_img: any;
   @ApiProperty({ description: '정보 표시된 이미지' })
