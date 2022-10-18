@@ -154,6 +154,7 @@ export class DefectService {
         '작업방법',
         '교체면적(m2)',
         '교체면적(장)',
+        '단말기 고유 번호',
         // '파일명', 
         '등록일'
       ]
@@ -169,6 +170,7 @@ export class DefectService {
         get(dftConstant.work_method, defect[key].dft_work_method, ''),  // 작업방법
         get(defect[key], 'dft_replacement_square_meter', ''),           // 교체면적(m2)
         get(defect[key], 'dft_replacement_sheet', ''),                  // 교체면적(장)
+        get(defect[key], 'dft_device_key', ''),                         // 단말기 고유 번호
         // '',                                                          // 파일명
         moment(defect[key].dft_createdAt).format('YYYY-MM-DD hh:mm:ss'),// 등록일
       ]);
@@ -186,6 +188,7 @@ export class DefectService {
       { wpx: 70 }, // 작업방법
       { wpx: 70 }, // 교체면적(m2)
       { wpx: 70 }, // 교체면적(장)
+      { wpx: 100 }, // 단말기 고유 번호
       // { wpx: 200 }, // 파일명
       { wpx: 120 }, // 등록일
     ];
