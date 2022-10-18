@@ -71,6 +71,10 @@ export declare const dftConstant: {
             type: string;
             description: string;
         };
+        device_key: {
+            type: string;
+            description: string;
+        };
         dft_origin_img: {
             type: string;
             format: string;
