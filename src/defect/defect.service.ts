@@ -70,7 +70,6 @@ export class DefectService {
 
     // 조건 설정
     const where = {};
-    console.log({ search });
     if (search) {
       search = isArray(search) ? search : [search];
       map(search, (obj) => {
@@ -84,8 +83,6 @@ export class DefectService {
         }
       });
     }
-    console.log(get(where, 'shooting_day_lte') + ' 23:59:59');
-    console.log(get(where, 'shooting_day_mte') + ' 00:00:00');
     const [results, total] = await this.defectRepository.findAndCount({
       order: order,
       where: (qb) => {
