@@ -70,6 +70,7 @@ export class DefectService {
 
     // 조건 설정
     const where = {};
+    console.log({ search });
     if (search) {
       search = isArray(search) ? search : [search];
       map(search, (obj) => {
@@ -83,7 +84,8 @@ export class DefectService {
         }
       });
     }
-
+    console.log(get(where, 'shooting_day_lte') + ' 23:59:59');
+    console.log(get(where, 'shooting_day_mte') + ' 00:00:00');
     const [results, total] = await this.defectRepository.findAndCount({
       order: order,
       where: (qb) => {
@@ -93,8 +95,8 @@ export class DefectService {
         get(where, 'sort3', '') && qb.andWhere('dft_sort3 = :dft_sort3', { dft_sort3: get(where, 'sort3') });
         get(where, 'status', '') && qb.andWhere('dft_status IN (:dft_status)', { dft_status: get(where, 'status') });
         get(where, 'type', '') && qb.andWhere('dft_type = :dft_type', { dft_type: get(where, 'type') });
-        get(where, 'shooting_day_lte', '') && qb.andWhere('dft_shooting_day <= :dft_shooting_day_lte', { dft_shooting_day_lte: get(where, 'shooting_day_lte') });
-        get(where, 'shooting_day_mte', '') && qb.andWhere('dft_shooting_day >= :dft_shooting_day_mte', { dft_shooting_day_mte: get(where, 'shooting_day_mte') });
+        get(where, 'shooting_day_lte', '') && qb.andWhere('dft_shooting_day <= :dft_shooting_day_lte', { dft_shooting_day_lte: get(where, 'shooting_day_lte') + ' 23:59:59' });
+        get(where, 'shooting_day_mte', '') && qb.andWhere('dft_shooting_day >= :dft_shooting_day_mte', { dft_shooting_day_mte: get(where, 'shooting_day_mte') + ' 00:00:00' });
         get(where, 'id', '') && qb.andWhere('user_id = :user_id', { user_id: get(where, 'id') });
       },
       relations: ['user'],
