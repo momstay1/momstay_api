@@ -34,7 +34,7 @@ export class CreateDefectDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ description: '교체면적(장)' })
-  readonly dft_replacement_sheet: string;
+  readonly replacement_sheet: string;
   @IsString()
   @ApiProperty({ description: '사진촬영일' })
   readonly shooting_day: string;
