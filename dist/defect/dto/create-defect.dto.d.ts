@@ -8,7 +8,7 @@ export declare class CreateDefectDto {
     readonly content: string;
     readonly work_method: string;
     readonly replacement_square_meter: string;
-    readonly dft_replacement_sheet: string;
+    readonly replacement_sheet: string;
     readonly shooting_day: string;
     readonly device_key: string;
     readonly dft_origin_img: any;

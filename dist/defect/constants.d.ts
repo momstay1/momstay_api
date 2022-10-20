@@ -63,7 +63,7 @@ export declare const dftConstant: {
             type: string;
             description: string;
         };
-        dft_replacement_sheet: {
+        replacement_sheet: {
             type: string;
             description: string;
         };
