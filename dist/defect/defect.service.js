@@ -89,8 +89,8 @@ let DefectService = class DefectService {
                 (0, lodash_1.get)(where, 'sort3', '') && qb.andWhere('dft_sort3 = :dft_sort3', { dft_sort3: (0, lodash_1.get)(where, 'sort3') });
                 (0, lodash_1.get)(where, 'status', '') && qb.andWhere('dft_status IN (:dft_status)', { dft_status: (0, lodash_1.get)(where, 'status') });
                 (0, lodash_1.get)(where, 'type', '') && qb.andWhere('dft_type = :dft_type', { dft_type: (0, lodash_1.get)(where, 'type') });
-                (0, lodash_1.get)(where, 'shooting_day_lte', '') && qb.andWhere('dft_shooting_day <= :dft_shooting_day_lte', { dft_shooting_day_lte: (0, lodash_1.get)(where, 'shooting_day_lte') });
-                (0, lodash_1.get)(where, 'shooting_day_mte', '') && qb.andWhere('dft_shooting_day >= :dft_shooting_day_mte', { dft_shooting_day_mte: (0, lodash_1.get)(where, 'shooting_day_mte') });
+                (0, lodash_1.get)(where, 'shooting_day_lte', '') && qb.andWhere('dft_shooting_day <= :dft_shooting_day_lte', { dft_shooting_day_lte: (0, lodash_1.get)(where, 'shooting_day_lte') + ' 23:59:59' });
+                (0, lodash_1.get)(where, 'shooting_day_mte', '') && qb.andWhere('dft_shooting_day >= :dft_shooting_day_mte', { dft_shooting_day_mte: (0, lodash_1.get)(where, 'shooting_day_mte') + ' 00:00:00' });
                 (0, lodash_1.get)(where, 'id', '') && qb.andWhere('user_id = :user_id', { user_id: (0, lodash_1.get)(where, 'id') });
             },
             relations: ['user'],
