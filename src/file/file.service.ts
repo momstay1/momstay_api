@@ -69,10 +69,10 @@ export class FileService {
   }
 
   async findIndexs(idxs: string[]) {
-    console.log({ idxs });
     const files = await this.fileRepository.find({
       where: {
-        file_idx: In(idxs),
+        file_foreign_idx: In(idxs),
+        file_category: In(['dft_origin_img', 'dft_info_img'])
       }
     });
     if (files.length <= 0) {
