@@ -22,7 +22,6 @@ const common_constants_1 = require("../common/common.constants");
 const defect_service_1 = require("../defect/defect.service");
 const path = require("path");
 const zl = require("zip-lib");
-const fs = require("fs");
 const img_url = '/file/img/';
 let FileService = class FileService {
     constructor(fileRepository, defectService) {
@@ -168,33 +167,17 @@ let FileService = class FileService {
     async imageZip(files, type) {
         const zip = new zl.Zip();
         for (const key in files) {
-            let change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
-            if (files[key].file_category != 'dft_origin_img' && change_file_name.indexOf('정보표시') == -1) {
-                const temp_file_name = change_file_name.split('.');
-                change_file_name = temp_file_name[0] + '_정보표시.' + temp_file_name[1];
+            const change_file_name = path.join(files[key].file_path, files[key].file_name);
+            let file_name = files[key].file_orig_name;
+            if (files[key].file_category != 'dft_origin_img' && files[key].file_orig_name.indexOf('정보표시') == -1) {
+                const temp_file_name = files[key].file_orig_name.split('.');
+                file_name = temp_file_name[0] + '_정보표시.' + temp_file_name[1];
             }
-            fs.rename(files[key].file_full_path, change_file_name, (rename_err) => {
-                fs.writeFile(change_file_name, '', 'utf-8', (write_err) => {
-                });
-            });
-            zip.addFile(change_file_name);
+            zip.addFile(change_file_name, file_name);
         }
         const zip_file_name = `${type}.zip`;
         const zip_file_path = path.join(common_constants_1.commonContants.zip_upload_path, zip_file_name);
         await zip.archive(zip_file_path);
-        for (const key in files) {
-            const change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
-            fs.exists(change_file_name, (exists) => {
-                if (!exists) {
-                    console.log("삭제할 파일이 존재하지 않습니다.");
-                }
-                else {
-                    fs.unlink(change_file_name, (unlink_error) => {
-                        console.log({ unlink_error });
-                    });
-                }
-            });
-        }
         return { file_name: zip_file_name, file_path: zip_file_path };
     }
 };
