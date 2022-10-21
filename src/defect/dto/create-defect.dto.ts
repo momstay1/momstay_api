@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsDate, IsDateString, IsOptional, IsString } from "class-validator";
 
 export class CreateDefectDto {
   @IsString()
@@ -35,7 +35,7 @@ export class CreateDefectDto {
   @IsOptional()
   @ApiProperty({ description: '교체면적(장)' })
   readonly replacement_sheet: string;
-  @IsString()
+  @IsDateString()
   @ApiProperty({ description: '사진촬영일' })
   readonly shooting_day: string;
   @IsString()

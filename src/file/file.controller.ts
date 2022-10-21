@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   Res,
+  Query,
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
@@ -55,16 +56,27 @@ export class FileController {
     const file = await this.fileService.findOneName(name);
     return res.sendFile(file.file_full_path);
   }
-
   @Get('download/:name')
   @ApiOperation({ summary: '이미지 파일 다운로드 API' })
   async downloadFile(@Param('name') name: string, @Res() res) {
+    console.log({ name });
     const file = await this.fileService.findOneName(name);
     res.set({
       'Content-Type': 'application/json',
       'Content-Disposition': 'attachment; filename="' + encodeURI(file.file_orig_name) + '"',
     });
     createReadStream(file.file_full_path).pipe(res);
+  }
+
+  @Get('downloads/select')
+  @ApiOperation({ summary: '선택 이미지 파일 다운로드 API' })
+  async selectDownloadFile(@Query('file') file: string, @Res() res) {
+    const files = await this.fileService.findIndexs(file.split(','));
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',
+    });
+    createReadStream(files.file_path).pipe(res);
   }
 
   @Get('downloads/:type/:place_idx')

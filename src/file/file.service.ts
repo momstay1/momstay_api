@@ -16,6 +16,7 @@ import { DefectService } from 'src/defect/defect.service';
 import * as path from 'path';
 import * as zl from 'zip-lib';
 import * as fs from 'fs';
+import moment from 'moment';
 
 const img_url = '/file/img/';
 @Injectable()
@@ -67,6 +68,20 @@ export class FileService {
     return keyBy(files, (o) => o.file_category);
   }
 
+  async findIndexs(idxs: string[]) {
+    console.log({ idxs });
+    const files = await this.fileRepository.find({
+      where: {
+        file_idx: In(idxs),
+      }
+    });
+    if (files.length <= 0) {
+      throw new NotFoundException('존재하지 않는 파일 입니다.');
+    }
+
+    return this.imageZip(files, 'selectImage');
+  }
+
   async findCategory(category: string[], foreign_idx: string) {
     const files = await this.fileRepository.find({
       where: {
@@ -99,36 +114,7 @@ export class FileService {
       }
     });
 
-    const zip = new zl.Zip();
-    for (const key in files) {
-      // 이미지 압축시 암호화된 파일명 origin 이름으로 수정 후 새파일 생성 후 압축
-      const change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
-      fs.rename(files[key].file_full_path, change_file_name, (rename_err) => {
-        fs.writeFile(change_file_name, '', 'utf-8', (write_err) => {
-        });
-      });
-      zip.addFile(change_file_name);
-    }
-    const zip_file_name = `${type}.zip`;
-    const zip_file_path = path.join(commonContants.zip_upload_path, zip_file_name);
-    await zip.archive(zip_file_path);
-
-    for (const key in files) {
-      // 위에서 origin 이름으로 만든 새 파일 제거
-      const change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
-      fs.exists(change_file_name, (exists) => {
-        if (!exists) {
-          console.log("삭제할 파일이 존재하지 않습니다.");
-        } else {
-          fs.unlink(change_file_name, (unlink_error) => {
-            console.log({ unlink_error });
-          });
-        }
-      });
-    }
-
-    return { file_name: zip_file_name, file_path: zip_file_path };
-
+    return this.imageZip(files, type);
   }
 
   update(id: number, updateFileDto: UpdateFileDto) {
@@ -199,4 +185,41 @@ export class FileService {
     const img_mimes = ['image/gif', 'image/jpeg', 'image/png'];
     return img_mimes.includes(type) ? 1 : 0;
   }
+
+  private async imageZip(files, type) {
+    const zip = new zl.Zip();
+    for (const key in files) {
+      // 이미지 압축시 암호화된 파일명 origin 이름으로 수정 후 새파일 생성 후 압축
+      let change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
+      if (files[key].file_category != 'dft_origin_img' && change_file_name.indexOf('정보표시') == -1) {
+        const temp_file_name = change_file_name.split('.');
+        change_file_name = temp_file_name[0] + '_정보표시.' + temp_file_name[1];
+      }
+
+      fs.rename(files[key].file_full_path, change_file_name, (rename_err) => {
+        fs.writeFile(change_file_name, '', 'utf-8', (write_err) => {
+        });
+      });
+      zip.addFile(change_file_name);
+    }
+    const zip_file_name = `${type}.zip`;
+    const zip_file_path = path.join(commonContants.zip_upload_path, zip_file_name);
+    await zip.archive(zip_file_path);
+
+    for (const key in files) {
+      // 위에서 origin 이름으로 만든 새 파일 제거
+      const change_file_name = path.join(files[key].file_path, files[key].file_orig_name);
+      fs.exists(change_file_name, (exists) => {
+        if (!exists) {
+          console.log("삭제할 파일이 존재하지 않습니다.");
+        } else {
+          fs.unlink(change_file_name, (unlink_error) => {
+            console.log({ unlink_error });
+          });
+        }
+      });
+    }
+    return { file_name: zip_file_name, file_path: zip_file_path };
+  }
+
 }
