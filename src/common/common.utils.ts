@@ -33,7 +33,7 @@ export const commonUtils = {
   sanitizeEntity: (array, privateElement): any[] => {
     const arr: any = {};
     for (const key in array) {
-      if (isObject(array[key]) && (!key.includes('createdAt') && !key.includes('updatedAt'))) {
+      if (isObject(array[key]) && (!key.includes('createdAt') && !key.includes('updatedAt') && !key.includes('shooting_day'))) {
         arr[key] = commonUtils.sanitizeEntity(array[key], privateElement);
       } else {
         if (privateElement.indexOf(key) >= 0) {
