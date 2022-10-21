@@ -64,10 +64,10 @@ let FileService = class FileService {
         return (0, lodash_1.keyBy)(files, (o) => o.file_category);
     }
     async findIndexs(idxs) {
-        console.log({ idxs });
         const files = await this.fileRepository.find({
             where: {
-                file_idx: (0, typeorm_2.In)(idxs),
+                file_foreign_idx: (0, typeorm_2.In)(idxs),
+                file_category: (0, typeorm_2.In)(['dft_origin_img', 'dft_info_img'])
             }
         });
         if (files.length <= 0) {
