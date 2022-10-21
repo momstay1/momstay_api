@@ -34,7 +34,7 @@ exports.commonUtils = {
     sanitizeEntity: (array, privateElement) => {
         const arr = {};
         for (const key in array) {
-            if ((0, lodash_1.isObject)(array[key]) && (!key.includes('createdAt') && !key.includes('updatedAt'))) {
+            if ((0, lodash_1.isObject)(array[key]) && (!key.includes('createdAt') && !key.includes('updatedAt') && !key.includes('shooting_day'))) {
                 arr[key] = exports.commonUtils.sanitizeEntity(array[key], privateElement);
             }
             else {
