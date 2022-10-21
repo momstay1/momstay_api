@@ -28,7 +28,7 @@ export class DefectEntity {
   @Column({ default: '' })
   dft_replacement_sheet: string;
 
-  @Column()
+  @Column({ type: 'datetime' })
   dft_shooting_day: string;
 
   @Column()
