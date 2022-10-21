@@ -67,7 +67,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDefectDto.prototype, "replacement_sheet", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsDateString)(),
     (0, swagger_1.ApiProperty)({ description: '사진촬영일' }),
     __metadata("design:type", String)
 ], CreateDefectDto.prototype, "shooting_day", void 0);

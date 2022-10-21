@@ -60,7 +60,7 @@ __decorate([
     __metadata("design:type", String)
 ], DefectEntity.prototype, "dft_replacement_sheet", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ type: 'datetime' }),
     __metadata("design:type", String)
 ], DefectEntity.prototype, "dft_shooting_day", void 0);
 __decorate([

@@ -42,12 +42,21 @@ let FileController = class FileController {
         return res.sendFile(file.file_full_path);
     }
     async downloadFile(name, res) {
+        console.log({ name });
         const file = await this.fileService.findOneName(name);
         res.set({
             'Content-Type': 'application/json',
             'Content-Disposition': 'attachment; filename="' + encodeURI(file.file_orig_name) + '"',
         });
         (0, fs_1.createReadStream)(file.file_full_path).pipe(res);
+    }
+    async selectDownloadFile(file, res) {
+        const files = await this.fileService.findIndexs(file.split(','));
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',
+        });
+        (0, fs_1.createReadStream)(files.file_path).pipe(res);
     }
     async downloadsFile(type, place_idx, res) {
         const zip = await this.fileService.findAllPlace(type, +place_idx);
@@ -111,6 +120,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "downloadFile", null);
+__decorate([
+    (0, common_1.Get)('downloads/select'),
+    (0, swagger_1.ApiOperation)({ summary: '선택 이미지 파일 다운로드 API' }),
+    __param(0, (0, common_1.Query)('file')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "selectDownloadFile", null);
 __decorate([
     (0, common_1.Get)('downloads/:type/:place_idx'),
     (0, swagger_1.ApiOperation)({ summary: '현장이미지 파일 전체 다운로드 API' }),
