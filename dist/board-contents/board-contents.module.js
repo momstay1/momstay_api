@@ -16,6 +16,7 @@ const users_module_1 = require("../users/users.module");
 const board_categories_module_1 = require("../board-categories/board-categories.module");
 const boards_module_1 = require("../boards/boards.module");
 const board_selected_categories_module_1 = require("../board-selected-categories/board-selected-categories.module");
+const notice_contents_controller_1 = require("./notice-contents.controller");
 const admin_users_module_1 = require("../admin-users/admin-users.module");
 const groups_module_1 = require("../groups/groups.module");
 const admin_board_contents_controller_1 = require("./admin-board-contents.controller");
@@ -32,7 +33,7 @@ BoardContentsModule = __decorate([
             admin_users_module_1.AdminUsersModule,
             groups_module_1.GroupsModule
         ],
-        controllers: [board_contents_controller_1.BoardContentsController, admin_board_contents_controller_1.AdminBoardContentsController],
+        controllers: [board_contents_controller_1.BoardContentsController, admin_board_contents_controller_1.AdminBoardContentsController, notice_contents_controller_1.NoticeContentsController],
         providers: [board_contents_service_1.BoardContentsService]
     })
 ], BoardContentsModule);
