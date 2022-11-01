@@ -15,8 +15,6 @@ import { commonContants } from 'src/common/common.constants';
 import { DefectService } from 'src/defect/defect.service';
 import * as path from 'path';
 import * as zl from 'zip-lib';
-import * as fs from 'fs';
-import moment from 'moment';
 
 const img_url = '/file/img/';
 @Injectable()
@@ -33,6 +31,11 @@ export class FileService {
 
   async uploadImg(files: Express.Multer.File[]) {
     console.log({ files });
+  }
+
+  async ckeditorUploadImg(file: Express.Multer.File) {
+    const file_info = await this.fileInfoInsert({ ckeditor: file }, 0);
+    return file_info[0].ckeditor;
   }
 
   findAll() {
