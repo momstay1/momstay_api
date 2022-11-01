@@ -21,6 +21,7 @@ const platform_express_1 = require("@nestjs/platform-express");
 const common_file_1 = require("../common/common.file");
 const swagger_1 = require("@nestjs/swagger");
 const fs_1 = require("fs");
+const lodash_1 = require("lodash");
 let FileController = class FileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -29,7 +30,8 @@ let FileController = class FileController {
         return this.fileService.create(createFileDto);
     }
     async uploadImg(files) {
-        return await this.fileService.uploadImg(files);
+        console.log({ files });
+        return !(0, lodash_1.isEmpty)(files);
     }
     async uploadImg1(files) {
         console.log({ files });
