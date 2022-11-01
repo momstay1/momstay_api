@@ -18,7 +18,7 @@ import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-expres
 import { multerOptions } from 'src/common/common.file';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
-import { isEmpty } from 'lodash';
+import { ckeditorMulterOptions } from 'src/common/common.ckeditor';
 
 @Controller('file')
 export class FileController {
@@ -31,14 +31,19 @@ export class FileController {
     return this.fileService.create(createFileDto);
   }
 
-  @UseInterceptors(FilesInterceptor('image', 10, multerOptions()))
-  @Post('upload')
-  async uploadImg(@UploadedFiles() files: Array<Express.Multer.File>) {
-    console.log({ files });
-    // return await this.fileService.uploadImg(files);
-    return !isEmpty(files);
-    // return this.fileService.create(createFileDto);
+  @UseInterceptors(FilesInterceptor('ckeditor', 10, ckeditorMulterOptions()))
+  @Post('ckeditor/upload')
+  async ckeditorUploadImg(@UploadedFiles() file: Express.Multer.File) {
+    return await this.fileService.ckeditorUploadImg(file);
   }
+
+  // @Get('ckeditor/img/:name')
+  // @ApiOperation({ summary: '이미지 파일 API' })
+  // async getCkeditorFile(@Param('name') name: string, @Res() res) {
+  //   // const file = await this.fileService.findOneName(name);
+  //   console.log(path.join(commonContants.ckeditor_upload_path, 'ckeditor', name));
+  //   return res.sendFile(path.join(commonContants.ckeditor_upload_path, 'ckeditor', name));
+  // }
 
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'dft_origin_img', maxCount: 10 },
@@ -59,6 +64,7 @@ export class FileController {
     const file = await this.fileService.findOneName(name);
     return res.sendFile(file.file_full_path);
   }
+
   @Get('download/:name')
   @ApiOperation({ summary: '이미지 파일 다운로드 API' })
   async downloadFile(@Param('name') name: string, @Res() res) {
