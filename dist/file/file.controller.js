@@ -21,7 +21,7 @@ const platform_express_1 = require("@nestjs/platform-express");
 const common_file_1 = require("../common/common.file");
 const swagger_1 = require("@nestjs/swagger");
 const fs_1 = require("fs");
-const lodash_1 = require("lodash");
+const common_ckeditor_1 = require("../common/common.ckeditor");
 let FileController = class FileController {
     constructor(fileService) {
         this.fileService = fileService;
@@ -29,9 +29,8 @@ let FileController = class FileController {
     create(createFileDto) {
         return this.fileService.create(createFileDto);
     }
-    async uploadImg(files) {
-        console.log({ files });
-        return !(0, lodash_1.isEmpty)(files);
+    async ckeditorUploadImg(file) {
+        return await this.fileService.ckeditorUploadImg(file);
     }
     async uploadImg1(files) {
         console.log({ files });
@@ -86,13 +85,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], FileController.prototype, "create", null);
 __decorate([
-    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('image', 10, (0, common_file_1.multerOptions)())),
-    (0, common_1.Post)('upload'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('ckeditor', 10, (0, common_ckeditor_1.ckeditorMulterOptions)())),
+    (0, common_1.Post)('ckeditor/upload'),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], FileController.prototype, "uploadImg", null);
+], FileController.prototype, "ckeditorUploadImg", null);
 __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
         { name: 'dft_origin_img', maxCount: 10 },

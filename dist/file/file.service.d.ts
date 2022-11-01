@@ -11,6 +11,7 @@ export declare class FileService {
     constructor(fileRepository: Repository<FileEntity>, defectService: DefectService);
     create(createFileDto: CreateFileDto): string;
     uploadImg(files: Express.Multer.File[]): Promise<void>;
+    ckeditorUploadImg(file: Express.Multer.File): Promise<any>;
     findAll(): string;
     findOneName(name: string): Promise<FileEntity>;
     findOne(category: string, idx: string): Promise<import("lodash").Dictionary<FileEntity>>;

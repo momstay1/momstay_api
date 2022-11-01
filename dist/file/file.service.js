@@ -34,6 +34,10 @@ let FileService = class FileService {
     async uploadImg(files) {
         console.log({ files });
     }
+    async ckeditorUploadImg(file) {
+        const file_info = await this.fileInfoInsert({ ckeditor: file }, 0);
+        return file_info[0].ckeditor;
+    }
     findAll() {
         return `This action returns all file`;
     }
