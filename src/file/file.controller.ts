@@ -18,6 +18,7 @@ import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-expres
 import { multerOptions } from 'src/common/common.file';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
+import { isEmpty } from 'lodash';
 
 @Controller('file')
 export class FileController {
@@ -33,7 +34,9 @@ export class FileController {
   @UseInterceptors(FilesInterceptor('image', 10, multerOptions()))
   @Post('upload')
   async uploadImg(@UploadedFiles() files: Array<Express.Multer.File>) {
-    return await this.fileService.uploadImg(files);
+    console.log({ files });
+    // return await this.fileService.uploadImg(files);
+    return !isEmpty(files);
     // return this.fileService.create(createFileDto);
   }
 
