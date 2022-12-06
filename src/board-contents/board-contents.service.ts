@@ -51,8 +51,8 @@ export class BoardContentsService {
       }
       bc.user_idx = get(user, ['user_idx']).toString();
     } else {
-      const admin = await this.AdminService.findOne(userInfo.user_id);
-      bc.admin_idx = get(admin, ['admin_idx']).toString();
+      // const admin = await this.AdminService.findOne(userInfo.user_id);
+      // bc.admin_idx = get(admin, ['admin_idx']).toString();
     }
     bc.bd_idx = bc.bd_idx;
 
@@ -319,11 +319,11 @@ export class BoardContentsService {
   // 숨김처리할 개인정보
   getPrivateColumn(): any[] {
     const userPrivateColumn = this.usersService.getPrivateColumn();
-    const adminPrivateColumn = this.AdminService.getAdminPrivateColumn();
+    // const adminPrivateColumn = this.AdminService.getAdminPrivateColumn();
     return [
       ...bcConstants.privateColumn,
       ...userPrivateColumn,
-      ...adminPrivateColumn
+      // ...adminPrivateColumn
     ];
   }
 

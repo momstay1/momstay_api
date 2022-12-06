@@ -12,7 +12,7 @@ import { PlaceModule } from 'src/place/place.module';
   imports: [
     TypeOrmModule.forFeature([DefectEntity]),
     UsersModule,
-    forwardRef(() => FileModule),
+    FileModule,
     forwardRef(() => PlaceModule),
   ],
   controllers: [DefectController],

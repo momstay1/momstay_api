@@ -1,36 +1,30 @@
 import { AdminUsersEntity } from "src/admin-users/entities/admin-user.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('groups')
 export class GroupsEntity {
   @PrimaryGeneratedColumn()
-  grp_idx: number;
+  idx: number;
 
   @Column({ length: 30 })
-  grp_type: string;
+  type: string;
 
   @Column()
-  grp_status: string;
+  status: string;
 
   @Column({ length: 30 })
-  grp_id: string;
+  id: string;
 
   @Column({ length: 30 })
-  grp_name: string;
+  name: string;
 
   @Column({ type: 'text' })
-  grp_memo: string;
+  memo: string;
 
-  @OneToMany(
+  @ManyToMany(
     () => UsersEntity,
-    (user) => user.user_group,
+    (user) => user.groups,
   )
-  grp_users: undefined;
-
-  @OneToMany(
-    () => AdminUsersEntity,
-    (grp_admin) => grp_admin.admin_group,
-  )
-  grp_admin: undefined;
+  users: UsersEntity[];
 }

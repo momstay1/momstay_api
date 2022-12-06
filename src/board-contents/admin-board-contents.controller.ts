@@ -49,7 +49,7 @@ export class AdminBoardContentsController {
   @ApiOperation({ summary: '관리자 게시글 상태 일괄 변경 API' })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
-  @Auth(['root', 'basic'])
+  @Auth(['root'])
   @ApiBody({
     schema: {
       properties: {
@@ -96,7 +96,7 @@ export class AdminBoardContentsController {
   @Patch(':bc_idx')
   @ApiOperation({ summary: '관리자 게시글 수정 API' })
   @ApiBearerAuth()
-  @Auth(['root', 'basic'])
+  @Auth(['root'])
   async update(
     @GetUser() user: AdminUsersEntity,
     @Param('bc_idx') bc_idx: string,

@@ -49,12 +49,6 @@ export class AdminUsersEntity {
   @OneToMany(() => BoardContentsEntity, (bc) => bc.admin)
   board_contents: undefined;
 
-  @ManyToOne(() => GroupsEntity, (group) => group.grp_users, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION',
-  })
-  admin_group: GroupsEntity;
-
   @CreateDateColumn()
   admin_createdAt: Date;
 

@@ -70,7 +70,7 @@ export class PlaceController {
 
   // 현장 상세
   @Get(':idx')
-  @Auth(['root', 'admin', 'basic'])
+  @Auth(['root', 'admin'])
   @ApiOperation({ summary: '현장 정보 API' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: PlaceEntity })

@@ -71,7 +71,7 @@ export class DefectPlaceController {
   }
 
   @Get(':idx')
-  @Auth(['root', 'admin', 'basic'])
+  @Auth(['root', 'admin'])
   @ApiOperation({ summary: '하자현장 정보 API' })
   @ApiBearerAuth()
   async findOne(@Param('idx') idx: string) {

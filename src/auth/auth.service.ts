@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AdminUsersService } from 'src/admin-users/admin-users.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { GroupsService } from 'src/groups/groups.service';
+import { UserSnsService } from 'src/user-sns/user-sns.service';
 import { usersConstant } from 'src/users/constants';
 import { UsersService } from 'src/users/users.service';
 import { ResponseAuthDto } from './dto/response-auth.dto';
@@ -11,44 +12,42 @@ import { ResponseAuthDto } from './dto/response-auth.dto';
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
-    private readonly adminService: AdminUsersService,
     private readonly jwtService: JwtService,
-    private readonly groupsService: GroupsService
+    private readonly groupsService: GroupsService,
+    private readonly userSnsService: UserSnsService
   ) { }
 
   async validateUser(id: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(id);
-    if (user.user_status != usersConstant.status.registration) {
+    const user = await this.userService.findId(id);
+    if (user.status != usersConstant.status.registration) {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
-    const isHashValid = await commonBcrypt.isHashValid(password, user.user_password);
+    const isHashValid = await commonBcrypt.isHashValid(password, user.password);
     if (user && isHashValid) {
-      const { user_password, ...result } = user;
+      const { password, ...result } = user;
       return result;
     }
     return null;
   }
 
-  async login(user): Promise<ResponseAuthDto> {
-    const userInfo = await this.userService.findOne(user.user_id);
-    const group = await this.groupsService.findOne(userInfo.user_group.grp_idx);
-    const payload = { userId: userInfo.user_id, userName: userInfo.user_name, userGrp: group.grp_id };
+  async login(user, type): Promise<ResponseAuthDto> {
+    const userInfo = await this.userService.findId(user.id);
+    if (type && type.indexOf(userInfo.groups[0].id) == -1) {
+      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+    }
+    const group = await this.groupsService.findOne(userInfo.groups[0].idx);
+    const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: group.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  async admin_login(id, password): Promise<ResponseAuthDto> {
-    const admin = await this.adminService.findOne(id);
-    const isHashValid = await commonBcrypt.isHashValid(password, admin.admin_password);
-    if (admin && isHashValid) {
-      const group = await this.groupsService.findOne(admin.admin_group.grp_idx);
-      const payload = { userId: admin.admin_id, userName: admin.admin_name, userGrp: group.grp_id };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
-    } else {
-      return null;
-    }
+  async snsLogin(snsLoginUserDto): Promise<ResponseAuthDto> {
+    const snsUserInfo = await this.userSnsService.findId(snsLoginUserDto.id);
+    const user = await this.userService.findId(snsUserInfo.user.id);
+    const payload = { userId: user.id, userName: user.name, userGrp: user.groups[0].id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

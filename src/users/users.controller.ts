@@ -5,6 +5,9 @@ import {
   Body,
   UseGuards,
   Query,
+  Param,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,6 +18,7 @@ import { get, map } from 'lodash';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -30,6 +34,9 @@ import { ProfileUserDto } from './dto/profile-user.dto';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from './entities/user.entity';
 import { Auth } from 'src/common/decorator/role.decorator';
+import { SnsLoginUserDto } from './dto/sns.login-user.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/common/common.file';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -39,20 +46,21 @@ export class UsersController {
     private readonly usersService: UsersService
   ) { }
 
-  sanitizeUsers(user) {
-    return commonUtils.sanitizeEntity(user, this.usersService.getPrivateColumn());
-  };
-
   // 회원 생성
   @Post()
-  @Auth(['root', 'admin'])
-  @ApiBearerAuth()
   @ApiOperation({ summary: '회원 생성 API' })
   @ApiCreatedResponse({ type: CreateUserDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
-  async create(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.create(createUserDto);
-    return this.sanitizeUsers(user);
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'profile', maxCount: 1 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    const data = await this.usersService.create(createUserDto, files);
+    return data;
   }
 
   // 회원 로그인
@@ -63,26 +71,38 @@ export class UsersController {
   @ApiCreatedResponse({ type: ResponseAuthDto })
   @ApiUnauthorizedResponse({ type: ResponseErrDto })
   async login(@GetUser() user: UsersEntity) {
-    return this.authService.login(user);
+    return this.authService.login(user, '');
+  }
+
+  // sns회원 로그인
+  @Post('snslogin')
+  @ApiOperation({ summary: '로그인 API' })
+  @ApiBody({ type: SnsLoginUserDto })
+  @ApiCreatedResponse({ type: ResponseAuthDto })
+  @ApiUnauthorizedResponse({ type: ResponseErrDto })
+  async snsLogin(@Body() snsLoginUserDto: SnsLoginUserDto) {
+    return this.authService.snsLogin(snsLoginUserDto);
+  }
+
+  // 회원 정보 가져오기
+  @Get()
+  @ApiOperation({ summary: '회원 존재확인 API' })
+  @ApiOkResponse({ type: ProfileUserDto })
+  async getUniqueKey(@Query('uniquekey') uniquekey: string) {
+    const data = await this.usersService.findOne({ uniqueKey: uniquekey });
+    return data;
   }
 
   // 회원 정보 가져오기
   @Get('profile')
-  @Auth(['basic'])
+  @Auth(['Any'])
   @ApiOperation({ summary: '회원 정보 API' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {
-    const data = await this.usersService.findOne(get(user, 'user_id', ''));
-    return this.sanitizeUsers(data);
+    const data = await this.usersService.findId(get(user, 'id', ''));
+    return data;
   }
-
-  // 회원 아이디 조회
-  // @Get(':id')
-  // async findOne(@Param('id') id: string) {
-  //   const user = await this.usersService.findOne(id);
-  //   return this.sanitizeUsers(user);
-  // }
 
   // 회원 수정
   // @Patch(':id')

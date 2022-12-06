@@ -37,7 +37,7 @@ export class DefectController {
   };
 
   @Post()
-  @Auth(['root', 'admin', 'basic'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '하자 등록 API' })
   @UseInterceptors(FileFieldsInterceptor([

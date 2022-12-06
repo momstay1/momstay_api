@@ -1,6 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { isObject } from "lodash";
+import { isArray, isObject, map } from "lodash";
 import { usersConstant } from "src/users/constants";
 
 export const commonUtils = {
@@ -48,12 +48,30 @@ export const commonUtils = {
   },
   setupSwagger(app: INestApplication): void {
     const options = new DocumentBuilder()
-      .setTitle('대관모아 API Docs')
+      .setTitle('맘스테이 API Docs')
       .setVersion('v1.0.0')
       .addBearerAuth()
       .build();
 
     const document = SwaggerModule.createDocument(app, options);
     SwaggerModule.setup('api-docs', app, document);
+  },
+  searchSplit(search: string[]) {
+    const where = {};
+    if (search) {
+      search = isArray(search) ? search : [search];
+      map(search, (obj) => {
+        if (obj) {
+          const key_val = obj.split(':');
+          if (key_val[1].indexOf(",") === -1) {
+            where[key_val[0]] = key_val[1];
+          } else {
+            where[key_val[0]] = key_val[1].split(",");
+          }
+        }
+      });
+    }
+
+    return where;
   }
 };

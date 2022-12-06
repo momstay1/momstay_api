@@ -12,7 +12,7 @@ import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileEntity } from './entities/file.entity';
 import { commonContants } from 'src/common/common.constants';
-import { DefectService } from 'src/defect/defect.service';
+// import { DefectService } from 'src/defect/defect.service';
 import * as path from 'path';
 import * as zl from 'zip-lib';
 
@@ -21,8 +21,8 @@ const img_url = '/file/img/';
 export class FileService {
   constructor(
     @InjectRepository(FileEntity) private fileRepository: Repository<FileEntity>,
-    @Inject(forwardRef(() => DefectService))
-    private readonly defectService: DefectService,
+    // @Inject(forwardRef(() => DefectService))
+    // private readonly defectService: DefectService,
   ) { }
 
   create(createFileDto: CreateFileDto) {
@@ -102,22 +102,22 @@ export class FileService {
   }
 
   async findAllPlace(type: string, place_idx: number) {
-    const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
+    // const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
 
-    const file_category = [];
-    if (type == 'all') {
-      file_category.push('dft_origin_img', 'dft_info_img');
-    } else {
-      file_category.push('dft_' + type + '_img');
-    }
-    const files = await this.fileRepository.find({
-      where: {
-        file_category: In(file_category),
-        file_foreign_idx: In(dft_idxs),
-      }
-    });
+    // const file_category = [];
+    // if (type == 'all') {
+    //   file_category.push('dft_origin_img', 'dft_info_img');
+    // } else {
+    //   file_category.push('dft_' + type + '_img');
+    // }
+    // const files = await this.fileRepository.find({
+    //   where: {
+    //     file_category: In(file_category),
+    //     file_foreign_idx: In(dft_idxs),
+    //   }
+    // });
 
-    return this.imageZip(files, type);
+    // return this.imageZip(files, type);
   }
 
   update(id: number, updateFileDto: UpdateFileDto) {
