@@ -51,6 +51,6 @@ master 브랜치로 이동후 develop 브랜치와 merge 후 npm run build 실�
 [master] git purh origin master<br>
 
 서버접속<br>
-su sosohaja_api<br>
-pm2 reload sosohaja-api<br>
+su momstay_api<br>
+pm2 reload momstay-api<br>
 <br><br><br>

@@ -96,12 +96,12 @@ export class FileController {
   })
   async downloadsFile(@Param('type') type: string, @Param('place_idx') place_idx: string, @Res() res) {
     // const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
-    const zip = await this.fileService.findAllPlace(type, +place_idx);
-    res.set({
-      'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename="' + zip.file_name + '"',
-    });
-    createReadStream(zip.file_path).pipe(res);
+    // const zip = await this.fileService.findAllPlace(type, +place_idx);
+    // res.set({
+    //   'Content-Type': 'application/json',
+    //   'Content-Disposition': 'attachment; filename="' + zip.file_name + '"',
+    // });
+    // createReadStream(zip.file_path).pipe(res);
   }
 
   @Get(':category/:idx')

@@ -1,4 +1,4 @@
 export const jwtConstants = {
-  secret: 'sosohaja-api-secretKey',
+  secret: 'momstay-api-secretKey',
   expried_on: '30d',
 };

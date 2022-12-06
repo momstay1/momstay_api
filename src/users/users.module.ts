@@ -5,17 +5,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersEntity } from './entities/user.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { CommonService } from 'src/common/common.service';
-import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 import { GroupsModule } from 'src/groups/groups.module';
+import { AdminUsersController } from './admin-users.controller';
+import { UserSnsModule } from 'src/user-sns/user-sns.module';
+import { FileModule } from 'src/file/file.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    forwardRef(() => AdminUsersModule),
     TypeOrmModule.forFeature([UsersEntity]),
-    GroupsModule
+    GroupsModule,
+    UserSnsModule,
+    FileModule,
+    // forwardRef(() => FileModule),
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, AdminUsersController],
   providers: [UsersService, CommonService],
   exports: [UsersService],
 })

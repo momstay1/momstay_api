@@ -13,17 +13,14 @@ import { BoardContentsModule } from './board-contents/board-contents.module';
 import { BoardCategoriesModule } from './board-categories/board-categories.module';
 import { BoardSelectedCategoriesModule } from './board-selected-categories/board-selected-categories.module';
 import { GroupsModule } from './groups/groups.module';
-import { AdminUsersModule } from './admin-users/admin-users.module';
-import { PlaceModule } from './place/place.module';
-import { DefectModule } from './defect/defect.module';
-import { DefectPlaceModule } from './defect-place/defect-place.module';
 import { FileModule } from './file/file.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { SettingsModule } from './settings/settings.module';
+import { UserSnsModule } from './user-sns/user-sns.module';
+import { DefectModule } from './defect/defect.module';
 
 @Module({
   imports: [
-    UsersModule,
     ConfigModule.forRoot({
       envFilePath: [`${__dirname}/config/env/.${process.env.NODE_ENV}.env`],
       load: [],
@@ -35,20 +32,19 @@ import { SettingsModule } from './settings/settings.module';
       limit: 10,
     }),
     TypeOrmModule.forRoot(),
+    UsersModule,
     AuthModule,
     CommonModule,
-    BoardsModule,
-    BoardContentsModule,
-    BoardCategoriesModule,
-    BoardSelectedCategoriesModule,
+    // BoardsModule,
+    // BoardContentsModule,
+    // BoardCategoriesModule,
+    // BoardSelectedCategoriesModule,
     GroupsModule,
-    AdminUsersModule,
-    PlaceModule,
-    DefectModule,
-    DefectPlaceModule,
+    UserSnsModule,
     FileModule,
-    DashboardModule,
-    SettingsModule,
+    // DefectModule,
+    // DashboardModule,
+    // SettingsModule,
   ],
   providers: [CommonService],
 })

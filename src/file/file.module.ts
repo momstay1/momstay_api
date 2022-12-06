@@ -7,7 +7,7 @@ import { DefectModule } from 'src/defect/defect.module';
 
 @Module({
   imports: [
-    forwardRef(() => DefectModule),
+    // forwardRef(() => DefectModule),
     TypeOrmModule.forFeature([FileEntity]),
   ],
   controllers: [FileController],

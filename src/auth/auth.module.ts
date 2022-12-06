@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 import { CommonService } from 'src/common/common.service';
 import { GroupsModule } from 'src/groups/groups.module';
+import { UserSnsModule } from 'src/user-sns/user-sns.module';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
@@ -18,6 +19,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     forwardRef(() => AdminUsersModule),
     PassportModule,
     GroupsModule,
+    UserSnsModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expried_on },

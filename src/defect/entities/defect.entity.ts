@@ -45,10 +45,4 @@ export class DefectEntity {
     onUpdate: 'NO ACTION'
   })
   place: PlaceEntity;
-
-  @ManyToOne(() => UsersEntity, (place) => place.defect, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION'
-  })
-  user: UsersEntity;
 }

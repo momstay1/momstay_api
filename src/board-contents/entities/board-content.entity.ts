@@ -85,7 +85,7 @@ export class BoardContentsEntity {
   @ApiProperty({ description: '게시글 수정일' })
   bc_updatedAt: Date;
 
-  @ManyToOne(() => UsersEntity, (user) => user.board_contents, {
+  @ManyToOne(() => UsersEntity, (user) => user.boardContents, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION'
   })

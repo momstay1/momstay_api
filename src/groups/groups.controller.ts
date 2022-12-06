@@ -20,12 +20,12 @@ export class GroupsController {
   // }
 
   @Get()
-  @Auth(['root', 'admin', 'basic'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '그룹 리스트 API' })
   @ApiOkResponse({ type: GroupsEntity })
   async findAll(@GetUser() user: AdminUsersEntity | UsersEntity) {
-    return await this.groupsService.findAll(user);
+    return await this.groupsService.findAllUser(user);
   }
 
   // @Get(':id')
