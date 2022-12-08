@@ -19,6 +19,8 @@ import { SettingsModule } from './settings/settings.module';
 import { UserSnsModule } from './user-sns/user-sns.module';
 import { DefectModule } from './defect/defect.module';
 import { LoginModule } from './login/login.module';
+import { UserLeaveModule } from './user-leave/user-leave.module';
+import { UserDormantModule } from './user-dormant/user-dormant.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { LoginModule } from './login/login.module';
     UserSnsModule,
     FileModule,
     LoginModule,
+    UserLeaveModule,
+    UserDormantModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,

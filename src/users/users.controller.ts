@@ -102,7 +102,7 @@ export class UsersController {
 
   // 회원 정보 가져오기
   @Get('uniquekey/:uniquekey')
-  @ApiOperation({ summary: '회원 존재확인 API' })
+  @ApiOperation({ summary: '본인인증시 회원 존재여부 체크 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async getUniqueKey(@Param('uniquekey') uniquekey: string,) {
     const data = await this.usersService.findOne({ uniqueKey: uniquekey });
@@ -114,7 +114,7 @@ export class UsersController {
   @ApiOperation({ summary: '로그인시 아이디 체크 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async loginChk(@Param('id') id: string) {
-    const data = await this.usersService.loginChk(id);
+    const data = await this.usersService.fineUser(id);
     return data;
   }
 

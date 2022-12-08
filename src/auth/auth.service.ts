@@ -19,7 +19,7 @@ export class AuthService {
   ) { }
 
   async validateUser(id: string, password: string): Promise<any> {
-    const user = await this.userService.findId(id);
+    const user = await this.userService.fineUser(id);
     if (user.status != usersConstant.status.registration) {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async login(user, type): Promise<ResponseAuthDto> {
-    const userInfo = await this.userService.findId(user.id);
+    const userInfo = await this.userService.fineUser(user.id);
     if (type && type.indexOf(userInfo.groups[0].id) == -1) {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
