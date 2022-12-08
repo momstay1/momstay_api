@@ -162,6 +162,10 @@ export class UsersService {
     user.status = +get(updateUserDto, 'status', usersConstant.status.registration);
     user.name = get(updateUserDto, 'name', '');
     user.email = get(updateUserDto, 'email', '');
+    user.other = get(updateUserDto, 'other', '');
+    user.language = get(updateUserDto, 'language', '');
+    user.gender = get(updateUserDto, 'gender', '');
+    user.countryCode = get(updateUserDto, 'countryCode', '');
     user.phone = get(updateUserDto, 'phone', '');
     user.birthday = get(updateUserDto, 'birthday', '0000-00-00');
     user.memo = get(updateUserDto, 'memo', '');
