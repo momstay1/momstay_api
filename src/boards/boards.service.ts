@@ -23,7 +23,8 @@ export class BoardsService {
     return await this.boardRepository.find({
       where: qb => {
         qb.where('bd_status != :bd_status', { bd_status: bdConstants.status.delete });
-      }
+      },
+      order: { bd_order: 'ASC' }
     });
   }
 
