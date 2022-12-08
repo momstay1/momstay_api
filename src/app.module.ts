@@ -18,6 +18,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { SettingsModule } from './settings/settings.module';
 import { UserSnsModule } from './user-sns/user-sns.module';
 import { DefectModule } from './defect/defect.module';
+import { LoginModule } from './login/login.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { DefectModule } from './defect/defect.module';
     GroupsModule,
     UserSnsModule,
     FileModule,
+    LoginModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,

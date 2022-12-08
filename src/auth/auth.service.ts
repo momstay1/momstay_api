@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AdminUsersService } from 'src/admin-users/admin-users.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { GroupsService } from 'src/groups/groups.service';
+import { LoginService } from 'src/login/login.service';
 import { UserSnsService } from 'src/user-sns/user-sns.service';
 import { usersConstant } from 'src/users/constants';
 import { UsersService } from 'src/users/users.service';
@@ -37,6 +38,7 @@ export class AuthService {
     }
     const group = await this.groupsService.findOne(userInfo.groups[0].idx);
     const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: group.id };
+
     return {
       access_token: this.jwtService.sign(payload),
     };

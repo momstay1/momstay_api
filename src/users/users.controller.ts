@@ -8,6 +8,7 @@ import {
   Param,
   UseInterceptors,
   UploadedFiles,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -37,13 +38,15 @@ import { Auth } from 'src/common/decorator/role.decorator';
 import { SnsLoginUserDto } from './dto/sns.login-user.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
+import { LoginService } from 'src/login/login.service';
 
 @Controller('users')
 @ApiTags('유저 API')
 export class UsersController {
   constructor(
     private authService: AuthService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly loginService: LoginService
   ) { }
 
   // 회원 생성
@@ -70,8 +73,10 @@ export class UsersController {
   @ApiBody({ type: LoginUserDto })
   @ApiCreatedResponse({ type: ResponseAuthDto })
   @ApiUnauthorizedResponse({ type: ResponseErrDto })
-  async login(@GetUser() user: UsersEntity) {
-    return this.authService.login(user, '');
+  async login(@GetUser() user: UsersEntity, @Req() req) {
+    const jwt = await this.authService.login(user, '');
+    await this.loginService.create(user, req);
+    return jwt;
   }
 
   // sns회원 로그인
@@ -85,15 +90,6 @@ export class UsersController {
   }
 
   // 회원 정보 가져오기
-  @Get()
-  @ApiOperation({ summary: '회원 존재확인 API' })
-  @ApiOkResponse({ type: ProfileUserDto })
-  async getUniqueKey(@Query('uniquekey') uniquekey: string) {
-    const data = await this.usersService.findOne({ uniqueKey: uniquekey });
-    return data;
-  }
-
-  // 회원 정보 가져오기
   @Get('profile')
   @Auth(['Any'])
   @ApiOperation({ summary: '회원 정보 API' })
@@ -101,6 +97,24 @@ export class UsersController {
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {
     const data = await this.usersService.findId(get(user, 'id', ''));
+    return data;
+  }
+
+  // 회원 정보 가져오기
+  @Get('uniquekey/:uniquekey')
+  @ApiOperation({ summary: '회원 존재확인 API' })
+  @ApiOkResponse({ type: ProfileUserDto })
+  async getUniqueKey(@Param('uniquekey') uniquekey: string,) {
+    const data = await this.usersService.findOne({ uniqueKey: uniquekey });
+    return data;
+  }
+
+  // 로그인시 아이디 또는 이메일 회원 체크
+  @Get('logincheck/:id')
+  @ApiOperation({ summary: '로그인시 아이디 체크 API' })
+  @ApiOkResponse({ type: ProfileUserDto })
+  async loginChk(@Param('id') id: string) {
+    const data = await this.usersService.loginChk(id);
     return data;
   }
 

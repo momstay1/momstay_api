@@ -95,12 +95,11 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: obj,
-      relations: ['groups', 'userSns'],
+      relations: ['groups', 'userSns', 'login'],
     });
     if (!user) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
     }
-
     return user;
   }
 
@@ -110,10 +109,28 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['groups', 'userSns'],
+      relations: ['groups', 'userSns', 'login'],
     });
     if (!user) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
+    }
+
+    return user;
+  }
+
+  async loginChk(id: string): Promise<UsersEntity | undefined> {
+    if (!id) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const user = await this.usersRepository.findOne({
+      where: (qb) => {
+        qb.where('`email` = :email', { email: id })
+        qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
+      },
+      relations: ['groups', 'userSns', 'login'],
+    });
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
     }
 
     return user;
@@ -128,7 +145,7 @@ export class UsersService {
       relations: ['groups', 'userSns'],
     });
     if (!user) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
     }
 
     return user;

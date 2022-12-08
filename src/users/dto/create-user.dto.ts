@@ -47,12 +47,30 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
+  @ApiPropertyOptional({ description: '국가번호' })
+  readonly countryCode: string;
+
+  @IsOptional()
+  @IsString()
   @ApiPropertyOptional({ description: '연락처' })
   readonly phone: string;
 
   @IsOptional()
   @ApiPropertyOptional({ description: '생일' })
   readonly birthday: Date;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: '가입언어' })
+  readonly language: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({ description: '성별' })
+  readonly gender: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({ description: '직장 또는 학교' })
+  readonly other: string;
 
   @IsOptional()
   @IsString()

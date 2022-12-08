@@ -1,6 +1,7 @@
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
+import { LoginEntity } from 'src/login/entities/login.entity';
 import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
 import {
   BeforeInsert,
@@ -42,14 +43,26 @@ export class UsersEntity {
   @Column({ length: 255 })
   name: string;
 
-  @Column({ length: 60, default: '' })
+  @Column({ length: 255, default: '' })
   email: string;
 
-  @Column({ length: 60, default: '' })
+  @Column({ length: 255, default: '' })
+  language: string;
+
+  @Column({ length: 255, default: '' })
+  gender: string;
+
+  @Column({ length: 255, default: '' })
+  countryCode: string;
+
+  @Column({ length: 255, default: '' })
   phone: string;
 
   @Column({ type: 'date', default: '0' })
   birthday: Date | string;
+
+  @Column({ length: 255, default: '' })
+  other: string;
 
   @Column({ type: 'text', default: '' })
   memo: string;
@@ -65,6 +78,9 @@ export class UsersEntity {
 
   @OneToMany(() => BoardContentsEntity, (bc) => bc.user)
   boardContents: undefined;
+
+  @OneToMany(() => LoginEntity, (login) => login.user)
+  login: LoginEntity[];
 
   @OneToMany(() => UserSnsEntity, (us) => us.user)
   userSns: UserSnsEntity[];
