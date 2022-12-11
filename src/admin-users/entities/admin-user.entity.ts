@@ -46,9 +46,6 @@ export class AdminUsersEntity {
   @Column({ type: 'text' })
   admin_memo: string;
 
-  @OneToMany(() => BoardContentsEntity, (bc) => bc.admin)
-  board_contents: undefined;
-
   @CreateDateColumn()
   admin_createdAt: Date;
 

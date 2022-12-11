@@ -39,7 +39,7 @@ import { UserDormantModule } from './user-dormant/user-dormant.module';
     AuthModule,
     CommonModule,
     BoardsModule,
-    // BoardContentsModule,
+    BoardContentsModule,
     // BoardCategoriesModule,
     // BoardSelectedCategoriesModule,
     GroupsModule,

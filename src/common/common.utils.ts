@@ -1,6 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { isArray, isObject, map } from "lodash";
+import { filter, isArray, isObject, map } from "lodash";
 import { usersConstant } from "src/users/constants";
 
 export const commonUtils = {
@@ -73,5 +73,8 @@ export const commonUtils = {
     }
 
     return where;
+  },
+  async authCheck(auth, groups) {
+    return filter(groups, (o) => { return auth.includes(o.id) });
   }
 };

@@ -27,13 +27,8 @@ export class CreateBoardContentDto {
   user_idx: string;
 
   @IsString()
-  @IsOptional()
-  @ApiProperty({ description: '관리자 idx' })
-  admin_idx: string;
-
-  @IsString()
   @ApiProperty({ description: '게시글 작성자' })
-  write_name: string;
+  writer: string;
 
   @IsString()
   @ApiProperty({ description: '게시글 제목' })
@@ -42,7 +37,7 @@ export class CreateBoardContentDto {
   @IsOptional()
   @IsString()
   @ApiProperty({ description: '게시글 링크 상태' })
-  link_status: string;
+  linkStatus: string;
 
   @IsOptional()
   @IsString()
