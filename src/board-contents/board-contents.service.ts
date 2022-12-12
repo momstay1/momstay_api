@@ -33,7 +33,7 @@ export class BoardContentsService {
   // 게시글 생성
   async create(userInfo, bc: CreateBoardContentDto) {
     // 게시판 정보 가져오기
-    const board = await this.boardsService.findBoard({ bd_idx: bc.bd_idx });
+    const board = await this.boardsService.findBoard({ idx: bc.bd_idx });
     const write_auth = board.write_auth.split("|");
 
     // 회원정보 가져오기
@@ -73,7 +73,17 @@ export class BoardContentsService {
     await this.bcRepository.createQueryBuilder()
       .update(BoardContentsEntity)
       .set({ status: Number(statusChange.status) })
-      .where(" bc_idx IN (:bc_idx)", { bc_idx: statusChange.bc_idxs })
+      .where(" idx IN (:bc_idx)", { bc_idx: statusChange.bc_idxs })
+      .execute()
+  }
+
+  // 게시글 상태 일괄 변경 (수정, 삭제)
+  async typeChange(typeChange) {
+    console.log({ typeChange });
+    await this.bcRepository.createQueryBuilder()
+      .update(BoardContentsEntity)
+      .set({ type: Number(typeChange.type) })
+      .where(" idx IN (:bc_idx)", { bc_idx: typeChange.bc_idxs })
       .execute()
   }
 
@@ -94,7 +104,7 @@ export class BoardContentsService {
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
-        qb.where('`BoardContentsEntity__board`.`bd_idx` = :bd_idx', { bd_idx: bd_idx })
+        qb.where('`BoardContentsEntity__board`.`idx` = :bd_idx', { bd_idx: bd_idx })
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
@@ -123,7 +133,7 @@ export class BoardContentsService {
     return await this.bcRepository.find({
       order: { createdAt: 'DESC' },
       where: (qb) => {
-        qb.where('`BoardContentsEntity__board`.`bd_idx` = :bc_bd_idx', { bc_bd_idx: bd_idx })
+        qb.where('`BoardContentsEntity__board`.`idx` = :bc_bd_idx', { bc_bd_idx: bd_idx })
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
@@ -241,11 +251,11 @@ export class BoardContentsService {
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
-        qb.where('`BoardContentsEntity__board`.`bd_idx` = :bd_idx', { bd_idx: bd_idx })
+        qb.where('`BoardContentsEntity__board`.`idx` = :bd_idx', { bd_idx: bd_idx })
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
-        // qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        qb.andWhere('`BoardContentsEntity`.`status` >= :status', { status: bcConstants.status.uncertified })
         qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
       },
       relations: ['user', 'board', 'bscats'],

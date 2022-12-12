@@ -50,7 +50,7 @@ export class AdminBoardContentsController {
   @ApiOperation({ summary: '관리자 게시글 상태 일괄 변경 API' })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   @ApiBody({
     schema: {
       properties: {
@@ -60,7 +60,24 @@ export class AdminBoardContentsController {
     }
   })
   async statusChange(@Body() statusChange) {
-    return await this.boardContentsService.statusChange(statusChange);
+    await this.boardContentsService.statusChange(statusChange);
+  }
+
+  @Post('type-change')
+  @ApiOperation({ summary: '관리자 게시글 타입 일괄 변경 API' })
+  @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
+  @ApiBearerAuth()
+  @Auth(['root', 'admin'])
+  @ApiBody({
+    schema: {
+      properties: {
+        type: { type: 'string' },
+        bc_idxs: { example: [] }
+      }
+    }
+  })
+  async typeChange(@Body() statusChange) {
+    await this.boardContentsService.typeChange(statusChange);
   }
 
   @Get(':bd_idx')

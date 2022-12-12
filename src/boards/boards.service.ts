@@ -29,7 +29,7 @@ export class BoardsService {
   }
 
   async findOne(id: string): Promise<BoardsEntity | undefined> {
-    const board = await this.findBoard({ bd_id: id });
+    const board = await this.findBoard({ id: id });
     return board;
   }
 
