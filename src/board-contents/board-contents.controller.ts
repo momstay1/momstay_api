@@ -72,7 +72,7 @@ export class BoardContentsController {
   @ApiCreatedResponse({ type: BoardContentsEntity })
   async findOne(@Param('bd_idx') bd_idx: number, @Param('bc_idx') bc_idx: number) {
     const bc = await this.boardContentsService.findOne(bc_idx);
-    return this.sanitizeBoardContent(bc);
+    return bc;
   }
 
   @Patch(':bc_idx')

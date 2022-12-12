@@ -21,6 +21,7 @@ import { GetUser } from 'src/auth/getuser.decorator';
 import { commonUtils } from 'src/common/common.utils';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
+import { UsersEntity } from 'src/users/entities/user.entity';
 import { BoardContentsService } from './board-contents.service';
 import { CreateBoardContentDto } from './dto/create-board-content.dto';
 import { UpdateBoardContentDto } from './dto/update-board-content.dto';
@@ -41,7 +42,7 @@ export class AdminBoardContentsController {
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['Any'])
-  async create(@GetUser() user: AdminUsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
+  async create(@GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
     return await this.boardContentsService.create(user, createBoardContentDto);
   }
 
@@ -70,6 +71,7 @@ export class AdminBoardContentsController {
     @Query('category') category: string,
     @Query('take') take: number,
     @Query('page') page: number,
+    @Query('order') order: string,
   ) {
     const {
       bc: {
@@ -78,19 +80,19 @@ export class AdminBoardContentsController {
         pageTotal
       },
       bcats
-    } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page });
+    } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
     const data = map(results, (obj) => {
       return this.sanitizeBoardContent(obj);
     });
-    return { bcats, results: data, total, pageTotal };
+    return { bcats, total, pageTotal, results };
   }
 
   @Get(':bd_idx/:bc_idx')
   @ApiOperation({ summary: '관리자 게시글 상세 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
   async findOne(@Param('bd_idx') bd_idx: number, @Param('bc_idx') bc_idx: number) {
-    const bc = await this.boardContentsService.findBdBcIndex(bd_idx, bc_idx);
-    return this.sanitizeBoardContent(bc);
+    const bc = await this.boardContentsService.findBdBcIndex(bc_idx);
+    return bc;
   }
 
   @Patch(':bc_idx')
@@ -99,10 +101,10 @@ export class AdminBoardContentsController {
   @Auth(['root'])
   async update(
     @GetUser() user: AdminUsersEntity,
-    @Param('bc_idx') bc_idx: string,
+    @Param('bc_idx') bc_idx: number,
     @Body() updateBoardContentDto: UpdateBoardContentDto
   ) {
-    const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
-    return this.sanitizeBoardContent(bc);
+    const bc = await this.boardContentsService.update(user, bc_idx, updateBoardContentDto);
+    return bc;
   }
 }

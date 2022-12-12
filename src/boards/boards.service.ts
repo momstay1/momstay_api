@@ -22,9 +22,9 @@ export class BoardsService {
   async findAll() {
     return await this.boardRepository.find({
       where: qb => {
-        qb.where('bd_status != :bd_status', { bd_status: bdConstants.status.delete });
+        qb.where('`BoardsEntity`.`status` != :bd_status', { bd_status: bdConstants.status.delete });
       },
-      order: { bd_order: 'ASC' }
+      order: { order: 'ASC' }
     });
   }
 

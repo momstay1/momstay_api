@@ -12,37 +12,37 @@ import {
 @Entity('boards')
 export class BoardsEntity {
   @PrimaryGeneratedColumn()
-  bd_idx: number;
+  idx: number;
 
   @Column()
-  bd_status: number;
+  status: number;
 
   @Column({ length: 255 })
-  bd_id: string;
+  id: string;
 
   @Column({ length: 255 })
-  bd_name: string;
+  name: string;
 
   @Column({ length: 255 })
-  bd_type: string;
+  type: string;
 
   @Column({ default: 10 })
-  bd_order: number;
+  order: number;
 
   @Column({ default: 'root' })
-  bd_lists_auth: string;
+  lists_auth: string;
 
   @Column({ default: 'root' })
-  bd_write_auth: string;
+  write_auth: string;
 
   @Column({ default: 'root' })
-  bd_view_auth: string;
+  view_auth: string;
 
   @CreateDateColumn()
-  bd_createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  bd_updatedAt: Date;
+  updatedAt: Date;
 
   @OneToMany(() => BoardContentsEntity, (bc) => bc.board)
   board_contents: undefined;
