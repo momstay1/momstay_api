@@ -4,6 +4,7 @@ import { filter, get, isArray, isEmpty, map } from 'lodash';
 import moment from 'moment';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
+import { EmailService } from 'src/email/email.service';
 import { FileService } from 'src/file/file.service';
 import { GroupsService } from 'src/groups/groups.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
@@ -21,7 +22,13 @@ export class UsersService {
     private readonly groupService: GroupsService,
     private readonly userSnsService: UserSnsService,
     private readonly fileService: FileService,
+    private readonly emailService: EmailService,
   ) { }
+
+  async test(id) {
+    this.emailService.snedMail(1, 'shjeon2500@naver.com', '테스트입니다', `테스트<br><br><br>입니다.`);
+    return id;
+  }
 
   async create(createUserDto: CreateUserDto, files) {
     //회원 아이디 중복 체크
@@ -33,7 +40,9 @@ export class UsersService {
     //회원 정보 저장
     const save_user = await this.saveUser(createUserDto);
 
-    await this.userSnsService.saveUserSns(createUserDto.snsInfo, save_user);
+    if (createUserDto.snsInfo) {
+      await this.userSnsService.saveUserSns(createUserDto.snsInfo, save_user);
+    }
 
     const user = await this.findIdx(save_user['idx']);
     const file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
@@ -213,4 +222,5 @@ export class UsersService {
   private async checkUserExists(id: string) {
     return await this.usersRepository.findOne({ id: id });
   }
+
 }

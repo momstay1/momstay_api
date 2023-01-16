@@ -21,6 +21,7 @@ import { DefectModule } from './defect/defect.module';
 import { LoginModule } from './login/login.module';
 import { UserLeaveModule } from './user-leave/user-leave.module';
 import { UserDormantModule } from './user-dormant/user-dormant.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { UserDormantModule } from './user-dormant/user-dormant.module';
     LoginModule,
     UserLeaveModule,
     UserDormantModule,
+    EmailModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,

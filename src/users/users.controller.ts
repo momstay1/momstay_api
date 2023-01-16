@@ -118,6 +118,13 @@ export class UsersController {
     return data;
   }
 
+  // 테스트용
+  @Get('test/:id')
+  async test(@Param('id') id: string) {
+    const data = await this.usersService.test(id);
+    return data;
+  }
+
   // 회원 수정
   // @Patch(':id')
   // async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

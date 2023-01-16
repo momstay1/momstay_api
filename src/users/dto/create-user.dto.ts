@@ -83,11 +83,9 @@ export class CreateUserDto {
   readonly uniqueKey: string;
 
   @IsOptional()
-  @IsString()
-  @ApiProperty({ description: '회원 본인인증 정보' })
+  @ApiProperty({ description: '회원 본인인증 정보 (json형태)' })
   readonly certifiInfo: string;
 
-  @IsString()
   @IsOptional()
   @ApiProperty({ description: '회원 그룹' })
   readonly group: number[];
