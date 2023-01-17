@@ -22,6 +22,9 @@ import { LoginModule } from './login/login.module';
 import { UserLeaveModule } from './user-leave/user-leave.module';
 import { UserDormantModule } from './user-dormant/user-dormant.module';
 import { EmailModule } from './email/email.module';
+import { ProductModule } from './product/product.module';
+import { ProductOptionModule } from './product-option/product-option.module';
+import { ProductInfoModule } from './product-info/product-info.module';
 
 @Module({
   imports: [
@@ -50,6 +53,9 @@ import { EmailModule } from './email/email.module';
     UserLeaveModule,
     UserDormantModule,
     EmailModule,
+    ProductModule,
+    ProductOptionModule,
+    ProductInfoModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,
