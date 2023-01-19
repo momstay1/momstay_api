@@ -91,6 +91,16 @@ export class UsersController {
 
   // 인증 코드 확인
   @Post('emailckeck')
+  @ApiOperation({ summary: '인증 코드 확인 API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', description: '이메일' },
+        code: { type: 'string', description: '인증코드' },
+      }
+    }
+  })
   async emailChk(@Body('email') email: string, @Body('code') code: string) {
     await this.usersService.emailChk(email, code);
   }
@@ -126,6 +136,7 @@ export class UsersController {
 
   // 인증 메일 발송
   @Get('email/:email')
+  @ApiOperation({ summary: '인증 메일 발송 API' })
   async email(@Param('email') email: string) {
     await this.usersService.email(email);
   }
