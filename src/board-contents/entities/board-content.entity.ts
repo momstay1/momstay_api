@@ -19,83 +19,67 @@ import {
 export class BoardContentsEntity {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: '게시글 idx' })
-  bc_idx: number;
-
-  @Column()
-  @ApiProperty({ description: '게시판 idx' })
-  bc_bd_idx: number;
-
-  @Column({ default: 0 })
-  @ApiProperty({ description: '게시글 작성한 회원 idx' })
-  bc_user_idx: number;
-
-  @Column({ default: 0 })
-  @ApiProperty({ description: '게시글 작성한 관리자 idx' })
-  bc_admin_idx: number;
+  idx: number;
 
   @Column({ default: 2 })
   @ApiProperty({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' })
-  bc_status: number;
+  status: number;
 
   @Column({ default: 2 })
-  @ApiProperty({ description: '게시글 타입 1: 공지사항, 2: 일반글, 3: 비밀글, 4: 외부링크' })
-  bc_type: number;
+  @ApiProperty({ description: '게시글 타입 1: 공지사항, 2: 일반글, 3: 비밀글(미사용), 4: 외부링크, 5: 이벤트, 6: 새소식' })
+  type: number;
 
   @Column()
   @ApiProperty({ description: '게시글 작성자' })
-  bc_write_name: string;
+  writer: string;
 
   @Column({ length: 255 })
   @ApiProperty({ description: '게시글 제목' })
-  bc_title: string;
+  title: string;
 
   @Column({ length: 255, default: '' })
   @ApiProperty({ description: '게시글 링크 사용여부' })
-  bc_link_status: string;
+  linkStatus: string;
 
   @Column({ length: 255, default: '' })
   @ApiProperty({ description: '게시글 링크' })
-  bc_link: string;
+  link: string;
 
   @Column({ type: 'text' })
   @ApiProperty({ description: '게시글 내용' })
-  bc_content: string;
+  content: string;
 
   @Column({ length: 255, default: '' })
-  bc_password: string;
+  password: string;
 
   @BeforeInsert()
   async setPassword(password: string) {
-    this.bc_password = await commonBcrypt.setBcryptPassword(password || this.bc_password);
+    if (this.password) {
+      this.password = await commonBcrypt.setBcryptPassword(password || this.password);
+    }
   }
 
   @Column({ default: 0 })
   @ApiProperty({ description: '게시글 조회수' })
-  bc_count: number;
+  count: number;
 
   @Column({ default: 10 })
   @ApiProperty({ description: '게시글 순서' })
-  bc_order: number;
+  order: number;
 
   @CreateDateColumn()
   @ApiProperty({ description: '게시글 생성일' })
-  bc_createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   @ApiProperty({ description: '게시글 수정일' })
-  bc_updatedAt: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => UsersEntity, (user) => user.boardContents, {
     onDelete: 'NO ACTION',
     onUpdate: 'NO ACTION'
   })
   user: UsersEntity;
-
-  @ManyToOne(() => AdminUsersEntity, (admin) => admin.board_contents, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION'
-  })
-  admin: AdminUsersEntity;
 
   @ManyToOne(() => BoardsEntity, (board) => board.board_contents, {
     onDelete: 'NO ACTION',

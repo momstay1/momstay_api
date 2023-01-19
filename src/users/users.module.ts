@@ -9,6 +9,9 @@ import { GroupsModule } from 'src/groups/groups.module';
 import { AdminUsersController } from './admin-users.controller';
 import { UserSnsModule } from 'src/user-sns/user-sns.module';
 import { FileModule } from 'src/file/file.module';
+import { LoginModule } from 'src/login/login.module';
+import { EmailService } from 'src/email/email.service';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
@@ -17,6 +20,8 @@ import { FileModule } from 'src/file/file.module';
     GroupsModule,
     UserSnsModule,
     FileModule,
+    EmailModule,
+    LoginModule
     // forwardRef(() => FileModule),
   ],
   controllers: [UsersController, AdminUsersController],

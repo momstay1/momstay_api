@@ -54,6 +54,7 @@ export class BoardContentsController {
     @Query('category') category: string,
     @Query('take') take: number,
     @Query('page') page: number,
+    @Query('order') order: string,
   ) {
     const {
       bc: {
@@ -62,11 +63,8 @@ export class BoardContentsController {
         pageTotal
       },
       bcats
-    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page });
-    const data = map(results, (obj) => {
-      return this.sanitizeBoardContent(obj);
-    });
-    return { bcats, results: data, total, pageTotal };
+    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order);
+    return { bcats, total, pageTotal, results };
   }
 
   @Get(':bd_idx/:bc_idx')
@@ -74,7 +72,7 @@ export class BoardContentsController {
   @ApiCreatedResponse({ type: BoardContentsEntity })
   async findOne(@Param('bd_idx') bd_idx: number, @Param('bc_idx') bc_idx: number) {
     const bc = await this.boardContentsService.findOne(bc_idx);
-    return this.sanitizeBoardContent(bc);
+    return bc;
   }
 
   @Patch(':bc_idx')

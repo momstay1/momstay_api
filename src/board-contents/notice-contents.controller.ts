@@ -26,8 +26,6 @@ export class NoticeContentsController {
     @Query('category') category: string
   ) {
     const bc = await this.boardContentsService.findNoticeCategoryAll(bd_idx, category);
-    return map(bc, (obj) => {
-      return this.sanitizeBoardContent(obj);
-    });
+    return bc;
   }
 }

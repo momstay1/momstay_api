@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { filter, get, isArray, isEmpty, map } from 'lodash';
-import moment from 'moment';
+import * as moment from "moment";
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
+import { EmailService } from 'src/email/email.service';
 import { FileService } from 'src/file/file.service';
 import { GroupsService } from 'src/groups/groups.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
@@ -21,7 +22,41 @@ export class UsersService {
     private readonly groupService: GroupsService,
     private readonly userSnsService: UserSnsService,
     private readonly fileService: FileService,
+    private readonly emailService: EmailService,
   ) { }
+
+  async test(id) {
+    this.emailService.createCode('shjeon2500@naver.com', 0);
+    return id;
+  }
+
+  async email(email: string) {
+    try {
+      await this.findId(email);
+    } catch (error) {
+      const code = await this.emailService.createCode('shjeon2500@naver.com', 0);
+      this.emailService.snedMail(
+        1,
+        email,
+        'momstay - Email Authentication',
+        `Please enter the email authentication code below to register as a member.
+        <br><br>
+        Email authentication code : ${code}`
+      );
+    }
+  }
+
+  async emailChk(email: string, code: string) {
+    const email_code = await this.emailService.findEmailCode(code, email);
+
+    const date = moment().add(-10, 'm').format('YYYY-MM-DD HH:mm:ss');
+    const create_date = moment(email_code.createdAt).format('YYYY-MM-DD HH:mm:ss');
+    if (create_date < date) {
+      throw new NotAcceptableException('Authentication timeout.');
+    }
+
+    await this.emailService.authCode(code, email);
+  }
 
   async create(createUserDto: CreateUserDto, files) {
     //회원 아이디 중복 체크
@@ -33,7 +68,9 @@ export class UsersService {
     //회원 정보 저장
     const save_user = await this.saveUser(createUserDto);
 
-    await this.userSnsService.saveUserSns(createUserDto.snsInfo, save_user);
+    if (createUserDto.snsInfo) {
+      await this.userSnsService.saveUserSns(createUserDto.snsInfo, save_user);
+    }
 
     const user = await this.findIdx(save_user['idx']);
     const file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
@@ -59,6 +96,7 @@ export class UsersService {
       .where(new Brackets(qb => {
         qb.where('users.status IN (:user_status)', { user_status: status_arr });
         get(where, 'group', '') && qb.andWhere('`groups`.idx IN (:group)', { group: get(where, 'group') })
+        get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: get(where, 'language') })
         get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
         get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
         get(where, 'email', '') && qb.andWhere('`users`.email LIKE :email', { email: '%' + get(where, 'email') + '%' })
@@ -95,12 +133,11 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: obj,
-      relations: ['groups', 'userSns'],
+      relations: ['groups', 'userSns', 'login'],
     });
     if (!user) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
     }
-
     return user;
   }
 
@@ -110,10 +147,28 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['groups', 'userSns'],
+      relations: ['groups', 'userSns', 'login'],
     });
     if (!user) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
+    }
+
+    return user;
+  }
+
+  async fineUser(id: string): Promise<UsersEntity | undefined> {
+    if (!id) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const user = await this.usersRepository.findOne({
+      where: (qb) => {
+        qb.where('`email` = :email', { email: id })
+        qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
+      },
+      relations: ['groups', 'userSns', 'login'],
+    });
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
     }
 
     return user;
@@ -128,7 +183,7 @@ export class UsersService {
       relations: ['groups', 'userSns'],
     });
     if (!user) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('존재하지 않는 회원 입니다.');
     }
 
     return user;
@@ -144,6 +199,10 @@ export class UsersService {
     user.status = +get(updateUserDto, 'status', usersConstant.status.registration);
     user.name = get(updateUserDto, 'name', '');
     user.email = get(updateUserDto, 'email', '');
+    user.other = get(updateUserDto, 'other', '');
+    user.language = get(updateUserDto, 'language', '');
+    user.gender = get(updateUserDto, 'gender', '');
+    user.countryCode = get(updateUserDto, 'countryCode', '');
     user.phone = get(updateUserDto, 'phone', '');
     user.birthday = get(updateUserDto, 'birthday', '0000-00-00');
     user.memo = get(updateUserDto, 'memo', '');
@@ -191,4 +250,5 @@ export class UsersService {
   private async checkUserExists(id: string) {
     return await this.usersRepository.findOne({ id: id });
   }
+
 }

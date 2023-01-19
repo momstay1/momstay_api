@@ -47,12 +47,30 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
+  @ApiPropertyOptional({ description: '국가번호' })
+  readonly countryCode: string;
+
+  @IsOptional()
+  @IsString()
   @ApiPropertyOptional({ description: '연락처' })
   readonly phone: string;
 
   @IsOptional()
   @ApiPropertyOptional({ description: '생일' })
   readonly birthday: Date;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({ description: '가입언어' })
+  readonly language: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({ description: '성별' })
+  readonly gender: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({ description: '직장 또는 학교' })
+  readonly other: string;
 
   @IsOptional()
   @IsString()
@@ -65,11 +83,9 @@ export class CreateUserDto {
   readonly uniqueKey: string;
 
   @IsOptional()
-  @IsString()
-  @ApiProperty({ description: '회원 본인인증 정보' })
+  @ApiProperty({ description: '회원 본인인증 정보 (json형태)' })
   readonly certifiInfo: string;
 
-  @IsString()
   @IsOptional()
   @ApiProperty({ description: '회원 그룹' })
   readonly group: number[];

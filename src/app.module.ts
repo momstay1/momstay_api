@@ -18,6 +18,13 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { SettingsModule } from './settings/settings.module';
 import { UserSnsModule } from './user-sns/user-sns.module';
 import { DefectModule } from './defect/defect.module';
+import { LoginModule } from './login/login.module';
+import { UserLeaveModule } from './user-leave/user-leave.module';
+import { UserDormantModule } from './user-dormant/user-dormant.module';
+import { EmailModule } from './email/email.module';
+import { ProductModule } from './product/product.module';
+import { ProductOptionModule } from './product-option/product-option.module';
+import { ProductInfoModule } from './product-info/product-info.module';
 
 @Module({
   imports: [
@@ -35,13 +42,20 @@ import { DefectModule } from './defect/defect.module';
     UsersModule,
     AuthModule,
     CommonModule,
-    // BoardsModule,
-    // BoardContentsModule,
+    BoardsModule,
+    BoardContentsModule,
     // BoardCategoriesModule,
     // BoardSelectedCategoriesModule,
     GroupsModule,
     UserSnsModule,
     FileModule,
+    LoginModule,
+    UserLeaveModule,
+    UserDormantModule,
+    EmailModule,
+    ProductModule,
+    ProductOptionModule,
+    ProductInfoModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,

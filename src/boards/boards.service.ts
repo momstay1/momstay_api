@@ -22,13 +22,14 @@ export class BoardsService {
   async findAll() {
     return await this.boardRepository.find({
       where: qb => {
-        qb.where('bd_status != :bd_status', { bd_status: bdConstants.status.delete });
-      }
+        qb.where('`BoardsEntity`.`status` != :bd_status', { bd_status: bdConstants.status.delete });
+      },
+      order: { order: 'ASC' }
     });
   }
 
   async findOne(id: string): Promise<BoardsEntity | undefined> {
-    const board = await this.findBoard({ bd_id: id });
+    const board = await this.findBoard({ id: id });
     return board;
   }
 
