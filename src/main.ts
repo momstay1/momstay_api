@@ -17,7 +17,7 @@ async function bootstrap() {
     }),
   );
   commonUtils.setupSwagger(app);
-  await app.listen(3011);
+  await app.listen(3111);
 }
 
 async function makeOrmConfig() {
