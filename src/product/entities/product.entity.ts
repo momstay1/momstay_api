@@ -69,6 +69,5 @@ export class ProductEntity {
   productOption: undefined;
 
   @ManyToMany(() => ProductInfoEntity, (pi) => pi.product)
-  @JoinTable()
   productInfo: ProductInfoEntity[];
 }
