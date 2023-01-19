@@ -89,6 +89,12 @@ export class UsersController {
     return this.authService.snsLogin(snsLoginUserDto);
   }
 
+  // 인증 코드 확인
+  @Post('emailckeck')
+  async emailChk(@Body('email') email: string, @Body('code') code: string) {
+    await this.usersService.emailChk(email, code);
+  }
+
   // 회원 정보 가져오기
   @Get('profile')
   @Auth(['Any'])
@@ -116,6 +122,12 @@ export class UsersController {
   async loginChk(@Param('id') id: string) {
     const data = await this.usersService.fineUser(id);
     return data;
+  }
+
+  // 인증 메일 발송
+  @Get('email/:email')
+  async email(@Param('email') email: string) {
+    await this.usersService.email(email);
   }
 
   // 테스트용

@@ -76,5 +76,8 @@ export const commonUtils = {
   },
   async authCheck(auth, groups) {
     return filter(groups, (o) => { return auth.includes(o.id) });
+  },
+  createCode(): string {
+    return Math.random().toString(36).substr(2, 11);
   }
 };

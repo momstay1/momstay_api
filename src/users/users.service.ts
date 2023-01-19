@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { filter, get, isArray, isEmpty, map } from 'lodash';
-import moment from 'moment';
+import * as moment from "moment";
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
 import { EmailService } from 'src/email/email.service';
@@ -26,8 +26,36 @@ export class UsersService {
   ) { }
 
   async test(id) {
-    this.emailService.snedMail(1, 'shjeon2500@naver.com', '테스트입니다', `테스트<br><br><br>입니다.`);
+    this.emailService.createCode('shjeon2500@naver.com', 0);
     return id;
+  }
+
+  async email(email: string) {
+    try {
+      await this.findId(email);
+    } catch (error) {
+      const code = await this.emailService.createCode('shjeon2500@naver.com', 0);
+      this.emailService.snedMail(
+        1,
+        email,
+        'momstay - Email Authentication',
+        `Please enter the email authentication code below to register as a member.
+        <br><br>
+        Email authentication code : ${code}`
+      );
+    }
+  }
+
+  async emailChk(email: string, code: string) {
+    const email_code = await this.emailService.findEmailCode(code, email);
+
+    const date = moment().add(-10, 'm').format('YYYY-MM-DD HH:mm:ss');
+    const create_date = moment(email_code.createdAt).format('YYYY-MM-DD HH:mm:ss');
+    if (create_date < date) {
+      throw new NotAcceptableException('Authentication timeout.');
+    }
+
+    await this.emailService.authCode(code, email);
   }
 
   async create(createUserDto: CreateUserDto, files) {
