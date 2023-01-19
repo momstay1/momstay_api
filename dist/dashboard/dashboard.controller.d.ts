@@ -9,7 +9,6 @@ export declare class DashboardController {
     findAll(): string;
     getUsersDashboard(user: AdminUsersEntity): Promise<{
         total_cnt: number;
-        admin_cnt: number;
         users_cnt: number;
     }>;
     findOne(id: string): string;

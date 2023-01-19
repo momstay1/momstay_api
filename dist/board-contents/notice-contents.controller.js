@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NoticeContentsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const lodash_1 = require("lodash");
 const common_utils_1 = require("../common/common.utils");
 const board_contents_service_1 = require("./board-contents.service");
 const board_content_entity_1 = require("./entities/board-content.entity");
@@ -28,9 +27,7 @@ let NoticeContentsController = class NoticeContentsController {
     }
     async findCategoryAll(bd_idx, category) {
         const bc = await this.boardContentsService.findNoticeCategoryAll(bd_idx, category);
-        return (0, lodash_1.map)(bc, (obj) => {
-            return this.sanitizeBoardContent(obj);
-        });
+        return bc;
     }
 };
 __decorate([

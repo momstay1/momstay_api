@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BoardContentsEntity = void 0;
 const swagger_1 = require("@nestjs/swagger");
-const admin_user_entity_1 = require("../../admin-users/entities/admin-user.entity");
 const board_selected_categories_entity_1 = require("../../board-selected-categories/entities/board-selected-categories.entity");
 const board_entity_1 = require("../../boards/entities/board.entity");
 const common_bcrypt_1 = require("../../common/common.bcrypt");
@@ -19,68 +18,55 @@ const user_entity_1 = require("../../users/entities/user.entity");
 const typeorm_1 = require("typeorm");
 let BoardContentsEntity = class BoardContentsEntity {
     async setPassword(password) {
-        this.bc_password = await common_bcrypt_1.commonBcrypt.setBcryptPassword(password || this.bc_password);
+        if (this.password) {
+            this.password = await common_bcrypt_1.commonBcrypt.setBcryptPassword(password || this.password);
+        }
     }
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 idx' }),
     __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_idx", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    (0, swagger_1.ApiProperty)({ description: '게시판 idx' }),
-    __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_bd_idx", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
-    (0, swagger_1.ApiProperty)({ description: '게시글 작성한 회원 idx' }),
-    __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_user_idx", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
-    (0, swagger_1.ApiProperty)({ description: '게시글 작성한 관리자 idx' }),
-    __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_admin_idx", void 0);
+], BoardContentsEntity.prototype, "idx", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 2 }),
     (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' }),
     __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_status", void 0);
+], BoardContentsEntity.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 2 }),
-    (0, swagger_1.ApiProperty)({ description: '게시글 타입 1: 공지사항, 2: 일반글, 3: 비밀글, 4: 외부링크' }),
+    (0, swagger_1.ApiProperty)({ description: '게시글 타입 1: 공지사항, 2: 일반글, 3: 비밀글(미사용), 4: 외부링크, 5: 이벤트, 6: 새소식' }),
     __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_type", void 0);
+], BoardContentsEntity.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 작성자' }),
     __metadata("design:type", String)
-], BoardContentsEntity.prototype, "bc_write_name", void 0);
+], BoardContentsEntity.prototype, "writer", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255 }),
     (0, swagger_1.ApiProperty)({ description: '게시글 제목' }),
     __metadata("design:type", String)
-], BoardContentsEntity.prototype, "bc_title", void 0);
+], BoardContentsEntity.prototype, "title", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
     (0, swagger_1.ApiProperty)({ description: '게시글 링크 사용여부' }),
     __metadata("design:type", String)
-], BoardContentsEntity.prototype, "bc_link_status", void 0);
+], BoardContentsEntity.prototype, "linkStatus", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
     (0, swagger_1.ApiProperty)({ description: '게시글 링크' }),
     __metadata("design:type", String)
-], BoardContentsEntity.prototype, "bc_link", void 0);
+], BoardContentsEntity.prototype, "link", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text' }),
     (0, swagger_1.ApiProperty)({ description: '게시글 내용' }),
     __metadata("design:type", String)
-], BoardContentsEntity.prototype, "bc_content", void 0);
+], BoardContentsEntity.prototype, "content", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
     __metadata("design:type", String)
-], BoardContentsEntity.prototype, "bc_password", void 0);
+], BoardContentsEntity.prototype, "password", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),
@@ -91,36 +77,29 @@ __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, swagger_1.ApiProperty)({ description: '게시글 조회수' }),
     __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_count", void 0);
+], BoardContentsEntity.prototype, "count", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 10 }),
     (0, swagger_1.ApiProperty)({ description: '게시글 순서' }),
     __metadata("design:type", Number)
-], BoardContentsEntity.prototype, "bc_order", void 0);
+], BoardContentsEntity.prototype, "order", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 생성일' }),
     __metadata("design:type", Date)
-], BoardContentsEntity.prototype, "bc_createdAt", void 0);
+], BoardContentsEntity.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 수정일' }),
     __metadata("design:type", Date)
-], BoardContentsEntity.prototype, "bc_updatedAt", void 0);
+], BoardContentsEntity.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.UsersEntity, (user) => user.board_contents, {
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.UsersEntity, (user) => user.boardContents, {
         onDelete: 'NO ACTION',
         onUpdate: 'NO ACTION'
     }),
     __metadata("design:type", user_entity_1.UsersEntity)
 ], BoardContentsEntity.prototype, "user", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => admin_user_entity_1.AdminUsersEntity, (admin) => admin.board_contents, {
-        onDelete: 'NO ACTION',
-        onUpdate: 'NO ACTION'
-    }),
-    __metadata("design:type", admin_user_entity_1.AdminUsersEntity)
-], BoardContentsEntity.prototype, "admin", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => board_entity_1.BoardsEntity, (board) => board.board_contents, {
         onDelete: 'NO ACTION',

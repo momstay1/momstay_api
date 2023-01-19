@@ -72,7 +72,7 @@ let DefectController = class DefectController {
 };
 __decorate([
     (0, common_1.Post)(),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'basic']),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '하자 등록 API' }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([

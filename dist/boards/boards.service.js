@@ -28,12 +28,13 @@ let BoardsService = class BoardsService {
     async findAll() {
         return await this.boardRepository.find({
             where: qb => {
-                qb.where('bd_status != :bd_status', { bd_status: constants_1.bdConstants.status.delete });
-            }
+                qb.where('`BoardsEntity`.`status` != :bd_status', { bd_status: constants_1.bdConstants.status.delete });
+            },
+            order: { order: 'ASC' }
         });
     }
     async findOne(id) {
-        const board = await this.findBoard({ bd_id: id });
+        const board = await this.findBoard({ id: id });
         return board;
     }
     update(id, updateBoardDto) {

@@ -1,0 +1,30 @@
+import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
+import { UsersEntity } from "src/users/entities/user.entity";
+export declare class ProductEntity {
+    idx: number;
+    status: number;
+    type: string;
+    order: string;
+    membership: string;
+    hostBusiness: string;
+    title: string;
+    postCode: string;
+    addr1: string;
+    addr2: string;
+    lat: string;
+    lng: string;
+    language: string;
+    metro: string;
+    college: string;
+    detailsKor: string;
+    detailsEng: string;
+    detailsJpn: string;
+    detailsChn: string;
+    oldIdx: string;
+    oldData: string;
+    createdAt: Date;
+    updatedAt: Date;
+    user: UsersEntity;
+    productOption: undefined;
+    productInfo: ProductInfoEntity[];
+}

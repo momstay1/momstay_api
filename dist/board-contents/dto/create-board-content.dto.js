@@ -40,15 +40,9 @@ __decorate([
 ], CreateBoardContentDto.prototype, "user_idx", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '관리자 idx' }),
-    __metadata("design:type", String)
-], CreateBoardContentDto.prototype, "admin_idx", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 작성자' }),
     __metadata("design:type", String)
-], CreateBoardContentDto.prototype, "write_name", void 0);
+], CreateBoardContentDto.prototype, "writer", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 제목' }),
@@ -59,7 +53,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '게시글 링크 상태' }),
     __metadata("design:type", String)
-], CreateBoardContentDto.prototype, "link_status", void 0);
+], CreateBoardContentDto.prototype, "linkStatus", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

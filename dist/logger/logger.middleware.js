@@ -13,6 +13,8 @@ let LoggerMiddleware = class LoggerMiddleware {
         console.log('---------------------------Request...');
         console.log('---------------------------url : ', req.originalUrl);
         console.log('---------------------------method : ', req.method);
+        console.log('---------------------------body : ', req.body);
+        console.log('---------------------------query : ', req.query);
         next();
     }
 };

@@ -15,22 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BoardsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const common_utils_1 = require("../common/common.utils");
 const boards_service_1 = require("./boards.service");
 let BoardsController = class BoardsController {
     constructor(boardsService) {
         this.boardsService = boardsService;
-        this.sanitizeBoard = (bc) => {
-            return common_utils_1.commonUtils.sanitizeEntity(bc, this.boardsService.getPrivateColumn());
-        };
     }
     async findAll() {
-        const data = await this.boardsService.findAll();
-        return this.sanitizeBoard(data);
+        return await this.boardsService.findAll();
     }
     async findOne(id) {
-        const data = await this.boardsService.findOne(id);
-        return this.sanitizeBoard(data);
+        return await this.boardsService.findOne(id);
     }
 };
 __decorate([

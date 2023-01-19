@@ -13,6 +13,7 @@ const passport_1 = require("@nestjs/passport");
 const admin_users_module_1 = require("../admin-users/admin-users.module");
 const common_service_1 = require("../common/common.service");
 const groups_module_1 = require("../groups/groups.module");
+const user_sns_module_1 = require("../user-sns/user-sns.module");
 const users_module_1 = require("../users/users.module");
 const auth_service_1 = require("./auth.service");
 const constants_1 = require("./constants");
@@ -27,6 +28,7 @@ AuthModule = __decorate([
             (0, common_1.forwardRef)(() => admin_users_module_1.AdminUsersModule),
             passport_1.PassportModule,
             groups_module_1.GroupsModule,
+            user_sns_module_1.UserSnsModule,
             jwt_1.JwtModule.register({
                 secret: constants_1.jwtConstants.secret,
                 signOptions: { expiresIn: constants_1.jwtConstants.expried_on },

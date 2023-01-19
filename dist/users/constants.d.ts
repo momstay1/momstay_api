@@ -1,8 +1,6 @@
 export declare const usersConstant: {
     prefix: string;
-    adminPrefix: string;
     privateColumn: string[];
-    adminPrivateColumn: string[];
     status: {
         delete: number;
         uncertified: number;
@@ -11,9 +9,6 @@ export declare const usersConstant: {
         leave: number;
     };
     default: {
-        group_idx: number;
-    };
-    admin: {
         group_idx: number;
     };
 };

@@ -13,7 +13,6 @@ export declare class DashboardService {
     remove(id: number): string;
     usersCount(user: any): Promise<{
         total_cnt: number;
-        admin_cnt: number;
         users_cnt: number;
     }>;
 }

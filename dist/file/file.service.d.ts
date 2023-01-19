@@ -4,11 +4,9 @@ import { Repository } from 'typeorm';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileEntity } from './entities/file.entity';
-import { DefectService } from 'src/defect/defect.service';
 export declare class FileService {
     private fileRepository;
-    private readonly defectService;
-    constructor(fileRepository: Repository<FileEntity>, defectService: DefectService);
+    constructor(fileRepository: Repository<FileEntity>);
     create(createFileDto: CreateFileDto): string;
     uploadImg(files: Express.Multer.File[]): Promise<void>;
     ckeditorUploadImg(file: Express.Multer.File): Promise<any>;
@@ -20,10 +18,7 @@ export declare class FileService {
         file_path: string;
     }>;
     findCategory(category: string[], foreign_idx: string): Promise<{}>;
-    findAllPlace(type: string, place_idx: number): Promise<{
-        file_name: string;
-        file_path: string;
-    }>;
+    findAllPlace(type: string, place_idx: number): Promise<void>;
     update(id: number, updateFileDto: UpdateFileDto): string;
     remove(id: number): string;
     fileInfoInsert(files: any, foreign_idx: any): Promise<{}>;

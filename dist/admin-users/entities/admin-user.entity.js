@@ -10,9 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminUsersEntity = void 0;
-const board_content_entity_1 = require("../../board-contents/entities/board-content.entity");
 const common_bcrypt_1 = require("../../common/common.bcrypt");
-const group_entity_1 = require("../../groups/entities/group.entity");
 const typeorm_1 = require("typeorm");
 let AdminUsersEntity = class AdminUsersEntity {
     async setPassword(password) {
@@ -61,17 +59,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'text' }),
     __metadata("design:type", String)
 ], AdminUsersEntity.prototype, "admin_memo", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => board_content_entity_1.BoardContentsEntity, (bc) => bc.admin),
-    __metadata("design:type", void 0)
-], AdminUsersEntity.prototype, "board_contents", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => group_entity_1.GroupsEntity, (group) => group.grp_users, {
-        onDelete: 'NO ACTION',
-        onUpdate: 'NO ACTION',
-    }),
-    __metadata("design:type", group_entity_1.GroupsEntity)
-], AdminUsersEntity.prototype, "admin_group", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

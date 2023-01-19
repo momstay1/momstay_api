@@ -108,7 +108,7 @@ __decorate([
 ], PlaceController.prototype, "findAllDefect", null);
 __decorate([
     (0, common_1.Get)(':idx'),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'basic']),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiOperation)({ summary: '현장 정보 API' }),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOkResponse)({ type: place_entity_1.PlaceEntity }),

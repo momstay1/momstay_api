@@ -14,19 +14,26 @@ const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("./entities/user.entity");
 const auth_module_1 = require("../auth/auth.module");
 const common_service_1 = require("../common/common.service");
-const admin_users_module_1 = require("../admin-users/admin-users.module");
 const groups_module_1 = require("../groups/groups.module");
+const admin_users_controller_1 = require("./admin-users.controller");
+const user_sns_module_1 = require("../user-sns/user-sns.module");
+const file_module_1 = require("../file/file.module");
+const login_module_1 = require("../login/login.module");
+const email_module_1 = require("../email/email.module");
 let UsersModule = class UsersModule {
 };
 UsersModule = __decorate([
     (0, common_1.Module)({
         imports: [
             (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
-            (0, common_1.forwardRef)(() => admin_users_module_1.AdminUsersModule),
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.UsersEntity]),
-            groups_module_1.GroupsModule
+            groups_module_1.GroupsModule,
+            user_sns_module_1.UserSnsModule,
+            file_module_1.FileModule,
+            email_module_1.EmailModule,
+            login_module_1.LoginModule
         ],
-        controllers: [users_controller_1.UsersController],
+        controllers: [users_controller_1.UsersController, admin_users_controller_1.AdminUsersController],
         providers: [users_service_1.UsersService, common_service_1.CommonService],
         exports: [users_service_1.UsersService],
     })

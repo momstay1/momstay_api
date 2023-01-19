@@ -60,12 +60,6 @@ let FileController = class FileController {
         (0, fs_1.createReadStream)(files.file_path).pipe(res);
     }
     async downloadsFile(type, place_idx, res) {
-        const zip = await this.fileService.findAllPlace(type, +place_idx);
-        res.set({
-            'Content-Type': 'application/json',
-            'Content-Disposition': 'attachment; filename="' + zip.file_name + '"',
-        });
-        (0, fs_1.createReadStream)(zip.file_path).pipe(res);
     }
     async getFileInfo(category, idx) {
         return await this.fileService.findOne(category, idx);

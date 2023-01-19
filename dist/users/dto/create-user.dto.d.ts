@@ -1,12 +1,20 @@
 export declare class CreateUserDto {
-    readonly id: string;
-    readonly name: string;
-    readonly status: string;
-    readonly email: string;
-    readonly phone: string;
-    readonly memo: string;
-    readonly password: string;
     readonly type: string;
-    readonly group: string;
-    readonly place_idx: string;
+    readonly status: number;
+    readonly id: string;
+    readonly password: string;
+    readonly name: string;
+    readonly email: string;
+    readonly countryCode: string;
+    readonly phone: string;
+    readonly birthday: Date;
+    readonly language: string;
+    readonly gender: string;
+    readonly other: string;
+    readonly memo: string;
+    readonly uniqueKey: string;
+    readonly certifiInfo: string;
+    readonly group: number[];
+    readonly snsInfo: string;
+    readonly profile: string;
 }

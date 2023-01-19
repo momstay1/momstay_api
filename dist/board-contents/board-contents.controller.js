@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BoardContentsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const lodash_1 = require("lodash");
 const getuser_decorator_1 = require("../auth/getuser.decorator");
 const common_utils_1 = require("../common/common.utils");
 const role_decorator_1 = require("../common/decorator/role.decorator");
@@ -35,16 +34,13 @@ let BoardContentsController = class BoardContentsController {
     async create(user, createBoardContentDto) {
         return await this.boardContentsService.create(user, createBoardContentDto);
     }
-    async findCategoryAll(bd_idx, category, take, page) {
-        const { bc: { results, total, pageTotal }, bcats } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page });
-        const data = (0, lodash_1.map)(results, (obj) => {
-            return this.sanitizeBoardContent(obj);
-        });
-        return { bcats, results: data, total, pageTotal };
+    async findCategoryAll(bd_idx, category, take, page, order) {
+        const { bc: { results, total, pageTotal }, bcats } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order);
+        return { bcats, total, pageTotal, results };
     }
     async findOne(bd_idx, bc_idx) {
         const bc = await this.boardContentsService.findOne(bc_idx);
-        return this.sanitizeBoardContent(bc);
+        return bc;
     }
     async update(user, bc_idx, updateBoardContentDto) {
         const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
@@ -72,8 +68,9 @@ __decorate([
     __param(1, (0, common_1.Query)('category')),
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:paramtypes", [String, String, Number, Number, String]),
     __metadata("design:returntype", Promise)
 ], BoardContentsController.prototype, "findCategoryAll", null);
 __decorate([

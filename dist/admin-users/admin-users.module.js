@@ -12,7 +12,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("../auth/auth.module");
 const common_service_1 = require("../common/common.service");
 const groups_module_1 = require("../groups/groups.module");
-const users_module_1 = require("../users/users.module");
 const admin_users_controller_1 = require("./admin-users.controller");
 const admin_users_service_1 = require("./admin-users.service");
 const admin_user_entity_1 = require("./entities/admin-user.entity");
@@ -22,7 +21,6 @@ AdminUsersModule = __decorate([
     (0, common_1.Module)({
         imports: [
             (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
-            (0, common_1.forwardRef)(() => users_module_1.UsersModule),
             groups_module_1.GroupsModule,
             typeorm_1.TypeOrmModule.forFeature([admin_user_entity_1.AdminUsersEntity]),
         ],

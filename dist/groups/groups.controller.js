@@ -24,12 +24,12 @@ let GroupsController = class GroupsController {
         this.groupsService = groupsService;
     }
     async findAll(user) {
-        return await this.groupsService.findAll(user);
+        return await this.groupsService.findAllUser(user);
     }
 };
 __decorate([
     (0, common_1.Get)(),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'basic']),
+    (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '그룹 리스트 API' }),
     (0, swagger_1.ApiOkResponse)({ type: group_entity_1.GroupsEntity }),

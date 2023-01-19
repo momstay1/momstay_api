@@ -16,11 +16,29 @@ class CreateUserDto {
 }
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '회원 타입' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '상태' }),
+    __metadata("design:type", Number)
+], CreateUserDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(2),
     (0, class_validator_1.MaxLength)(30),
     (0, swagger_1.ApiProperty)({ description: '아이디' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "id", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Matches)(/^[a-z\d!@#$%^&*()]{8,30}$/),
+    (0, swagger_1.ApiProperty)({ description: '비밀번호' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "password", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(2),
@@ -29,13 +47,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '상태' }),
-    __metadata("design:type", String)
-], CreateUserDto.prototype, "status", void 0);
-__decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsEmail)(),
     (0, swagger_1.ApiPropertyOptional)({ description: '이메일' }),
     __metadata("design:type", String)
@@ -43,37 +55,67 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiPropertyOptional)({ description: '국가번호' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "countryCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiPropertyOptional)({ description: '연락처' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "phone", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiPropertyOptional)({ description: '생일' }),
+    __metadata("design:type", Date)
+], CreateUserDto.prototype, "birthday", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiPropertyOptional)({ description: '가입언어' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "language", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiPropertyOptional)({ description: '성별' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "gender", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiPropertyOptional)({ description: '직장 또는 학교' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "other", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '회원 메모' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "memo", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Matches)(/^[a-z\d!@#$%^&*()]{8,30}$/),
-    (0, swagger_1.ApiProperty)({ description: '비밀번호' }),
-    __metadata("design:type", String)
-], CreateUserDto.prototype, "password", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '회원 타입' }),
-    __metadata("design:type", String)
-], CreateUserDto.prototype, "type", void 0);
-__decorate([
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '회원 본인인증 고유키' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "uniqueKey", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '회원 본인인증 정보 (json형태)' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "certifiInfo", void 0);
+__decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '회원 그룹' }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], CreateUserDto.prototype, "group", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '회원 담당현장' }),
+    (0, swagger_1.ApiProperty)({ description: '회원 가입 유형' }),
     __metadata("design:type", String)
-], CreateUserDto.prototype, "place_idx", void 0);
+], CreateUserDto.prototype, "snsInfo", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ format: 'binary', description: '회원 프로필' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "profile", void 0);
 exports.CreateUserDto = CreateUserDto;
 //# sourceMappingURL=create-user.dto.js.map

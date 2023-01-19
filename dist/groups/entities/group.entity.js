@@ -10,7 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GroupsEntity = void 0;
-const admin_user_entity_1 = require("../../admin-users/entities/admin-user.entity");
 const user_entity_1 = require("../../users/entities/user.entity");
 const typeorm_1 = require("typeorm");
 let GroupsEntity = class GroupsEntity {
@@ -18,35 +17,31 @@ let GroupsEntity = class GroupsEntity {
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], GroupsEntity.prototype, "grp_idx", void 0);
+], GroupsEntity.prototype, "idx", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 30 }),
     __metadata("design:type", String)
-], GroupsEntity.prototype, "grp_type", void 0);
+], GroupsEntity.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], GroupsEntity.prototype, "grp_status", void 0);
+], GroupsEntity.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 30 }),
     __metadata("design:type", String)
-], GroupsEntity.prototype, "grp_id", void 0);
+], GroupsEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 30 }),
     __metadata("design:type", String)
-], GroupsEntity.prototype, "grp_name", void 0);
+], GroupsEntity.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text' }),
     __metadata("design:type", String)
-], GroupsEntity.prototype, "grp_memo", void 0);
+], GroupsEntity.prototype, "memo", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => user_entity_1.UsersEntity, (user) => user.user_group),
-    __metadata("design:type", void 0)
-], GroupsEntity.prototype, "grp_users", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => admin_user_entity_1.AdminUsersEntity, (grp_admin) => grp_admin.admin_group),
-    __metadata("design:type", void 0)
-], GroupsEntity.prototype, "grp_admin", void 0);
+    (0, typeorm_1.ManyToMany)(() => user_entity_1.UsersEntity, (user) => user.groups),
+    __metadata("design:type", Array)
+], GroupsEntity.prototype, "users", void 0);
 GroupsEntity = __decorate([
     (0, typeorm_1.Entity)('groups')
 ], GroupsEntity);

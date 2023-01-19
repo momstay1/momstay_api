@@ -51,12 +51,36 @@ exports.commonUtils = {
     },
     setupSwagger(app) {
         const options = new swagger_1.DocumentBuilder()
-            .setTitle('대관모아 API Docs')
+            .setTitle('맘스테이 API Docs')
             .setVersion('v1.0.0')
             .addBearerAuth()
             .build();
         const document = swagger_1.SwaggerModule.createDocument(app, options);
         swagger_1.SwaggerModule.setup('api-docs', app, document);
+    },
+    searchSplit(search) {
+        const where = {};
+        if (search) {
+            search = (0, lodash_1.isArray)(search) ? search : [search];
+            (0, lodash_1.map)(search, (obj) => {
+                if (obj) {
+                    const key_val = obj.split(':');
+                    if (key_val[1].indexOf(",") === -1) {
+                        where[key_val[0]] = key_val[1];
+                    }
+                    else {
+                        where[key_val[0]] = key_val[1].split(",");
+                    }
+                }
+            });
+        }
+        return where;
+    },
+    async authCheck(auth, groups) {
+        return (0, lodash_1.filter)(groups, (o) => { return auth.includes(o.id); });
+    },
+    createCode() {
+        return Math.random().toString(36).substr(2, 11);
     }
 };
 //# sourceMappingURL=common.utils.js.map

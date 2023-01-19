@@ -23,59 +23,62 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
-const admin_users_service_1 = require("../admin-users/admin-users.service");
 const common_bcrypt_1 = require("../common/common.bcrypt");
 const groups_service_1 = require("../groups/groups.service");
+const user_sns_service_1 = require("../user-sns/user-sns.service");
 const constants_1 = require("../users/constants");
 const users_service_1 = require("../users/users.service");
 let AuthService = class AuthService {
-    constructor(userService, adminService, jwtService, groupsService) {
+    constructor(userService, jwtService, groupsService, userSnsService) {
         this.userService = userService;
-        this.adminService = adminService;
         this.jwtService = jwtService;
         this.groupsService = groupsService;
+        this.userSnsService = userSnsService;
     }
     async validateUser(id, password) {
-        const user = await this.userService.findOne(id);
-        if (user.user_status != constants_1.usersConstant.status.registration) {
+        const user = await this.userService.fineUser(id);
+        if (user.status != constants_1.usersConstant.status.registration) {
             throw new common_1.NotFoundException('존재하지 않는 아이디 입니다.');
         }
-        const isHashValid = await common_bcrypt_1.commonBcrypt.isHashValid(password, user.user_password);
+        const isHashValid = await common_bcrypt_1.commonBcrypt.isHashValid(password, user.password);
+        const isSha1HashValid = await common_bcrypt_1.commonBcrypt.isSha1HashValid(password, user.prevPassword);
         if (user && isHashValid) {
-            const { user_password } = user, result = __rest(user, ["user_password"]);
+            const { password } = user, result = __rest(user, ["password"]);
+            return result;
+        }
+        else if (user && isSha1HashValid) {
+            const { password } = user, result = __rest(user, ["password"]);
             return result;
         }
         return null;
     }
-    async login(user) {
-        const userInfo = await this.userService.findOne(user.user_id);
-        const group = await this.groupsService.findOne(userInfo.user_group.grp_idx);
-        const payload = { userId: userInfo.user_id, userName: userInfo.user_name, userGrp: group.grp_id };
+    async login(user, type) {
+        const userInfo = await this.userService.fineUser(user.id);
+        if (type && type.indexOf(userInfo.groups[0].id) == -1) {
+            throw new common_1.NotFoundException('존재하지 않는 아이디 입니다.');
+        }
+        console.log(userInfo.groups);
+        const group = await this.groupsService.findOne(userInfo.groups[0].idx);
+        const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: group.id };
         return {
             access_token: this.jwtService.sign(payload),
         };
     }
-    async admin_login(id, password) {
-        const admin = await this.adminService.findOne(id);
-        const isHashValid = await common_bcrypt_1.commonBcrypt.isHashValid(password, admin.admin_password);
-        if (admin && isHashValid) {
-            const group = await this.groupsService.findOne(admin.admin_group.grp_idx);
-            const payload = { userId: admin.admin_id, userName: admin.admin_name, userGrp: group.grp_id };
-            return {
-                access_token: this.jwtService.sign(payload),
-            };
-        }
-        else {
-            return null;
-        }
+    async snsLogin(snsLoginUserDto) {
+        const snsUserInfo = await this.userSnsService.findId(snsLoginUserDto.id);
+        const user = await this.userService.findId(snsUserInfo.user.id);
+        const payload = { userId: user.id, userName: user.name, userGrp: user.groups[0].id };
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
     }
 };
 AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [users_service_1.UsersService,
-        admin_users_service_1.AdminUsersService,
         jwt_1.JwtService,
-        groups_service_1.GroupsService])
+        groups_service_1.GroupsService,
+        user_sns_service_1.UserSnsService])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

@@ -1,5 +1,4 @@
 import { PlaceEntity } from "src/place/entities/place.entity";
-import { UsersEntity } from "src/users/entities/user.entity";
 export declare class DefectEntity {
     dft_idx: number;
     dft_place_idx: string;
@@ -17,5 +16,4 @@ export declare class DefectEntity {
     dft_createdAt: Date;
     dft_updatedAt: Date;
     place: PlaceEntity;
-    user: UsersEntity;
 }

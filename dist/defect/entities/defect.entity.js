@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefectEntity = void 0;
 const place_entity_1 = require("../../place/entities/place.entity");
-const user_entity_1 = require("../../users/entities/user.entity");
 const typeorm_1 = require("typeorm");
 let DefectEntity = class DefectEntity {
 };
@@ -82,13 +81,6 @@ __decorate([
     }),
     __metadata("design:type", place_entity_1.PlaceEntity)
 ], DefectEntity.prototype, "place", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => user_entity_1.UsersEntity, (place) => place.defect, {
-        onDelete: 'NO ACTION',
-        onUpdate: 'NO ACTION'
-    }),
-    __metadata("design:type", user_entity_1.UsersEntity)
-], DefectEntity.prototype, "user", void 0);
 DefectEntity = __decorate([
     (0, typeorm_1.Entity)('defect')
 ], DefectEntity);

@@ -6,4 +6,7 @@ export declare const commonUtils: {
     removePrefix: (str: string) => string;
     sanitizeEntity: (array: any, privateElement: any) => any[];
     setupSwagger(app: INestApplication): void;
+    searchSplit(search: string[]): {};
+    authCheck(auth: any, groups: any): Promise<any[]>;
+    createCode(): string;
 };

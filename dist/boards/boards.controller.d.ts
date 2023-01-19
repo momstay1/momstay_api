@@ -2,7 +2,6 @@ import { BoardsService } from './boards.service';
 export declare class BoardsController {
     private readonly boardsService;
     constructor(boardsService: BoardsService);
-    sanitizeBoard: (bc: any) => any[];
-    findAll(): Promise<any[]>;
-    findOne(id: string): Promise<any[]>;
+    findAll(): Promise<import("./entities/board.entity").BoardsEntity[]>;
+    findOne(id: string): Promise<import("./entities/board.entity").BoardsEntity>;
 }

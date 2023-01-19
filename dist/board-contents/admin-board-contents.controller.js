@@ -21,6 +21,7 @@ const getuser_decorator_1 = require("../auth/getuser.decorator");
 const common_utils_1 = require("../common/common.utils");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const response_error_dto_1 = require("../error/dto/response-error.dto");
+const user_entity_1 = require("../users/entities/user.entity");
 const board_contents_service_1 = require("./board-contents.service");
 const create_board_content_dto_1 = require("./dto/create-board-content.dto");
 const update_board_content_dto_1 = require("./dto/update-board-content.dto");
@@ -36,22 +37,25 @@ let AdminBoardContentsController = class AdminBoardContentsController {
         return await this.boardContentsService.create(user, createBoardContentDto);
     }
     async statusChange(statusChange) {
-        return await this.boardContentsService.statusChange(statusChange);
+        await this.boardContentsService.statusChange(statusChange);
     }
-    async findCategoryAll(bd_idx, category, take, page) {
-        const { bc: { results, total, pageTotal }, bcats } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page });
+    async typeChange(statusChange) {
+        await this.boardContentsService.typeChange(statusChange);
+    }
+    async findCategoryAll(bd_idx, category, take, page, order) {
+        const { bc: { results, total, pageTotal }, bcats } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
         const data = (0, lodash_1.map)(results, (obj) => {
             return this.sanitizeBoardContent(obj);
         });
-        return { bcats, results: data, total, pageTotal };
+        return { bcats, total, pageTotal, results };
     }
     async findOne(bd_idx, bc_idx) {
-        const bc = await this.boardContentsService.findBdBcIndex(bd_idx, bc_idx);
-        return this.sanitizeBoardContent(bc);
+        const bc = await this.boardContentsService.findBdBcIndex(bc_idx);
+        return bc;
     }
     async update(user, bc_idx, updateBoardContentDto) {
-        const bc = await this.boardContentsService.update(user, +bc_idx, updateBoardContentDto);
-        return this.sanitizeBoardContent(bc);
+        const bc = await this.boardContentsService.update(user, bc_idx, updateBoardContentDto);
+        return bc;
     }
 };
 __decorate([
@@ -64,7 +68,7 @@ __decorate([
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [admin_user_entity_1.AdminUsersEntity, create_board_content_dto_1.CreateBoardContentDto]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, create_board_content_dto_1.CreateBoardContentDto]),
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "create", null);
 __decorate([
@@ -72,7 +76,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 상태 일괄 변경 API' }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Auth)(['root', 'basic']),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
     (0, swagger_1.ApiBody)({
         schema: {
             properties: {
@@ -87,6 +91,25 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "statusChange", null);
 __decorate([
+    (0, common_1.Post)('type-change'),
+    (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 타입 일괄 변경 API' }),
+    (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                type: { type: 'string' },
+                bc_idxs: { example: [] }
+            }
+        }
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AdminBoardContentsController.prototype, "typeChange", null);
+__decorate([
     (0, common_1.Get)(':bd_idx'),
     (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 리스트 API' }),
     (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
@@ -94,8 +117,9 @@ __decorate([
     __param(1, (0, common_1.Query)('category')),
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:paramtypes", [String, String, Number, Number, String]),
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "findCategoryAll", null);
 __decorate([
@@ -112,12 +136,12 @@ __decorate([
     (0, common_1.Patch)(':bc_idx'),
     (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 수정 API' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Auth)(['root', 'basic']),
+    (0, role_decorator_1.Auth)(['root']),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Param)('bc_idx')),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [admin_user_entity_1.AdminUsersEntity, String, update_board_content_dto_1.UpdateBoardContentDto]),
+    __metadata("design:paramtypes", [admin_user_entity_1.AdminUsersEntity, Number, update_board_content_dto_1.UpdateBoardContentDto]),
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "update", null);
 AdminBoardContentsController = __decorate([

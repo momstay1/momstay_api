@@ -34,11 +34,9 @@ let DashboardService = class DashboardService {
         return `This action removes a #${id} dashboard`;
     }
     async usersCount(user) {
-        const admin_cnt = await this.adminService.count(user);
         const users_cnt = await this.usersService.count();
         return {
-            total_cnt: admin_cnt + users_cnt,
-            admin_cnt,
+            total_cnt: users_cnt,
             users_cnt,
         };
     }

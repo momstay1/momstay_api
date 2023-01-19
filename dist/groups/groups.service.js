@@ -24,11 +24,14 @@ let GroupsService = class GroupsService {
     create(createGroupDto) {
         return 'This action adds a new group';
     }
-    async findAll(user) {
+    async findAll() {
+        return await this.groupsRepository.find();
+    }
+    async findAllUser(user) {
         const grp = await this.findOneName(user.user_group);
         return await this.groupsRepository.createQueryBuilder()
             .select()
-            .where("grp_idx >= :grp_idx", { grp_idx: grp.grp_idx })
+            .where("grp_idx >= :grp_idx", { grp_idx: grp.idx })
             .getMany();
     }
     async findOne(idx) {
@@ -38,8 +41,17 @@ let GroupsService = class GroupsService {
         }
         return group;
     }
+    async findIdxs(idxs) {
+        const groups = await this.groupsRepository.find({
+            where: { idx: (0, typeorm_2.In)(idxs) }
+        });
+        if (!groups) {
+            throw new common_1.NotFoundException('존재하지 않는 그룹 입니다.');
+        }
+        return groups;
+    }
     async findOneName(name) {
-        const group = await this.groupsRepository.findOne({ grp_id: name });
+        const group = await this.groupsRepository.findOne({ id: name });
         if (!group) {
             throw new common_1.NotFoundException('존재하지 않는 그룹 입니다.');
         }

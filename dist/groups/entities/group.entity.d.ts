@@ -1,10 +1,10 @@
+import { UsersEntity } from "src/users/entities/user.entity";
 export declare class GroupsEntity {
-    grp_idx: number;
-    grp_type: string;
-    grp_status: string;
-    grp_id: string;
-    grp_name: string;
-    grp_memo: string;
-    grp_users: undefined;
-    grp_admin: undefined;
+    idx: number;
+    type: string;
+    status: string;
+    id: string;
+    name: string;
+    memo: string;
+    users: UsersEntity[];
 }

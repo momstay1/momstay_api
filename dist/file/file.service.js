@@ -19,14 +19,12 @@ const lodash_1 = require("lodash");
 const typeorm_2 = require("typeorm");
 const file_entity_1 = require("./entities/file.entity");
 const common_constants_1 = require("../common/common.constants");
-const defect_service_1 = require("../defect/defect.service");
 const path = require("path");
 const zl = require("zip-lib");
 const img_url = '/file/img/';
 let FileService = class FileService {
-    constructor(fileRepository, defectService) {
+    constructor(fileRepository) {
         this.fileRepository = fileRepository;
-        this.defectService = defectService;
     }
     create(createFileDto) {
         return 'This action adds a new file';
@@ -93,21 +91,6 @@ let FileService = class FileService {
         return result;
     }
     async findAllPlace(type, place_idx) {
-        const dft_idxs = await this.defectService.findAllPlaceIdxs([+place_idx]);
-        const file_category = [];
-        if (type == 'all') {
-            file_category.push('dft_origin_img', 'dft_info_img');
-        }
-        else {
-            file_category.push('dft_' + type + '_img');
-        }
-        const files = await this.fileRepository.find({
-            where: {
-                file_category: (0, typeorm_2.In)(file_category),
-                file_foreign_idx: (0, typeorm_2.In)(dft_idxs),
-            }
-        });
-        return this.imageZip(files, type);
     }
     update(id, updateFileDto) {
         return `This action updates a #${id} file`;
@@ -188,9 +171,7 @@ let FileService = class FileService {
 FileService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(file_entity_1.FileEntity)),
-    __param(1, (0, common_1.Inject)((0, common_1.forwardRef)(() => defect_service_1.DefectService))),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        defect_service_1.DefectService])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], FileService);
 exports.FileService = FileService;
 //# sourceMappingURL=file.service.js.map

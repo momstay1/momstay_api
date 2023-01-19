@@ -23,7 +23,7 @@ DefectModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([defect_entity_1.DefectEntity]),
             users_module_1.UsersModule,
-            (0, common_1.forwardRef)(() => file_module_1.FileModule),
+            file_module_1.FileModule,
             (0, common_1.forwardRef)(() => place_module_1.PlaceModule),
         ],
         controllers: [defect_controller_1.DefectController],

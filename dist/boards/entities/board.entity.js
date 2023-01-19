@@ -18,47 +18,47 @@ let BoardsEntity = class BoardsEntity {
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], BoardsEntity.prototype, "bd_idx", void 0);
+], BoardsEntity.prototype, "idx", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], BoardsEntity.prototype, "bd_status", void 0);
+], BoardsEntity.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255 }),
     __metadata("design:type", String)
-], BoardsEntity.prototype, "bd_id", void 0);
+], BoardsEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255 }),
     __metadata("design:type", String)
-], BoardsEntity.prototype, "bd_name", void 0);
+], BoardsEntity.prototype, "name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255 }),
     __metadata("design:type", String)
-], BoardsEntity.prototype, "bd_type", void 0);
+], BoardsEntity.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 10 }),
     __metadata("design:type", Number)
-], BoardsEntity.prototype, "bd_order", void 0);
+], BoardsEntity.prototype, "order", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 'root' }),
     __metadata("design:type", String)
-], BoardsEntity.prototype, "bd_lists_auth", void 0);
+], BoardsEntity.prototype, "lists_auth", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 'root' }),
     __metadata("design:type", String)
-], BoardsEntity.prototype, "bd_write_auth", void 0);
+], BoardsEntity.prototype, "write_auth", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 'root' }),
     __metadata("design:type", String)
-], BoardsEntity.prototype, "bd_view_auth", void 0);
+], BoardsEntity.prototype, "view_auth", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
-], BoardsEntity.prototype, "bd_createdAt", void 0);
+], BoardsEntity.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)(),
     __metadata("design:type", Date)
-], BoardsEntity.prototype, "bd_updatedAt", void 0);
+], BoardsEntity.prototype, "updatedAt", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => board_content_entity_1.BoardContentsEntity, (bc) => bc.board),
     __metadata("design:type", void 0)
