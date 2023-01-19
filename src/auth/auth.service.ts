@@ -24,7 +24,11 @@ export class AuthService {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
     const isHashValid = await commonBcrypt.isHashValid(password, user.password);
+    const isSha1HashValid = await commonBcrypt.isSha1HashValid(password, user.prevPassword);
     if (user && isHashValid) {
+      const { password, ...result } = user;
+      return result;
+    } else if (user && isSha1HashValid) {
       const { password, ...result } = user;
       return result;
     }
@@ -36,6 +40,7 @@ export class AuthService {
     if (type && type.indexOf(userInfo.groups[0].id) == -1) {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
+    console.log(userInfo.groups);
     const group = await this.groupsService.findOne(userInfo.groups[0].idx);
     const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: group.id };
 
