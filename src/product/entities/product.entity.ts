@@ -1,6 +1,7 @@
 import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
+import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('product')
 export class ProductEntity {
@@ -30,6 +31,10 @@ export class ProductEntity {
   @Column({ default: '' })
   addr2: string;
   @Column({ default: '' })
+  lat: string;            // 위도
+  @Column({ default: '' })
+  lng: string;            // 경도
+  @Column({ default: '' })
   language: string;
   @Column({ default: '' })
   metro: string;
@@ -43,6 +48,10 @@ export class ProductEntity {
   detailsJpn: string;
   @Column({ type: 'text', default: '' })
   detailsChn: string;
+  @Column({ default: '' })
+  oldIdx: string;
+  @Column({ type: 'text', default: '' })
+  oldData: string;
 
 
   @CreateDateColumn()
@@ -55,6 +64,9 @@ export class ProductEntity {
     onUpdate: 'NO ACTION'
   })
   user: UsersEntity;
+
+  @OneToMany(() => ProductOptionEntity, (po) => po.product)
+  productOption: undefined;
 
   @ManyToMany(() => ProductInfoEntity, (pi) => pi.product)
   @JoinTable()

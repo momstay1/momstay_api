@@ -81,14 +81,16 @@ export class UsersEntity {
   @Column({ type: 'text', default: '' })
   certifiInfo: string;
 
+  @Column({ default: '' })
+  oldIdx: string;
+  @Column({ type: 'text', default: '' })
+  oldData: string;
+
   @OneToMany(() => BoardContentsEntity, (bc) => bc.user)
   boardContents: undefined;
 
   @OneToMany(() => ProductEntity, (pr) => pr.user)
   product: undefined;
-
-  @OneToMany(() => ProductOptionEntity, (po) => po.user)
-  productOption: undefined;
 
   @OneToMany(() => LoginEntity, (login) => login.user)
   login: LoginEntity[];
