@@ -14,7 +14,7 @@ export class ProductService {
     @InjectRepository(ProductEntity) private productRepository: Repository<ProductEntity>,
   ) { }
 
-  create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto) {
     return 'This action adds a new product';
   }
 

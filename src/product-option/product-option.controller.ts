@@ -17,14 +17,8 @@ export class ProductOptionController {
   @Get()
   @ApiOperation({
     summary: '방 리스트 조회 API',
-    // description: 'search=group:그룹인덱스1,그룹인덱스2<br>'
-    //   + 'search=membership:(0|1)<br>'
+    // description: 'search=membership:(0|1)<br>'
     //   + 'search=keyword:메인검색<br>'
-    //   + 'search=addr1:이메일<br>'
-    //   + 'search=phone:연락처<br>'
-    //   + 'search=birthday:생일<br>'
-    //   + 'search=createdAt_mte:시작날짜<br>'
-    //   + 'search=createdAt_lte:종료날짜<br>'
   })
   async findAll(
     @Query('take') take: number,
