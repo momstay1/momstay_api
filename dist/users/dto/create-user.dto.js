@@ -87,13 +87,11 @@ __decorate([
 ], CreateUserDto.prototype, "other", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '회원 메모' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "memo", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '회원 본인인증 고유키' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "uniqueKey", void 0);
@@ -109,12 +107,7 @@ __decorate([
 ], CreateUserDto.prototype, "group", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '회원 가입 유형' }),
-    __metadata("design:type", String)
-], CreateUserDto.prototype, "snsInfo", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ format: 'binary', description: '회원 프로필' }),
+    (0, swagger_1.ApiProperty)({ format: 'binary', description: '회원 프로필', required: false }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "profile", void 0);
 exports.CreateUserDto = CreateUserDto;

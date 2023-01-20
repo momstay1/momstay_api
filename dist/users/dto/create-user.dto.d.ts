@@ -15,6 +15,5 @@ export declare class CreateUserDto {
     readonly uniqueKey: string;
     readonly certifiInfo: string;
     readonly group: number[];
-    readonly snsInfo: string;
     readonly profile: string;
 }

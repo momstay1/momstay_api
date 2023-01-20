@@ -65,8 +65,8 @@ let UsersService = class UsersService {
             throw new common_1.UnprocessableEntityException('아이디가 중복 됩니다.');
         }
         const save_user = await this.saveUser(createUserDto);
-        if (createUserDto.snsInfo) {
-            await this.userSnsService.saveUserSns(createUserDto.snsInfo, save_user);
+        if ((0, lodash_1.get)(createUserDto, 'snsInfo', '')) {
+            await this.userSnsService.saveUserSns((0, lodash_1.get)(createUserDto, 'snsInfo'), save_user);
         }
         const user = await this.findIdx(save_user['idx']);
         const file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
