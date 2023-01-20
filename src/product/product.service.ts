@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get } from 'lodash';
+import { get, isEmpty, isObject, keyBy, map } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
+import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -12,10 +13,54 @@ import { ProductEntity } from './entities/product.entity';
 export class ProductService {
   constructor(
     @InjectRepository(ProductEntity) private productRepository: Repository<ProductEntity>,
+    private readonly fileService: FileService,
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  async create(createProductDto: CreateProductDto, files) {
+    // 숙소 정보
+    const product_data = {
+      idx: +get(createProductDto, 'idx'),
+      status: +get(createProductDto, 'status', 0),
+      type: get(createProductDto, 'type', ''),
+      order: '10',
+      membership: get(createProductDto, 'membership', '0'),
+      hostBusiness: get(createProductDto, 'hostBusiness', ''),
+      title: get(createProductDto, 'title', ''),
+      postCode: get(createProductDto, 'postCode', ''),
+      addr1: get(createProductDto, 'addr1', ''),
+      addr2: get(createProductDto, 'addr2', ''),
+      language: get(createProductDto, 'language', ''),
+      metro: get(createProductDto, 'metro', ''),
+      lat: get(createProductDto, 'lat', ''),
+      lng: get(createProductDto, 'lng', ''),
+      college: get(createProductDto, 'college', ''),
+      detailsKor: get(createProductDto, 'detailsKor', ''),
+      detailsEng: get(createProductDto, 'detailsEng', ''),
+      detailsJpn: get(createProductDto, 'detailsJpn', ''),
+      userIdx: get(createProductDto, 'userIdx'),
+    };
+    // 숙소 등록
+    const productEntity = await this.productRepository.create(product_data);
+    const product = await this.productRepository.save(productEntity);
+
+    // 파일 제거
+    if (get(createProductDto, 'filesIdx', '')) {
+      const productFileIdxs = map(
+        await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product_data.idx),
+        (o) => "" + o.file_idx
+      );
+      const fileIdxs = get(createProductDto, 'filesIdx').split(",");
+      const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+      await this.fileService.removes(delFileIdxs);
+    }
+
+    // 새 첨부파일 등록
+    let file_info;
+    if (!isEmpty(files)) {
+      file_info = await this.fileService.fileInfoInsert(files, product['idx']);
+    }
+
+    return { product, file_info }
   }
 
   async findAll(options: PaginationOptions, search: string[]) {

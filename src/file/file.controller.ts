@@ -80,7 +80,7 @@ export class FileController {
   @Get('downloads/select')
   @ApiOperation({ summary: '선택 이미지 파일 다운로드 API' })
   async selectDownloadFile(@Query('file') file: string, @Res() res) {
-    const files = await this.fileService.findIndexs(file.split(','));
+    const files = await this.fileService.findIndexsZip(file.split(','));
     res.set({
       'Content-Type': 'application/json',
       'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',

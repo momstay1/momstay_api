@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/common/common.file';
 
 @Controller('product')
 @ApiTags('숙소 API')
@@ -16,8 +18,16 @@ export class ProductController {
   })
   @Auth(['root', 'admin', 'host'])
   @ApiBearerAuth()
-  async create(@Body() createProductDto: CreateProductDto) {
-    return await this.productService.create(createProductDto);
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'lodgingDetailImg', maxCount: 5 },
+    { name: 'mealsImg', maxCount: 5 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.productService.create(createProductDto, files);
   }
 
   // 숙소 리스트 조회

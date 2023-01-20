@@ -48,8 +48,8 @@ export class ProductEntity {
   detailsJpn: string;
   @Column({ type: 'text', default: '' })
   detailsChn: string;
-  @Column({ default: '' })
-  oldIdx: string;
+  @Column({ default: 0, })
+  oldIdx: number;
   @Column({ type: 'text', default: '' })
   oldData: string;
 

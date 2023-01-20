@@ -15,6 +15,7 @@ import { commonContants } from 'src/common/common.constants';
 // import { DefectService } from 'src/defect/defect.service';
 import * as path from 'path';
 import * as zl from 'zip-lib';
+import * as fs from "fs";
 
 const img_url = '/file/img/';
 @Injectable()
@@ -71,7 +72,7 @@ export class FileService {
     return keyBy(files, (o) => o.file_category);
   }
 
-  async findIndexs(idxs: string[]) {
+  async findIndexsZip(idxs: string[]) {
     const files = await this.fileRepository.find({
       where: {
         file_foreign_idx: In(idxs),
@@ -85,7 +86,34 @@ export class FileService {
     return this.imageZip(files, 'selectImage');
   }
 
+  async findIndexs(idxs: string[]) {
+    const files = await this.fileRepository.find({
+      where: {
+        file_idx: In(idxs),
+      }
+    });
+    if (files.length <= 0) {
+      throw new NotFoundException('존재하지 않는 파일 입니다.');
+    }
+
+    return files;
+  }
+
   async findCategory(category: string[], foreign_idx: string) {
+    const files = await this.fileRepository.find({
+      where: {
+        file_category: In(category),
+        file_foreign_idx: foreign_idx
+      }
+    });
+    if (files.length <= 0) {
+      throw new NotFoundException('존재하지 않는 파일 입니다.');
+    }
+
+    return files;
+  }
+
+  async findCategoryFiles(category: string[], foreign_idx: string) {
     const files = await this.fileRepository.find({
       where: {
         file_category: In(category),
@@ -94,9 +122,13 @@ export class FileService {
     });
 
     const result = {};
-    result[foreign_idx] = keyBy(files, (o) => {
-      return o.file_category;
-    });
+    result[foreign_idx] = {};
+    for (const key in files) {
+      if (!result[foreign_idx][files[key].file_category]) {
+        result[foreign_idx][files[key].file_category] = [];
+      }
+      result[foreign_idx][files[key].file_category].push(files[key]);
+    }
 
     return result;
   }
@@ -126,6 +158,27 @@ export class FileService {
 
   remove(id: number) {
     return `This action removes a #${id} file`;
+  }
+
+  async removes(idxs: string[]) {
+    const files = await this.findIndexs(idxs);
+
+    for (const key in files) {
+      if (fs.existsSync(files[key].file_full_path)) {
+        // 파일이 존재하면 true 그렇지 않은 경우 false 반환
+        try {
+          fs.unlinkSync(files[key].file_full_path);
+        } catch (error) {
+          console.log('-------------------삭제할 파일: ' + files[key].file_name);
+          console.log('-------------------없음');
+        }
+
+      }
+    }
+    await this.fileRepository.createQueryBuilder()
+      .delete()
+      .where(" file_idx IN (:idxs)", { idxs: idxs })
+      .execute()
   }
 
   async fileInfoInsert(files, foreign_idx) {
@@ -173,7 +226,7 @@ export class FileService {
       .execute();
 
     // 저장한 파일 조회 및 반환
-    return await this.findCategory(file_category, foreign_idx);
+    return await this.findCategoryFiles(file_category, foreign_idx);
   }
 
   isImage(type) {
