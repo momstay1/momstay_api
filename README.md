@@ -53,4 +53,8 @@ master 브랜치로 이동후 develop 브랜치와 merge 후 npm run build 실�
 서버접속<br>
 su momstay_api<br>
 pm2 reload momstay-api<br>
+<br>
+
+서버최초실행<br>
+pm2 start npm --name "momstay_api" -- run start<br>
 <br><br><br>

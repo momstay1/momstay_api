@@ -73,12 +73,10 @@ export class CreateUserDto {
   readonly other: string;
 
   @IsOptional()
-  @IsString()
   @ApiProperty({ description: '회원 메모' })
   readonly memo: string;
 
   @IsOptional()
-  @IsString()
   @ApiProperty({ description: '회원 본인인증 고유키' })
   readonly uniqueKey: string;
 
@@ -90,11 +88,10 @@ export class CreateUserDto {
   @ApiProperty({ description: '회원 그룹' })
   readonly group: number[];
 
-  @IsOptional()
-  @ApiProperty({ description: '회원 가입 유형' })
-  readonly snsInfo: string;
+  // @ApiProperty({ description: '회원 가입 유형' })
+  // readonly snsInfo: string;
 
   @IsOptional()
-  @ApiProperty({ format: 'binary', description: '회원 프로필' })
+  @ApiProperty({ format: 'binary', description: '회원 프로필', required: false })
   readonly profile: string;
 }

@@ -68,8 +68,8 @@ export class UsersService {
     //회원 정보 저장
     const save_user = await this.saveUser(createUserDto);
 
-    if (createUserDto.snsInfo) {
-      await this.userSnsService.saveUserSns(createUserDto.snsInfo, save_user);
+    if (get(createUserDto, 'snsInfo', '')) {
+      await this.userSnsService.saveUserSns(get(createUserDto, 'snsInfo'), save_user);
     }
 
     const user = await this.findIdx(save_user['idx']);
