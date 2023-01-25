@@ -1,15 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateProductInfoDto } from './dto/create-product-info.dto';
 import { UpdateProductInfoDto } from './dto/update-product-info.dto';
+import { ProductInfoEntity } from './entities/product-info.entity';
 
 @Injectable()
 export class ProductInfoService {
+  constructor(
+    @InjectRepository(ProductInfoEntity) private productRepository: Repository<ProductInfoEntity>,
+  ) { }
+
   create(createProductInfoDto: CreateProductInfoDto) {
     return 'This action adds a new productInfo';
   }
 
   findAll() {
     return `This action returns all productInfo`;
+  }
+
+  async findAllIdxs(idxs: string[]) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const productInfo = await this.productRepository.find({
+      where: { idx: In(idxs) }
+    });
+    if (productInfo.length <= 0) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    return productInfo;
   }
 
   findOne(id: number) {

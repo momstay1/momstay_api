@@ -4,6 +4,7 @@ import { get, isEmpty, isObject, keyBy, map } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
+import { ProductInfoService } from 'src/product-info/product-info.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,9 +15,18 @@ export class ProductService {
   constructor(
     @InjectRepository(ProductEntity) private productRepository: Repository<ProductEntity>,
     private readonly fileService: FileService,
+    private readonly productInfoService: ProductInfoService,
   ) { }
 
   async create(createProductDto: CreateProductDto, files) {
+
+    // 생활 및 편의 정보 가져오기
+    let productInfo;
+    if (get(createProductDto, 'productInfoIdx', '')) {
+      const productInfoIdx = get(createProductDto, 'productInfoIdx').split(",");
+      productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
+    }
+
     // 숙소 정보
     const product_data = {
       idx: +get(createProductDto, 'idx'),
@@ -38,6 +48,7 @@ export class ProductService {
       detailsEng: get(createProductDto, 'detailsEng', ''),
       detailsJpn: get(createProductDto, 'detailsJpn', ''),
       userIdx: get(createProductDto, 'userIdx'),
+      productInfo: productInfo,
     };
     // 숙소 등록
     const productEntity = await this.productRepository.create(product_data);
