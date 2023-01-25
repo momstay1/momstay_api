@@ -2,10 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProductInfoService } from './product-info.service';
 import { CreateProductInfoDto } from './dto/create-product-info.dto';
 import { UpdateProductInfoDto } from './dto/update-product-info.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('product-info')
+@ApiTags('숙소 생활 및 편의 API')
 export class ProductInfoController {
-  constructor(private readonly productInfoService: ProductInfoService) {}
+  constructor(private readonly productInfoService: ProductInfoService) { }
 
   @Post()
   create(@Body() createProductInfoDto: CreateProductInfoDto) {
@@ -13,8 +15,11 @@ export class ProductInfoController {
   }
 
   @Get()
-  findAll() {
-    return this.productInfoService.findAll();
+  @ApiOperation({
+    summary: '숙소 샐활 및 편의 API',
+  })
+  async findAll() {
+    return await this.productInfoService.findAll();
   }
 
   @Get(':id')

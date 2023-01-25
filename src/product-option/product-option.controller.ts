@@ -2,15 +2,29 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ProductOptionService } from './product-option.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
 import { UpdateProductOptionDto } from './dto/update-product-option.dto';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
+import { multerOptions } from 'src/common/common.file';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Auth } from 'src/common/decorator/role.decorator';
 
 @Controller('product-option')
+@ApiTags('방 API')
 export class ProductOptionController {
   constructor(private readonly productOptionService: ProductOptionService) { }
 
   @Post()
-  create(@Body() createProductOptionDto: CreateProductOptionDto) {
-    return this.productOptionService.create(createProductOptionDto);
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'roomDetailImg', maxCount: 5 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @Body() createProductOptionDto: CreateProductOptionDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.productOptionService.create(createProductOptionDto, files);
   }
 
   // 방 리스트 조회

@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get } from 'lodash';
+import { get, isEmpty, isObject, keyBy, map, union } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
+import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
-import { Repository } from 'typeorm';
+import { ProductInfoService } from 'src/product-info/product-info.service';
+import { In, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
@@ -12,10 +15,72 @@ import { ProductEntity } from './entities/product.entity';
 export class ProductService {
   constructor(
     @InjectRepository(ProductEntity) private productRepository: Repository<ProductEntity>,
+    private readonly fileService: FileService,
+    private readonly productInfoService: ProductInfoService,
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  async create(createProductDto: CreateProductDto, files) {
+
+    // 생활 및 편의 정보 가져오기
+    let productInfo;
+    if (get(createProductDto, 'productInfoIdx', '')) {
+      const productInfoIdx = get(createProductDto, 'productInfoIdx').split(",");
+      productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
+    }
+
+    // 숙소 정보
+    const product_data = {
+      idx: +get(createProductDto, 'idx'),
+      status: +get(createProductDto, 'status', 0),
+      type: get(createProductDto, 'type', ''),
+      order: '10',
+      membership: get(createProductDto, 'membership', '0'),
+      hostBusiness: get(createProductDto, 'hostBusiness', ''),
+      title: get(createProductDto, 'title', ''),
+      postCode: get(createProductDto, 'postCode', ''),
+      addr1: get(createProductDto, 'addr1', ''),
+      addr2: get(createProductDto, 'addr2', ''),
+      language: get(createProductDto, 'language', ''),
+      metro: get(createProductDto, 'metro', ''),
+      lat: get(createProductDto, 'lat', ''),
+      lng: get(createProductDto, 'lng', ''),
+      college: get(createProductDto, 'college', ''),
+      detailsKor: get(createProductDto, 'detailsKor', ''),
+      detailsEng: get(createProductDto, 'detailsEng', ''),
+      detailsJpn: get(createProductDto, 'detailsJpn', ''),
+      detailsChn: get(createProductDto, 'detailsChn', ''),
+      userIdx: get(createProductDto, 'userIdx'),
+      productInfo: productInfo,
+    };
+    // 숙소 등록
+    const productEntity = await this.productRepository.create(product_data);
+    const product = await this.productRepository.save(productEntity);
+
+    // 파일 제거
+    if (get(createProductDto, 'filesIdx', '')) {
+      const productFileIdxs = map(
+        await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']),
+        (o) => "" + o.file_idx
+      );
+      const fileIdxs = get(createProductDto, 'filesIdx').split(",");
+      const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+      if (delFileIdxs.length > 0) {
+        await this.fileService.removes(delFileIdxs);
+      }
+    }
+
+    // 새 첨부파일 등록
+    let new_file;
+    let fileIdxs;
+    if (!isEmpty(files)) {
+      new_file = await this.fileService.fileInfoInsert(files, product['idx']);
+      fileIdxs = map(new_file, (o) => o.idx);
+    }
+
+    fileIdxs = union(fileIdxs, get(createProductDto, 'filesIdx').split(","));
+    const file_info = await this.fileService.findIndexs(fileIdxs);
+
+    return { product, file_info }
   }
 
   async findAll(options: PaginationOptions, search: string[]) {
@@ -49,6 +114,20 @@ export class ProductService {
 
   findOne(id: number) {
     return `This action returns a #${id} product`;
+  }
+
+  async findIdx(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const product = await this.productRepository.findOne({
+      where: { idx: idx },
+      relations: ['productInfo']
+    });
+    if (!product.idx) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
