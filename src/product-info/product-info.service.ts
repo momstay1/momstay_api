@@ -15,8 +15,15 @@ export class ProductInfoService {
     return 'This action adds a new productInfo';
   }
 
-  findAll() {
-    return `This action returns all productInfo`;
+  async findAll() {
+    const productInfo = await this.productRepository.find({
+      where: { status: 2 }
+    });
+    if (productInfo.length <= 0) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+
+    return productInfo;
   }
 
   async findAllIdxs(idxs: string[]) {
@@ -27,7 +34,7 @@ export class ProductInfoService {
       where: { idx: In(idxs) }
     });
     if (productInfo.length <= 0) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
     }
     return productInfo;
   }
