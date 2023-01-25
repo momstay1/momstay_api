@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isEmpty, isObject, keyBy, map } from 'lodash';
+import { get, isEmpty, isObject, keyBy, map, union } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductInfoService } from 'src/product-info/product-info.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
@@ -47,6 +48,7 @@ export class ProductService {
       detailsKor: get(createProductDto, 'detailsKor', ''),
       detailsEng: get(createProductDto, 'detailsEng', ''),
       detailsJpn: get(createProductDto, 'detailsJpn', ''),
+      detailsChn: get(createProductDto, 'detailsChn', ''),
       userIdx: get(createProductDto, 'userIdx'),
       productInfo: productInfo,
     };
@@ -57,19 +59,26 @@ export class ProductService {
     // 파일 제거
     if (get(createProductDto, 'filesIdx', '')) {
       const productFileIdxs = map(
-        await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product_data.idx),
+        await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']),
         (o) => "" + o.file_idx
       );
       const fileIdxs = get(createProductDto, 'filesIdx').split(",");
       const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
-      await this.fileService.removes(delFileIdxs);
+      if (delFileIdxs.length > 0) {
+        await this.fileService.removes(delFileIdxs);
+      }
     }
 
     // 새 첨부파일 등록
-    let file_info;
+    let new_file;
+    let fileIdxs;
     if (!isEmpty(files)) {
-      file_info = await this.fileService.fileInfoInsert(files, product['idx']);
+      new_file = await this.fileService.fileInfoInsert(files, product['idx']);
+      fileIdxs = map(new_file, (o) => o.idx);
     }
+
+    fileIdxs = union(fileIdxs, get(createProductDto, 'filesIdx').split(","));
+    const file_info = await this.fileService.findIndexs(fileIdxs);
 
     return { product, file_info }
   }
@@ -105,6 +114,20 @@ export class ProductService {
 
   findOne(id: number) {
     return `This action returns a #${id} product`;
+  }
+
+  async findIdx(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const product = await this.productRepository.findOne({
+      where: { idx: idx },
+      relations: ['productInfo']
+    });
+    if (!product.idx) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {

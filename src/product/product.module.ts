@@ -13,6 +13,7 @@ import { ProductInfoModule } from 'src/product-info/product-info.module';
     ProductInfoModule,
   ],
   controllers: [ProductController],
-  providers: [ProductService]
+  providers: [ProductService],
+  exports: [ProductService]
 })
 export class ProductModule { }

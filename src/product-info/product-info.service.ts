@@ -8,7 +8,7 @@ import { ProductInfoEntity } from './entities/product-info.entity';
 @Injectable()
 export class ProductInfoService {
   constructor(
-    @InjectRepository(ProductInfoEntity) private productRepository: Repository<ProductInfoEntity>,
+    @InjectRepository(ProductInfoEntity) private productInfoRepository: Repository<ProductInfoEntity>,
   ) { }
 
   create(createProductInfoDto: CreateProductInfoDto) {
@@ -16,7 +16,7 @@ export class ProductInfoService {
   }
 
   async findAll() {
-    const productInfo = await this.productRepository.find({
+    const productInfo = await this.productInfoRepository.find({
       where: { status: 2 }
     });
     if (productInfo.length <= 0) {
@@ -30,7 +30,7 @@ export class ProductInfoService {
     if (idxs.length <= 0) {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
-    const productInfo = await this.productRepository.find({
+    const productInfo = await this.productInfoRepository.find({
       where: { idx: In(idxs) }
     });
     if (productInfo.length <= 0) {
