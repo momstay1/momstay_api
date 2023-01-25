@@ -13,14 +13,17 @@ export declare class FileService {
     findAll(): string;
     findOneName(name: string): Promise<FileEntity>;
     findOne(category: string, idx: string): Promise<import("lodash").Dictionary<FileEntity>>;
-    findIndexs(idxs: string[]): Promise<{
+    findIndexsZip(idxs: string[]): Promise<{
         file_name: string;
         file_path: string;
     }>;
-    findCategory(category: string[], foreign_idx: string): Promise<{}>;
+    findIndexs(idxs: string[]): Promise<FileEntity[]>;
+    findCategory(category: string[], foreign_idx: string): Promise<FileEntity[]>;
+    findCategoryFiles(category: string[], foreign_idx: string): Promise<{}>;
     findAllPlace(type: string, place_idx: number): Promise<void>;
     update(id: number, updateFileDto: UpdateFileDto): string;
     remove(id: number): string;
+    removes(idxs: string[]): Promise<void>;
     fileInfoInsert(files: any, foreign_idx: any): Promise<{}>;
     isImage(type: any): 0 | 1;
     private imageZip;

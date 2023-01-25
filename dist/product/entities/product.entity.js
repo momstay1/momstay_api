@@ -93,8 +93,8 @@ __decorate([
     __metadata("design:type", String)
 ], ProductEntity.prototype, "detailsChn", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)({ default: 0, }),
+    __metadata("design:type", Number)
 ], ProductEntity.prototype, "oldIdx", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', default: '' }),

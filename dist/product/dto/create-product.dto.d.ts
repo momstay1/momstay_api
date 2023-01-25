@@ -18,4 +18,8 @@ export declare class CreateProductDto {
     readonly detailsJpn: string;
     readonly detailsChn: string;
     readonly userIdx: string;
+    readonly filesIdx: string;
+    readonly productInfoIdx: string;
+    readonly lodgingDetailImg: string;
+    readonly mealsImg: string;
 }

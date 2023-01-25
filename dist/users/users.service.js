@@ -69,7 +69,10 @@ let UsersService = class UsersService {
             await this.userSnsService.saveUserSns((0, lodash_1.get)(createUserDto, 'snsInfo'), save_user);
         }
         const user = await this.findIdx(save_user['idx']);
-        const file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
+        let file_info;
+        if (files) {
+            file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
+        }
         return { user, file_info };
     }
     async findAll(user, options, search) {

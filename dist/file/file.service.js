@@ -21,6 +21,7 @@ const file_entity_1 = require("./entities/file.entity");
 const common_constants_1 = require("../common/common.constants");
 const path = require("path");
 const zl = require("zip-lib");
+const fs = require("fs");
 const img_url = '/file/img/';
 let FileService = class FileService {
     constructor(fileRepository) {
@@ -65,7 +66,7 @@ let FileService = class FileService {
         }
         return (0, lodash_1.keyBy)(files, (o) => o.file_category);
     }
-    async findIndexs(idxs) {
+    async findIndexsZip(idxs) {
         const files = await this.fileRepository.find({
             where: {
                 file_foreign_idx: (0, typeorm_2.In)(idxs),
@@ -77,6 +78,17 @@ let FileService = class FileService {
         }
         return this.imageZip(files, 'selectImage');
     }
+    async findIndexs(idxs) {
+        const files = await this.fileRepository.find({
+            where: {
+                file_idx: (0, typeorm_2.In)(idxs),
+            }
+        });
+        if (files.length <= 0) {
+            throw new common_1.NotFoundException('존재하지 않는 파일 입니다.');
+        }
+        return files;
+    }
     async findCategory(category, foreign_idx) {
         const files = await this.fileRepository.find({
             where: {
@@ -84,10 +96,26 @@ let FileService = class FileService {
                 file_foreign_idx: foreign_idx
             }
         });
-        const result = {};
-        result[foreign_idx] = (0, lodash_1.keyBy)(files, (o) => {
-            return o.file_category;
+        if (files.length <= 0) {
+            throw new common_1.NotFoundException('존재하지 않는 파일 입니다.');
+        }
+        return files;
+    }
+    async findCategoryFiles(category, foreign_idx) {
+        const files = await this.fileRepository.find({
+            where: {
+                file_category: (0, typeorm_2.In)(category),
+                file_foreign_idx: foreign_idx
+            }
         });
+        const result = {};
+        result[foreign_idx] = {};
+        for (const key in files) {
+            if (!result[foreign_idx][files[key].file_category]) {
+                result[foreign_idx][files[key].file_category] = [];
+            }
+            result[foreign_idx][files[key].file_category].push(files[key]);
+        }
         return result;
     }
     async findAllPlace(type, place_idx) {
@@ -97,6 +125,24 @@ let FileService = class FileService {
     }
     remove(id) {
         return `This action removes a #${id} file`;
+    }
+    async removes(idxs) {
+        const files = await this.findIndexs(idxs);
+        for (const key in files) {
+            if (fs.existsSync(files[key].file_full_path)) {
+                try {
+                    fs.unlinkSync(files[key].file_full_path);
+                }
+                catch (error) {
+                    console.log('-------------------삭제할 파일: ' + files[key].file_name);
+                    console.log('-------------------없음');
+                }
+            }
+        }
+        await this.fileRepository.createQueryBuilder()
+            .delete()
+            .where(" file_idx IN (:idxs)", { idxs: idxs })
+            .execute();
     }
     async fileInfoInsert(files, foreign_idx) {
         const files_data = [];
@@ -137,7 +183,7 @@ let FileService = class FileService {
             .insert()
             .values(files_data)
             .execute();
-        return await this.findCategory(file_category, foreign_idx);
+        return await this.findCategoryFiles(file_category, foreign_idx);
     }
     isImage(type) {
         const png_mimes = ['image/x-png'];

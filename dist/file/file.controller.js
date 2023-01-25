@@ -52,7 +52,7 @@ let FileController = class FileController {
         (0, fs_1.createReadStream)(file.file_full_path).pipe(res);
     }
     async selectDownloadFile(file, res) {
-        const files = await this.fileService.findIndexs(file.split(','));
+        const files = await this.fileService.findIndexsZip(file.split(','));
         res.set({
             'Content-Type': 'application/json',
             'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',

@@ -19,7 +19,7 @@ export declare class UsersService {
     emailChk(email: string, code: string): Promise<void>;
     create(createUserDto: CreateUserDto, files: any): Promise<{
         user: UsersEntity;
-        file_info: {};
+        file_info: any;
     }>;
     findAll(user: any, options: PaginationOptions, search: string[]): Promise<Pagination<UsersEntity>>;
     count(): Promise<number>;

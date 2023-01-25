@@ -19,12 +19,14 @@ const create_product_dto_1 = require("./dto/create-product.dto");
 const update_product_dto_1 = require("./dto/update-product.dto");
 const swagger_1 = require("@nestjs/swagger");
 const role_decorator_1 = require("../common/decorator/role.decorator");
+const platform_express_1 = require("@nestjs/platform-express");
+const common_file_1 = require("../common/common.file");
 let ProductController = class ProductController {
     constructor(productService) {
         this.productService = productService;
     }
-    async create(createProductDto) {
-        return await this.productService.create(createProductDto);
+    async create(createProductDto, files) {
+        return await this.productService.create(createProductDto, files);
     }
     async findAll(take, page, search) {
         const { results, total, pageTotal } = await this.productService.findAll({ take, page }, search);
@@ -51,9 +53,16 @@ __decorate([
     }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'lodgingDetailImg', maxCount: 5 },
+        { name: 'mealsImg', maxCount: 5 },
+    ], (0, common_file_1.multerOptions)())),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_product_dto_1.CreateProductDto]),
+    __metadata("design:paramtypes", [create_product_dto_1.CreateProductDto,
+        Array]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "create", null);
 __decorate([

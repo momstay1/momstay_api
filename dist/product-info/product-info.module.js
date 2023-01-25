@@ -10,12 +10,18 @@ exports.ProductInfoModule = void 0;
 const common_1 = require("@nestjs/common");
 const product_info_service_1 = require("./product-info.service");
 const product_info_controller_1 = require("./product-info.controller");
+const typeorm_1 = require("@nestjs/typeorm");
+const product_info_entity_1 = require("./entities/product-info.entity");
 let ProductInfoModule = class ProductInfoModule {
 };
 ProductInfoModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([product_info_entity_1.ProductInfoEntity]),
+        ],
         controllers: [product_info_controller_1.ProductInfoController],
-        providers: [product_info_service_1.ProductInfoService]
+        providers: [product_info_service_1.ProductInfoService],
+        exports: [product_info_service_1.ProductInfoService]
     })
 ], ProductInfoModule);
 exports.ProductInfoModule = ProductInfoModule;

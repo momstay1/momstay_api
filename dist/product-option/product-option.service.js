@@ -20,12 +20,61 @@ const typeorm_1 = require("@nestjs/typeorm");
 const product_option_entity_1 = require("./entities/product-option.entity");
 const typeorm_2 = require("typeorm");
 const lodash_1 = require("lodash");
+const product_service_1 = require("../product/product.service");
+const file_service_1 = require("../file/file.service");
+const exceptions_1 = require("@nestjs/common/exceptions");
 let ProductOptionService = class ProductOptionService {
-    constructor(productOptionRepository) {
+    constructor(productOptionRepository, productService, fileService) {
         this.productOptionRepository = productOptionRepository;
+        this.productService = productService;
+        this.fileService = fileService;
     }
-    create(createProductOptionDto) {
-        return 'This action adds a new productOption';
+    async create(createProductOptionDto, files) {
+        let product;
+        if ((0, lodash_1.get)(createProductOptionDto, 'productIdx', '')) {
+            const productIdx = (0, lodash_1.get)(createProductOptionDto, 'productIdx');
+            product = await this.productService.findIdx(+productIdx);
+        }
+        const product_option_data = {
+            idx: +(0, lodash_1.get)(createProductOptionDto, 'idx'),
+            status: +(0, lodash_1.get)(createProductOptionDto, 'status', 0),
+            type: (0, lodash_1.get)(createProductOptionDto, 'type', ''),
+            order: '10',
+            stayStatus: (0, lodash_1.get)(createProductOptionDto, 'stayStatus', '0'),
+            visitStatus: (0, lodash_1.get)(createProductOptionDto, 'visitStatus', '0'),
+            paymentStatus: (0, lodash_1.get)(createProductOptionDto, 'paymentStatus', '0'),
+            title: (0, lodash_1.get)(createProductOptionDto, 'title', ''),
+            price: +(0, lodash_1.get)(createProductOptionDto, 'price', 0),
+            priceMonth: +(0, lodash_1.get)(createProductOptionDto, 'priceMonth', 0),
+            priceWeek: +(0, lodash_1.get)(createProductOptionDto, 'priceWeek', 0),
+            priceDay: +(0, lodash_1.get)(createProductOptionDto, 'priceDay', 0),
+            detailsKor: (0, lodash_1.get)(createProductOptionDto, 'detailsKor', ''),
+            detailsEng: (0, lodash_1.get)(createProductOptionDto, 'detailsEng', ''),
+            detailsJpn: (0, lodash_1.get)(createProductOptionDto, 'detailsJpn', ''),
+            detailsChn: (0, lodash_1.get)(createProductOptionDto, 'detailsChn', ''),
+            privateFacility: (0, lodash_1.get)(createProductOptionDto, 'privateFacility', ''),
+            productInfo: product,
+        };
+        const productOptionEntity = await this.productOptionRepository.create(product_option_data);
+        const productOption = await this.productOptionRepository.save(productOptionEntity);
+        productOption['product'] = product;
+        if ((0, lodash_1.get)(createProductOptionDto, 'filesIdx', '')) {
+            const productOptionFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["roomDetailImg"], "" + productOption['idx']), (o) => "" + o.file_idx);
+            const fileIdxs = (0, lodash_1.get)(createProductOptionDto, 'filesIdx').split(",");
+            const delFileIdxs = productOptionFileIdxs.filter(o => !fileIdxs.includes(o));
+            if (delFileIdxs.length > 0) {
+                await this.fileService.removes(delFileIdxs);
+            }
+        }
+        let new_file;
+        let fileIdxs;
+        if (!(0, lodash_1.isEmpty)(files)) {
+            new_file = await this.fileService.fileInfoInsert(files, productOption['idx']);
+            fileIdxs = (0, lodash_1.map)(new_file, (o) => o.idx);
+        }
+        fileIdxs = (0, lodash_1.union)(fileIdxs, (0, lodash_1.get)(createProductOptionDto, 'filesIdx').split(","));
+        const file_info = await this.fileService.findIndexs(fileIdxs);
+        return { productOption, file_info };
     }
     async findAll(options, search) {
         const { take, page } = options;
@@ -54,6 +103,18 @@ let ProductOptionService = class ProductOptionService {
     findOne(id) {
         return `This action returns a #${id} productOption`;
     }
+    async findIdx(idx) {
+        if (!idx) {
+            throw new exceptions_1.NotFoundException('잘못된 정보 입니다.');
+        }
+        const productOption = await this.productOptionRepository.findOne({
+            where: { idx: idx },
+        });
+        if (!productOption.idx) {
+            throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');
+        }
+        return productOption;
+    }
     update(id, updateProductOptionDto) {
         return `This action updates a #${id} productOption`;
     }
@@ -64,7 +125,9 @@ let ProductOptionService = class ProductOptionService {
 ProductOptionService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(product_option_entity_1.ProductOptionEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        product_service_1.ProductService,
+        file_service_1.FileService])
 ], ProductOptionService);
 exports.ProductOptionService = ProductOptionService;
 //# sourceMappingURL=product-option.service.js.map

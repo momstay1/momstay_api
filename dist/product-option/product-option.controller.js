@@ -18,12 +18,16 @@ const product_option_service_1 = require("./product-option.service");
 const create_product_option_dto_1 = require("./dto/create-product-option.dto");
 const update_product_option_dto_1 = require("./dto/update-product-option.dto");
 const swagger_1 = require("@nestjs/swagger");
+const decorators_1 = require("@nestjs/common/decorators");
+const common_file_1 = require("../common/common.file");
+const platform_express_1 = require("@nestjs/platform-express");
+const role_decorator_1 = require("../common/decorator/role.decorator");
 let ProductOptionController = class ProductOptionController {
     constructor(productOptionService) {
         this.productOptionService = productOptionService;
     }
-    create(createProductOptionDto) {
-        return this.productOptionService.create(createProductOptionDto);
+    async create(createProductOptionDto, files) {
+        return await this.productOptionService.create(createProductOptionDto, files);
     }
     async findAll(take, page, search) {
         const { results, total, pageTotal } = await this.productOptionService.findAll({ take, page }, search);
@@ -45,10 +49,18 @@ let ProductOptionController = class ProductOptionController {
 };
 __decorate([
     (0, common_1.Post)(),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, decorators_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'roomDetailImg', maxCount: 5 },
+    ], (0, common_file_1.multerOptions)())),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, decorators_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_product_option_dto_1.CreateProductOptionDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [create_product_option_dto_1.CreateProductOptionDto,
+        Array]),
+    __metadata("design:returntype", Promise)
 ], ProductOptionController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
@@ -86,6 +98,7 @@ __decorate([
 ], ProductOptionController.prototype, "remove", null);
 ProductOptionController = __decorate([
     (0, common_1.Controller)('product-option'),
+    (0, swagger_1.ApiTags)('방 API'),
     __metadata("design:paramtypes", [product_option_service_1.ProductOptionService])
 ], ProductOptionController);
 exports.ProductOptionController = ProductOptionController;

@@ -13,7 +13,7 @@ export declare class UsersController {
     constructor(authService: AuthService, usersService: UsersService, loginService: LoginService);
     create(createUserDto: CreateUserDto, files: Array<Express.Multer.File>): Promise<{
         user: UsersEntity;
-        file_info: {};
+        file_info: any;
     }>;
     login(user: UsersEntity, req: any): Promise<ResponseAuthDto>;
     snsLogin(snsLoginUserDto: SnsLoginUserDto): Promise<ResponseAuthDto>;

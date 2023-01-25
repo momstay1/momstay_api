@@ -12,12 +12,16 @@ const product_option_service_1 = require("./product-option.service");
 const product_option_controller_1 = require("./product-option.controller");
 const typeorm_1 = require("@nestjs/typeorm");
 const product_option_entity_1 = require("./entities/product-option.entity");
+const product_module_1 = require("../product/product.module");
+const file_module_1 = require("../file/file.module");
 let ProductOptionModule = class ProductOptionModule {
 };
 ProductOptionModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([product_option_entity_1.ProductOptionEntity]),
+            file_module_1.FileModule,
+            product_module_1.ProductModule
         ],
         controllers: [product_option_controller_1.ProductOptionController],
         providers: [product_option_service_1.ProductOptionService]

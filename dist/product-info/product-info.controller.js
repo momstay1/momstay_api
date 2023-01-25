@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const product_info_service_1 = require("./product-info.service");
 const create_product_info_dto_1 = require("./dto/create-product-info.dto");
 const update_product_info_dto_1 = require("./dto/update-product-info.dto");
+const swagger_1 = require("@nestjs/swagger");
 let ProductInfoController = class ProductInfoController {
     constructor(productInfoService) {
         this.productInfoService = productInfoService;
@@ -24,8 +25,8 @@ let ProductInfoController = class ProductInfoController {
     create(createProductInfoDto) {
         return this.productInfoService.create(createProductInfoDto);
     }
-    findAll() {
-        return this.productInfoService.findAll();
+    async findAll() {
+        return await this.productInfoService.findAll();
     }
     findOne(id) {
         return this.productInfoService.findOne(+id);
@@ -46,9 +47,12 @@ __decorate([
 ], ProductInfoController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({
+        summary: '숙소 샐활 및 편의 API',
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ProductInfoController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
@@ -74,6 +78,7 @@ __decorate([
 ], ProductInfoController.prototype, "remove", null);
 ProductInfoController = __decorate([
     (0, common_1.Controller)('product-info'),
+    (0, swagger_1.ApiTags)('숙소 생활 및 편의 API'),
     __metadata("design:paramtypes", [product_info_service_1.ProductInfoService])
 ], ProductInfoController);
 exports.ProductInfoController = ProductInfoController;

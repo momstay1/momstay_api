@@ -1,10 +1,14 @@
+/// <reference types="multer" />
 import { ProductOptionService } from './product-option.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
 import { UpdateProductOptionDto } from './dto/update-product-option.dto';
 export declare class ProductOptionController {
     private readonly productOptionService;
     constructor(productOptionService: ProductOptionService);
-    create(createProductOptionDto: CreateProductOptionDto): string;
+    create(createProductOptionDto: CreateProductOptionDto, files: Array<Express.Multer.File>): Promise<{
+        productOption: import("./entities/product-option.entity").ProductOptionEntity;
+        file_info: import("../file/entities/file.entity").FileEntity[];
+    }>;
     findAll(take: number, page: number, search: string[]): Promise<{
         results: import("./entities/product-option.entity").ProductOptionEntity[];
         total: number;

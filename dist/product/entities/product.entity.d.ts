@@ -20,7 +20,7 @@ export declare class ProductEntity {
     detailsEng: string;
     detailsJpn: string;
     detailsChn: string;
-    oldIdx: string;
+    oldIdx: number;
     oldData: string;
     createdAt: Date;
     updatedAt: Date;

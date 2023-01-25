@@ -11,7 +11,7 @@ export declare class AdminUsersController {
     constructor(authService: AuthService, usersService: UsersService);
     create(createUserDto: CreateUserDto, files: Array<Express.Multer.File>): Promise<{
         user: UsersEntity;
-        file_info: {};
+        file_info: any;
     }>;
     login(user: UsersEntity): Promise<ResponseAuthDto>;
     findAll(user: UsersEntity, take: number, page: number, search: string[]): Promise<{
