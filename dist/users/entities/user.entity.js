@@ -103,6 +103,10 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "certifiInfo", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: '1' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "marketing", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "oldIdx", void 0);

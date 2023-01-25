@@ -189,6 +189,7 @@ let UsersService = class UsersService {
         user.phone = (0, lodash_1.get)(updateUserDto, 'phone', '');
         user.birthday = (0, lodash_1.get)(updateUserDto, 'birthday', '0000-00-00');
         user.memo = (0, lodash_1.get)(updateUserDto, 'memo', '');
+        user.marketing = (0, lodash_1.get)(updateUserDto, 'marketing', '1');
         user.groups = groups;
         if ((0, lodash_1.get)(updateUserDto, 'password')) {
             user.password = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(updateUserDto, 'password'));

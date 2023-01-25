@@ -14,6 +14,7 @@ export declare class CreateUserDto {
     readonly memo: string;
     readonly uniqueKey: string;
     readonly certifiInfo: string;
+    readonly marketing: string;
     readonly group: number[];
     readonly profile: string;
 }

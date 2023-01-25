@@ -21,6 +21,7 @@ export declare class UsersEntity {
     signupVerifyToken: string;
     uniqueKey: string;
     certifiInfo: string;
+    marketing: string;
     oldIdx: string;
     oldData: string;
     boardContents: undefined;

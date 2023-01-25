@@ -15,8 +15,8 @@ const class_validator_1 = require("class-validator");
 class CreateUserDto {
 }
 __decorate([
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '회원 타입' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "type", void 0);
@@ -87,7 +87,7 @@ __decorate([
 ], CreateUserDto.prototype, "other", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '회원 메모' }),
+    (0, swagger_1.ApiProperty)({ description: '회원 메모', required: false }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "memo", void 0);
 __decorate([
@@ -100,6 +100,11 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: '회원 본인인증 정보 (json형태)' }),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "certifiInfo", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '회원 마케팅 동의 여부 <br>(1: 비동의, 2: 동의)' }),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "marketing", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '회원 그룹' }),
