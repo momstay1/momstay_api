@@ -81,6 +81,9 @@ export class UsersEntity {
   @Column({ type: 'text', default: '' })
   certifiInfo: string;
 
+  @Column({ default: '1' })
+  marketing: string;
+
   @Column({ default: '' })
   oldIdx: string;
   @Column({ type: 'text', default: '' })
