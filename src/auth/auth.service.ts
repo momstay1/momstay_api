@@ -25,6 +25,7 @@ export class AuthService {
     }
     const isHashValid = await commonBcrypt.isHashValid(password, user.password);
     const isSha1HashValid = await commonBcrypt.isSha1HashValid(password, user.prevPassword);
+
     if (user && isHashValid) {
       const { password, ...result } = user;
       return result;

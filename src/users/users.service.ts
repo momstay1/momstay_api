@@ -209,6 +209,7 @@ export class UsersService {
     user.phone = get(updateUserDto, 'phone', '');
     user.birthday = get(updateUserDto, 'birthday', '0000-00-00');
     user.memo = get(updateUserDto, 'memo', '');
+    user.marketing = get(updateUserDto, 'marketing', '1');
     user.groups = groups;
     if (get(updateUserDto, 'password')) {
       user.password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));

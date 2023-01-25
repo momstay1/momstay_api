@@ -13,8 +13,8 @@ import {
 } from 'class-validator';
 
 export class CreateUserDto {
-  @IsString()
   @IsOptional()
+  @IsString()
   @ApiProperty({ description: '회원 타입' })
   readonly type: string;
 
@@ -73,7 +73,7 @@ export class CreateUserDto {
   readonly other: string;
 
   @IsOptional()
-  @ApiProperty({ description: '회원 메모' })
+  @ApiProperty({ description: '회원 메모', required: false })
   readonly memo: string;
 
   @IsOptional()
@@ -83,6 +83,10 @@ export class CreateUserDto {
   @IsOptional()
   @ApiProperty({ description: '회원 본인인증 정보 (json형태)' })
   readonly certifiInfo: string;
+
+  @IsOptional()
+  @ApiProperty({ description: '회원 마케팅 동의 여부 <br>(1: 비동의, 2: 동의)' })
+  readonly marketing: string;
 
   @IsOptional()
   @ApiProperty({ description: '회원 그룹' })
