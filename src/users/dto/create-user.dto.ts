@@ -73,7 +73,7 @@ export class CreateUserDto {
   readonly other: string;
 
   @IsOptional()
-  @ApiProperty({ description: '회원 메모' })
+  @ApiProperty({ description: '회원 메모', required: false })
   readonly memo: string;
 
   @IsOptional()

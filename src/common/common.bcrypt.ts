@@ -11,10 +11,6 @@ export const commonBcrypt = {
   isSha1HashValid: async (password, hashPassword): Promise<boolean> => {
     const first = crypto.createHash('sha1').update(password).digest();
     const prevPassword = '*' + crypto.createHash('sha1').update(first).digest('hex').toUpperCase();
-    console.log({ prevPassword });
-    console.log({ hashPassword });
-    console.log(prevPassword == hashPassword);
-    console.log(prevPassword === hashPassword);
     return prevPassword === hashPassword;
   },
 };
