@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query
+} from '@nestjs/common';
 import { MetroService } from './metro.service';
 import { CreateMetroDto } from './dto/create-metro.dto';
 import { UpdateMetroDto } from './dto/update-metro.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('metro')
+@ApiTags('지하철 API')
 export class MetroController {
-  constructor(private readonly metroService: MetroService) {}
+  constructor(private readonly metroService: MetroService) { }
 
   @Post()
   create(@Body() createMetroDto: CreateMetroDto) {
@@ -13,8 +24,23 @@ export class MetroController {
   }
 
   @Get()
-  findAll() {
-    return this.metroService.findAll();
+  @ApiOperation({ summary: '지하철 리스트 API' })
+  async findAll(
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[]
+  ) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.metroService.findAll({ take, page }, search);
+
+    return {
+      results,
+      total,
+      pageTotal
+    };
   }
 
   @Get(':id')

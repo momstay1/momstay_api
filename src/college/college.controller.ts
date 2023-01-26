@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query
+} from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CollegeService } from './college.service';
 import { CreateCollegeDto } from './dto/create-college.dto';
 import { UpdateCollegeDto } from './dto/update-college.dto';
 
 @Controller('college')
+@ApiTags('대학교 API')
 export class CollegeController {
-  constructor(private readonly collegeService: CollegeService) {}
+  constructor(private readonly collegeService: CollegeService) { }
 
   @Post()
   create(@Body() createCollegeDto: CreateCollegeDto) {
@@ -13,8 +24,23 @@ export class CollegeController {
   }
 
   @Get()
-  findAll() {
-    return this.collegeService.findAll();
+  @ApiOperation({ summary: '대학교 리스트 API' })
+  async findAll(
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[]
+  ) {
+    const {
+      results,
+      total,
+      pageTotal
+    } = await this.collegeService.findAll({ take, page }, search);
+
+    return {
+      results,
+      total,
+      pageTotal
+    };
   }
 
   @Get(':id')

@@ -14,6 +14,7 @@ export class ProductOptionController {
   constructor(private readonly productOptionService: ProductOptionService) { }
 
   @Post()
+  @ApiOperation({ summary: '방 생성 API' })
   @Auth(['root', 'admin', 'host'])
   @ApiBearerAuth()
   @UseInterceptors(FileFieldsInterceptor([
