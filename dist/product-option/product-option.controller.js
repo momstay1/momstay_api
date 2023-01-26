@@ -49,6 +49,7 @@ let ProductOptionController = class ProductOptionController {
 };
 __decorate([
     (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: '방 생성 API' }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, decorators_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([

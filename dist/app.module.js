@@ -29,6 +29,8 @@ const email_module_1 = require("./email/email.module");
 const product_module_1 = require("./product/product.module");
 const product_option_module_1 = require("./product-option/product-option.module");
 const product_info_module_1 = require("./product-info/product-info.module");
+const metro_module_1 = require("./metro/metro.module");
+const college_module_1 = require("./college/college.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
@@ -63,6 +65,8 @@ AppModule = __decorate([
             product_module_1.ProductModule,
             product_option_module_1.ProductOptionModule,
             product_info_module_1.ProductInfoModule,
+            metro_module_1.MetroModule,
+            college_module_1.CollegeModule,
         ],
         providers: [common_service_1.CommonService],
     })
