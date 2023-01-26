@@ -112,8 +112,8 @@ export class ProductService {
     })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(idx: number) {
+    return await this.findIdx(idx);
   }
 
   async findIdx(idx: number) {
