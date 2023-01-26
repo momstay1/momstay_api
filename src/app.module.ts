@@ -25,6 +25,8 @@ import { EmailModule } from './email/email.module';
 import { ProductModule } from './product/product.module';
 import { ProductOptionModule } from './product-option/product-option.module';
 import { ProductInfoModule } from './product-info/product-info.module';
+import { MetroModule } from './metro/metro.module';
+import { CollegeModule } from './college/college.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { ProductInfoModule } from './product-info/product-info.module';
     ProductModule,
     ProductOptionModule,
     ProductInfoModule,
+    MetroModule,
+    CollegeModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,
