@@ -36,8 +36,8 @@ let ProductController = class ProductController {
             pageTotal
         };
     }
-    findOne(id) {
-        return this.productService.findOne(+id);
+    async findOne(idx) {
+        return await this.productService.findOne(+idx);
     }
     update(id, updateProductDto) {
         return this.productService.update(+id, updateProductDto);
@@ -80,11 +80,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(':idx'),
+    (0, swagger_1.ApiOperation)({ summary: '숙소 상세 조회 API' }),
+    __param(0, (0, common_1.Param)('idx')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),

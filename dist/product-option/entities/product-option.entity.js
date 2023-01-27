@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductOptionEntity = void 0;
+const product_info_entity_1 = require("../../product-info/entities/product-info.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
 const typeorm_1 = require("typeorm");
 let ProductOptionEntity = class ProductOptionEntity {
@@ -105,6 +106,10 @@ __decorate([
     }),
     __metadata("design:type", product_entity_1.ProductEntity)
 ], ProductOptionEntity.prototype, "product", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => product_info_entity_1.ProductInfoEntity, (pi) => pi.productOption),
+    __metadata("design:type", Array)
+], ProductOptionEntity.prototype, "productInfo", void 0);
 ProductOptionEntity = __decorate([
     (0, typeorm_1.Entity)("product_option")
 ], ProductOptionEntity);

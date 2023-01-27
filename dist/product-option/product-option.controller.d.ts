@@ -14,7 +14,7 @@ export declare class ProductOptionController {
         total: number;
         pageTotal: number;
     }>;
-    findOne(id: string): string;
+    findOne(idx: string): Promise<import("./entities/product-option.entity").ProductOptionEntity>;
     update(id: string, updateProductOptionDto: UpdateProductOptionDto): string;
     remove(id: string): string;
 }

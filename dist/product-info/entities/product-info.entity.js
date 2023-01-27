@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductInfoEntity = void 0;
+const product_option_entity_1 = require("../../product-option/entities/product-option.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
 const typeorm_1 = require("typeorm");
 let ProductInfoEntity = class ProductInfoEntity {
@@ -25,6 +26,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
+], ProductInfoEntity.prototype, "group", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
 ], ProductInfoEntity.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
@@ -35,6 +40,11 @@ __decorate([
     (0, typeorm_1.JoinTable)(),
     __metadata("design:type", Array)
 ], ProductInfoEntity.prototype, "product", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => product_option_entity_1.ProductOptionEntity, (product) => product.productInfo),
+    (0, typeorm_1.JoinTable)(),
+    __metadata("design:type", Array)
+], ProductInfoEntity.prototype, "productOption", void 0);
 ProductInfoEntity = __decorate([
     (0, typeorm_1.Entity)('product_info')
 ], ProductInfoEntity);

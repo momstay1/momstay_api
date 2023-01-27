@@ -6,7 +6,7 @@ export declare class ProductInfoService {
     private productInfoRepository;
     constructor(productInfoRepository: Repository<ProductInfoEntity>);
     create(createProductInfoDto: CreateProductInfoDto): string;
-    findAll(): Promise<ProductInfoEntity[]>;
+    findAll(group: string): Promise<ProductInfoEntity[]>;
     findAllIdxs(idxs: string[]): Promise<ProductInfoEntity[]>;
     findOne(id: number): string;
     update(id: number, updateProductInfoDto: UpdateProductInfoDto): string;

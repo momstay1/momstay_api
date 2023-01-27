@@ -14,7 +14,7 @@ export declare class ProductController {
         total: number;
         pageTotal: number;
     }>;
-    findOne(id: string): string;
+    findOne(idx: string): Promise<import("./entities/product.entity").ProductEntity>;
     update(id: string, updateProductDto: UpdateProductDto): string;
     remove(id: string): string;
 }

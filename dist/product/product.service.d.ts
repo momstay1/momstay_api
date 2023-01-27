@@ -15,7 +15,7 @@ export declare class ProductService {
         file_info: import("../file/entities/file.entity").FileEntity[];
     }>;
     findAll(options: PaginationOptions, search: string[]): Promise<Pagination<ProductEntity>>;
-    findOne(id: number): string;
+    findOne(idx: number): Promise<ProductEntity>;
     findIdx(idx: number): Promise<ProductEntity>;
     update(id: number, updateProductDto: UpdateProductDto): string;
     remove(id: number): string;

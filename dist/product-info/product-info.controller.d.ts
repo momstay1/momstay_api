@@ -5,7 +5,7 @@ export declare class ProductInfoController {
     private readonly productInfoService;
     constructor(productInfoService: ProductInfoService);
     create(createProductInfoDto: CreateProductInfoDto): string;
-    findAll(): Promise<import("./entities/product-info.entity").ProductInfoEntity[]>;
+    findAll(group: string): Promise<import("./entities/product-info.entity").ProductInfoEntity[]>;
     findOne(id: string): string;
     update(id: string, updateProductInfoDto: UpdateProductInfoDto): string;
     remove(id: string): string;

@@ -1,3 +1,4 @@
+import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
 import { ProductEntity } from "src/product/entities/product.entity";
 export declare class ProductOptionEntity {
     idx: number;
@@ -22,4 +23,5 @@ export declare class ProductOptionEntity {
     createdAt: Date;
     updatedAt: Date;
     product: ProductEntity;
+    productInfo: ProductInfoEntity[];
 }

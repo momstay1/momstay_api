@@ -25,8 +25,8 @@ let ProductInfoController = class ProductInfoController {
     create(createProductInfoDto) {
         return this.productInfoService.create(createProductInfoDto);
     }
-    async findAll() {
-        return await this.productInfoService.findAll();
+    async findAll(group) {
+        return await this.productInfoService.findAll(group);
     }
     findOne(id) {
         return this.productInfoService.findOne(+id);
@@ -50,8 +50,9 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '숙소 샐활 및 편의 API',
     }),
+    __param(0, (0, common_1.Query)('group')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductInfoController.prototype, "findAll", null);
 __decorate([

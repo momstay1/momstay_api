@@ -37,8 +37,8 @@ let ProductOptionController = class ProductOptionController {
             pageTotal
         };
     }
-    findOne(id) {
-        return this.productOptionService.findOne(+id);
+    async findOne(idx) {
+        return await this.productOptionService.findOne(+idx);
     }
     update(id, updateProductOptionDto) {
         return this.productOptionService.update(+id, updateProductOptionDto);
@@ -68,6 +68,16 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: '방 리스트 조회 API',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
+        description: "search=membership:(0:무료|1:유료)<br>"
+            + "search=title:string<br>"
+            + "search=addr1:string<br>"
+            + "search=addr2:string<br>"
+            + "search=metro:string<br>"
+            + "search=college:string<br>",
+        required: false
+    }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
     __param(2, (0, common_1.Query)('search')),
@@ -76,11 +86,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProductOptionController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(':idx'),
+    (0, swagger_1.ApiOperation)({ summary: '방 상세 조회 API' }),
+    __param(0, (0, common_1.Param)('idx')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ProductOptionController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),

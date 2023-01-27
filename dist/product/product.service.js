@@ -104,8 +104,8 @@ let ProductService = class ProductService {
             total,
         });
     }
-    findOne(id) {
-        return `This action returns a #${id} product`;
+    async findOne(idx) {
+        return await this.findIdx(idx);
     }
     async findIdx(idx) {
         if (!idx) {

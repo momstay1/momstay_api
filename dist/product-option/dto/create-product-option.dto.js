@@ -107,15 +107,15 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '방 생활 시설', required: false }),
-    __metadata("design:type", String)
-], CreateProductOptionDto.prototype, "privateFacility", void 0);
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '숙소 idx', required: false }),
     __metadata("design:type", String)
 ], CreateProductOptionDto.prototype, "productIdx", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 생활 시설 <br> (ex> 33,34)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "productInfoIdx", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

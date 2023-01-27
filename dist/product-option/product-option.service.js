@@ -23,17 +23,24 @@ const lodash_1 = require("lodash");
 const product_service_1 = require("../product/product.service");
 const file_service_1 = require("../file/file.service");
 const exceptions_1 = require("@nestjs/common/exceptions");
+const product_info_service_1 = require("../product-info/product-info.service");
 let ProductOptionService = class ProductOptionService {
-    constructor(productOptionRepository, productService, fileService) {
+    constructor(productOptionRepository, productService, fileService, productInfoService) {
         this.productOptionRepository = productOptionRepository;
         this.productService = productService;
         this.fileService = fileService;
+        this.productInfoService = productInfoService;
     }
     async create(createProductOptionDto, files) {
         let product;
         if ((0, lodash_1.get)(createProductOptionDto, 'productIdx', '')) {
             const productIdx = (0, lodash_1.get)(createProductOptionDto, 'productIdx');
             product = await this.productService.findIdx(+productIdx);
+        }
+        let productInfo;
+        if ((0, lodash_1.get)(createProductOptionDto, 'productInfoIdx', '')) {
+            const productInfoIdx = (0, lodash_1.get)(createProductOptionDto, 'productInfoIdx').split(",");
+            productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
         }
         const product_option_data = {
             idx: +(0, lodash_1.get)(createProductOptionDto, 'idx'),
@@ -52,12 +59,13 @@ let ProductOptionService = class ProductOptionService {
             detailsEng: (0, lodash_1.get)(createProductOptionDto, 'detailsEng', ''),
             detailsJpn: (0, lodash_1.get)(createProductOptionDto, 'detailsJpn', ''),
             detailsChn: (0, lodash_1.get)(createProductOptionDto, 'detailsChn', ''),
-            privateFacility: (0, lodash_1.get)(createProductOptionDto, 'privateFacility', ''),
-            productInfo: product,
+            product: product,
+            productInfo: productInfo,
         };
         const productOptionEntity = await this.productOptionRepository.create(product_option_data);
         const productOption = await this.productOptionRepository.save(productOptionEntity);
         productOption['product'] = product;
+        productOption['productInfo'] = productInfo;
         if ((0, lodash_1.get)(createProductOptionDto, 'filesIdx', '')) {
             const productOptionFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["roomDetailImg"], "" + productOption['idx']), (o) => "" + o.file_idx);
             const fileIdxs = (0, lodash_1.get)(createProductOptionDto, 'filesIdx').split(",");
@@ -81,6 +89,7 @@ let ProductOptionService = class ProductOptionService {
         const where = common_utils_1.commonUtils.searchSplit(search);
         const [results, total] = await this.productOptionRepository.createQueryBuilder('product_option')
             .leftJoinAndSelect('product_option.product', 'product')
+            .leftJoinAndSelect('product_option.productInfo', 'productInfo')
             .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
             .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
             .where((qb) => {
@@ -100,8 +109,8 @@ let ProductOptionService = class ProductOptionService {
             total,
         });
     }
-    findOne(id) {
-        return `This action returns a #${id} productOption`;
+    async findOne(idx) {
+        return await this.findIdx(idx);
     }
     async findIdx(idx) {
         if (!idx) {
@@ -109,6 +118,7 @@ let ProductOptionService = class ProductOptionService {
         }
         const productOption = await this.productOptionRepository.findOne({
             where: { idx: idx },
+            relations: ['product', 'product.productInfo', 'productInfo']
         });
         if (!productOption.idx) {
             throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');
@@ -127,7 +137,8 @@ ProductOptionService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(product_option_entity_1.ProductOptionEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         product_service_1.ProductService,
-        file_service_1.FileService])
+        file_service_1.FileService,
+        product_info_service_1.ProductInfoService])
 ], ProductOptionService);
 exports.ProductOptionService = ProductOptionService;
 //# sourceMappingURL=product-option.service.js.map

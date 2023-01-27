@@ -24,9 +24,13 @@ let ProductInfoService = class ProductInfoService {
     create(createProductInfoDto) {
         return 'This action adds a new productInfo';
     }
-    async findAll() {
+    async findAll(group) {
+        const where = { status: 2 };
+        if (group) {
+            where['group'] = group;
+        }
         const productInfo = await this.productInfoRepository.find({
-            where: { status: 2 }
+            where: where
         });
         if (productInfo.length <= 0) {
             throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
