@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ProductOptionService } from './product-option.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
 import { UpdateProductOptionDto } from './dto/update-product-option.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
 import { multerOptions } from 'src/common/common.file';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -35,6 +35,16 @@ export class ProductOptionController {
     // description: 'search=membership:(0|1)<br>'
     //   + 'search=keyword:메인검색<br>'
   })
+  @ApiQuery({
+    name: "search",
+    description: "search=membership:(0:무료|1:유료)<br>"
+      + "search=title:string<br>"
+      + "search=addr1:string<br>"
+      + "search=addr2:string<br>"
+      + "search=metro:string<br>"
+      + "search=college:string<br>",
+    required: false
+  })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
@@ -51,9 +61,10 @@ export class ProductOptionController {
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productOptionService.findOne(+id);
+  @Get(':idx')
+  @ApiOperation({ summary: '방 상세 조회 API' })
+  async findOne(@Param('idx') idx: string) {
+    return await this.productOptionService.findOne(+idx);
   }
 
   @Patch(':id')

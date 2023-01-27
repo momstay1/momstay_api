@@ -62,14 +62,18 @@ export class CreateProductOptionDto {
   @IsString()
   @ApiProperty({ description: '방 소개(중국어)', required: false })
   readonly detailsChn: string;
-  @IsOptional()
-  @IsString()
-  @ApiProperty({ description: '방 생활 시설', required: false })
-  readonly privateFacility: string;
+  // @IsOptional()
+  // @IsString()
+  // @ApiProperty({ description: '방 생활 시설', required: false })
+  // readonly privateFacility: string;
   @IsOptional()
   @IsString()
   @ApiProperty({ description: '숙소 idx', required: false })
   readonly productIdx: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '방 생활 시설 <br> (ex> 33,34)', required: false })
+  readonly productInfoIdx: string;
 
   @IsOptional()
   @IsString()

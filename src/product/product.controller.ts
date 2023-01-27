@@ -53,9 +53,10 @@ export class ProductController {
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  @Get(':idx')
+  @ApiOperation({ summary: '숙소 상세 조회 API' })
+  async findOne(@Param('idx') idx: string) {
+    return await this.productService.findOne(+idx);
   }
 
   @Patch(':id')
