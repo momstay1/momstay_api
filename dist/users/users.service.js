@@ -44,7 +44,7 @@ let UsersService = class UsersService {
             await this.findId(email);
         }
         catch (error) {
-            const code = await this.emailService.createCode('shjeon2500@naver.com', 0);
+            const code = await this.emailService.createCode(email, 0);
             this.emailService.snedMail(1, email, 'momstay - Email Authentication', `Please enter the email authentication code below to register as a member.
         <br><br>
         Email authentication code : ${code}`);
