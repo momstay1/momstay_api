@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductInfoService } from './product-info.service';
 import { CreateProductInfoDto } from './dto/create-product-info.dto';
 import { UpdateProductInfoDto } from './dto/update-product-info.dto';
@@ -18,8 +18,8 @@ export class ProductInfoController {
   @ApiOperation({
     summary: '숙소 샐활 및 편의 API',
   })
-  async findAll() {
-    return await this.productInfoService.findAll();
+  async findAll(@Query('group') group: string) {
+    return await this.productInfoService.findAll(group);
   }
 
   @Get(':id')

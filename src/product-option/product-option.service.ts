@@ -10,6 +10,7 @@ import { get, isEmpty, map, merge, union } from 'lodash';
 import { ProductService } from 'src/product/product.service';
 import { FileService } from 'src/file/file.service';
 import { NotFoundException } from '@nestjs/common/exceptions';
+import { ProductInfoService } from 'src/product-info/product-info.service';
 
 @Injectable()
 export class ProductOptionService {
@@ -17,6 +18,7 @@ export class ProductOptionService {
     @InjectRepository(ProductOptionEntity) private productOptionRepository: Repository<ProductOptionEntity>,
     private readonly productService: ProductService,
     private readonly fileService: FileService,
+    private readonly productInfoService: ProductInfoService,
   ) { }
 
   async create(createProductOptionDto: CreateProductOptionDto, files) {
@@ -26,6 +28,13 @@ export class ProductOptionService {
     if (get(createProductOptionDto, 'productIdx', '')) {
       const productIdx = get(createProductOptionDto, 'productIdx');
       product = await this.productService.findIdx(+productIdx);
+    }
+
+    // 방 생활 시설 정보 가져오기
+    let productInfo;
+    if (get(createProductOptionDto, 'productInfoIdx', '')) {
+      const productInfoIdx = get(createProductOptionDto, 'productInfoIdx').split(",");
+      productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
     }
 
     // 방 정보
@@ -46,13 +55,15 @@ export class ProductOptionService {
       detailsEng: get(createProductOptionDto, 'detailsEng', ''),
       detailsJpn: get(createProductOptionDto, 'detailsJpn', ''),
       detailsChn: get(createProductOptionDto, 'detailsChn', ''),
-      privateFacility: get(createProductOptionDto, 'privateFacility', ''),
-      productInfo: product,
+      // privateFacility: get(createProductOptionDto, 'privateFacility', ''),
+      product: product,
+      productInfo: productInfo,
     };
     // 방 등록
     const productOptionEntity = await this.productOptionRepository.create(product_option_data);
     const productOption = await this.productOptionRepository.save(productOptionEntity);
     productOption['product'] = product;
+    productOption['productInfo'] = productInfo;
 
     // 파일 제거
     if (get(createProductOptionDto, 'filesIdx', '')) {
@@ -87,6 +98,7 @@ export class ProductOptionService {
     const where = commonUtils.searchSplit(search);
     const [results, total] = await this.productOptionRepository.createQueryBuilder('product_option')
       .leftJoinAndSelect('product_option.product', 'product')
+      .leftJoinAndSelect('product_option.productInfo', 'productInfo')
       .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
       .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
       .where((qb) => {
@@ -119,7 +131,7 @@ export class ProductOptionService {
     }
     const productOption = await this.productOptionRepository.findOne({
       where: { idx: idx },
-      relations: ['product', 'product.productInfo']
+      relations: ['product', 'product.productInfo', 'productInfo']
     });
     if (!productOption.idx) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ProductOptionService } from './product-option.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
 import { UpdateProductOptionDto } from './dto/update-product-option.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
 import { multerOptions } from 'src/common/common.file';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -34,6 +34,16 @@ export class ProductOptionController {
     summary: '방 리스트 조회 API',
     // description: 'search=membership:(0|1)<br>'
     //   + 'search=keyword:메인검색<br>'
+  })
+  @ApiQuery({
+    name: "search",
+    description: "search=membership:(0:무료|1:유료)<br>"
+      + "search=title:string<br>"
+      + "search=addr1:string<br>"
+      + "search=addr2:string<br>"
+      + "search=metro:string<br>"
+      + "search=college:string<br>",
+    required: false
   })
   async findAll(
     @Query('take') take: number,
