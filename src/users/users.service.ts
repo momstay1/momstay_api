@@ -34,7 +34,7 @@ export class UsersService {
     try {
       await this.findId(email);
     } catch (error) {
-      const code = await this.emailService.createCode('shjeon2500@naver.com', 0);
+      const code = await this.emailService.createCode(email, 0);
       this.emailService.snedMail(
         1,
         email,
