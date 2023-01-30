@@ -27,6 +27,7 @@ import { ProductOptionModule } from './product-option/product-option.module';
 import { ProductInfoModule } from './product-info/product-info.module';
 import { MetroModule } from './metro/metro.module';
 import { CollegeModule } from './college/college.module';
+import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { CollegeModule } from './college/college.module';
     ProductInfoModule,
     MetroModule,
     CollegeModule,
+    RefreshTokenModule,
     // DefectModule,
     // DashboardModule,
     // SettingsModule,

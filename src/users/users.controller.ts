@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   UseGuards,
   Query,
@@ -39,6 +40,7 @@ import { SnsLoginUserDto } from './dto/sns.login-user.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 import { LoginService } from 'src/login/login.service';
+import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -46,7 +48,8 @@ export class UsersController {
   constructor(
     private authService: AuthService,
     private readonly usersService: UsersService,
-    private readonly loginService: LoginService
+    private readonly loginService: LoginService,
+    private readonly refreshTokenService: RefreshTokenService
   ) { }
 
   // 회원 생성
@@ -76,6 +79,23 @@ export class UsersController {
   async login(@GetUser() user: UsersEntity, @Req() req) {
     const jwt = await this.authService.login(user, '');
     await this.loginService.create(user, req);
+    await this.refreshTokenService.insert(user, jwt);
+    return jwt;
+  }
+
+  // access token 재발급
+  @Post('reissued')
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'access token 재발급 API',
+    description: '헤더에 refresh token 값으로 요청시<br>access token 및 refresh token 재발급'
+  })
+  async reissued(@Req() req) {
+    const refreshToken = await this.refreshTokenService.findJwtOne(req.get('authorization'));
+    const user = await this.usersService.findIdx(+refreshToken.user_idx);
+    const jwt = await this.authService.login(user, '');
+    await this.refreshTokenService.insert(user, jwt);
     return jwt;
   }
 
@@ -145,6 +165,26 @@ export class UsersController {
   @Get('test/:id')
   async test(@Param('id') id: string) {
     const data = await this.usersService.test(id);
+    return data;
+  }
+
+  // 회원 정보 가져오기
+  @Patch('chpw')
+  @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: '아이디' },
+        password: { type: 'string', description: '비밀번호' },
+      }
+    }
+  })
+  async changePassword(
+    @Body('id') id: string,
+    @Body('password') password: string
+  ) {
+    const data = await this.usersService.chpw(id, password);
     return data;
   }
 

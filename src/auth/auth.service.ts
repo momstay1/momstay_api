@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AdminUsersService } from 'src/admin-users/admin-users.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
@@ -7,6 +7,7 @@ import { LoginService } from 'src/login/login.service';
 import { UserSnsService } from 'src/user-sns/user-sns.service';
 import { usersConstant } from 'src/users/constants';
 import { UsersService } from 'src/users/users.service';
+import { jwtConstants } from './constants';
 import { ResponseAuthDto } from './dto/response-auth.dto';
 
 @Injectable()
@@ -32,6 +33,8 @@ export class AuthService {
     } else if (user && isSha1HashValid) {
       const { password, ...result } = user;
       return result;
+    } else {
+      throw new NotAcceptableException('비밀번호가 틀립니다.');
     }
     return null;
   }
@@ -47,6 +50,7 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
+      refresh_token: this.jwtService.sign({}, { expiresIn: jwtConstants.refresh_expried_on }),
     };
   }
 
@@ -56,6 +60,7 @@ export class AuthService {
     const payload = { userId: user.id, userName: user.name, userGrp: user.groups[0].id };
     return {
       access_token: this.jwtService.sign(payload),
+      refresh_token: this.jwtService.sign({}, { expiresIn: jwtConstants.refresh_expried_on }),
     };
   }
 }
