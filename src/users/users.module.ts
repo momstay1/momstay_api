@@ -12,6 +12,7 @@ import { FileModule } from 'src/file/file.module';
 import { LoginModule } from 'src/login/login.module';
 import { EmailService } from 'src/email/email.service';
 import { EmailModule } from 'src/email/email.module';
+import { RefreshTokenModule } from 'src/refresh-token/refresh-token.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { EmailModule } from 'src/email/email.module';
     UserSnsModule,
     FileModule,
     EmailModule,
-    LoginModule
+    LoginModule,
+    RefreshTokenModule
     // forwardRef(() => FileModule),
   ],
   controllers: [UsersController, AdminUsersController],

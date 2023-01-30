@@ -7,6 +7,7 @@ import { LoginService } from 'src/login/login.service';
 import { UserSnsService } from 'src/user-sns/user-sns.service';
 import { usersConstant } from 'src/users/constants';
 import { UsersService } from 'src/users/users.service';
+import { jwtConstants } from './constants';
 import { ResponseAuthDto } from './dto/response-auth.dto';
 
 @Injectable()
@@ -47,6 +48,7 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
+      refresh_token: this.jwtService.sign({}, { expiresIn: jwtConstants.refresh_expried_on }),
     };
   }
 
@@ -56,6 +58,7 @@ export class AuthService {
     const payload = { userId: user.id, userName: user.name, userGrp: user.groups[0].id };
     return {
       access_token: this.jwtService.sign(payload),
+      refresh_token: this.jwtService.sign({}, { expiresIn: jwtConstants.refresh_expried_on }),
     };
   }
 }

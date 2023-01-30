@@ -39,6 +39,7 @@ import { SnsLoginUserDto } from './dto/sns.login-user.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 import { LoginService } from 'src/login/login.service';
+import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -46,7 +47,8 @@ export class UsersController {
   constructor(
     private authService: AuthService,
     private readonly usersService: UsersService,
-    private readonly loginService: LoginService
+    private readonly loginService: LoginService,
+    private readonly refreshTokenService: RefreshTokenService
   ) { }
 
   // 회원 생성
@@ -76,6 +78,20 @@ export class UsersController {
   async login(@GetUser() user: UsersEntity, @Req() req) {
     const jwt = await this.authService.login(user, '');
     await this.loginService.create(user, req);
+    await this.refreshTokenService.insert(user, jwt);
+    return jwt;
+  }
+
+  // access token 재발급
+  @Post('reissued')
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'access token 재발급 API' })
+  async reissued(@Req() req) {
+    const refreshToken = await this.refreshTokenService.findJwtOne(req.get('authorization'));
+    const user = await this.usersService.findIdx(+refreshToken.user_idx);
+    const jwt = await this.authService.login(user, '');
+    await this.refreshTokenService.insert(user, jwt);
     return jwt;
   }
 
