@@ -217,6 +217,13 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
+  async chpw(id: string, password: string) {
+    const user = await this.findId(id);
+
+    user.password = await commonBcrypt.setBcryptPassword(password);
+    return await this.usersRepository.save(user);
+  }
+
   async remove(id: string) {
     const user = await this.findId(id);
     user.status = usersConstant.status.delete;

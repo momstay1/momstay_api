@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AdminUsersService } from 'src/admin-users/admin-users.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
@@ -33,6 +33,8 @@ export class AuthService {
     } else if (user && isSha1HashValid) {
       const { password, ...result } = user;
       return result;
+    } else {
+      throw new NotAcceptableException('비밀번호가 틀립니다.');
     }
     return null;
   }

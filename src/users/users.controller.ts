@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   UseGuards,
   Query,
@@ -164,6 +165,26 @@ export class UsersController {
   @Get('test/:id')
   async test(@Param('id') id: string) {
     const data = await this.usersService.test(id);
+    return data;
+  }
+
+  // 회원 정보 가져오기
+  @Patch('chpw')
+  @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: '아이디' },
+        password: { type: 'string', description: '비밀번호' },
+      }
+    }
+  })
+  async changePassword(
+    @Body('id') id: string,
+    @Body('password') password: string
+  ) {
+    const data = await this.usersService.chpw(id, password);
     return data;
   }
 
