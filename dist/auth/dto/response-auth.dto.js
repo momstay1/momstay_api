@@ -17,5 +17,9 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'jwt 토큰' }),
     __metadata("design:type", String)
 ], ResponseAuthDto.prototype, "access_token", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'refresh 토큰' }),
+    __metadata("design:type", String)
+], ResponseAuthDto.prototype, "refresh_token", void 0);
 exports.ResponseAuthDto = ResponseAuthDto;
 //# sourceMappingURL=response-auth.dto.js.map

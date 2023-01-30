@@ -28,6 +28,7 @@ const groups_service_1 = require("../groups/groups.service");
 const user_sns_service_1 = require("../user-sns/user-sns.service");
 const constants_1 = require("../users/constants");
 const users_service_1 = require("../users/users.service");
+const constants_2 = require("./constants");
 let AuthService = class AuthService {
     constructor(userService, jwtService, groupsService, userSnsService) {
         this.userService = userService;
@@ -50,6 +51,9 @@ let AuthService = class AuthService {
             const { password } = user, result = __rest(user, ["password"]);
             return result;
         }
+        else {
+            throw new common_1.NotAcceptableException('비밀번호가 틀립니다.');
+        }
         return null;
     }
     async login(user, type) {
@@ -62,6 +66,7 @@ let AuthService = class AuthService {
         const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: group.id };
         return {
             access_token: this.jwtService.sign(payload),
+            refresh_token: this.jwtService.sign({}, { expiresIn: constants_2.jwtConstants.refresh_expried_on }),
         };
     }
     async snsLogin(snsLoginUserDto) {
@@ -70,6 +75,7 @@ let AuthService = class AuthService {
         const payload = { userId: user.id, userName: user.name, userGrp: user.groups[0].id };
         return {
             access_token: this.jwtService.sign(payload),
+            refresh_token: this.jwtService.sign({}, { expiresIn: constants_2.jwtConstants.refresh_expried_on }),
         };
     }
 };

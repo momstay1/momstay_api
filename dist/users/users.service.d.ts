@@ -28,6 +28,7 @@ export declare class UsersService {
     fineUser(id: string): Promise<UsersEntity | undefined>;
     findIdx(idx: number): Promise<UsersEntity | undefined>;
     update(id: string, updateUserDto: UpdateUserDto, files: any): Promise<UsersEntity>;
+    chpw(id: string, password: string): Promise<UsersEntity>;
     remove(id: string): Promise<void>;
     removes(ids: any): Promise<void>;
     getPrivateColumn(): string[];

@@ -20,6 +20,7 @@ const user_sns_module_1 = require("../user-sns/user-sns.module");
 const file_module_1 = require("../file/file.module");
 const login_module_1 = require("../login/login.module");
 const email_module_1 = require("../email/email.module");
+const refresh_token_module_1 = require("../refresh-token/refresh-token.module");
 let UsersModule = class UsersModule {
 };
 UsersModule = __decorate([
@@ -31,7 +32,8 @@ UsersModule = __decorate([
             user_sns_module_1.UserSnsModule,
             file_module_1.FileModule,
             email_module_1.EmailModule,
-            login_module_1.LoginModule
+            login_module_1.LoginModule,
+            refresh_token_module_1.RefreshTokenModule
         ],
         controllers: [users_controller_1.UsersController, admin_users_controller_1.AdminUsersController],
         providers: [users_service_1.UsersService, common_service_1.CommonService],

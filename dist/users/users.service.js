@@ -196,6 +196,11 @@ let UsersService = class UsersService {
         }
         return await this.usersRepository.save(user);
     }
+    async chpw(id, password) {
+        const user = await this.findId(id);
+        user.password = await common_bcrypt_1.commonBcrypt.setBcryptPassword(password);
+        return await this.usersRepository.save(user);
+    }
     async remove(id) {
         const user = await this.findId(id);
         user.status = constants_1.usersConstant.status.delete;

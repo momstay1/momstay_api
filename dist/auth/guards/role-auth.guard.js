@@ -23,10 +23,10 @@ let RoleGuard = class RoleGuard {
         }
         const request = ctx.switchToHttp().getRequest();
         const user = request.user;
-        if (!user)
-            return false;
         if (requiredRoles.includes('Any'))
             return true;
+        if (!user)
+            return false;
         return requiredRoles.includes(user.group);
     }
 };
