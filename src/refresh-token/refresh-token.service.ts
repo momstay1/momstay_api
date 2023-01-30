@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { ResponseAuthDto } from 'src/auth/dto/response-auth.dto';
@@ -19,7 +19,9 @@ export class RefreshTokenService {
   }
 
   async insert(user: UsersEntity, jwt: ResponseAuthDto) {
-    const refreshToken = await this.findUserOne(user.idx);
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { user_idx: user.idx }
+    });
     const refresh_token_data = {
       token: jwt.refresh_token,
       user_idx: "" + user.idx,
@@ -64,6 +66,11 @@ export class RefreshTokenService {
 
     if (!refreshToken) {
       throw new NotFoundException('찾을 수 없습니다.');
+    }
+    const date = moment().format("YYYY-MM-DD HH:mm:ss");
+    const expried = moment(refreshToken.expriedAt).format("YYYY-MM-DD HH:mm:ss");
+    if (expried < date) {
+      throw new NotAcceptableException('토큰 만료');
     }
     return refreshToken;
   }

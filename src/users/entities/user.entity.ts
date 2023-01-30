@@ -96,10 +96,10 @@ export class UsersEntity {
   product: undefined;
 
   @OneToMany(() => LoginEntity, (login) => login.user)
-  login: LoginEntity[];
+  login: undefined;
 
   @OneToMany(() => UserSnsEntity, (us) => us.user)
-  userSns: UserSnsEntity[];
+  userSns: undefined;
 
   @ManyToMany(() => GroupsEntity, (group) => group.users)
   @JoinTable()

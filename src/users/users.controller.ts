@@ -41,6 +41,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 import { LoginService } from 'src/login/login.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -128,8 +129,8 @@ export class UsersController {
   // 회원 정보 가져오기
   @Get('profile')
   @Auth(['Any'])
-  @ApiOperation({ summary: '회원 정보 API' })
   @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 정보 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {
     const data = await this.usersService.findId(get(user, 'id', ''));
@@ -168,9 +169,9 @@ export class UsersController {
     return data;
   }
 
-  // 회원 정보 가져오기
+  // 비회원 비밀번호 재설정
   @Patch('chpw')
-  @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
+  @ApiOperation({ summary: '비회원 비밀번호 재설정 API' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -188,12 +189,45 @@ export class UsersController {
     return data;
   }
 
+  // 회원 비밀번호 재설정
+  @Patch('rspw')
+  @Auth(['host', 'guest'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        prevpassword: { type: 'string', description: '이전 비밀번호' },
+        password: { type: 'string', description: '비밀번호' },
+      }
+    }
+  })
+  async resettingPassword(
+    @GetUser() user: UsersEntity,
+    @Body('prevpassword') prevpassword: string,
+    @Body('password') password: string
+  ) {
+    const data = await this.usersService.rspw(user, prevpassword, password);
+    return data;
+  }
+
   // 회원 수정
-  // @Patch(':id')
-  // async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   const user = await this.usersService.update(id, updateUserDto);
-  //   return this.sanitizeUsers(user);
-  // }
+  @Patch(':id')
+  @Auth(['root', 'admin', 'host', 'guest'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'profile', maxCount: 1 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '회원 정보 수정 API' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.usersService.update(id, updateUserDto, files);
+  }
 
   // 회원 삭제(탈퇴)
   // @Delete(':id')

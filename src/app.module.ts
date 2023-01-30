@@ -64,7 +64,7 @@ import { RefreshTokenModule } from './refresh-token/refresh-token.module';
     RefreshTokenModule,
     // DefectModule,
     // DashboardModule,
-    // SettingsModule,
+    SettingsModule,
   ],
   providers: [CommonService],
 })

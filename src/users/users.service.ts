@@ -74,7 +74,7 @@ export class UsersService {
 
     const user = await this.findIdx(save_user['idx']);
     let file_info;
-    if (files) {
+    if (!isEmpty(files)) {
       file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
     }
     return { user, file_info };
@@ -194,31 +194,72 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, files) {
     const user = await this.findId(id);
-
     const groupIdxs = updateUserDto.group ? updateUserDto.group : [usersConstant.default.group_idx];
     const groups = await this.groupService.findIdxs(groupIdxs);
 
     user.name = updateUserDto.name;
-    user.status = +get(updateUserDto, 'status', usersConstant.status.registration);
-    user.name = get(updateUserDto, 'name', '');
-    user.email = get(updateUserDto, 'email', '');
-    user.other = get(updateUserDto, 'other', '');
-    user.language = get(updateUserDto, 'language', '');
-    user.gender = get(updateUserDto, 'gender', '');
-    user.countryCode = get(updateUserDto, 'countryCode', '');
-    user.phone = get(updateUserDto, 'phone', '');
-    user.birthday = get(updateUserDto, 'birthday', '0000-00-00');
-    user.memo = get(updateUserDto, 'memo', '');
-    user.marketing = get(updateUserDto, 'marketing', '1');
+    if (get(updateUserDto, 'status', ''))
+      user.status = +get(updateUserDto, 'status');
+    if (get(updateUserDto, 'name', ''))
+      user.name = get(updateUserDto, 'name');
+    if (get(updateUserDto, 'email', ''))
+      user.email = get(updateUserDto, 'email');
+    if (get(updateUserDto, 'other', ''))
+      user.other = get(updateUserDto, 'other');
+    if (get(updateUserDto, 'language', ''))
+      user.language = get(updateUserDto, 'language');
+    if (get(updateUserDto, 'gender', ''))
+      user.gender = get(updateUserDto, 'gender');
+    if (get(updateUserDto, 'countryCode', ''))
+      user.countryCode = get(updateUserDto, 'countryCode');
+    if (get(updateUserDto, 'phone', ''))
+      user.phone = get(updateUserDto, 'phone');
+    if (get(updateUserDto, 'birthday', ''))
+      user.birthday = get(updateUserDto, 'birthday');
+    if (get(updateUserDto, 'memo', ''))
+      user.memo = get(updateUserDto, 'memo');
+    if (get(updateUserDto, 'marketing', ''))
+      user.marketing = get(updateUserDto, 'marketing');
+    if (get(updateUserDto, 'uniqueKey', ''))
+      user.marketing = get(updateUserDto, 'uniqueKey');
+    if (get(updateUserDto, 'certifiInfo', ''))
+      user.marketing = get(updateUserDto, 'certifiInfo');
+
     user.groups = groups;
     if (get(updateUserDto, 'password')) {
       user.password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
     }
-    return await this.usersRepository.save(user);
+    const user_data = await this.usersRepository.save(user);
+
+    let file_info;
+    if (!isEmpty(files)) {
+      const file = await this.fileService.findCategory(['profile'], "" + user_data['idx']);
+      const file_idxs = map(file, o => "" + o.file_idx);
+      await this.fileService.removes(file_idxs);
+      file_info = await this.fileService.fileInfoInsert(files, user_data['idx']);
+    }
+    return { user: user_data, file_info }
   }
 
   async chpw(id: string, password: string) {
     const user = await this.findId(id);
+
+    user.password = await commonBcrypt.setBcryptPassword(password);
+    return await this.usersRepository.save(user);
+  }
+
+  async rspw(userdata, prevpassword: string, password: string) {
+    const user = await this.findId(userdata.id);
+
+    let isHashValid = await commonBcrypt.isHashValid(prevpassword, user.password);
+    if (!isHashValid) {
+      throw new NotAcceptableException('현재 비밀번호와 일치하지 않습니다.');
+    }
+
+    isHashValid = await commonBcrypt.isHashValid(password, user.password);
+    if (isHashValid) {
+      throw new NotAcceptableException('이전 비밀번호와 동일합니다.');
+    }
 
     user.password = await commonBcrypt.setBcryptPassword(password);
     return await this.usersRepository.save(user);
