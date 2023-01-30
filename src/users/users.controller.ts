@@ -86,7 +86,10 @@ export class UsersController {
   @Post('reissued')
   @Auth(['Any'])
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'access token 재발급 API' })
+  @ApiOperation({
+    summary: 'access token 재발급 API',
+    description: '헤더에 refresh token 값으로 요청시<br>access token 및 refresh token 재발급'
+  })
   async reissued(@Req() req) {
     const refreshToken = await this.refreshTokenService.findJwtOne(req.get('authorization'));
     const user = await this.usersService.findIdx(+refreshToken.user_idx);
