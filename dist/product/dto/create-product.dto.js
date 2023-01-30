@@ -142,12 +142,12 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ format: 'binary', description: '대표 사진', required: false }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], CreateProductDto.prototype, "lodgingDetailImg", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ format: 'binary', description: '식사 서비스 사진', required: false }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], CreateProductDto.prototype, "mealsImg", void 0);
 exports.CreateProductDto = CreateProductDto;
 //# sourceMappingURL=create-product.dto.js.map

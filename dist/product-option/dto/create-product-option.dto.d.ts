@@ -17,5 +17,5 @@ export declare class CreateProductOptionDto {
     readonly productIdx: string;
     readonly productInfoIdx: string;
     readonly filesIdx: string;
-    readonly roomDetailImg: string;
+    readonly roomDetailImg: string[];
 }

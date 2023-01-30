@@ -125,7 +125,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ format: 'binary', description: '대표 사진', required: false }),
-    __metadata("design:type", String)
+    __metadata("design:type", Array)
 ], CreateProductOptionDto.prototype, "roomDetailImg", void 0);
 exports.CreateProductOptionDto = CreateProductOptionDto;
 //# sourceMappingURL=create-product-option.dto.js.map

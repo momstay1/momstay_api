@@ -12,7 +12,7 @@ export declare class ProductService {
     constructor(productRepository: Repository<ProductEntity>, fileService: FileService, productInfoService: ProductInfoService);
     create(createProductDto: CreateProductDto, files: any): Promise<{
         product: ProductEntity;
-        file_info: import("../file/entities/file.entity").FileEntity[];
+        file_info: any;
     }>;
     findAll(options: PaginationOptions, search: string[]): Promise<Pagination<ProductEntity>>;
     findOne(idx: number): Promise<ProductEntity>;

@@ -14,7 +14,7 @@ export declare class ProductOptionService {
     constructor(productOptionRepository: Repository<ProductOptionEntity>, productService: ProductService, fileService: FileService, productInfoService: ProductInfoService);
     create(createProductOptionDto: CreateProductOptionDto, files: any): Promise<{
         productOption: ProductOptionEntity;
-        file_info: import("../file/entities/file.entity").FileEntity[];
+        file_info: any;
     }>;
     findAll(options: PaginationOptions, search: string[]): Promise<Pagination<ProductOptionEntity>>;
     findOne(idx: number): Promise<ProductOptionEntity>;

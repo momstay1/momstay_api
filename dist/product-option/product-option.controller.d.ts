@@ -7,7 +7,7 @@ export declare class ProductOptionController {
     constructor(productOptionService: ProductOptionService);
     create(createProductOptionDto: CreateProductOptionDto, files: Array<Express.Multer.File>): Promise<{
         productOption: import("./entities/product-option.entity").ProductOptionEntity;
-        file_info: import("../file/entities/file.entity").FileEntity[];
+        file_info: any;
     }>;
     findAll(take: number, page: number, search: string[]): Promise<{
         results: import("./entities/product-option.entity").ProductOptionEntity[];

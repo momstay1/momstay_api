@@ -60,22 +60,30 @@ let ProductService = class ProductService {
         };
         const productEntity = await this.productRepository.create(product_data);
         const product = await this.productRepository.save(productEntity);
-        if ((0, lodash_1.get)(createProductDto, 'filesIdx', '')) {
-            const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']), (o) => "" + o.file_idx);
-            const fileIdxs = (0, lodash_1.get)(createProductDto, 'filesIdx').split(",");
-            const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
-            if (delFileIdxs.length > 0) {
-                await this.fileService.removes(delFileIdxs);
+        const fileIdx = (0, lodash_1.get)(createProductDto, 'filesIdx', '');
+        let fileIdxs = [];
+        if (fileIdx) {
+            try {
+                const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']), (o) => "" + o.file_idx);
+                fileIdxs = fileIdx.split(",");
+                const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+                if (delFileIdxs.length > 0) {
+                    await this.fileService.removes(delFileIdxs);
+                }
+            }
+            catch (error) {
+                console.log({ error });
             }
         }
         let new_file;
-        let fileIdxs;
         if (!(0, lodash_1.isEmpty)(files)) {
             new_file = await this.fileService.fileInfoInsert(files, product['idx']);
-            fileIdxs = (0, lodash_1.map)(new_file, (o) => o.idx);
+            fileIdxs = (0, lodash_1.union)(fileIdxs, (0, lodash_1.map)(new_file, (o) => o.idx));
         }
-        fileIdxs = (0, lodash_1.union)(fileIdxs, (0, lodash_1.get)(createProductDto, 'filesIdx').split(","));
-        const file_info = await this.fileService.findIndexs(fileIdxs);
+        let file_info;
+        if (fileIdxs.length > 0) {
+            file_info = await this.fileService.findIndexs(fileIdxs);
+        }
         return { product, file_info };
     }
     async findAll(options, search) {
