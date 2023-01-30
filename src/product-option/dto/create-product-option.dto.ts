@@ -82,5 +82,5 @@ export class CreateProductOptionDto {
 
   @IsOptional()
   @ApiProperty({ format: 'binary', description: '대표 사진', required: false })
-  readonly roomDetailImg: string;
+  readonly roomDetailImg: string[];
 }

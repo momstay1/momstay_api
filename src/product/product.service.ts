@@ -57,28 +57,35 @@ export class ProductService {
     const product = await this.productRepository.save(productEntity);
 
     // 파일 제거
-    if (get(createProductDto, 'filesIdx', '')) {
-      const productFileIdxs = map(
-        await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']),
-        (o) => "" + o.file_idx
-      );
-      const fileIdxs = get(createProductDto, 'filesIdx').split(",");
-      const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
-      if (delFileIdxs.length > 0) {
-        await this.fileService.removes(delFileIdxs);
+    const fileIdx = get(createProductDto, 'filesIdx', '');
+    let fileIdxs = [];
+    if (fileIdx) {
+      try {
+        const productFileIdxs = map(
+          await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']),
+          (o) => "" + o.file_idx
+        );
+        fileIdxs = fileIdx.split(",");
+        const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+        if (delFileIdxs.length > 0) {
+          await this.fileService.removes(delFileIdxs);
+        }
+      } catch (error) {
+        console.log({ error });
       }
     }
 
     // 새 첨부파일 등록
     let new_file;
-    let fileIdxs;
     if (!isEmpty(files)) {
       new_file = await this.fileService.fileInfoInsert(files, product['idx']);
-      fileIdxs = map(new_file, (o) => o.idx);
+      fileIdxs = union(fileIdxs, map(new_file, (o) => o.idx));
     }
 
-    fileIdxs = union(fileIdxs, get(createProductDto, 'filesIdx').split(","));
-    const file_info = await this.fileService.findIndexs(fileIdxs);
+    let file_info;
+    if (fileIdxs.length > 0) {
+      file_info = await this.fileService.findIndexs(fileIdxs);
+    }
 
     return { product, file_info }
   }

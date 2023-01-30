@@ -88,8 +88,8 @@ export class CreateProductDto {
 
   @IsOptional()
   @ApiProperty({ format: 'binary', description: '대표 사진', required: false })
-  readonly lodgingDetailImg: string;
+  readonly lodgingDetailImg: string[];
   @IsOptional()
   @ApiProperty({ format: 'binary', description: '식사 서비스 사진', required: false })
-  readonly mealsImg: string;
+  readonly mealsImg: string[];
 }
