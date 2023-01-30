@@ -19,7 +19,9 @@ export class RefreshTokenService {
   }
 
   async insert(user: UsersEntity, jwt: ResponseAuthDto) {
-    const refreshToken = await this.findUserOne(user.idx);
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { user_idx: user.idx }
+    });
     const refresh_token_data = {
       token: jwt.refresh_token,
       user_idx: "" + user.idx,
