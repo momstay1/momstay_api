@@ -26,7 +26,9 @@ let RefreshTokenService = class RefreshTokenService {
         return 'This action adds a new refreshToken';
     }
     async insert(user, jwt) {
-        const refreshToken = await this.findUserOne(user.idx);
+        const refreshToken = await this.refreshTokenRepository.findOne({
+            where: { user_idx: user.idx }
+        });
         const refresh_token_data = {
             token: jwt.refresh_token,
             user_idx: "" + user.idx,
@@ -65,6 +67,11 @@ let RefreshTokenService = class RefreshTokenService {
         });
         if (!refreshToken) {
             throw new common_1.NotFoundException('찾을 수 없습니다.');
+        }
+        const date = moment().format("YYYY-MM-DD HH:mm:ss");
+        const expried = moment(refreshToken.expriedAt).format("YYYY-MM-DD HH:mm:ss");
+        if (expried < date) {
+            throw new common_1.NotAcceptableException('토큰 만료');
         }
         return refreshToken;
     }

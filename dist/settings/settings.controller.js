@@ -19,15 +19,10 @@ const create_setting_dto_1 = require("./dto/create-setting.dto");
 const update_setting_dto_1 = require("./dto/update-setting.dto");
 const swagger_1 = require("@nestjs/swagger");
 const role_decorator_1 = require("../common/decorator/role.decorator");
-const common_utils_1 = require("../common/common.utils");
 let SettingsController = class SettingsController {
     constructor(settingsService) {
         this.settingsService = settingsService;
     }
-    sanitizeSettings(data) {
-        return common_utils_1.commonUtils.sanitizeEntity(data, this.settingsService.getPrivateColumn());
-    }
-    ;
     async create(createSettingDto) {
         return await this.settingsService.create(createSettingDto);
     }
@@ -35,8 +30,7 @@ let SettingsController = class SettingsController {
         return this.settingsService.findAll();
     }
     async findOne(key) {
-        const settings = await this.settingsService.find(key);
-        return this.sanitizeSettings(settings);
+        return await this.settingsService.find(key);
     }
     update(id, updateSettingDto) {
         return this.settingsService.update(+id, updateSettingDto);
@@ -64,8 +58,6 @@ __decorate([
 ], SettingsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':key'),
-    (0, role_decorator_1.Auth)(['Any']),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_환경설정 가져오기 API' }),
     __param(0, (0, common_1.Param)('key')),
     __metadata("design:type", Function),

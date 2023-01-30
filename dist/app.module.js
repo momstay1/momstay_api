@@ -21,6 +21,7 @@ const boards_module_1 = require("./boards/boards.module");
 const board_contents_module_1 = require("./board-contents/board-contents.module");
 const groups_module_1 = require("./groups/groups.module");
 const file_module_1 = require("./file/file.module");
+const settings_module_1 = require("./settings/settings.module");
 const user_sns_module_1 = require("./user-sns/user-sns.module");
 const login_module_1 = require("./login/login.module");
 const user_leave_module_1 = require("./user-leave/user-leave.module");
@@ -69,6 +70,7 @@ AppModule = __decorate([
             metro_module_1.MetroModule,
             college_module_1.CollegeModule,
             refresh_token_module_1.RefreshTokenModule,
+            settings_module_1.SettingsModule,
         ],
         providers: [common_service_1.CommonService],
     })

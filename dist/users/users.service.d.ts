@@ -27,8 +27,12 @@ export declare class UsersService {
     findId(id: string): Promise<UsersEntity | undefined>;
     fineUser(id: string): Promise<UsersEntity | undefined>;
     findIdx(idx: number): Promise<UsersEntity | undefined>;
-    update(id: string, updateUserDto: UpdateUserDto, files: any): Promise<UsersEntity>;
+    update(id: string, updateUserDto: UpdateUserDto, files: any): Promise<{
+        user: UsersEntity;
+        file_info: any;
+    }>;
     chpw(id: string, password: string): Promise<UsersEntity>;
+    rspw(userdata: any, prevpassword: string, password: string): Promise<UsersEntity>;
     remove(id: string): Promise<void>;
     removes(ids: any): Promise<void>;
     getPrivateColumn(): string[];

@@ -124,11 +124,11 @@ __decorate([
 ], UsersEntity.prototype, "product", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => login_entity_1.LoginEntity, (login) => login.user),
-    __metadata("design:type", Array)
+    __metadata("design:type", void 0)
 ], UsersEntity.prototype, "login", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => user_sns_entity_1.UserSnsEntity, (us) => us.user),
-    __metadata("design:type", Array)
+    __metadata("design:type", void 0)
 ], UsersEntity.prototype, "userSns", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => group_entity_1.GroupsEntity, (group) => group.users),

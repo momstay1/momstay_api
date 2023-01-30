@@ -33,6 +33,7 @@ const platform_express_1 = require("@nestjs/platform-express");
 const common_file_1 = require("../common/common.file");
 const login_service_1 = require("../login/login.service");
 const refresh_token_service_1 = require("../refresh-token/refresh-token.service");
+const update_user_dto_1 = require("./dto/update-user.dto");
 let UsersController = class UsersController {
     constructor(authService, usersService, loginService, refreshTokenService) {
         this.authService = authService;
@@ -85,6 +86,13 @@ let UsersController = class UsersController {
     async changePassword(id, password) {
         const data = await this.usersService.chpw(id, password);
         return data;
+    }
+    async resettingPassword(user, prevpassword, password) {
+        const data = await this.usersService.rspw(user, prevpassword, password);
+        return data;
+    }
+    async update(id, updateUserDto, files) {
+        return await this.usersService.update(id, updateUserDto, files);
     }
 };
 __decorate([
@@ -161,8 +169,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)('profile'),
     (0, role_decorator_1.Auth)(['Any']),
-    (0, swagger_1.ApiOperation)({ summary: '회원 정보 API' }),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '회원 정보 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __metadata("design:type", Function),
@@ -204,7 +212,7 @@ __decorate([
 ], UsersController.prototype, "test", null);
 __decorate([
     (0, common_1.Patch)('chpw'),
-    (0, swagger_1.ApiOperation)({ summary: '회원 비밀번호 재설정 API' }),
+    (0, swagger_1.ApiOperation)({ summary: '비회원 비밀번호 재설정 API' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -220,6 +228,44 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Patch)('rspw'),
+    (0, role_decorator_1.Auth)(['host', 'guest']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '회원 비밀번호 재설정 API' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                prevpassword: { type: 'string', description: '이전 비밀번호' },
+                password: { type: 'string', description: '비밀번호' },
+            }
+        }
+    }),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Body)('prevpassword')),
+    __param(2, (0, common_1.Body)('password')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "resettingPassword", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host', 'guest']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'profile', maxCount: 1 },
+    ], (0, common_file_1.multerOptions)())),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiOperation)({ summary: '회원 정보 수정 API' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto,
+        Array]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "update", null);
 UsersController = __decorate([
     (0, common_1.Controller)('users'),
     (0, swagger_1.ApiTags)('유저 API'),

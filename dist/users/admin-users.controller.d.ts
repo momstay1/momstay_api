@@ -20,6 +20,9 @@ export declare class AdminUsersController {
         pageTotal: number;
     }>;
     findId(id: string): Promise<UsersEntity>;
-    update(id: string, updateUserDto: UpdateUserDto, files: Array<Express.Multer.File>): Promise<UsersEntity>;
+    update(id: string, updateUserDto: UpdateUserDto, files: Array<Express.Multer.File>): Promise<{
+        user: UsersEntity;
+        file_info: any;
+    }>;
     remove(user_ids: any): Promise<void>;
 }

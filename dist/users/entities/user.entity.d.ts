@@ -1,6 +1,4 @@
 import { GroupsEntity } from 'src/groups/entities/group.entity';
-import { LoginEntity } from 'src/login/entities/login.entity';
-import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
 export declare class UsersEntity {
     idx: number;
     status: number;
@@ -26,8 +24,8 @@ export declare class UsersEntity {
     oldData: string;
     boardContents: undefined;
     product: undefined;
-    login: LoginEntity[];
-    userSns: UserSnsEntity[];
+    login: undefined;
+    userSns: undefined;
     groups: GroupsEntity[];
     createdAt: Date;
     updatedAt: Date;
