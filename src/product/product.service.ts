@@ -20,7 +20,6 @@ export class ProductService {
   ) { }
 
   async create(createProductDto: CreateProductDto, files) {
-
     // 생활 및 편의 정보 가져오기
     let productInfo;
     if (get(createProductDto, 'productInfoIdx', '')) {
@@ -79,7 +78,7 @@ export class ProductService {
     let new_file;
     if (!isEmpty(files)) {
       new_file = await this.fileService.fileInfoInsert(files, product['idx']);
-      fileIdxs = union(fileIdxs, map(new_file, (o) => o.idx));
+      fileIdxs = union(fileIdxs, ...map(new_file[product_data['idx']], (obj) => map(obj, o => "" + o.file_idx)));
     }
 
     let file_info;

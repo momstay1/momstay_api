@@ -88,7 +88,7 @@ export class ProductOptionService {
     let new_file;
     if (!isEmpty(files)) {
       new_file = await this.fileService.fileInfoInsert(files, productOption['idx']);
-      fileIdxs = union(fileIdxs, map(new_file, (o) => o.idx));
+      fileIdxs = union(fileIdxs, ...map(new_file[product_option_data['idx']], (obj) => map(obj, o => "" + o.file_idx)));
     }
 
     let file_info;
