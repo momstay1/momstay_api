@@ -224,6 +224,23 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
+  async rspw(userdata, prevpassword: string, password: string) {
+    const user = await this.findId(userdata.id);
+
+    let isHashValid = await commonBcrypt.isHashValid(prevpassword, user.password);
+    if (!isHashValid) {
+      throw new NotAcceptableException('현재 비밀번호와 일치하지 않습니다.');
+    }
+
+    isHashValid = await commonBcrypt.isHashValid(password, user.password);
+    if (isHashValid) {
+      throw new NotAcceptableException('이전 비밀번호와 동일합니다.');
+    }
+
+    user.password = await commonBcrypt.setBcryptPassword(password);
+    return await this.usersRepository.save(user);
+  }
+
   async remove(id: string) {
     const user = await this.findId(id);
     user.status = usersConstant.status.delete;

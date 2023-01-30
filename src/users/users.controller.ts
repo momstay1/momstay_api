@@ -128,8 +128,8 @@ export class UsersController {
   // 회원 정보 가져오기
   @Get('profile')
   @Auth(['Any'])
-  @ApiOperation({ summary: '회원 정보 API' })
   @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 정보 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async getProfile(@GetUser() user: UsersEntity) {
     const data = await this.usersService.findId(get(user, 'id', ''));
@@ -168,9 +168,9 @@ export class UsersController {
     return data;
   }
 
-  // 회원 정보 가져오기
+  // 비회원 비밀번호 재설정
   @Patch('chpw')
-  @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
+  @ApiOperation({ summary: '비회원 비밀번호 재설정 API' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -185,6 +185,29 @@ export class UsersController {
     @Body('password') password: string
   ) {
     const data = await this.usersService.chpw(id, password);
+    return data;
+  }
+
+  // 회원 비밀번호 재설정
+  @Patch('rspw')
+  @Auth(['host', 'guest'])
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        prevpassword: { type: 'string', description: '이전 비밀번호' },
+        password: { type: 'string', description: '비밀번호' },
+      }
+    }
+  })
+  async resettingPassword(
+    @GetUser() user: UsersEntity,
+    @Body('prevpassword') prevpassword: string,
+    @Body('password') password: string
+  ) {
+    const data = await this.usersService.rspw(user, prevpassword, password);
     return data;
   }
 
