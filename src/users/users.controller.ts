@@ -41,6 +41,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 import { LoginService } from 'src/login/login.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -212,11 +213,21 @@ export class UsersController {
   }
 
   // 회원 수정
-  // @Patch(':id')
-  // async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   const user = await this.usersService.update(id, updateUserDto);
-  //   return this.sanitizeUsers(user);
-  // }
+  @Patch(':id')
+  @Auth(['root', 'admin', 'host', 'guest'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'profile', maxCount: 1 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '회원 정보 수정 API' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.usersService.update(id, updateUserDto, files);
+  }
 
   // 회원 삭제(탈퇴)
   // @Delete(':id')
