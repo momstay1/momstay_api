@@ -78,7 +78,7 @@ let ProductService = class ProductService {
         let new_file;
         if (!(0, lodash_1.isEmpty)(files)) {
             new_file = await this.fileService.fileInfoInsert(files, product['idx']);
-            fileIdxs = (0, lodash_1.union)(fileIdxs, (0, lodash_1.map)(new_file, (o) => o.idx));
+            fileIdxs = (0, lodash_1.union)(fileIdxs, ...(0, lodash_1.map)(new_file[product_data['idx']], (obj) => (0, lodash_1.map)(obj, o => "" + o.file_idx)));
         }
         let file_info;
         if (fileIdxs.length > 0) {
