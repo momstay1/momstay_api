@@ -6,6 +6,7 @@ import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductInfoService } from 'src/product-info/product-info.service';
+import { UsersService } from 'src/users/users.service';
 import { In, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -17,6 +18,7 @@ export class ProductService {
     @InjectRepository(ProductEntity) private productRepository: Repository<ProductEntity>,
     private readonly fileService: FileService,
     private readonly productInfoService: ProductInfoService,
+    private readonly userService: UsersService,
   ) { }
 
   async create(createProductDto: CreateProductDto, files) {
@@ -26,6 +28,9 @@ export class ProductService {
       const productInfoIdx = get(createProductDto, 'productInfoIdx').split(",");
       productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
     }
+
+    const userIdx = get(createProductDto, 'userIdx');
+    const user = await this.userService.findIdx(+userIdx);
 
     // 숙소 정보
     const product_data = {
@@ -48,7 +53,7 @@ export class ProductService {
       detailsEng: get(createProductDto, 'detailsEng', ''),
       detailsJpn: get(createProductDto, 'detailsJpn', ''),
       detailsChn: get(createProductDto, 'detailsChn', ''),
-      userIdx: get(createProductDto, 'userIdx'),
+      user: user,
       productInfo: productInfo,
     };
     // 숙소 등록
