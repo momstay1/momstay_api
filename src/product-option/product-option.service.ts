@@ -39,7 +39,6 @@ export class ProductOptionService {
 
     // 방 정보
     const product_option_data = {
-      idx: +get(createProductOptionDto, 'idx'),
       status: +get(createProductOptionDto, 'status', 0),
       type: get(createProductOptionDto, 'type', ''),
       order: '10',
@@ -59,6 +58,9 @@ export class ProductOptionService {
       product: product,
       productInfo: productInfo,
     };
+    if (get(createProductOptionDto, 'idx', '')) {
+      product_option_data['idx'] = +get(createProductOptionDto, 'idx');
+    }
     // 방 등록
     const productOptionEntity = await this.productOptionRepository.create(product_option_data);
     const productOption = await this.productOptionRepository.save(productOptionEntity);
