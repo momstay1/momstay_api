@@ -21,13 +21,15 @@ const common_utils_1 = require("../common/common.utils");
 const file_service_1 = require("../file/file.service");
 const paginate_1 = require("../paginate");
 const product_info_service_1 = require("../product-info/product-info.service");
+const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const product_entity_1 = require("./entities/product.entity");
 let ProductService = class ProductService {
-    constructor(productRepository, fileService, productInfoService) {
+    constructor(productRepository, fileService, productInfoService, userService) {
         this.productRepository = productRepository;
         this.fileService = fileService;
         this.productInfoService = productInfoService;
+        this.userService = userService;
     }
     async create(createProductDto, files) {
         let productInfo;
@@ -35,6 +37,8 @@ let ProductService = class ProductService {
             const productInfoIdx = (0, lodash_1.get)(createProductDto, 'productInfoIdx').split(",");
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
         }
+        const userIdx = (0, lodash_1.get)(createProductDto, 'userIdx');
+        const user = await this.userService.findIdx(+userIdx);
         const product_data = {
             idx: +(0, lodash_1.get)(createProductDto, 'idx'),
             status: +(0, lodash_1.get)(createProductDto, 'status', 0),
@@ -55,7 +59,7 @@ let ProductService = class ProductService {
             detailsEng: (0, lodash_1.get)(createProductDto, 'detailsEng', ''),
             detailsJpn: (0, lodash_1.get)(createProductDto, 'detailsJpn', ''),
             detailsChn: (0, lodash_1.get)(createProductDto, 'detailsChn', ''),
-            userIdx: (0, lodash_1.get)(createProductDto, 'userIdx'),
+            user: user,
             productInfo: productInfo,
         };
         const productEntity = await this.productRepository.create(product_data);
@@ -152,7 +156,8 @@ ProductService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(product_entity_1.ProductEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         file_service_1.FileService,
-        product_info_service_1.ProductInfoService])
+        product_info_service_1.ProductInfoService,
+        users_service_1.UsersService])
 ], ProductService);
 exports.ProductService = ProductService;
 //# sourceMappingURL=product.service.js.map

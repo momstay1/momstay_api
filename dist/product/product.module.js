@@ -14,6 +14,7 @@ const product_entity_1 = require("./entities/product.entity");
 const typeorm_1 = require("@nestjs/typeorm");
 const file_module_1 = require("../file/file.module");
 const product_info_module_1 = require("../product-info/product-info.module");
+const users_module_1 = require("../users/users.module");
 let ProductModule = class ProductModule {
 };
 ProductModule = __decorate([
@@ -22,6 +23,7 @@ ProductModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([product_entity_1.ProductEntity]),
             file_module_1.FileModule,
             product_info_module_1.ProductInfoModule,
+            users_module_1.UsersModule,
         ],
         controllers: [product_controller_1.ProductController],
         providers: [product_service_1.ProductService],
