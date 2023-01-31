@@ -27,7 +27,7 @@ export class ProductOptionService {
     let product;
     if (get(createProductOptionDto, 'productIdx', '')) {
       const productIdx = get(createProductOptionDto, 'productIdx');
-      product = await this.productService.findIdx(+productIdx);
+      product = await this.productService.findIdxOne(+productIdx);
     }
 
     // 방 생활 시설 정보 가져오기

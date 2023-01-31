@@ -94,7 +94,7 @@ export class ProductService {
 
     const where = commonUtils.searchSplit(search);
     const [results, total] = await this.productRepository.createQueryBuilder('product')
-      .leftJoinAndSelect('product.product_option', 'product_option')
+      .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
       .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
       .where((qb) => {
@@ -118,11 +118,25 @@ export class ProductService {
     })
   }
 
-  async findOne(idx: number) {
-    return await this.findIdx(idx);
+  async findIdxAll(idx: number[]) {
+    const product = await this.productRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.productOption', 'product_option')
+      .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
+      .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
+      .where((qb) => {
+        qb.where('`product_option`.status = :status', { status: 2 });
+        qb.andWhere('`product`.idx IN (:idx)', { idx: idx });
+      })
+      .getMany();
+
+    return product
   }
 
-  async findIdx(idx: number) {
+  async findOne(idx: number) {
+    return await this.findIdxOne(idx);
+  }
+
+  async findIdxOne(idx: number) {
     if (!idx) {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
