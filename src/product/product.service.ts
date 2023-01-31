@@ -34,7 +34,6 @@ export class ProductService {
 
     // 숙소 정보
     const product_data = {
-      idx: +get(createProductDto, 'idx'),
       status: +get(createProductDto, 'status', 0),
       type: get(createProductDto, 'type', ''),
       order: '10',
@@ -56,6 +55,9 @@ export class ProductService {
       user: user,
       productInfo: productInfo,
     };
+    if (get(createProductDto, 'idx', '')) {
+      product_data['idx'] = +get(createProductDto, 'idx');
+    }
     // 숙소 등록
     const productEntity = await this.productRepository.create(product_data);
     const product = await this.productRepository.save(productEntity);
