@@ -35,7 +35,7 @@ let ProductOptionService = class ProductOptionService {
         let product;
         if ((0, lodash_1.get)(createProductOptionDto, 'productIdx', '')) {
             const productIdx = (0, lodash_1.get)(createProductOptionDto, 'productIdx');
-            product = await this.productService.findIdx(+productIdx);
+            product = await this.productService.findIdxOne(+productIdx);
         }
         let productInfo;
         if ((0, lodash_1.get)(createProductOptionDto, 'productInfoIdx', '')) {

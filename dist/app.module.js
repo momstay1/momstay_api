@@ -33,6 +33,7 @@ const product_info_module_1 = require("./product-info/product-info.module");
 const metro_module_1 = require("./metro/metro.module");
 const college_module_1 = require("./college/college.module");
 const refresh_token_module_1 = require("./refresh-token/refresh-token.module");
+const wishlist_module_1 = require("./wishlist/wishlist.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
@@ -71,6 +72,7 @@ AppModule = __decorate([
             college_module_1.CollegeModule,
             refresh_token_module_1.RefreshTokenModule,
             settings_module_1.SettingsModule,
+            wishlist_module_1.WishlistModule,
         ],
         providers: [common_service_1.CommonService],
     })

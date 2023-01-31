@@ -36,7 +36,12 @@ let UsersService = class UsersService {
         this.emailService = emailService;
     }
     async test(id) {
-        this.emailService.createCode('shjeon2500@naver.com', 0);
+        try {
+            throw new common_1.NotAcceptableException('123123123');
+        }
+        catch (error) {
+            console.log({ error });
+        }
         return id;
     }
     async email(email) {
