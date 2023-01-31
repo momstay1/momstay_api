@@ -28,6 +28,7 @@ import { ProductInfoModule } from './product-info/product-info.module';
 import { MetroModule } from './metro/metro.module';
 import { CollegeModule } from './college/college.module';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { RefreshTokenModule } from './refresh-token/refresh-token.module';
     // DefectModule,
     // DashboardModule,
     SettingsModule,
+    WishlistModule,
   ],
   providers: [CommonService],
 })

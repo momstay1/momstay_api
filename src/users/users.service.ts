@@ -26,7 +26,11 @@ export class UsersService {
   ) { }
 
   async test(id) {
-    this.emailService.createCode('shjeon2500@naver.com', 0);
+    try {
+      throw new NotAcceptableException('123123123');
+    } catch (error) {
+      console.log({ error });
+    }
     return id;
   }
 
