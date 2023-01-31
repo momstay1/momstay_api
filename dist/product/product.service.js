@@ -40,7 +40,6 @@ let ProductService = class ProductService {
         const userIdx = (0, lodash_1.get)(createProductDto, 'userIdx');
         const user = await this.userService.findIdx(+userIdx);
         const product_data = {
-            idx: +(0, lodash_1.get)(createProductDto, 'idx'),
             status: +(0, lodash_1.get)(createProductDto, 'status', 0),
             type: (0, lodash_1.get)(createProductDto, 'type', ''),
             order: '10',
@@ -62,6 +61,9 @@ let ProductService = class ProductService {
             user: user,
             productInfo: productInfo,
         };
+        if ((0, lodash_1.get)(createProductDto, 'idx', '')) {
+            product_data['idx'] = +(0, lodash_1.get)(createProductDto, 'idx');
+        }
         const productEntity = await this.productRepository.create(product_data);
         const product = await this.productRepository.save(productEntity);
         const fileIdx = (0, lodash_1.get)(createProductDto, 'filesIdx', '');

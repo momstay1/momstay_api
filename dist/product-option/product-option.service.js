@@ -43,7 +43,6 @@ let ProductOptionService = class ProductOptionService {
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
         }
         const product_option_data = {
-            idx: +(0, lodash_1.get)(createProductOptionDto, 'idx'),
             status: +(0, lodash_1.get)(createProductOptionDto, 'status', 0),
             type: (0, lodash_1.get)(createProductOptionDto, 'type', ''),
             order: '10',
@@ -62,6 +61,9 @@ let ProductOptionService = class ProductOptionService {
             product: product,
             productInfo: productInfo,
         };
+        if ((0, lodash_1.get)(createProductOptionDto, 'idx', '')) {
+            product_option_data['idx'] = +(0, lodash_1.get)(createProductOptionDto, 'idx');
+        }
         const productOptionEntity = await this.productOptionRepository.create(product_option_data);
         const productOption = await this.productOptionRepository.save(productOptionEntity);
         productOption['product'] = product;
