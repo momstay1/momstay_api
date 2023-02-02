@@ -1,6 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { filter, isArray, isObject, map } from "lodash";
+import { filter, get, isArray, isObject, map } from "lodash";
 import { usersConstant } from "src/users/constants";
 
 export const commonUtils = {
@@ -79,5 +79,56 @@ export const commonUtils = {
   },
   createCode(): string {
     return Math.random().toString(36).substr(2, 11);
-  }
+  },
+  getArrayKey(arr: any, pks: string | string[], is_push: boolean) {
+    const result = {};
+
+    let third_pk;
+    let sub_pk;
+    let pk;
+    if (isArray(pks)) {
+      third_pk = pks[2];
+      sub_pk = pks[1];
+      pk = pks[0];
+    }
+
+    for (const key in arr) {
+      const _pk = arr[key][pk];
+      const _sub_pk = get(arr, [key, sub_pk], '');
+      const _third_pk = get(arr, [key, third_pk], '');
+
+      if (!result[_pk]) {
+        result[_pk] = {};
+      }
+
+      if (is_push) {
+        if (third_pk) {
+          if (!result[_pk][_sub_pk]) result[_pk][_sub_pk] = {};
+
+          result[_pk][_sub_pk][_third_pk] = arr[key];
+        } else if (sub_pk) {
+          if (!result[_pk][_sub_pk]) result[_pk][_sub_pk] = [];
+
+          result[_pk][_sub_pk].push(arr[key]);
+        } else {
+          if (isObject(result[_pk])) result[_pk] = [];
+
+          result[_pk].push(arr[key]);
+        }
+      } else {
+        if (third_pk) {
+          if (!result[_pk][_sub_pk]) result[_pk][_sub_pk] = {};
+
+          result[_pk][_sub_pk][_third_pk] = arr[key];
+        } else if (sub_pk) {
+          if (!result[_pk][_sub_pk]) result[_pk][_sub_pk] = {};
+
+          result[_pk][_sub_pk] = arr[key];
+        } else {
+          result[_pk] = arr[key];
+        }
+      }
+    }
+    return result;
+  },
 };
