@@ -42,7 +42,8 @@ export class ProductOptionController {
       + "search=addr1:string<br>"
       + "search=addr2:string<br>"
       + "search=metro:string<br>"
-      + "search=college:string<br>",
+      + "search=college:string<br>"
+      + "search=product_idx:숙소idx<br>",
     required: false
   })
   async findAll(

@@ -19,7 +19,7 @@ export class CreateUserDto {
   readonly type: string;
 
   @IsOptional()
-  @ApiProperty({ description: '상태' })
+  @ApiProperty({ description: '상태<br>(0:회원 삭제, 1: 회원 미인증, 2: 회원 등록, 5: 회원 휴면, 9: 회원 탈퇴)' })
   readonly status: number;
 
   @IsOptional()
