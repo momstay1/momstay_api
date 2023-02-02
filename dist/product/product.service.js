@@ -100,7 +100,7 @@ let ProductService = class ProductService {
             .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
             .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
             .where((qb) => {
-            qb.where('`product_option`.status = :status', { status: 2 });
+            qb.where('`product`.status = :status', { status: (0, lodash_1.get)(where, 'status', '2') });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
             (0, lodash_1.get)(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
             if ((0, lodash_1.get)(where, 'keyword', '')) {

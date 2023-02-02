@@ -72,6 +72,7 @@ __decorate([
         description: 'search=membership:(0|1)<br>'
             + 'search=keyword:메인검색<br>'
             + 'search=user_idx:회원idx<br>'
+            + 'search=status:상태값(0:삭제|1:미등록|2:등록)<br>'
     }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
