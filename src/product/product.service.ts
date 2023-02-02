@@ -120,10 +120,21 @@ export class ProductService {
       .take((take || 10))
       .getManyAndCount();
 
-    return new Pagination({
+    const product_idxs = map(results, o => o.idx);
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], product_idxs);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('숙소 리스트 이미지 파일 없음');
+    }
+
+    const data = new Pagination({
       results,
       total,
-    })
+    });
+
+    return { data, file_info }
   }
 
   async findIdxAll(idx: number[]) {

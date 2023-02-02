@@ -124,10 +124,21 @@ export class ProductOptionService {
       .take((take || 10))
       .getManyAndCount();
 
-    return new Pagination({
+    const product_option_idxs = map(results, o => o.idx);
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('방 리스트 이미지 파일 없음');
+    }
+
+    const data = new Pagination({
       results,
       total,
-    })
+    });
+
+    return { data, file_info }
 
   }
 
