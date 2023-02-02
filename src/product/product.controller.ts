@@ -37,7 +37,7 @@ export class ProductController {
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
       + 'search=user_idx:회원idx<br>'
-      + 'search=status:상태값(0:삭제|1:미등록|2:등록)<br>'
+      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
   })
   async findAll(
     @Query('take') take: number,
