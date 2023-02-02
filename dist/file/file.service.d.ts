@@ -19,6 +19,7 @@ export declare class FileService {
     }>;
     findIndexs(idxs: string[]): Promise<FileEntity[]>;
     findCategory(category: string[], foreign_idx: string): Promise<FileEntity[]>;
+    findCategoryForeignAll(category: string[], foreign_idx: number[]): Promise<FileEntity[]>;
     findCategoryFiles(category: string[], foreign_idx: string): Promise<{}>;
     findAllPlace(type: string, place_idx: number): Promise<void>;
     update(id: number, updateFileDto: UpdateFileDto): string;

@@ -1,3 +1,4 @@
+import { FileService } from 'src/file/file.service';
 import { ProductService } from 'src/product/product.service';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -9,10 +10,14 @@ export declare class WishlistService {
     private wishlistRepository;
     private readonly userService;
     private readonly productService;
-    constructor(wishlistRepository: Repository<WishlistEntity>, userService: UsersService, productService: ProductService);
+    private readonly fileService;
+    constructor(wishlistRepository: Repository<WishlistEntity>, userService: UsersService, productService: ProductService, fileService: FileService);
     create(user: UsersEntity, createWishlistDto: CreateWishlistDto): Promise<any>;
     findAll(): string;
-    findUserAll(user: UsersEntity): Promise<import("../product/entities/product.entity").ProductEntity[]>;
+    findUserAll(user: UsersEntity): Promise<{
+        product: import("../product/entities/product.entity").ProductEntity[];
+        file_info: {};
+    }>;
     findOne(id: number): string;
     findUserProOne(user_idx: number, product_idx: number): Promise<WishlistEntity>;
     update(id: number, updateWishlistDto: UpdateWishlistDto): string;

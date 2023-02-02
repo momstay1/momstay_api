@@ -22,7 +22,7 @@ __decorate([
 ], UpdateUserDto.prototype, "type", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '상태', required: false }),
+    (0, swagger_1.ApiProperty)({ description: '상태 <br>(0:회원 삭제, 1: 회원 미인증, 2: 회원 등록, 5: 회원 휴면, 9: 회원 탈퇴)', required: false }),
     __metadata("design:type", Number)
 ], UpdateUserDto.prototype, "status", void 0);
 __decorate([
@@ -52,7 +52,7 @@ __decorate([
 ], UpdateUserDto.prototype, "certifiInfo", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ description: '회원 마케팅 동의 여부 <br>(1: 비동의, 2: 동의', required: false }),
+    (0, swagger_1.ApiProperty)({ description: '회원 마케팅 동의 여부 <br>(1: 비동의, 2: 동의)', required: false }),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "marketing", void 0);
 __decorate([

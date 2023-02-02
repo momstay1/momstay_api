@@ -75,7 +75,8 @@ __decorate([
             + "search=addr1:string<br>"
             + "search=addr2:string<br>"
             + "search=metro:string<br>"
-            + "search=college:string<br>",
+            + "search=college:string<br>"
+            + "search=product_idx:숙소idx<br>",
         required: false
     }),
     __param(0, (0, common_1.Query)('take')),

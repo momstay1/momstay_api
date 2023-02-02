@@ -14,6 +14,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const wishlist_entity_1 = require("./entities/wishlist.entity");
 const product_module_1 = require("../product/product.module");
 const users_module_1 = require("../users/users.module");
+const file_module_1 = require("../file/file.module");
 let WishlistModule = class WishlistModule {
 };
 WishlistModule = __decorate([
@@ -21,7 +22,8 @@ WishlistModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([wishlist_entity_1.WishlistEntity]),
             users_module_1.UsersModule,
-            product_module_1.ProductModule
+            product_module_1.ProductModule,
+            file_module_1.FileModule
         ],
         controllers: [wishlist_controller_1.WishlistController],
         providers: [wishlist_service_1.WishlistService]

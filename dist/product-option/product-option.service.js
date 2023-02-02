@@ -105,6 +105,7 @@ let ProductOptionService = class ProductOptionService {
             .where((qb) => {
             qb.where('`product_option`.status = :status', { status: 2 });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'title') });
+            (0, lodash_1.get)(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: (0, lodash_1.get)(where, 'product_idx') });
             (0, lodash_1.get)(where, 'title', '') && qb.andWhere('`product`.`title` LIKE :title', { title: '%' + (0, lodash_1.get)(where, 'title') + '%' });
             (0, lodash_1.get)(where, 'addr1', '') && qb.andWhere('`product`.`addr1` LIKE :addr1', { addr1: '%' + (0, lodash_1.get)(where, 'addr1') + '%' });
             (0, lodash_1.get)(where, 'addr2', '') && qb.andWhere('`product`.`addr2` LIKE :addr2', { addr2: '%' + (0, lodash_1.get)(where, 'addr2') + '%' });

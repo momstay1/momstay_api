@@ -16,15 +16,18 @@ exports.WishlistService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
+const common_utils_1 = require("../common/common.utils");
+const file_service_1 = require("../file/file.service");
 const product_service_1 = require("../product/product.service");
 const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const wishlist_entity_1 = require("./entities/wishlist.entity");
 let WishlistService = class WishlistService {
-    constructor(wishlistRepository, userService, productService) {
+    constructor(wishlistRepository, userService, productService, fileService) {
         this.wishlistRepository = wishlistRepository;
         this.userService = userService;
         this.productService = productService;
+        this.fileService = fileService;
     }
     async create(user, createWishlistDto) {
         const user_data = await this.userService.findId(user.id);
@@ -55,7 +58,15 @@ let WishlistService = class WishlistService {
         }
         const wishlist_idxs = (0, lodash_1.map)(wishlist, o => o.product_idx);
         const product = await this.productService.findIdxAll(wishlist_idxs);
-        return product;
+        let file_info = {};
+        try {
+            file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], wishlist_idxs);
+            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+        }
+        catch (error) {
+            console.log('위시리스트에 이미지 파일 없음');
+        }
+        return { product, file_info };
     }
     findOne(id) {
         return `This action returns a #${id} wishlist`;
@@ -84,7 +95,8 @@ WishlistService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(wishlist_entity_1.WishlistEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         users_service_1.UsersService,
-        product_service_1.ProductService])
+        product_service_1.ProductService,
+        file_service_1.FileService])
 ], WishlistService);
 exports.WishlistService = WishlistService;
 //# sourceMappingURL=wishlist.service.js.map

@@ -71,6 +71,7 @@ __decorate([
         summary: '숙소 리스트 조회 API',
         description: 'search=membership:(0|1)<br>'
             + 'search=keyword:메인검색<br>'
+            + 'search=user_idx:회원idx<br>'
     }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),

@@ -81,6 +81,58 @@ exports.commonUtils = {
     },
     createCode() {
         return Math.random().toString(36).substr(2, 11);
-    }
+    },
+    getArrayKey(arr, pks, is_push) {
+        const result = {};
+        let third_pk;
+        let sub_pk;
+        let pk;
+        if ((0, lodash_1.isArray)(pks)) {
+            third_pk = pks[2];
+            sub_pk = pks[1];
+            pk = pks[0];
+        }
+        for (const key in arr) {
+            const _pk = arr[key][pk];
+            const _sub_pk = (0, lodash_1.get)(arr, [key, sub_pk], '');
+            const _third_pk = (0, lodash_1.get)(arr, [key, third_pk], '');
+            if (!result[_pk]) {
+                result[_pk] = {};
+            }
+            if (is_push) {
+                if (third_pk) {
+                    if (!result[_pk][_sub_pk])
+                        result[_pk][_sub_pk] = {};
+                    result[_pk][_sub_pk][_third_pk] = arr[key];
+                }
+                else if (sub_pk) {
+                    if (!result[_pk][_sub_pk])
+                        result[_pk][_sub_pk] = [];
+                    result[_pk][_sub_pk].push(arr[key]);
+                }
+                else {
+                    if ((0, lodash_1.isObject)(result[_pk]))
+                        result[_pk] = [];
+                    result[_pk].push(arr[key]);
+                }
+            }
+            else {
+                if (third_pk) {
+                    if (!result[_pk][_sub_pk])
+                        result[_pk][_sub_pk] = {};
+                    result[_pk][_sub_pk][_third_pk] = arr[key];
+                }
+                else if (sub_pk) {
+                    if (!result[_pk][_sub_pk])
+                        result[_pk][_sub_pk] = {};
+                    result[_pk][_sub_pk] = arr[key];
+                }
+                else {
+                    result[_pk] = arr[key];
+                }
+            }
+        }
+        return result;
+    },
 };
 //# sourceMappingURL=common.utils.js.map

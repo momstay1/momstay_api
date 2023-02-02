@@ -101,6 +101,18 @@ let FileService = class FileService {
         }
         return files;
     }
+    async findCategoryForeignAll(category, foreign_idx) {
+        const files = await this.fileRepository.find({
+            where: {
+                file_category: (0, typeorm_2.In)(category),
+                file_foreign_idx: (0, typeorm_2.In)(foreign_idx)
+            }
+        });
+        if (files.length <= 0) {
+            throw new common_1.NotFoundException('존재하지 않는 파일 입니다.');
+        }
+        return files;
+    }
     async findCategoryFiles(category, foreign_idx) {
         const files = await this.fileRepository.find({
             where: {
