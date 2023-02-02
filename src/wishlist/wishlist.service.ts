@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { map } from 'lodash';
+import { commonUtils } from 'src/common/common.utils';
+import { FileService } from 'src/file/file.service';
 import { ProductService } from 'src/product/product.service';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -14,7 +16,8 @@ export class WishlistService {
   constructor(
     @InjectRepository(WishlistEntity) private wishlistRepository: Repository<WishlistEntity>,
     private readonly userService: UsersService,
-    private readonly productService: ProductService
+    private readonly productService: ProductService,
+    private readonly fileService: FileService
   ) { }
 
   async create(user: UsersEntity, createWishlistDto: CreateWishlistDto) {
@@ -50,7 +53,14 @@ export class WishlistService {
     }
     const wishlist_idxs = map(wishlist, o => o.product_idx);
     const product = await this.productService.findIdxAll(wishlist_idxs);
-    return product;
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], wishlist_idxs);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('위시리스트에 이미지 파일 없음');
+    }
+    return { product, file_info };
   }
 
   findOne(id: number) {

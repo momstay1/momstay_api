@@ -36,6 +36,7 @@ export class ProductController {
     summary: '숙소 리스트 조회 API',
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
+      + 'search=user_idx:회원idx<br>'
   })
   async findAll(
     @Query('take') take: number,

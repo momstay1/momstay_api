@@ -8,7 +8,7 @@ export class UpdateUserDto extends CreateUserDto {
   readonly type: string;
 
   @IsOptional()
-  @ApiProperty({ description: '상태', required: false })
+  @ApiProperty({ description: '상태 <br>(0:회원 삭제, 1: 회원 미인증, 2: 회원 등록, 5: 회원 휴면, 9: 회원 탈퇴)', required: false })
   readonly status: number;
 
   @IsOptional()
@@ -32,7 +32,7 @@ export class UpdateUserDto extends CreateUserDto {
   readonly certifiInfo: string;
 
   @IsOptional()
-  @ApiProperty({ description: '회원 마케팅 동의 여부 <br>(1: 비동의, 2: 동의', required: false })
+  @ApiProperty({ description: '회원 마케팅 동의 여부 <br>(1: 비동의, 2: 동의)', required: false })
   readonly marketing: string;
 
   @IsOptional()
