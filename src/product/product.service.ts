@@ -152,7 +152,15 @@ export class ProductService {
   }
 
   async findOne(idx: number) {
-    return await this.findIdxOne(idx);
+    const product = await this.findIdxOne(idx);
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [idx]);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('숙소 상세 이미지 파일 없음');
+    }
+    return { product, file_info };
   }
 
   async findIdxOne(idx: number) {
