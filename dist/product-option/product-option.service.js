@@ -115,13 +115,32 @@ let ProductOptionService = class ProductOptionService {
             .skip((take * (page - 1) || 0))
             .take((take || 10))
             .getManyAndCount();
-        return new paginate_1.Pagination({
+        const product_option_idxs = (0, lodash_1.map)(results, o => o.idx);
+        let file_info = {};
+        try {
+            file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
+            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+        }
+        catch (error) {
+            console.log('방 리스트 이미지 파일 없음');
+        }
+        const data = new paginate_1.Pagination({
             results,
             total,
         });
+        return { data, file_info };
     }
     async findOne(idx) {
-        return await this.findIdx(idx);
+        const productOption = await this.findIdx(idx);
+        let file_info = {};
+        try {
+            file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [idx]);
+            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+        }
+        catch (error) {
+            console.log('방 상세 이미지 파일 없음');
+        }
+        return { productOption, file_info };
     }
     async findIdx(idx) {
         if (!idx) {

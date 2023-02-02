@@ -13,8 +13,12 @@ export declare class ProductController {
         results: import("./entities/product.entity").ProductEntity[];
         total: number;
         pageTotal: number;
+        file_info: {};
     }>;
-    findOne(idx: string): Promise<import("./entities/product.entity").ProductEntity>;
+    findOne(idx: string): Promise<{
+        product: import("./entities/product.entity").ProductEntity;
+        file_info: {};
+    }>;
     update(id: string, updateProductDto: UpdateProductDto): string;
     remove(id: string): string;
 }

@@ -16,9 +16,15 @@ export declare class ProductService {
         product: ProductEntity;
         file_info: any;
     }>;
-    findAll(options: PaginationOptions, search: string[]): Promise<Pagination<ProductEntity>>;
+    findAll(options: PaginationOptions, search: string[]): Promise<{
+        data: Pagination<ProductEntity>;
+        file_info: {};
+    }>;
     findIdxAll(idx: number[]): Promise<ProductEntity[]>;
-    findOne(idx: number): Promise<ProductEntity>;
+    findOne(idx: number): Promise<{
+        product: ProductEntity;
+        file_info: {};
+    }>;
     findIdxOne(idx: number): Promise<ProductEntity>;
     update(id: number, updateProductDto: UpdateProductDto): string;
     remove(id: number): string;

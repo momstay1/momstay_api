@@ -29,11 +29,12 @@ let ProductController = class ProductController {
         return await this.productService.create(createProductDto, files);
     }
     async findAll(take, page, search) {
-        const { results, total, pageTotal } = await this.productService.findAll({ take, page }, search);
+        const { data: { results, total, pageTotal }, file_info } = await this.productService.findAll({ take, page }, search);
         return {
             results,
             total,
-            pageTotal
+            pageTotal,
+            file_info
         };
     }
     async findOne(idx) {

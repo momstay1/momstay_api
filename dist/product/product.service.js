@@ -114,10 +114,20 @@ let ProductService = class ProductService {
             .skip((take * (page - 1) || 0))
             .take((take || 10))
             .getManyAndCount();
-        return new paginate_1.Pagination({
+        const product_idxs = (0, lodash_1.map)(results, o => o.idx);
+        let file_info = {};
+        try {
+            file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], product_idxs);
+            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+        }
+        catch (error) {
+            console.log('숙소 리스트 이미지 파일 없음');
+        }
+        const data = new paginate_1.Pagination({
             results,
             total,
         });
+        return { data, file_info };
     }
     async findIdxAll(idx) {
         const product = await this.productRepository.createQueryBuilder('product')
@@ -132,7 +142,16 @@ let ProductService = class ProductService {
         return product;
     }
     async findOne(idx) {
-        return await this.findIdxOne(idx);
+        const product = await this.findIdxOne(idx);
+        let file_info = {};
+        try {
+            file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [idx]);
+            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+        }
+        catch (error) {
+            console.log('숙소 상세 이미지 파일 없음');
+        }
+        return { product, file_info };
     }
     async findIdxOne(idx) {
         if (!idx) {
