@@ -44,7 +44,7 @@ export class ProductOptionController {
       + "search=metro:string<br>"
       + "search=college:string<br>"
       + "search=product_idx:숙소idx<br>"
-      + "search=status:상태값(0:삭제|1:미등록|2:등록)<br>",
+      + "search=status:상태값(0:미등록|1:미사용|2:사용)<br>",
     required: false
   })
   async findAll(

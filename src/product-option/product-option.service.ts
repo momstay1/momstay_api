@@ -111,7 +111,7 @@ export class ProductOptionService {
       .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
       .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
       .where((qb) => {
-        qb.where('`product_option`.status = :status', { status: get(where, 'status', '2') });
+        qb.where('`product_option`.status IN (:status)', { status: get(where, 'status', ['2']) });
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'title') });
         get(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: get(where, 'product_idx') });
         get(where, 'title', '') && qb.andWhere('`product`.`title` LIKE :title', { title: '%' + get(where, 'title') + '%' });
