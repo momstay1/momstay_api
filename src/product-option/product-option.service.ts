@@ -70,18 +70,20 @@ export class ProductOptionService {
     // 파일 제거
     const fileIdx = get(createProductOptionDto, 'filesIdx', '');
     let fileIdxs = [];
-    try {
-      const productOptionFileIdxs = map(
-        await this.fileService.findCategory(["roomDetailImg"], "" + productOption['idx']),
-        (o) => "" + o.file_idx
-      );
-      fileIdxs = fileIdx.split(",");
-      const delFileIdxs = productOptionFileIdxs.filter(o => !fileIdxs.includes(o));
-      if (delFileIdxs.length > 0) {
-        await this.fileService.removes(delFileIdxs);
+    if (fileIdx) {
+      try {
+        const productOptionFileIdxs = map(
+          await this.fileService.findCategory(["roomDetailImg"], "" + productOption['idx']),
+          (o) => "" + o.file_idx
+        );
+        fileIdxs = fileIdx.split(",");
+        const delFileIdxs = productOptionFileIdxs.filter(o => !fileIdxs.includes(o));
+        if (delFileIdxs.length > 0) {
+          await this.fileService.removes(delFileIdxs);
+        }
+      } catch (error) {
+        console.log({ error });
       }
-    } catch (error) {
-      console.log({ error });
     }
 
     // 새 첨부파일 등록
