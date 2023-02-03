@@ -68,16 +68,18 @@ let ProductService = class ProductService {
         const product = await this.productRepository.save(productEntity);
         const fileIdx = (0, lodash_1.get)(createProductDto, 'filesIdx', '');
         let fileIdxs = [];
-        try {
-            const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']), (o) => "" + o.file_idx);
-            fileIdxs = fileIdx.split(",");
-            const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
-            if (delFileIdxs.length > 0) {
-                await this.fileService.removes(delFileIdxs);
+        if (fileIdx) {
+            try {
+                const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']), (o) => "" + o.file_idx);
+                fileIdxs = fileIdx.split(",");
+                const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+                if (delFileIdxs.length > 0) {
+                    await this.fileService.removes(delFileIdxs);
+                }
             }
-        }
-        catch (error) {
-            console.log({ error });
+            catch (error) {
+                console.log({ error });
+            }
         }
         let new_file;
         if (!(0, lodash_1.isEmpty)(files)) {
