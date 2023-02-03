@@ -107,11 +107,21 @@ export class ProductService {
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
         get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         if (get(where, 'keyword', '')) {
-          qb.orWhere('`product`.`title` LIKE :title', { title: '%' + get(where, 'keyword') + '%' });
-          qb.orWhere('`product`.`addr1` LIKE :addr1', { addr1: '%' + get(where, 'keyword') + '%' });
-          qb.orWhere('`product`.`addr2` LIKE :addr2', { addr2: '%' + get(where, 'keyword') + '%' });
-          qb.orWhere('`product`.`metro` LIKE :metro', { metro: '%' + get(where, 'keyword') + '%' });
-          qb.orWhere('`product`.`college` LIKE :college', { college: '%' + get(where, 'keyword') + '%' });
+          qb.andWhere('(' +
+            '`product`.`title` LIKE :title' +
+            ' OR `product`.`addr1` LIKE :addr1' +
+            ' OR `product`.`addr2` LIKE :addr2' +
+            ' OR `product`.`metro` LIKE :metro' +
+            ' OR `product`.`college` LIKE :college' +
+            ')',
+            {
+              title: '%' + get(where, 'keyword') + '%',
+              addr1: '%' + get(where, 'keyword') + '%',
+              addr2: '%' + get(where, 'keyword') + '%',
+              metro: '%' + get(where, 'keyword') + '%',
+              college: '%' + get(where, 'keyword') + '%',
+            }
+          );
         }
       })
       .skip((take * (page - 1) || 0))
