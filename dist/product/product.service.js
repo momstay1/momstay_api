@@ -102,11 +102,19 @@ let ProductService = class ProductService {
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
             (0, lodash_1.get)(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
             if ((0, lodash_1.get)(where, 'keyword', '')) {
-                qb.orWhere('`product`.`title` LIKE :title', { title: '%' + (0, lodash_1.get)(where, 'keyword') + '%' });
-                qb.orWhere('`product`.`addr1` LIKE :addr1', { addr1: '%' + (0, lodash_1.get)(where, 'keyword') + '%' });
-                qb.orWhere('`product`.`addr2` LIKE :addr2', { addr2: '%' + (0, lodash_1.get)(where, 'keyword') + '%' });
-                qb.orWhere('`product`.`metro` LIKE :metro', { metro: '%' + (0, lodash_1.get)(where, 'keyword') + '%' });
-                qb.orWhere('`product`.`college` LIKE :college', { college: '%' + (0, lodash_1.get)(where, 'keyword') + '%' });
+                qb.andWhere('(' +
+                    '`product`.`title` LIKE :title' +
+                    ' OR `product`.`addr1` LIKE :addr1' +
+                    ' OR `product`.`addr2` LIKE :addr2' +
+                    ' OR `product`.`metro` LIKE :metro' +
+                    ' OR `product`.`college` LIKE :college' +
+                    ')', {
+                    title: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    addr1: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    addr2: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    metro: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    college: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                });
             }
         })
             .skip((take * (page - 1) || 0))

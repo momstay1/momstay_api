@@ -68,12 +68,14 @@ __decorate([
 ], ProductController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({
-        summary: '숙소 리스트 조회 API',
+    (0, swagger_1.ApiOperation)({ summary: '숙소 리스트 조회 API' }),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
         description: 'search=membership:(0|1)<br>'
             + 'search=keyword:메인검색<br>'
             + 'search=user_idx:회원idx<br>'
-            + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
+            + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+        required: false
     }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
