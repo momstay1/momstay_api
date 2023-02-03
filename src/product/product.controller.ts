@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseIntercepto
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
@@ -32,12 +32,14 @@ export class ProductController {
 
   // 숙소 리스트 조회
   @Get()
-  @ApiOperation({
-    summary: '숙소 리스트 조회 API',
+  @ApiOperation({ summary: '숙소 리스트 조회 API' })
+  @ApiQuery({
+    name: "search",
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
       + 'search=user_idx:회원idx<br>'
-      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
+      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+    required: false
   })
   async findAll(
     @Query('take') take: number,
