@@ -23,7 +23,7 @@ __decorate([
 ], LoginUserDto.prototype, "id", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Matches)(/^[a-z\d!@#$%^&*()]{8,30}$/),
+    (0, class_validator_1.Matches)(/^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/),
     (0, swagger_1.ApiProperty)({ description: '비밀번호' }),
     __metadata("design:type", String)
 ], LoginUserDto.prototype, "password", void 0);
