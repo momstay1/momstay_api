@@ -16,7 +16,9 @@ import { commonContants } from 'src/common/common.constants';
 import * as path from 'path';
 import * as zl from 'zip-lib';
 import * as fs from "fs";
+import * as sharp from "sharp";
 
+// const sharp = require('sharp');
 const img_url = '/file/img/';
 @Injectable()
 export class FileService {
@@ -206,6 +208,7 @@ export class FileService {
       file_category.push(i); // 저장 후 조회할 파일 카테고리 정보
       for (const j in files[i]) {
         const raw_name = files[i][j].filename.split('.')[0];
+        const ext = path.extname(files[i][j].originalname);
         files_data.push({
           file_category: i,
           file_foreign_idx: foreign_idx,
@@ -219,7 +222,7 @@ export class FileService {
           file_raw_name: raw_name,
           file_orig_name: files[i][j].originalname,
           file_client_name: files[i][j].originalname,
-          file_ext: path.extname(files[i][j].originalname),
+          file_ext: ext,
           file_size: files[i][j].size,
           file_is_img: this.isImage(files[i][j].mimetype),
           file_image_width: '',
@@ -229,7 +232,10 @@ export class FileService {
           file_order: base_order * order,
         });
         order++;
+        console.log(files[i][j].originalname);
+        await this.sharpFile(files[i][j], ext);
       }
+
     }
 
     // 파일정보 저장
@@ -275,6 +281,31 @@ export class FileService {
     await zip.archive(zip_file_path);
 
     return { file_name: zip_file_name, file_path: zip_file_path };
+  }
+
+  async sharpFile(file, extension) {
+    const fileBuffer = fs.readFileSync(file.path);
+    const ext = extension.replace('.', '');
+    let ext_name;
+    switch (ext) {
+      case 'png':
+        ext_name = 'png';
+        break;
+      case 'jpeg':
+        ext_name = 'jpeg';
+        break;
+      case 'jpg':
+        ext_name = 'jpg';
+        break;
+    }
+    const image = await sharp(fileBuffer)
+      .withMetadata()
+      .toFormat(ext_name, { quality: 90 })
+      .toFile(file.path, (err, info) => {
+        console.log(`파일 압축 info :${JSON.stringify(info, null, 2)}`);
+        console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);
+      })
+      .toBuffer();
   }
 
 }
