@@ -22,6 +22,7 @@ const common_constants_1 = require("../common/common.constants");
 const path = require("path");
 const zl = require("zip-lib");
 const fs = require("fs");
+const sharp = require("sharp");
 const img_url = '/file/img/';
 let FileService = class FileService {
     constructor(fileRepository) {
@@ -165,6 +166,7 @@ let FileService = class FileService {
             file_category.push(i);
             for (const j in files[i]) {
                 const raw_name = files[i][j].filename.split('.')[0];
+                const ext = path.extname(files[i][j].originalname);
                 files_data.push({
                     file_category: i,
                     file_foreign_idx: foreign_idx,
@@ -178,7 +180,7 @@ let FileService = class FileService {
                     file_raw_name: raw_name,
                     file_orig_name: files[i][j].originalname,
                     file_client_name: files[i][j].originalname,
-                    file_ext: path.extname(files[i][j].originalname),
+                    file_ext: ext,
                     file_size: files[i][j].size,
                     file_is_img: this.isImage(files[i][j].mimetype),
                     file_image_width: '',
@@ -188,6 +190,8 @@ let FileService = class FileService {
                     file_order: base_order * order,
                 });
                 order++;
+                console.log(files[i][j].originalname);
+                await this.sharpFile(files[i][j], ext);
             }
         }
         await this.fileRepository
@@ -224,6 +228,30 @@ let FileService = class FileService {
         const zip_file_path = path.join(common_constants_1.commonContants.zip_upload_path, zip_file_name);
         await zip.archive(zip_file_path);
         return { file_name: zip_file_name, file_path: zip_file_path };
+    }
+    async sharpFile(file, extension) {
+        const fileBuffer = fs.readFileSync(file.path);
+        const ext = extension.replace('.', '');
+        let ext_name;
+        switch (ext) {
+            case 'png':
+                ext_name = 'png';
+                break;
+            case 'jpeg':
+                ext_name = 'jpeg';
+                break;
+            case 'jpg':
+                ext_name = 'jpg';
+                break;
+        }
+        const image = await sharp(fileBuffer)
+            .withMetadata()
+            .toFormat(ext_name, { quality: 90 })
+            .toFile(file.path, (err, info) => {
+            console.log(`파일 압축 info :${JSON.stringify(info, null, 2)}`);
+            console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);
+        })
+            .toBuffer();
     }
 };
 FileService = __decorate([
