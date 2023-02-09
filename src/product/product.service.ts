@@ -66,13 +66,18 @@ export class ProductService {
     const fileIdx = get(createProductDto, 'filesIdx', '');
     let fileIdxs = [];
     if (fileIdx) {
+      console.log('-----------------------파일 제거-----------------------');
+      console.log({ fileIdx });
       try {
         const productFileIdxs = map(
           await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']),
           (o) => "" + o.file_idx
         );
+        console.log({ productFileIdxs });
         fileIdxs = fileIdx.split(",");
+        console.log({ fileIdxs });
         const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+        console.log({ delFileIdxs });
         if (delFileIdxs.length > 0) {
           await this.fileService.removes(delFileIdxs);
         }
@@ -84,13 +89,20 @@ export class ProductService {
     // 새 첨부파일 등록
     let new_file;
     if (!isEmpty(files)) {
+      console.log('-----------------------새 첨부파일 등록-----------------------');
+      console.log({ files });
       new_file = await this.fileService.fileInfoInsert(files, product['idx']);
+      console.log({ new_file });
       fileIdxs = union(fileIdxs, ...map(new_file[product_data['idx']], (obj) => map(obj, o => "" + o.file_idx)));
+      console.log({ fileIdxs });
     }
 
     let file_info;
+    console.log('-----------------------파일 정보 가져오기-----------------------');
+    console.log({ fileIdxs });
     if (fileIdxs.length > 0) {
       file_info = await this.fileService.findIndexs(fileIdxs);
+      console.log({ file_info });
     }
 
     return { product, file_info }
