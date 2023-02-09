@@ -166,7 +166,6 @@ let FileService = class FileService {
             file_category.push(i);
             for (const j in files[i]) {
                 const raw_name = files[i][j].filename.split('.')[0];
-                const ext = path.extname(files[i][j].originalname);
                 files_data.push({
                     file_category: i,
                     file_foreign_idx: foreign_idx,
@@ -180,7 +179,7 @@ let FileService = class FileService {
                     file_raw_name: raw_name,
                     file_orig_name: files[i][j].originalname,
                     file_client_name: files[i][j].originalname,
-                    file_ext: ext,
+                    file_ext: path.extname(files[i][j].originalname),
                     file_size: files[i][j].size,
                     file_is_img: this.isImage(files[i][j].mimetype),
                     file_image_width: '',
@@ -191,7 +190,7 @@ let FileService = class FileService {
                 });
                 order++;
                 console.log(files[i][j].originalname);
-                await this.sharpFile(files[i][j], ext);
+                await this.sharpFile(files[i][j]);
             }
         }
         await this.fileRepository
@@ -229,24 +228,18 @@ let FileService = class FileService {
         await zip.archive(zip_file_path);
         return { file_name: zip_file_name, file_path: zip_file_path };
     }
-    async sharpFile(file, extension) {
+    async sharpFile(file) {
         const fileBuffer = fs.readFileSync(file.path);
-        const ext = extension.replace('.', '');
-        let ext_name;
-        switch (ext) {
-            case 'png':
-                ext_name = 'png';
-                break;
-            case 'jpeg':
-                ext_name = 'jpeg';
-                break;
-            case 'jpg':
-                ext_name = 'jpg';
-                break;
+        const image = await sharp(fileBuffer);
+        const { format, width, height } = await image.metadata();
+        if (width >= 1200) {
+            await image.resize(1200, null, { fit: 'contain' });
         }
-        const image = await sharp(fileBuffer)
-            .withMetadata()
-            .toFormat(ext_name, { quality: 90 })
+        if (height >= 1200) {
+            await image.resize(null, 1200, { fit: 'contain' });
+        }
+        await image.withMetadata()
+            .toFormat(format, { quality: 85 })
             .toFile(file.path, (err, info) => {
             console.log(`파일 압축 info :${JSON.stringify(info, null, 2)}`);
             console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);

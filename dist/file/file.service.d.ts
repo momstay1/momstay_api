@@ -28,5 +28,5 @@ export declare class FileService {
     fileInfoInsert(files: any, foreign_idx: any): Promise<{}>;
     isImage(type: any): 0 | 1;
     private imageZip;
-    sharpFile(file: any, extension: any): Promise<void>;
+    sharpFile(file: any): Promise<void>;
 }
