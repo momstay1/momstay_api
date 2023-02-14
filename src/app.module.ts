@@ -29,6 +29,7 @@ import { MetroModule } from './metro/metro.module';
 import { CollegeModule } from './college/college.module';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
       limit: 10,
     }),
     TypeOrmModule.forRoot(),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     CommonModule,

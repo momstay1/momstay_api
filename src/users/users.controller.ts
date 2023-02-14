@@ -10,6 +10,8 @@ import {
   UseInterceptors,
   UploadedFiles,
   Req,
+  Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -230,10 +232,10 @@ export class UsersController {
   }
 
   // 회원 삭제(탈퇴)
-  // @Delete(':id')
-  // @HttpCode(204)
-  // async remove(@Param('id') id: string) {
-  //   await this.usersService.remove(id);
-  // }
+  @Delete('leave/:id')
+  @HttpCode(204)
+  async leave(@Param('id') id: string) {
+    await this.usersService.leave(id);
+  }
 
 }

@@ -14,6 +14,7 @@ import { usersConstant } from './constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UsersService {
@@ -269,9 +270,22 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async remove(id: string) {
+  async leave(id: string) {
     const user = await this.findId(id);
-    user.status = usersConstant.status.delete;
+    user.status = usersConstant.status.leave;
+    user.id = '';
+    user.password = '';
+    user.prevPassword = '';
+    user.name = '';
+    user.email = '';
+    user.gender = '';
+    user.phone = '';
+    user.birthday = '0000-00-00';
+    user.other = '';
+    user.oldData = '';
+    user.oldData = '';
+    user.leaveAt = new Date(moment().format('YYYY-MM-DD'));
+    user.marketing = '0';
     await this.usersRepository.save(user);
   }
 
@@ -306,5 +320,26 @@ export class UsersService {
   private async checkUserExists(id: string) {
     return await this.usersRepository.findOne({ id: id });
   }
+
+  /******************** cron ********************/
+  // cron 테스트
+  // @Cron('*/10 * * * * *')
+  // async cronTest() {
+  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+  //   console.log('-----------------------cronTest-----------------------');
+  // }
+
+  // 탈퇴 회원 다음날 01시 uniquekey 제거
+  @Cron('0 0 1 * * *')
+  async deleteUniqueKey() {
+    console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+    console.log('-----------------------deleteUniqueKey-----------------------');
+    await this.usersRepository.createQueryBuilder()
+      .update(UsersEntity)
+      .set({ uniqueKey: '', certifiInfo: '' })
+      .where(" status = :status", { status: usersConstant.status.leave })
+      .execute()
+  }
+
 
 }
