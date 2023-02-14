@@ -5,11 +5,26 @@ import { UpdatePushNotificationDto } from './dto/update-push-notification.dto';
 
 @Controller('push-notification')
 export class PushNotificationController {
-  constructor(private readonly pushNotificationService: PushNotificationService) {}
+  constructor(private readonly pushNotificationService: PushNotificationService) { }
 
   @Post()
   create(@Body() createPushNotificationDto: CreatePushNotificationDto) {
     return this.pushNotificationService.create(createPushNotificationDto);
+  }
+
+  @Get('test')
+  async test() {
+    const target = {
+      // token: 'cJfclSYOSzOS86FH2TQHOz:APA91bGHhZpeZ3sg90Q6RnuPTCtWwJ_y0o3nVyh-xPCOQXYlj4XZb_HLHyp7gQFEY56YcIQPmZjUwSVNfZuOienzIkc2KYZoIJQyYToH4ZJ6T6EPZE_EMcZFNEtE4Z5riCpmazJRjJxE',
+      token: '',
+      topic: 'all',
+    }
+    const notifications = {
+      title: '앱 푸시 테스트',
+      body: '앱 푸시 테스트 입니다.',
+      data: null
+    };
+    return await this.pushNotificationService.sendPush(target, notifications);
   }
 
   @Get()
