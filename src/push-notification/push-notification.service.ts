@@ -6,12 +6,20 @@ import { UpdatePushNotificationDto } from './dto/update-push-notification.dto';
 import { google } from 'googleapis';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PushHistoryEntity } from './entities/push-history.entity';
+import { Repository } from 'typeorm';
+import { get } from 'lodash';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
+let accessToken;
 @Injectable()
 export class PushNotificationService {
-  constructor(private readonly http: HttpService) { }
+  constructor(
+    @InjectRepository(PushHistoryEntity) private pushHistoryRepository: Repository<PushHistoryEntity>,
+    private readonly http: HttpService,
+  ) { }
 
   async sendPush({ topic, token }, { title, body, data }) {
     const message = {
@@ -21,21 +29,46 @@ export class PushNotificationService {
         title: title,
         body: body
       },
-      data: data
+      // data: ''
     };
     if (topic) {
       message['topic'] = topic;
-    }
-    if (token) {
+    } else {
       message['token'] = token;
     }
-    await this.sendFcmMessage({ message });
+    if (data) {
+      message['data'] = data;
+    }
+    try {
+      const response = await this.sendFcmMessage({ message });
+      await this.historySave(response);
+    } catch (error) {
+      await this.historySave(error.response);
+    }
+  }
+
+  async historySave(response) {
+    const data = JSON.parse(response.config.data);
+    const push_history_data = {
+      status: '' + response.status,
+      topic: get(data, ['message', 'topic'], ''),
+      token: get(data, ['message', 'token'], ''),
+      data: get(data, ['message', 'data'], '') && JSON.stringify(get(data, ['message', 'data'])),
+      notifications: response.config.data,
+      error: get(response, ['data', 'error'], '') && JSON.stringify(get(response, ['data', 'error'])),
+    };
+    const pushHistory = await this.pushHistoryRepository.create(push_history_data);
+    await this.pushHistoryRepository.save(pushHistory);
   }
 
   private async sendFcmMessage(fcmMessage) {
     const http = this.http;
 
-    const accessToken = await this.getAccessToken()
+    if (!accessToken) {
+      console.log({ accessToken });
+      accessToken = await this.getAccessToken();
+      console.log({ accessToken });
+    }
 
     const url = MESSAGING_URL;
     const headersRequest = {
@@ -47,7 +80,6 @@ export class PushNotificationService {
         headers: headersRequest,
       })
     );
-    console.log({ response });
     return response;
   }
 
@@ -62,7 +94,6 @@ export class PushNotificationService {
       null,
     )
     const tokens = await jwtClient.authorize();
-    console.log({ tokens });
     return tokens.access_token;
   }
 
