@@ -30,6 +30,7 @@ import { CollegeModule } from './college/college.module';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { PushNotificationModule } from './push-notification/push-notification.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     // DashboardModule,
     SettingsModule,
     WishlistModule,
+    PushNotificationModule,
   ],
   providers: [CommonService],
 })
