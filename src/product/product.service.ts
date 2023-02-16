@@ -197,6 +197,10 @@ export class ProductService {
     if (!get(product, 'idx', '')) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');
     }
+    if (get(product, 'user')) {
+      product['userIdx'] = product.user.idx;
+      delete product.user;
+    }
     return product;
   }
 
