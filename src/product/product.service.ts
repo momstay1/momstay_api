@@ -175,6 +175,7 @@ export class ProductService {
 
   async findOne(idx: number) {
     const product = await this.findIdxOne(idx);
+    console.log({ product });
     let file_info = {};
     try {
       file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [idx]);
@@ -191,9 +192,9 @@ export class ProductService {
     }
     const product = await this.productRepository.findOne({
       where: { idx: idx },
-      relations: ['productInfo']
+      relations: ['productInfo', 'user']
     });
-    if (!product.idx) {
+    if (!get(product, 'idx', '')) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');
     }
     return product;

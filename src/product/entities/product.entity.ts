@@ -53,7 +53,6 @@ export class ProductEntity {
   @Column({ type: 'text', default: '' })
   oldData: string;
 
-
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
