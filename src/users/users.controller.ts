@@ -193,7 +193,7 @@ export class UsersController {
 
   // 회원 비밀번호 재설정
   @Patch('rspw')
-  @Auth(['host', 'guest'])
+  @Auth(['guest', 'host'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
   @ApiBody({

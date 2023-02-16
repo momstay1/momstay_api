@@ -25,6 +25,13 @@ export class RoleGuard implements CanActivate {
     if (requiredRoles.includes('Any')) return true;
     if (!user) return false;
 
-    return requiredRoles.includes(user.group);
+    // 회원 그룹 및 권한 그룹 교집합 구하기
+    const groups = user.group.split('|');
+    const difference = groups.filter(x => requiredRoles.includes(x));
+    console.log(user.group);
+    console.log({ groups });
+    console.log({ difference });
+    // 길이 0 이상인 배열시 권한 있음
+    return difference.length > 0;
   }
 }

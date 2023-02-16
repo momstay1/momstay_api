@@ -1,5 +1,6 @@
 import { ConsoleLogger, Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { map } from 'lodash';
 import { AdminUsersService } from 'src/admin-users/admin-users.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { GroupsService } from 'src/groups/groups.service';
@@ -45,8 +46,10 @@ export class AuthService {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
     console.log(userInfo.groups);
-    const group = await this.groupsService.findOne(userInfo.groups[0].idx);
-    const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: group.id };
+    const userGrp = map(userInfo.groups, o => o.id);
+    // const group = await this.groupsService.findIdxs(group_idxs);
+    // const userGrp = map(group, o)
+    const payload = { userId: userInfo.id, userName: userInfo.name, userGrp: userGrp.join('|') };
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -57,7 +60,8 @@ export class AuthService {
   async snsLogin(snsLoginUserDto): Promise<ResponseAuthDto> {
     const snsUserInfo = await this.userSnsService.findId(snsLoginUserDto.id);
     const user = await this.userService.findId(snsUserInfo.user.id);
-    const payload = { userId: user.id, userName: user.name, userGrp: user.groups[0].id };
+    const userGrp = map(user.groups, o => o.id);
+    const payload = { userId: user.id, userName: user.name, userGrp: userGrp.join('|') };
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign({}, { expiresIn: jwtConstants.refresh_expried_on }),

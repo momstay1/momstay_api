@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FileModule } from 'src/file/file.module';
 import { ProductInfoModule } from 'src/product-info/product-info.module';
 import { UsersModule } from 'src/users/users.module';
+import { AdminProductController } from './admin-product.controller';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { UsersModule } from 'src/users/users.module';
     ProductInfoModule,
     UsersModule,
   ],
-  controllers: [ProductController],
+  controllers: [ProductController, AdminProductController],
   providers: [ProductService],
   exports: [ProductService]
 })
