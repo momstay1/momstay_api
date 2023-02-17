@@ -13,6 +13,8 @@ export class ProductOptionEntity {
   @Column({ default: '' })
   type: string;
   @Column({ default: '' })
+  code: string;
+  @Column({ default: '' })
   order: string;
 
   @Column({ default: '' })  // 투숙 상태

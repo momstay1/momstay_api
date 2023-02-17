@@ -1,7 +1,17 @@
 import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
 import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from "typeorm";
 
 @Entity('product')
 export class ProductEntity {
@@ -12,6 +22,8 @@ export class ProductEntity {
   status: number;
   @Column({ default: '' })
   type: string;
+  @Column({ default: '' })
+  code: string;
   @Column({ default: '' })
   order: string;
 
