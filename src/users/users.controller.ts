@@ -26,6 +26,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse
@@ -160,6 +161,10 @@ export class UsersController {
   // 인증 메일 발송
   @Get('email/:email')
   @ApiOperation({ summary: '인증 메일 발송 API' })
+  @ApiQuery({
+    name: "type",
+    description: 'type=[pw|sign]'
+  })
   async email(@Param('email') email: string, @Query('type') type: string) {
     return await this.usersService.email(email, type);
   }
