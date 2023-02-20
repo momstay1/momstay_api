@@ -50,6 +50,11 @@ export class OrderProductEntity {
   @Column({ type: 'text', default: '' })
   memo: string;
 
+  @Column({ type: 'date', default: '0' })
+  startAt: string;
+  @Column({ type: 'date', default: '0' })
+  endAt: string;
+
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
