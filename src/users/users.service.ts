@@ -96,14 +96,14 @@ export class UsersService {
     }
     const where = commonUtils.searchSplit(search);
 
-    const group = await this.groupService.findOneName(user.group);
+    const group = await this.groupService.findAllName(user.group);
     const data = await this.usersRepository.createQueryBuilder('users')
-      .addSelect('`groups`.idx AS groups_idx')
-      .leftJoin('users.groups', 'groups')
-      .leftJoin('users.userSns', 'userSns')
+      // .addSelect('`groups`.idx AS groups_idx')
+      .leftJoinAndSelect('users.groups', 'groups')
+      .leftJoinAndSelect('users.userSns', 'userSns')
       .where(new Brackets(qb => {
         qb.where('users.status IN (:user_status)', { user_status: status_arr });
-        get(where, 'group', '') && qb.andWhere('`groups`.idx IN (:group)', { group: get(where, 'group') })
+        get(where, 'group', '') && qb.andWhere('`groups`.idx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
         get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: get(where, 'language') })
         get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
         get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
@@ -114,7 +114,7 @@ export class UsersService {
         get(where, 'createdAt_lte', '') && qb.andWhere('`users`.`createdAt` <= :createdAt_lte', { createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59' });
       }))
       .groupBy('users_idx')
-      .having('MIN(`groups`.`idx`) >= :group_idx', { group_idx: group.idx })
+      .having('`groups`.`idx` IN (:group_idx)', { group_idx: map(group, o => o.idx) })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getMany();

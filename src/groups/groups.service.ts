@@ -25,6 +25,19 @@ export class GroupsService {
       .getMany();
   }
 
+  async findAllName(group) {
+    const group_name = group.split('|');
+
+    const groups = await this.groupsRepository.find({
+      where: { id: In(group_name) }
+    });
+    if (groups.length <= 0) {
+      throw new NotFoundException('존재하지 않는 그룹 입니다.');
+    }
+
+    return groups;
+  }
+
   async findOne(idx: number) {
     const group = await this.groupsRepository.findOne(idx);
     if (!group) {
