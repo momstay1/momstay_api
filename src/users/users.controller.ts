@@ -160,8 +160,8 @@ export class UsersController {
   // 인증 메일 발송
   @Get('email/:email')
   @ApiOperation({ summary: '인증 메일 발송 API' })
-  async email(@Param('email') email: string) {
-    await this.usersService.email(email);
+  async email(@Param('email') email: string, @Query('type') type: string) {
+    return await this.usersService.email(email, type);
   }
 
   // 테스트용

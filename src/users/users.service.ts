@@ -35,20 +35,48 @@ export class UsersService {
     return id;
   }
 
-  async email(email: string) {
+  async email(email: string, type: string) {
+    const result = { status: true, message: '', type };
     try {
       await this.findId(email);
+      if (type == 'pw') {
+        // 비밀번호 재설정 인증코드 발송 성공
+        const code = await this.emailService.createCode(email, 0);
+        this.emailService.snedMail(
+          1,
+          email,
+          'momstay - Email Authentication',
+          `Please enter your email verification code below.
+          <br><br>
+          Email authentication code : ${code.toUpperCase()}`
+        );
+        result['message'] = '인증 코드 메일 발송 완료';
+      } else {
+        // 회원가입 인증코드 발송 실패
+        result['status'] = false;
+        result['message'] = '인증 코드 메일 발송 실패';
+      }
     } catch (error) {
-      const code = await this.emailService.createCode(email, 0);
-      this.emailService.snedMail(
-        1,
-        email,
-        'momstay - Email Authentication',
-        `Please enter the email authentication code below to register as a member.
-        <br><br>
-        Email authentication code : ${code}`
-      );
+      if (type == 'sign') {
+        // 회원가입 인증코드 발송 성공
+        const code = await this.emailService.createCode(email, 0);
+        this.emailService.snedMail(
+          1,
+          email,
+          'momstay - Email Authentication',
+          `Please enter the email authentication code below to register as a member.
+          <br><br>
+          Email authentication code : ${code.toUpperCase()}`
+        );
+        result['message'] = '인증 코드 메일 발송 완료';
+      } else {
+        // 비밀번호 재설정 인증코드 발송 실패
+        result['status'] = false;
+        result['message'] = '존재하지 않는 이메일';
+      }
     }
+
+    return { result };
   }
 
   async emailChk(email: string, code: string) {
