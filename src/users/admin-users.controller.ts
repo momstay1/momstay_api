@@ -79,7 +79,6 @@ export class AdminUsersController {
     @Query('page') page: number,
     @Query('search') search: string[]
   ) {
-    console.log({ search });
     const {
       results,
       total,

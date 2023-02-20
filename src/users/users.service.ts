@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { filter, get, isArray, isEmpty, map } from 'lodash';
+import { compact, filter, get, isArray, isEmpty, map } from 'lodash';
 import * as moment from "moment";
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
@@ -124,14 +124,22 @@ export class UsersService {
     }
     const where = commonUtils.searchSplit(search);
 
-    const group = await this.groupService.findAllName(user.group);
-    const data = await this.usersRepository.createQueryBuilder('users')
-      // .addSelect('`groups`.idx AS groups_idx')
-      .leftJoinAndSelect('users.groups', 'groups')
+    // const group = await this.groupService.findAllName(user.group);
+    if (get(where, 'group', []).indexOf('1') >= 0) {
+      if (!isArray(where['group'])) where['group'] = [where['group']];
+      delete where['group'][get(where, 'group').indexOf('1')];
+      where['group'] = compact(where['group']);
+    }
+    where['group'] = get(where, 'group').length > 0 ? get(where, 'group') : [1];
+
+    const [results, total] = await this.usersRepository.createQueryBuilder('users')
+      // .addSelect('`groups`.idx AS gp_idx')
+      .leftJoinAndSelect('users_groups_groups', 'users_to_groups', '`users_to_groups`.usersIdx=`users`.idx')
+      .leftJoinAndSelect('users.groups', 'groups', '`groups`.idx=`users_to_groups`.groupsIdx')
       .leftJoinAndSelect('users.userSns', 'userSns')
       .where(new Brackets(qb => {
         qb.where('users.status IN (:user_status)', { user_status: status_arr });
-        get(where, 'group', '') && qb.andWhere('`groups`.idx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
+        get(where, 'group', '') && qb.andWhere('`groups`.idx NOT IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
         get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: get(where, 'language') })
         get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
         get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
@@ -141,17 +149,17 @@ export class UsersService {
         get(where, 'createdAt_mte', '') && qb.andWhere('`users`.`createdAt` >= :createdAt_mte', { createdAt_mte: get(where, 'createdAt_mte') + ' 00:00:00' });
         get(where, 'createdAt_lte', '') && qb.andWhere('`users`.`createdAt` <= :createdAt_lte', { createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59' });
       }))
-      .groupBy('users_idx')
-      .having('`groups`.`idx` IN (:group_idx)', { group_idx: map(group, o => o.idx) })
+      // .groupBy('users_idx')
+      // .having('`groups`.idx IN (:group_idx)', { group_idx: map(group, o => o.idx) })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
-      .getMany();
-    const user_idxs = map(data, (o) => o.idx);
+      .getManyAndCount();
+    // const user_idxs = map(data, (o) => o.idx);
 
-    const [results, total] = await this.usersRepository.findAndCount({
-      where: { idx: In(user_idxs) },
-      relations: ['groups', 'userSns'],
-    });
+    // const [results, total] = await this.usersRepository.findAndCount({
+    //   where: { idx: In(user_idxs) },
+    //   relations: ['groups', 'userSns'],
+    // });
 
     return new Pagination({
       results,
