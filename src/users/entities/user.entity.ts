@@ -108,9 +108,8 @@ export class UsersEntity {
   @OneToMany(() => UserSnsEntity, (us) => us.user)
   userSns: undefined;
 
-  @ManyToMany(() => GroupsEntity, (group) => group.users)
-  @JoinTable()
-  groups: GroupsEntity[];
+  @ManyToOne(() => GroupsEntity, (group) => group.users)
+  group: GroupsEntity;
 
   @CreateDateColumn()
   createdAt: Date;

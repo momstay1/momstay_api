@@ -124,22 +124,24 @@ export class UsersService {
     }
     const where = commonUtils.searchSplit(search);
 
-    // const group = await this.groupService.findAllName(user.group);
-    if (get(where, 'group', []).indexOf('1') >= 0) {
-      if (!isArray(where['group'])) where['group'] = [where['group']];
-      delete where['group'][get(where, 'group').indexOf('1')];
-      where['group'] = compact(where['group']);
+    if (!get(where, 'group', '')) {
+      // 그룹 검색 없는 경우
+      const groups = commonUtils.getArrayKey(await this.groupService.findAll(), ['id'], false);
+      console.log(map(groups, o => console.log(o['idx'])));
+      where['group'] = map(
+        commonUtils.getArrayKey(groups, ['id'], false),
+        o => {
+          if (o['idx'] >= groups[user.group].idx) return o['idx'];
+        }
+      )
     }
-    where['group'] = get(where, 'group').length > 0 ? get(where, 'group') : [1];
 
     const [results, total] = await this.usersRepository.createQueryBuilder('users')
-      // .addSelect('`groups`.idx AS gp_idx')
-      .leftJoinAndSelect('users_groups_groups', 'users_to_groups', '`users_to_groups`.usersIdx=`users`.idx')
-      .leftJoinAndSelect('users.groups', 'groups', '`groups`.idx=`users_to_groups`.groupsIdx')
       .leftJoinAndSelect('users.userSns', 'userSns')
+      .leftJoinAndSelect('users.group', 'group')
       .where(new Brackets(qb => {
         qb.where('users.status IN (:user_status)', { user_status: status_arr });
-        get(where, 'group', '') && qb.andWhere('`groups`.idx NOT IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
+        get(where, 'group', '') && qb.andWhere('`users`.groupIdx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
         get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: get(where, 'language') })
         get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
         get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
@@ -149,17 +151,9 @@ export class UsersService {
         get(where, 'createdAt_mte', '') && qb.andWhere('`users`.`createdAt` >= :createdAt_mte', { createdAt_mte: get(where, 'createdAt_mte') + ' 00:00:00' });
         get(where, 'createdAt_lte', '') && qb.andWhere('`users`.`createdAt` <= :createdAt_lte', { createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59' });
       }))
-      // .groupBy('users_idx')
-      // .having('`groups`.idx IN (:group_idx)', { group_idx: map(group, o => o.idx) })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getManyAndCount();
-    // const user_idxs = map(data, (o) => o.idx);
-
-    // const [results, total] = await this.usersRepository.findAndCount({
-    //   where: { idx: In(user_idxs) },
-    //   relations: ['groups', 'userSns'],
-    // });
 
     return new Pagination({
       results,
@@ -177,7 +171,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: obj,
-      relations: ['groups', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -191,7 +185,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['groups', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -209,7 +203,7 @@ export class UsersService {
         qb.where('`email` = :email', { email: id })
         qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
       },
-      relations: ['groups', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -224,7 +218,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { idx: idx },
-      relations: ['groups', 'userSns'],
+      relations: ['group', 'userSns'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -235,8 +229,8 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, files) {
     const user = await this.findId(id);
-    const groupIdxs = updateUserDto.group ? updateUserDto.group : [usersConstant.default.group_idx];
-    const groups = await this.groupService.findIdxs(groupIdxs);
+    const groupIdxs = updateUserDto.group ? updateUserDto.group : usersConstant.default.group_idx;
+    const group = await this.groupService.findOne(groupIdxs);
 
     user.name = updateUserDto.name;
     if (get(updateUserDto, 'status', ''))
@@ -266,7 +260,7 @@ export class UsersService {
     if (get(updateUserDto, 'certifiInfo', ''))
       user.marketing = get(updateUserDto, 'certifiInfo');
 
-    user.groups = groups;
+    user.group = group;
     if (get(updateUserDto, 'password')) {
       user.password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
     }
@@ -343,9 +337,9 @@ export class UsersService {
   //회원 정보 저장
   private async saveUser(createUserDto): Promise<any> {
     const addPrefixUserDto = createUserDto;
-    const groupIdxs = createUserDto.group ? createUserDto.group : [usersConstant.default.group_idx];
-    const groups = await this.groupService.findIdxs(groupIdxs);
-    addPrefixUserDto.groups = groups;
+    const groupIdx = createUserDto.group ? createUserDto.group : usersConstant.default.group_idx;
+    const group = await this.groupService.findOne(groupIdx);
+    addPrefixUserDto.group = group;
     addPrefixUserDto.status = createUserDto.status ? +createUserDto.status : usersConstant.status.registration;
 
     const user = await this.usersRepository.create({ ...addPrefixUserDto });

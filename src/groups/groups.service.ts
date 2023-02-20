@@ -18,10 +18,11 @@ export class GroupsService {
   }
 
   async findAllUser(user) {
-    const grp = await this.findOneName(user.user_group);
+    console.log({ user });
+    const grp = await this.findOneName(user.group);
     return await this.groupsRepository.createQueryBuilder()
       .select()
-      .where("grp_idx >= :grp_idx", { grp_idx: grp.idx })
+      .where("idx >= :idx", { idx: grp.idx })
       .getMany();
   }
 
