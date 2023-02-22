@@ -50,13 +50,13 @@ export class OrderService {
     }
     // console.log({ createOrderDto });
 
-    // 주문 상품 설정 기능 필요
+    // 주문 상품 설정 기능 작업중
     // total 주문 설정 기능 필요
 
     const order_data = await this.orderRepository.create(createOrderDto);
     const order = await this.orderRepository.save(order_data);
 
-    return order;
+    return { order };
   }
 
   async ordCreateCode() {

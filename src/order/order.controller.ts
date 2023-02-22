@@ -19,7 +19,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) { }
 
   @Post()
-  @ApiOperation({ summary: '주문 생성 API' })
+  @ApiOperation({ summary: '주문 생성 API (작업중)' })
   async create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
     return await this.orderService.create(createOrderDto, req);
   }
