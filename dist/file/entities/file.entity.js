@@ -44,6 +44,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
+], FileEntity.prototype, "file_storage_path", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
 ], FileEntity.prototype, "file_html_path", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),

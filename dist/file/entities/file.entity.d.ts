@@ -6,6 +6,7 @@ export declare class FileEntity {
     file_type: string;
     file_path: string;
     file_full_path: string;
+    file_storage_path: string;
     file_html_path: string;
     file_html_full_path: string;
     file_html_thumb_path: string;

@@ -39,7 +39,7 @@ __decorate([
     __metadata("design:type", String)
 ], GroupsEntity.prototype, "memo", void 0);
 __decorate([
-    (0, typeorm_1.ManyToMany)(() => user_entity_1.UsersEntity, (user) => user.groups),
+    (0, typeorm_1.OneToMany)(() => user_entity_1.UsersEntity, (user) => user.group),
     __metadata("design:type", Array)
 ], GroupsEntity.prototype, "users", void 0);
 GroupsEntity = __decorate([

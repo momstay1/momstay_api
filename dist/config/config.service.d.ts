@@ -15,4 +15,8 @@ export declare class ConfigService {
         host: string;
         name: string;
     };
+    getFireBaseConfig(): {
+        firebase_client_email: string;
+        firebase_private_key: string;
+    };
 }

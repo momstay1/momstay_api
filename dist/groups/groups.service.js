@@ -28,11 +28,22 @@ let GroupsService = class GroupsService {
         return await this.groupsRepository.find();
     }
     async findAllUser(user) {
-        const grp = await this.findOneName(user.user_group);
+        console.log({ user });
+        const grp = await this.findOneName(user.group);
         return await this.groupsRepository.createQueryBuilder()
             .select()
-            .where("grp_idx >= :grp_idx", { grp_idx: grp.idx })
+            .where("idx >= :idx", { idx: grp.idx })
             .getMany();
+    }
+    async findAllName(group) {
+        const group_name = group.split('|');
+        const groups = await this.groupsRepository.find({
+            where: { id: (0, typeorm_2.In)(group_name) }
+        });
+        if (groups.length <= 0) {
+            throw new common_1.NotFoundException('존재하지 않는 그룹 입니다.');
+        }
+        return groups;
     }
     async findOne(idx) {
         const group = await this.groupsRepository.findOne(idx);

@@ -58,7 +58,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '회원 그룹', required: false }),
-    __metadata("design:type", Array)
+    __metadata("design:type", Number)
 ], UpdateUserDto.prototype, "group", void 0);
 exports.UpdateUserDto = UpdateUserDto;
 //# sourceMappingURL=update-user.dto.js.map

@@ -27,7 +27,8 @@ let RoleGuard = class RoleGuard {
             return true;
         if (!user)
             return false;
-        return requiredRoles.includes(user.group);
+        const group = user.group;
+        return requiredRoles.includes(group);
     }
 };
 RoleGuard = __decorate([

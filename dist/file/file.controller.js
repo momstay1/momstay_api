@@ -33,10 +33,7 @@ let FileController = class FileController {
         return await this.fileService.ckeditorUploadImg(file);
     }
     async uploadImg1(files) {
-        console.log({ files });
-        console.log(files['dft_origin_img']);
-        console.log(files['dft_info_img']);
-        return true;
+        return this.fileService.uploadImg(files);
     }
     async getFile(name, res) {
         const file = await this.fileService.findOneName(name);
@@ -88,9 +85,9 @@ __decorate([
 ], FileController.prototype, "ckeditorUploadImg", null);
 __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
-        { name: 'dft_origin_img', maxCount: 10 },
-        { name: 'dft_info_img', maxCount: 10 },
+        { name: 'img', maxCount: 10 },
     ], (0, common_file_1.multerOptions)())),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.Post)('upload1'),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),

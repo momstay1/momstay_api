@@ -25,7 +25,10 @@ export declare class FileService {
     update(id: number, updateFileDto: UpdateFileDto): string;
     remove(id: number): string;
     removes(idxs: string[]): Promise<void>;
+    deleteStorageFile(files: any): Promise<void>;
+    deleteFile(files: any): Promise<void>;
     fileInfoInsert(files: any, foreign_idx: any): Promise<{}>;
+    uploadStorage(file: any): Promise<void>;
     isImage(type: any): 0 | 1;
     private imageZip;
     sharpFile(file: any): Promise<void>;

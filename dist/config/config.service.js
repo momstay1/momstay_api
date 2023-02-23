@@ -45,6 +45,12 @@ class ConfigService {
             name: this.getValue('EMAIL_FROM_USER_NAME'),
         };
     }
+    getFireBaseConfig() {
+        return {
+            firebase_client_email: this.getValue('FIREBASE_CLIENT_EMAIL'),
+            firebase_private_key: this.getValue('FIREBASE_PRIVATE_KEY'),
+        };
+    }
 }
 exports.ConfigService = ConfigService;
 //# sourceMappingURL=config.service.js.map

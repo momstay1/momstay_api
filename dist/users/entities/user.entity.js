@@ -14,7 +14,10 @@ const board_content_entity_1 = require("../../board-contents/entities/board-cont
 const common_bcrypt_1 = require("../../common/common.bcrypt");
 const group_entity_1 = require("../../groups/entities/group.entity");
 const login_entity_1 = require("../../login/entities/login.entity");
+const order_product_entity_1 = require("../../order-product/entities/order-product.entity");
+const order_entity_1 = require("../../order/entities/order.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
+const reservation_entity_1 = require("../../reservation/entities/reservation.entity");
 const user_sns_entity_1 = require("../../user-sns/entities/user-sns.entity");
 const typeorm_1 = require("typeorm");
 let UsersEntity = class UsersEntity {
@@ -123,18 +126,29 @@ __decorate([
     __metadata("design:type", void 0)
 ], UsersEntity.prototype, "product", void 0);
 __decorate([
+    (0, typeorm_1.OneToMany)(() => order_entity_1.OrderEntity, (order) => order.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "order", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => order_product_entity_1.OrderProductEntity, (op) => op.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "orderProduct", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => login_entity_1.LoginEntity, (login) => login.user),
     __metadata("design:type", void 0)
 ], UsersEntity.prototype, "login", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => reservation_entity_1.ReservationEntity, (rev) => rev.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "reservation", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => user_sns_entity_1.UserSnsEntity, (us) => us.user),
     __metadata("design:type", void 0)
 ], UsersEntity.prototype, "userSns", void 0);
 __decorate([
-    (0, typeorm_1.ManyToMany)(() => group_entity_1.GroupsEntity, (group) => group.users),
-    (0, typeorm_1.JoinTable)(),
-    __metadata("design:type", Array)
-], UsersEntity.prototype, "groups", void 0);
+    (0, typeorm_1.ManyToOne)(() => group_entity_1.GroupsEntity, (group) => group.users),
+    __metadata("design:type", group_entity_1.GroupsEntity)
+], UsersEntity.prototype, "group", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

@@ -76,8 +76,8 @@ let UsersController = class UsersController {
         const data = await this.usersService.fineUser(id);
         return data;
     }
-    async email(email) {
-        await this.usersService.email(email);
+    async email(email, type) {
+        return await this.usersService.email(email, type);
     }
     async test(id) {
         const data = await this.usersService.test(id);
@@ -93,6 +93,9 @@ let UsersController = class UsersController {
     }
     async update(id, updateUserDto, files) {
         return await this.usersService.update(id, updateUserDto, files);
+    }
+    async leave(id) {
+        await this.usersService.leave(id);
     }
 };
 __decorate([
@@ -198,9 +201,14 @@ __decorate([
 __decorate([
     (0, common_1.Get)('email/:email'),
     (0, swagger_1.ApiOperation)({ summary: '인증 메일 발송 API' }),
+    (0, swagger_1.ApiQuery)({
+        name: "type",
+        description: 'type=[pw|sign]'
+    }),
     __param(0, (0, common_1.Param)('email')),
+    __param(1, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "email", null);
 __decorate([
@@ -230,7 +238,7 @@ __decorate([
 ], UsersController.prototype, "changePassword", null);
 __decorate([
     (0, common_1.Patch)('rspw'),
-    (0, role_decorator_1.Auth)(['host', 'guest']),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host', 'guest']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '회원 비밀번호 재설정 API' }),
     (0, swagger_1.ApiBody)({
@@ -266,6 +274,14 @@ __decorate([
         Array]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)('leave/:id'),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "leave", null);
 UsersController = __decorate([
     (0, common_1.Controller)('users'),
     (0, swagger_1.ApiTags)('유저 API'),

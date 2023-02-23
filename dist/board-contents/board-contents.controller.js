@@ -64,6 +64,8 @@ __decorate([
     (0, common_1.Get)(':bd_idx'),
     (0, swagger_1.ApiOperation)({ summary: '게시글 리스트 API' }),
     (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
+    (0, swagger_1.ApiQuery)({ name: "category", required: false }),
+    (0, swagger_1.ApiQuery)({ name: "order", required: false }),
     __param(0, (0, common_1.Param)('bd_idx')),
     __param(1, (0, common_1.Query)('category')),
     __param(2, (0, common_1.Query)('take')),

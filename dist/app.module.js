@@ -34,6 +34,15 @@ const metro_module_1 = require("./metro/metro.module");
 const college_module_1 = require("./college/college.module");
 const refresh_token_module_1 = require("./refresh-token/refresh-token.module");
 const wishlist_module_1 = require("./wishlist/wishlist.module");
+const schedule_1 = require("@nestjs/schedule");
+const push_notification_module_1 = require("./push-notification/push-notification.module");
+const order_module_1 = require("./order/order.module");
+const reservation_module_1 = require("./reservation/reservation.module");
+const order_total_module_1 = require("./order-total/order-total.module");
+const order_product_module_1 = require("./order-product/order-product.module");
+const pg_data_module_1 = require("./pg-data/pg-data.module");
+const pg_noti_module_1 = require("./pg-noti/pg-noti.module");
+const pg_cancel_module_1 = require("./pg-cancel/pg-cancel.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
@@ -53,6 +62,7 @@ AppModule = __decorate([
                 limit: 10,
             }),
             typeorm_1.TypeOrmModule.forRoot(),
+            schedule_1.ScheduleModule.forRoot(),
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             common_module_1.CommonModule,
@@ -73,6 +83,14 @@ AppModule = __decorate([
             refresh_token_module_1.RefreshTokenModule,
             settings_module_1.SettingsModule,
             wishlist_module_1.WishlistModule,
+            push_notification_module_1.PushNotificationModule,
+            order_module_1.OrderModule,
+            reservation_module_1.ReservationModule,
+            order_total_module_1.OrderTotalModule,
+            order_product_module_1.OrderProductModule,
+            pg_data_module_1.PgDataModule,
+            pg_noti_module_1.PgNotiModule,
+            pg_cancel_module_1.PgCancelModule,
         ],
         providers: [common_service_1.CommonService],
     })

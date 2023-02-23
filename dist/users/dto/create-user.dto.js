@@ -108,7 +108,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, swagger_1.ApiProperty)({ description: '회원 그룹' }),
-    __metadata("design:type", Array)
+    __metadata("design:type", Number)
 ], CreateUserDto.prototype, "group", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

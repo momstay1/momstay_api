@@ -26,7 +26,8 @@ ProductOptionModule = __decorate([
             product_info_module_1.ProductInfoModule
         ],
         controllers: [product_option_controller_1.ProductOptionController],
-        providers: [product_option_service_1.ProductOptionService]
+        providers: [product_option_service_1.ProductOptionService],
+        exports: [product_option_service_1.ProductOptionService]
     })
 ], ProductOptionModule);
 exports.ProductOptionModule = ProductOptionModule;

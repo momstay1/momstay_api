@@ -9,5 +9,6 @@ export declare const commonUtils: {
     searchSplit(search: string[]): {};
     authCheck(auth: any, groups: any): Promise<any[]>;
     createCode(): string;
+    isMobile(agent: string): string;
     getArrayKey(arr: any, pks: string | string[], is_push: boolean): {};
 };

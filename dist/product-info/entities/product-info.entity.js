@@ -34,7 +34,31 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
+], ProductInfoEntity.prototype, "typeEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductInfoEntity.prototype, "typeJpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductInfoEntity.prototype, "typeChn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
 ], ProductInfoEntity.prototype, "name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductInfoEntity.prototype, "nameEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductInfoEntity.prototype, "nameJpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductInfoEntity.prototype, "nameChn", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => product_entity_1.ProductEntity, (product) => product.productInfo),
     (0, typeorm_1.JoinTable)(),

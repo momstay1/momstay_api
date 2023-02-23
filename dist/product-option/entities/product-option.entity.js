@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductOptionEntity = void 0;
 const product_info_entity_1 = require("../../product-info/entities/product-info.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
+const reservation_entity_1 = require("../../reservation/entities/reservation.entity");
 const typeorm_1 = require("typeorm");
 let ProductOptionEntity = class ProductOptionEntity {
 };
@@ -27,6 +28,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], ProductOptionEntity.prototype, "type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductOptionEntity.prototype, "code", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
@@ -47,6 +52,18 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], ProductOptionEntity.prototype, "title", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductOptionEntity.prototype, "titleEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductOptionEntity.prototype, "titleJpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductOptionEntity.prototype, "titleChn", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
@@ -106,6 +123,10 @@ __decorate([
     }),
     __metadata("design:type", product_entity_1.ProductEntity)
 ], ProductOptionEntity.prototype, "product", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => reservation_entity_1.ReservationEntity, (rev) => rev.productOption),
+    __metadata("design:type", void 0)
+], ProductOptionEntity.prototype, "reservation", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => product_info_entity_1.ProductInfoEntity, (pi) => pi.productOption),
     __metadata("design:type", Array)

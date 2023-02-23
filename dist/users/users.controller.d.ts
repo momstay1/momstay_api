@@ -25,7 +25,13 @@ export declare class UsersController {
     getProfile(user: UsersEntity): Promise<UsersEntity>;
     getUniqueKey(uniquekey: string): Promise<UsersEntity>;
     loginChk(id: string): Promise<UsersEntity>;
-    email(email: string): Promise<void>;
+    email(email: string, type: string): Promise<{
+        result: {
+            status: boolean;
+            message: string;
+            type: string;
+        };
+    }>;
     test(id: string): Promise<any>;
     changePassword(id: string, password: string): Promise<UsersEntity>;
     resettingPassword(user: UsersEntity, prevpassword: string, password: string): Promise<UsersEntity>;
@@ -33,4 +39,5 @@ export declare class UsersController {
         user: UsersEntity;
         file_info: any;
     }>;
+    leave(id: string): Promise<void>;
 }

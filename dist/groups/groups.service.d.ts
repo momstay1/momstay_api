@@ -8,6 +8,7 @@ export declare class GroupsService {
     create(createGroupDto: CreateGroupDto): string;
     findAll(): Promise<GroupsEntity[]>;
     findAllUser(user: any): Promise<GroupsEntity[]>;
+    findAllName(group: any): Promise<GroupsEntity[]>;
     findOne(idx: number): Promise<GroupsEntity>;
     findIdxs(idxs: number[]): Promise<GroupsEntity[]>;
     findOneName(name: string): Promise<GroupsEntity>;

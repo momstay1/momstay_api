@@ -8,7 +8,7 @@ export declare class FileController {
     constructor(fileService: FileService);
     create(createFileDto: CreateFileDto): string;
     ckeditorUploadImg(file: Express.Multer.File): Promise<any>;
-    uploadImg1(files: Array<Express.Multer.File>): Promise<boolean>;
+    uploadImg1(files: Array<Express.Multer.File>): Promise<void>;
     getFile(name: string, res: any): Promise<any>;
     downloadFile(name: string, res: any): Promise<void>;
     selectDownloadFile(file: string, res: any): Promise<void>;

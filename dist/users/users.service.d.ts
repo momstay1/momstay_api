@@ -15,7 +15,13 @@ export declare class UsersService {
     private readonly emailService;
     constructor(usersRepository: Repository<UsersEntity>, groupService: GroupsService, userSnsService: UserSnsService, fileService: FileService, emailService: EmailService);
     test(id: any): Promise<any>;
-    email(email: string): Promise<void>;
+    email(email: string, type: string): Promise<{
+        result: {
+            status: boolean;
+            message: string;
+            type: string;
+        };
+    }>;
     emailChk(email: string, code: string): Promise<void>;
     create(createUserDto: CreateUserDto, files: any): Promise<{
         user: UsersEntity;
@@ -33,9 +39,10 @@ export declare class UsersService {
     }>;
     chpw(id: string, password: string): Promise<UsersEntity>;
     rspw(userdata: any, prevpassword: string, password: string): Promise<UsersEntity>;
-    remove(id: string): Promise<void>;
+    leave(id: string): Promise<void>;
     removes(ids: any): Promise<void>;
     getPrivateColumn(): string[];
     private saveUser;
     private checkUserExists;
+    deleteUniqueKey(): Promise<void>;
 }

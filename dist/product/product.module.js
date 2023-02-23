@@ -15,6 +15,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const file_module_1 = require("../file/file.module");
 const product_info_module_1 = require("../product-info/product-info.module");
 const users_module_1 = require("../users/users.module");
+const admin_product_controller_1 = require("./admin-product.controller");
 let ProductModule = class ProductModule {
 };
 ProductModule = __decorate([
@@ -25,7 +26,7 @@ ProductModule = __decorate([
             product_info_module_1.ProductInfoModule,
             users_module_1.UsersModule,
         ],
-        controllers: [product_controller_1.ProductController],
+        controllers: [product_controller_1.ProductController, admin_product_controller_1.AdminProductController],
         providers: [product_service_1.ProductService],
         exports: [product_service_1.ProductService]
     })

@@ -44,7 +44,6 @@ let AdminUsersController = class AdminUsersController {
         return this.authService.login(user, ['root', 'admin']);
     }
     async findAll(user, take, page, search) {
-        console.log({ search });
         const { results, total, pageTotal } = await this.usersService.findAll(user, { take, page }, search);
         return {
             results,
@@ -96,8 +95,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, role_decorator_1.Auth)(['root', 'admin']),
-    (0, swagger_1.ApiOperation)({
-        summary: '관리자_회원 리스트 API',
+    (0, swagger_1.ApiOperation)({ summary: '관리자_회원 리스트 API' }),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
         description: 'search=group:그룹인덱스1,그룹인덱스2<br>'
             + 'search=id:아이디<br>'
             + 'search=name:이름<br>'
@@ -105,7 +105,8 @@ __decorate([
             + 'search=phone:연락처<br>'
             + 'search=birthday:생일<br>'
             + 'search=createdAt_mte:시작날짜<br>'
-            + 'search=createdAt_lte:종료날짜<br>'
+            + 'search=createdAt_lte:종료날짜<br>',
+        required: false
     }),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),

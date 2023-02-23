@@ -135,14 +135,46 @@ let ProductService = class ProductService {
             .take((take || 10))
             .getManyAndCount();
         const product_idxs = (0, lodash_1.map)(results, o => o.idx);
-        let file_info = {};
-        try {
-            file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], product_idxs);
-            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
-        }
-        catch (error) {
-            console.log('숙소 리스트 이미지 파일 없음');
-        }
+        let file_info = await this.getFileInfo(product_idxs);
+        const data = new paginate_1.Pagination({
+            results,
+            total,
+        });
+        return { data, file_info };
+    }
+    async adminFindAll(options, search) {
+        const { take, page } = options;
+        const where = common_utils_1.commonUtils.searchSplit(search);
+        const [results, total] = await this.productRepository.createQueryBuilder('product')
+            .leftJoinAndSelect('product.productOption', 'product_option')
+            .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
+            .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
+            .leftJoinAndSelect('product.user', 'user')
+            .where((qb) => {
+            qb.where('`product`.status IN (:status)', { status: (0, lodash_1.get)(where, 'status', ['2']) });
+            (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
+            (0, lodash_1.get)(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
+            if ((0, lodash_1.get)(where, 'keyword', '')) {
+                qb.andWhere('(' +
+                    '`product`.`title` LIKE :title' +
+                    ' OR `product`.`addr1` LIKE :addr1' +
+                    ' OR `product`.`addr2` LIKE :addr2' +
+                    ' OR `product`.`metro` LIKE :metro' +
+                    ' OR `product`.`college` LIKE :college' +
+                    ')', {
+                    title: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    addr1: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    addr2: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    metro: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    college: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                });
+            }
+        })
+            .skip((take * (page - 1) || 0))
+            .take((take || 10))
+            .getManyAndCount();
+        const product_idxs = (0, lodash_1.map)(results, o => o.idx);
+        let file_info = await this.getFileInfo(product_idxs);
         const data = new paginate_1.Pagination({
             results,
             total,
@@ -163,15 +195,26 @@ let ProductService = class ProductService {
     }
     async findOne(idx) {
         const product = await this.findIdxOne(idx);
+        product['userIdx'] = product.user.idx;
+        delete product.user;
+        let file_info = await this.getFileInfo([idx]);
+        return { product, file_info };
+    }
+    async adminFindOne(idx) {
+        const product = await this.findIdxOne(idx);
+        let file_info = await this.getFileInfo([idx]);
+        return { product, file_info };
+    }
+    async getFileInfo(idxs) {
         let file_info = {};
         try {
-            file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [idx]);
+            file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], idxs);
             file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
         }
         catch (error) {
             console.log('숙소 상세 이미지 파일 없음');
         }
-        return { product, file_info };
+        return file_info;
     }
     async findIdxOne(idx) {
         if (!idx) {
@@ -179,9 +222,9 @@ let ProductService = class ProductService {
         }
         const product = await this.productRepository.findOne({
             where: { idx: idx },
-            relations: ['productInfo']
+            relations: ['productInfo', 'user']
         });
-        if (!product.idx) {
+        if (!(0, lodash_1.get)(product, 'idx', '')) {
             throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');
         }
         return product;

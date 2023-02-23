@@ -31,6 +31,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
+], ProductEntity.prototype, "code", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
 ], ProductEntity.prototype, "order", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
@@ -47,6 +51,18 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
+], ProductEntity.prototype, "titleEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "titleJpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "titleChn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
 ], ProductEntity.prototype, "postCode", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
@@ -56,6 +72,30 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], ProductEntity.prototype, "addr2", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "addr1Eng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "addr2Eng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "addr1Jpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "addr2Jpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "addr1Chn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "addr2Chn", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
@@ -76,6 +116,30 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], ProductEntity.prototype, "college", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "metroEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "collegeEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "metroJpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "collegeJpn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "metroChn", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "collegeChn", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', default: '' }),
     __metadata("design:type", String)

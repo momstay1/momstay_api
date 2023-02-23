@@ -4,11 +4,15 @@ export declare class ProductOptionEntity {
     idx: number;
     status: number;
     type: string;
+    code: string;
     order: string;
     stayStatus: string;
     visitStatus: string;
     paymentStatus: string;
     title: string;
+    titleEng: string;
+    titleJpn: string;
+    titleChn: string;
     price: number;
     priceMonth: number;
     priceWeek: number;
@@ -23,5 +27,6 @@ export declare class ProductOptionEntity {
     createdAt: Date;
     updatedAt: Date;
     product: ProductEntity;
+    reservation: undefined;
     productInfo: ProductInfoEntity[];
 }

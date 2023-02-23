@@ -23,6 +23,28 @@ const path = require("path");
 const zl = require("zip-lib");
 const fs = require("fs");
 const sharp = require("sharp");
+const moment = require("moment");
+const AWS = require('aws-sdk');
+const storage_url = 'https://kr.object.ncloudstorage.com';
+const endpoint = new AWS.Endpoint(storage_url);
+const region = 'kr-standard';
+const access_key = 'M9UeETnMpK9QgxoE0pRD';
+const secret_key = 'lp5isd46v7suJG7Ok8wVnFkVVUdQbFJJRXOwAhlx';
+const S3 = new AWS.S3({
+    endpoint: endpoint,
+    region: region,
+    credentials: {
+        accessKeyId: access_key,
+        secretAccessKey: secret_key
+    }
+});
+const bucket_name = 'momstay-storage';
+const MAX_KEYS = 300;
+const params = {
+    Bucket: bucket_name,
+    MaxKeys: MAX_KEYS,
+    FetchOwner: true
+};
 const img_url = '/file/img/';
 let FileService = class FileService {
     constructor(fileRepository) {
@@ -33,6 +55,7 @@ let FileService = class FileService {
     }
     async uploadImg(files) {
         console.log({ files });
+        console.log(files['img']);
     }
     async ckeditorUploadImg(file) {
         const file_info = await this.fileInfoInsert({ ckeditor: file }, 0);
@@ -141,6 +164,24 @@ let FileService = class FileService {
     }
     async removes(idxs) {
         const files = await this.findIndexs(idxs);
+        await this.deleteFile(files);
+        await this.deleteStorageFile(files);
+        await this.fileRepository.createQueryBuilder()
+            .delete()
+            .where(" file_idx IN (:idxs)", { idxs: idxs })
+            .execute();
+    }
+    async deleteStorageFile(files) {
+        console.log('deleteStorageFile', { files });
+        for (const key in files) {
+            await S3.deleteObject({
+                Bucket: bucket_name,
+                Key: files[key].file_storage_path.replace(storage_url + '/', '')
+            }).promise();
+        }
+    }
+    async deleteFile(files) {
+        console.log('deletFile', { files });
         for (const key in files) {
             if (fs.existsSync(files[key].file_full_path)) {
                 try {
@@ -152,16 +193,13 @@ let FileService = class FileService {
                 }
             }
         }
-        await this.fileRepository.createQueryBuilder()
-            .delete()
-            .where(" file_idx IN (:idxs)", { idxs: idxs })
-            .execute();
     }
     async fileInfoInsert(files, foreign_idx) {
         const files_data = [];
         let order = 1;
         const base_order = 10;
         const file_category = [];
+        const folder = 'momstay/' + moment().format('YYYY-MM') + '/';
         for (const i in files) {
             file_category.push(i);
             for (const j in files[i]) {
@@ -173,6 +211,7 @@ let FileService = class FileService {
                     file_type: files[i][j].mimetype,
                     file_path: files[i][j].destination,
                     file_full_path: files[i][j].path,
+                    file_storage_path: storage_url + '/' + folder + files[i][j].filename,
                     file_html_path: '',
                     file_html_full_path: img_url + raw_name,
                     file_html_thumb_path: '',
@@ -191,6 +230,8 @@ let FileService = class FileService {
                 order++;
                 console.log(files[i][j].originalname);
                 await this.sharpFile(files[i][j]);
+                await this.uploadStorage(files[i][j]);
+                await this.deleteFile([files_data[j]]);
             }
         }
         await this.fileRepository
@@ -199,6 +240,18 @@ let FileService = class FileService {
             .values(files_data)
             .execute();
         return await this.findCategoryFiles(file_category, foreign_idx);
+    }
+    async uploadStorage(file) {
+        const folder = 'momstay/' + moment().format('YYYY-MM') + '/';
+        console.log('uploadStorage', file.path);
+        console.log('uploadStorage', file.name);
+        await S3.putObject({
+            Bucket: bucket_name,
+            Key: folder + file.filename,
+            ACL: 'public-read',
+            Body: fs.createReadStream(file.path),
+            ContentType: file.mimetype
+        }).promise();
     }
     isImage(type) {
         const png_mimes = ['image/x-png'];

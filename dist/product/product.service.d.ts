@@ -20,11 +20,20 @@ export declare class ProductService {
         data: Pagination<ProductEntity>;
         file_info: {};
     }>;
+    adminFindAll(options: PaginationOptions, search: string[]): Promise<{
+        data: Pagination<ProductEntity>;
+        file_info: {};
+    }>;
     findIdxAll(idx: number[]): Promise<ProductEntity[]>;
     findOne(idx: number): Promise<{
         product: ProductEntity;
         file_info: {};
     }>;
+    adminFindOne(idx: number): Promise<{
+        product: ProductEntity;
+        file_info: {};
+    }>;
+    getFileInfo(idxs: number[]): Promise<{}>;
     findIdxOne(idx: number): Promise<ProductEntity>;
     update(id: number, updateProductDto: UpdateProductDto): string;
     remove(id: number): string;

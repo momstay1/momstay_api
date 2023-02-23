@@ -5,7 +5,13 @@ export declare class ProductInfoEntity {
     status: number;
     group: string;
     type: string;
+    typeEng: string;
+    typeJpn: string;
+    typeChn: string;
     name: string;
+    nameEng: string;
+    nameJpn: string;
+    nameChn: string;
     product: ProductEntity[];
     productOption: ProductOptionEntity[];
 }

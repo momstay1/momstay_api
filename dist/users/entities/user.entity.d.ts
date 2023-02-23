@@ -24,9 +24,12 @@ export declare class UsersEntity {
     oldData: string;
     boardContents: undefined;
     product: undefined;
+    order: undefined;
+    orderProduct: undefined;
     login: undefined;
+    reservation: undefined;
     userSns: undefined;
-    groups: GroupsEntity[];
+    group: GroupsEntity;
     createdAt: Date;
     updatedAt: Date;
     leaveAt: Date;
