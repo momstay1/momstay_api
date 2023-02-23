@@ -6,6 +6,7 @@ import { OrderProductEntity } from 'src/order-product/entities/order-product.ent
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 import { ProductEntity } from 'src/product/entities/product.entity';
+import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
 import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
 import {
   BeforeInsert,
@@ -104,6 +105,9 @@ export class UsersEntity {
 
   @OneToMany(() => LoginEntity, (login) => login.user)
   login: undefined;
+
+  @OneToMany(() => ReservationEntity, (rev) => rev.user)
+  reservation: undefined;
 
   @OneToMany(() => UserSnsEntity, (us) => us.user)
   userSns: undefined;
