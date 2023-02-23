@@ -16,7 +16,7 @@ import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
-import { ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { ckeditorMulterOptions } from 'src/common/common.ckeditor';
 
@@ -46,16 +46,12 @@ export class FileController {
   // }
 
   @UseInterceptors(FileFieldsInterceptor([
-    { name: 'dft_origin_img', maxCount: 10 },
-    { name: 'dft_info_img', maxCount: 10 },
+    { name: 'img', maxCount: 10 },
   ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
   @Post('upload1')
   async uploadImg1(@UploadedFiles() files: Array<Express.Multer.File>) {
-    console.log({ files });
-    console.log(files['dft_origin_img']);
-    console.log(files['dft_info_img']);
-    return true;
-    // return this.fileService.create(createFileDto);
+    return this.fileService.uploadImg(files);
   }
 
   @Get('img/:name')

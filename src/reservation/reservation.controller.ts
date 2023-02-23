@@ -13,7 +13,10 @@ export class ReservationController {
   constructor(private readonly reservationService: ReservationService) { }
 
   @Post()
-  @ApiOperation({ summary: '방문 예약 등록 API' })
+  @ApiOperation({
+    summary: '방문 예약 등록 API',
+    description: '상태값 (1:대기, 2:승인, 4:취소(게스트), 5:거절(호스트))'
+  })
   @Auth(['root', 'admin', 'guest'])
   @ApiBearerAuth()
   async create(
