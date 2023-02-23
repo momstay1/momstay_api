@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { filter, get, isArray, isEmpty, map } from 'lodash';
+import { compact, filter, get, isArray, isEmpty, map } from 'lodash';
 import * as moment from "moment";
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
@@ -14,6 +14,7 @@ import { usersConstant } from './constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UsersService {
@@ -34,20 +35,48 @@ export class UsersService {
     return id;
   }
 
-  async email(email: string) {
+  async email(email: string, type: string) {
+    const result = { status: true, message: '', type };
     try {
       await this.findId(email);
+      if (type == 'pw') {
+        // 비밀번호 재설정 인증코드 발송 성공
+        const code = await this.emailService.createCode(email, 0);
+        this.emailService.snedMail(
+          1,
+          email,
+          'momstay - Email Authentication',
+          `Please enter your email verification code below.
+          <br><br>
+          Email authentication code : ${code.toUpperCase()}`
+        );
+        result['message'] = '인증 코드 메일 발송 완료';
+      } else {
+        // 회원가입 인증코드 발송 실패
+        result['status'] = false;
+        result['message'] = '인증 코드 메일 발송 실패';
+      }
     } catch (error) {
-      const code = await this.emailService.createCode(email, 0);
-      this.emailService.snedMail(
-        1,
-        email,
-        'momstay - Email Authentication',
-        `Please enter the email authentication code below to register as a member.
-        <br><br>
-        Email authentication code : ${code}`
-      );
+      if (type == 'sign') {
+        // 회원가입 인증코드 발송 성공
+        const code = await this.emailService.createCode(email, 0);
+        this.emailService.snedMail(
+          1,
+          email,
+          'momstay - Email Authentication',
+          `Please enter the email authentication code below to register as a member.
+          <br><br>
+          Email authentication code : ${code.toUpperCase()}`
+        );
+        result['message'] = '인증 코드 메일 발송 완료';
+      } else {
+        // 비밀번호 재설정 인증코드 발송 실패
+        result['status'] = false;
+        result['message'] = '존재하지 않는 이메일';
+      }
     }
+
+    return { result };
   }
 
   async emailChk(email: string, code: string) {
@@ -95,15 +124,25 @@ export class UsersService {
     }
     const where = commonUtils.searchSplit(search);
 
-    const group = await this.groupService.findOneName(user.group);
-    const data = await this.usersRepository.createQueryBuilder('users')
-      .addSelect('`groups`.idx AS groups_idx')
-      .leftJoin('users.groups', 'groups')
-      .leftJoin('users.userSns', 'userSns')
+    if (!get(where, 'group', '')) {
+      // 그룹 검색 없는 경우
+      const groups = commonUtils.getArrayKey(await this.groupService.findAll(), ['id'], false);
+      console.log(map(groups, o => console.log(o['idx'])));
+      where['group'] = map(
+        commonUtils.getArrayKey(groups, ['id'], false),
+        o => {
+          if (o['idx'] >= groups[user.group].idx) return o['idx'];
+        }
+      )
+    }
+
+    const [results, total] = await this.usersRepository.createQueryBuilder('users')
+      .leftJoinAndSelect('users.userSns', 'userSns')
+      .leftJoinAndSelect('users.group', 'group')
       .where(new Brackets(qb => {
         qb.where('users.status IN (:user_status)', { user_status: status_arr });
-        get(where, 'group', '') && qb.andWhere('`groups`.idx IN (:group)', { group: get(where, 'group') })
-        get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: get(where, 'language') })
+        get(where, 'group', '') && qb.andWhere('`users`.groupIdx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
+        get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: isArray(get(where, 'language')) ? get(where, 'language') : [get(where, 'language')] })
         get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
         get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
         get(where, 'email', '') && qb.andWhere('`users`.email LIKE :email', { email: '%' + get(where, 'email') + '%' })
@@ -112,17 +151,9 @@ export class UsersService {
         get(where, 'createdAt_mte', '') && qb.andWhere('`users`.`createdAt` >= :createdAt_mte', { createdAt_mte: get(where, 'createdAt_mte') + ' 00:00:00' });
         get(where, 'createdAt_lte', '') && qb.andWhere('`users`.`createdAt` <= :createdAt_lte', { createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59' });
       }))
-      .groupBy('users_idx')
-      .having('MIN(`groups`.`idx`) >= :group_idx', { group_idx: group.idx })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
-      .getMany();
-    const user_idxs = map(data, (o) => o.idx);
-
-    const [results, total] = await this.usersRepository.findAndCount({
-      where: { idx: In(user_idxs) },
-      relations: ['groups', 'userSns'],
-    });
+      .getManyAndCount();
 
     return new Pagination({
       results,
@@ -140,7 +171,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: obj,
-      relations: ['groups', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -154,7 +185,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['groups', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -172,7 +203,7 @@ export class UsersService {
         qb.where('`email` = :email', { email: id })
         qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
       },
-      relations: ['groups', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -187,7 +218,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { idx: idx },
-      relations: ['groups', 'userSns'],
+      relations: ['group', 'userSns'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -198,8 +229,8 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, files) {
     const user = await this.findId(id);
-    const groupIdxs = updateUserDto.group ? updateUserDto.group : [usersConstant.default.group_idx];
-    const groups = await this.groupService.findIdxs(groupIdxs);
+    const groupIdxs = updateUserDto.group ? updateUserDto.group : usersConstant.default.group_idx;
+    const group = await this.groupService.findOne(groupIdxs);
 
     user.name = updateUserDto.name;
     if (get(updateUserDto, 'status', ''))
@@ -229,7 +260,7 @@ export class UsersService {
     if (get(updateUserDto, 'certifiInfo', ''))
       user.marketing = get(updateUserDto, 'certifiInfo');
 
-    user.groups = groups;
+    user.group = group;
     if (get(updateUserDto, 'password')) {
       user.password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
     }
@@ -269,9 +300,22 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async remove(id: string) {
+  async leave(id: string) {
     const user = await this.findId(id);
-    user.status = usersConstant.status.delete;
+    user.status = usersConstant.status.leave;
+    user.id = '';
+    user.password = '';
+    user.prevPassword = '';
+    user.name = '';
+    user.email = '';
+    user.gender = '';
+    user.phone = '';
+    user.birthday = '0000-00-00';
+    user.other = '';
+    user.oldData = '';
+    user.oldData = '';
+    user.leaveAt = new Date(moment().format('YYYY-MM-DD'));
+    user.marketing = '0';
     await this.usersRepository.save(user);
   }
 
@@ -293,9 +337,9 @@ export class UsersService {
   //회원 정보 저장
   private async saveUser(createUserDto): Promise<any> {
     const addPrefixUserDto = createUserDto;
-    const groupIdxs = createUserDto.group ? createUserDto.group : [usersConstant.default.group_idx];
-    const groups = await this.groupService.findIdxs(groupIdxs);
-    addPrefixUserDto.groups = groups;
+    const groupIdx = createUserDto.group ? createUserDto.group : usersConstant.default.group_idx;
+    const group = await this.groupService.findOne(groupIdx);
+    addPrefixUserDto.group = group;
     addPrefixUserDto.status = createUserDto.status ? +createUserDto.status : usersConstant.status.registration;
 
     const user = await this.usersRepository.create({ ...addPrefixUserDto });
@@ -306,5 +350,26 @@ export class UsersService {
   private async checkUserExists(id: string) {
     return await this.usersRepository.findOne({ id: id });
   }
+
+  /******************** cron ********************/
+  // cron 테스트
+  // @Cron('*/10 * * * * *')
+  // async cronTest() {
+  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+  //   console.log('-----------------------cronTest-----------------------');
+  // }
+
+  // 탈퇴 회원 다음날 01시 uniquekey 제거
+  @Cron('0 0 1 * * *')
+  async deleteUniqueKey() {
+    console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+    console.log('-----------------------deleteUniqueKey-----------------------');
+    await this.usersRepository.createQueryBuilder()
+      .update(UsersEntity)
+      .set({ uniqueKey: '', certifiInfo: '' })
+      .where(" status = :status", { status: usersConstant.status.leave })
+      .execute()
+  }
+
 
 }

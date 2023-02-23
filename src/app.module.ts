@@ -29,6 +29,15 @@ import { MetroModule } from './metro/metro.module';
 import { CollegeModule } from './college/college.module';
 import { RefreshTokenModule } from './refresh-token/refresh-token.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { PushNotificationModule } from './push-notification/push-notification.module';
+import { OrderModule } from './order/order.module';
+import { ReservationModule } from './reservation/reservation.module';
+import { OrderTotalModule } from './order-total/order-total.module';
+import { OrderProductModule } from './order-product/order-product.module';
+import { PgDataModule } from './pg-data/pg-data.module';
+import { PgNotiModule } from './pg-noti/pg-noti.module';
+import { PgCancelModule } from './pg-cancel/pg-cancel.module';
 
 @Module({
   imports: [
@@ -43,6 +52,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
       limit: 10,
     }),
     TypeOrmModule.forRoot(),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     CommonModule,
@@ -67,6 +77,14 @@ import { WishlistModule } from './wishlist/wishlist.module';
     // DashboardModule,
     SettingsModule,
     WishlistModule,
+    PushNotificationModule,
+    OrderModule,
+    ReservationModule,
+    OrderTotalModule,
+    OrderProductModule,
+    PgDataModule,
+    PgNotiModule,
+    PgCancelModule,
   ],
   providers: [CommonService],
 })

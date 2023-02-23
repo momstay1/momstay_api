@@ -2,8 +2,11 @@ import { BoardContentsEntity } from 'src/board-contents/entities/board-content.e
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 import { LoginEntity } from 'src/login/entities/login.entity';
+import { OrderProductEntity } from 'src/order-product/entities/order-product.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 import { ProductEntity } from 'src/product/entities/product.entity';
+import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
 import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
 import {
   BeforeInsert,
@@ -95,15 +98,22 @@ export class UsersEntity {
   @OneToMany(() => ProductEntity, (pr) => pr.user)
   product: undefined;
 
+  @OneToMany(() => OrderEntity, (order) => order.user)
+  order: undefined;
+  @OneToMany(() => OrderProductEntity, (op) => op.user)
+  orderProduct: undefined;
+
   @OneToMany(() => LoginEntity, (login) => login.user)
   login: undefined;
+
+  @OneToMany(() => ReservationEntity, (rev) => rev.user)
+  reservation: undefined;
 
   @OneToMany(() => UserSnsEntity, (us) => us.user)
   userSns: undefined;
 
-  @ManyToMany(() => GroupsEntity, (group) => group.users)
-  @JoinTable()
-  groups: GroupsEntity[];
+  @ManyToOne(() => GroupsEntity, (group) => group.users)
+  group: GroupsEntity;
 
   @CreateDateColumn()
   createdAt: Date;

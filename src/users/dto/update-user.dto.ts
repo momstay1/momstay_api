@@ -37,5 +37,5 @@ export class UpdateUserDto extends CreateUserDto {
 
   @IsOptional()
   @ApiProperty({ description: '회원 그룹', required: false })
-  readonly group: number[];
+  readonly group: number;
 }

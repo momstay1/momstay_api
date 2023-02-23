@@ -17,6 +17,29 @@ import * as path from 'path';
 import * as zl from 'zip-lib';
 import * as fs from "fs";
 import * as sharp from "sharp";
+import * as moment from 'moment';
+const AWS = require('aws-sdk');
+
+const storage_url = 'https://kr.object.ncloudstorage.com';
+const endpoint = new AWS.Endpoint(storage_url);
+const region = 'kr-standard';
+const access_key = 'M9UeETnMpK9QgxoE0pRD';
+const secret_key = 'lp5isd46v7suJG7Ok8wVnFkVVUdQbFJJRXOwAhlx';
+const S3 = new AWS.S3({
+  endpoint: endpoint,
+  region: region,
+  credentials: {
+    accessKeyId: access_key,
+    secretAccessKey: secret_key
+  }
+});
+const bucket_name = 'momstay-storage';
+const MAX_KEYS = 300;
+const params = {
+  Bucket: bucket_name,
+  MaxKeys: MAX_KEYS,
+  FetchOwner: true
+};
 
 // const sharp = require('sharp');
 const img_url = '/file/img/';
@@ -34,6 +57,20 @@ export class FileService {
 
   async uploadImg(files: Express.Multer.File[]) {
     console.log({ files });
+    console.log(files['img']);
+    // 파일 업로드2
+
+    // let object_name = 'sample-folder/';
+
+    // upload file
+    // await S3.putObject({
+    //   Bucket: bucket_name,
+    //   Key: 'momstay/2023-02/7f89d7fd-3552-4d83-8fff-0442653a4fc7.png',
+    //   ACL: 'public-read',
+    //   // ACL을 지우면 전체 공개되지 않습니다.
+    //   Body: fs.createReadStream('data/files/2023-02/7f89d7fd-3552-4d83-8fff-0442653a4fc7.png'),
+    //   ContentType: 'image/jpeg'
+    // }).promise();
   }
 
   async ckeditorUploadImg(file: Express.Multer.File) {
@@ -179,6 +216,28 @@ export class FileService {
   async removes(idxs: string[]) {
     const files = await this.findIndexs(idxs);
 
+    await this.deleteFile(files);
+    await this.deleteStorageFile(files);
+    await this.fileRepository.createQueryBuilder()
+      .delete()
+      .where(" file_idx IN (:idxs)", { idxs: idxs })
+      .execute()
+  }
+
+  async deleteStorageFile(files) {
+    // const files = await this.findIndexs(idxs);
+    console.log('deleteStorageFile', { files });
+    for (const key in files) {
+      await S3.deleteObject({
+        Bucket: bucket_name,
+        Key: files[key].file_storage_path.replace(storage_url + '/', '')
+      }).promise();
+    }
+  }
+
+  async deleteFile(files) {
+    // const files = await this.findIndexs(idxs);
+    console.log('deletFile', { files });
     for (const key in files) {
       if (fs.existsSync(files[key].file_full_path)) {
         // 파일이 존재하면 true 그렇지 않은 경우 false 반환
@@ -191,10 +250,6 @@ export class FileService {
 
       }
     }
-    await this.fileRepository.createQueryBuilder()
-      .delete()
-      .where(" file_idx IN (:idxs)", { idxs: idxs })
-      .execute()
   }
 
   async fileInfoInsert(files, foreign_idx) {
@@ -202,6 +257,7 @@ export class FileService {
     let order = 1;
     const base_order = 10;
     const file_category = [];
+    const folder = 'momstay/' + moment().format('YYYY-MM') + '/';
 
     // DB에 저장할 파일 정보 설정
     for (const i in files) {
@@ -215,6 +271,7 @@ export class FileService {
           file_type: files[i][j].mimetype,
           file_path: files[i][j].destination,
           file_full_path: files[i][j].path,
+          file_storage_path: storage_url + '/' + folder + files[i][j].filename,
           file_html_path: '',
           file_html_full_path: img_url + raw_name,
           file_html_thumb_path: '',
@@ -232,7 +289,12 @@ export class FileService {
         });
         order++;
         console.log(files[i][j].originalname);
+        // 이미지 용량 및 사이즈 줄이기
         await this.sharpFile(files[i][j]);
+        // 스토리지 서버에 업로드
+        await this.uploadStorage(files[i][j]);
+        // api 서버에 파일은 제거
+        await this.deleteFile([files_data[j]]);
       }
 
     }
@@ -246,6 +308,22 @@ export class FileService {
 
     // 저장한 파일 조회 및 반환
     return await this.findCategoryFiles(file_category, foreign_idx);
+  }
+
+  // 스토리지 서버에 업로드
+  async uploadStorage(file) {
+    const folder = 'momstay/' + moment().format('YYYY-MM') + '/';
+    console.log('uploadStorage', file.path);
+    console.log('uploadStorage', file.name);
+    // upload file
+    await S3.putObject({
+      Bucket: bucket_name,
+      Key: folder + file.filename,
+      ACL: 'public-read',
+      // ACL을 지우면 전체 공개되지 않습니다.
+      Body: fs.createReadStream(file.path),
+      ContentType: file.mimetype
+    }).promise();
   }
 
   isImage(type) {
@@ -282,6 +360,7 @@ export class FileService {
     return { file_name: zip_file_name, file_path: zip_file_path };
   }
 
+  // 이미지 용량 및 사이즈 축소
   async sharpFile(file) {
     const fileBuffer = fs.readFileSync(file.path);
     const image = await sharp(fileBuffer)

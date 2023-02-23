@@ -12,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnprocessableEntityResponse
 } from '@nestjs/swagger';
@@ -49,6 +50,8 @@ export class BoardContentsController {
   @Get(':bd_idx')
   @ApiOperation({ summary: '게시글 리스트 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
+  @ApiQuery({ name: "category", required: false })
+  @ApiQuery({ name: "order", required: false })
   async findCategoryAll(
     @Param('bd_idx') bd_idx: string,
     @Query('category') category: string,

@@ -1,6 +1,6 @@
 import { AdminUsersEntity } from "src/admin-users/entities/admin-user.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('groups')
 export class GroupsEntity {
@@ -22,9 +22,9 @@ export class GroupsEntity {
   @Column({ type: 'text' })
   memo: string;
 
-  @ManyToMany(
+  @OneToMany(
     () => UsersEntity,
-    (user) => user.groups,
+    (user) => user.group,
   )
   users: UsersEntity[];
 }

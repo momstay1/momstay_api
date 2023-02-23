@@ -10,6 +10,8 @@ import {
   UseInterceptors,
   UploadedFiles,
   Req,
+  Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,6 +26,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse
@@ -158,8 +161,12 @@ export class UsersController {
   // 인증 메일 발송
   @Get('email/:email')
   @ApiOperation({ summary: '인증 메일 발송 API' })
-  async email(@Param('email') email: string) {
-    await this.usersService.email(email);
+  @ApiQuery({
+    name: "type",
+    description: 'type=[pw|sign]'
+  })
+  async email(@Param('email') email: string, @Query('type') type: string) {
+    return await this.usersService.email(email, type);
   }
 
   // 테스트용
@@ -191,7 +198,7 @@ export class UsersController {
 
   // 회원 비밀번호 재설정
   @Patch('rspw')
-  @Auth(['host', 'guest'])
+  @Auth(['root', 'admin', 'host', 'guest'])
   @ApiBearerAuth()
   @ApiOperation({ summary: '회원 비밀번호 재설정 API' })
   @ApiBody({
@@ -230,10 +237,10 @@ export class UsersController {
   }
 
   // 회원 삭제(탈퇴)
-  // @Delete(':id')
-  // @HttpCode(204)
-  // async remove(@Param('id') id: string) {
-  //   await this.usersService.remove(id);
-  // }
+  @Delete('leave/:id')
+  @HttpCode(204)
+  async leave(@Param('id') id: string) {
+    await this.usersService.leave(id);
+  }
 
 }

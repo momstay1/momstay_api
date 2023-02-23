@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags, ApiUnauthorizedResponse, ApiUnprocessableEntityResponse } from '@nestjs/swagger';
 import { get, map } from 'lodash';
 import { AuthService } from 'src/auth/auth.service';
 import { ResponseAuthDto } from 'src/auth/dto/response-auth.dto';
@@ -59,8 +59,9 @@ export class AdminUsersController {
   // 회원 리스트 조회
   @Get()
   @Auth(['root', 'admin'])
-  @ApiOperation({
-    summary: '관리자_회원 리스트 API',
+  @ApiOperation({ summary: '관리자_회원 리스트 API' })
+  @ApiQuery({
+    name: "search",
     description: 'search=group:그룹인덱스1,그룹인덱스2<br>'
       + 'search=id:아이디<br>'
       + 'search=name:이름<br>'
@@ -68,7 +69,8 @@ export class AdminUsersController {
       + 'search=phone:연락처<br>'
       + 'search=birthday:생일<br>'
       + 'search=createdAt_mte:시작날짜<br>'
-      + 'search=createdAt_lte:종료날짜<br>'
+      + 'search=createdAt_lte:종료날짜<br>',
+    required: false
   })
   @ApiBearerAuth()
   async findAll(
@@ -77,7 +79,6 @@ export class AdminUsersController {
     @Query('page') page: number,
     @Query('search') search: string[]
   ) {
-    console.log({ search });
     const {
       results,
       total,

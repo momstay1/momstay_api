@@ -15,6 +15,7 @@ import { ProductInfoModule } from 'src/product-info/product-info.module';
     ProductInfoModule
   ],
   controllers: [ProductOptionController],
-  providers: [ProductOptionService]
+  providers: [ProductOptionService],
+  exports: [ProductOptionService]
 })
 export class ProductOptionModule { }

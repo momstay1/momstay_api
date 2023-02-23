@@ -18,6 +18,8 @@ export class FileEntity {
   @Column({ default: '' })
   file_full_path: string;
   @Column({ default: '' })
+  file_storage_path: string;
+  @Column({ default: '' })
   file_html_path: string;
   @Column({ default: '' })
   file_html_full_path: string;

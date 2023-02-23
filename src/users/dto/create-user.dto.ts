@@ -90,7 +90,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @ApiProperty({ description: '회원 그룹' })
-  readonly group: number[];
+  readonly group: number;
 
   // @ApiProperty({ description: '회원 가입 유형' })
   // readonly snsInfo: string;
