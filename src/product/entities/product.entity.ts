@@ -37,11 +37,29 @@ export class ProductEntity {
   @Column({ default: '' })
   title: string;
   @Column({ default: '' })
+  titleEng: string;
+  @Column({ default: '' })
+  titleJpn: string;
+  @Column({ default: '' })
+  titleChn: string;
+  @Column({ default: '' })
   postCode: string;
   @Column({ default: '' })
   addr1: string;
   @Column({ default: '' })
   addr2: string;
+  @Column({ default: '' })
+  addr1Eng: string;
+  @Column({ default: '' })
+  addr2Eng: string;
+  @Column({ default: '' })
+  addr1Jpn: string;
+  @Column({ default: '' })
+  addr2Jpn: string;
+  @Column({ default: '' })
+  addr1Chn: string;
+  @Column({ default: '' })
+  addr2Chn: string;
   @Column({ default: '' })
   lat: string;            // 위도
   @Column({ default: '' })
@@ -52,6 +70,18 @@ export class ProductEntity {
   metro: string;
   @Column({ default: '' })
   college: string;
+  @Column({ default: '' })
+  metroEng: string;
+  @Column({ default: '' })
+  collegeEng: string;
+  @Column({ default: '' })
+  metroJpn: string;
+  @Column({ default: '' })
+  collegeJpn: string;
+  @Column({ default: '' })
+  metroChn: string;
+  @Column({ default: '' })
+  collegeChn: string;
   @Column({ type: 'text', default: '' })
   detailsKor: string;
   @Column({ type: 'text', default: '' })

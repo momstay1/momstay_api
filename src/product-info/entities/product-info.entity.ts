@@ -13,7 +13,19 @@ export class ProductInfoEntity {
   @Column({ default: '' })
   type: string;
   @Column({ default: '' })
+  typeEng: string;
+  @Column({ default: '' })
+  typeJpn: string;
+  @Column({ default: '' })
+  typeChn: string;
+  @Column({ default: '' })
   name: string;
+  @Column({ default: '' })
+  nameEng: string;
+  @Column({ default: '' })
+  nameJpn: string;
+  @Column({ default: '' })
+  nameChn: string;
 
   @ManyToMany(() => ProductEntity, (product) => product.productInfo)
   @JoinTable()

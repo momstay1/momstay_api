@@ -216,14 +216,26 @@ export class FileService {
   async removes(idxs: string[]) {
     const files = await this.findIndexs(idxs);
 
-    await this.deletFile(files);
+    await this.deleteFile(files);
+    await this.deleteStorageFile(files);
     await this.fileRepository.createQueryBuilder()
       .delete()
       .where(" file_idx IN (:idxs)", { idxs: idxs })
       .execute()
   }
 
-  async deletFile(files) {
+  async deleteStorageFile(files) {
+    // const files = await this.findIndexs(idxs);
+    console.log('deleteStorageFile', { files });
+    for (const key in files) {
+      await S3.deleteObject({
+        Bucket: bucket_name,
+        Key: files[key].file_storage_path.replace(storage_url + '/', '')
+      }).promise();
+    }
+  }
+
+  async deleteFile(files) {
     // const files = await this.findIndexs(idxs);
     console.log('deletFile', { files });
     for (const key in files) {
@@ -282,7 +294,7 @@ export class FileService {
         // 스토리지 서버에 업로드
         await this.uploadStorage(files[i][j]);
         // api 서버에 파일은 제거
-        await this.deletFile([files_data[j]]);
+        await this.deleteFile([files_data[j]]);
       }
 
     }

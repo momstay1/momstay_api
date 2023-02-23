@@ -27,6 +27,12 @@ export class ProductOptionEntity {
 
   @Column({ default: '' })
   title: string;
+  @Column({ default: '' })
+  titleEng: string;
+  @Column({ default: '' })
+  titleJpn: string;
+  @Column({ default: '' })
+  titleChn: string;
   @Column({ default: 0 })
   price: number;
   @Column({ default: 0 })
