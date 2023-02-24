@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isEmpty, isObject, keyBy, map, union } from 'lodash';
+import { get, isEmpty, isObject, keyBy, map, sortBy, union } from 'lodash';
 import { CollegeService } from 'src/college/college.service';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
@@ -28,9 +28,12 @@ export class ProductService {
   async create(createProductDto: CreateProductDto, files) {
     // 생활 및 편의 정보 가져오기
     let productInfo;
+    let product_info_idxs;
     if (get(createProductDto, 'productInfoIdx', '')) {
       const productInfoIdx = get(createProductDto, 'productInfoIdx').split(",");
       productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
+      // 필터 검색시 쿼리가 복잡해짐에 따라 간단한 검색 쿼리 사용을 위함
+      product_info_idxs = sortBy(map(productInfoIdx, o => +o));
     }
 
     // 회원 정보 가져오기
@@ -80,6 +83,7 @@ export class ProductService {
       detailsChn: get(createProductDto, 'detailsChn', ''),
       user: user,
       productInfo: productInfo,
+      productInfoIdxs: product_info_idxs.join(',')
     };
     if (get(createProductDto, 'idx', '')) {
       product_data['idx'] = +get(createProductDto, 'idx');
@@ -139,34 +143,24 @@ export class ProductService {
 
     const where = commonUtils.searchSplit(search);
 
-    // product_info and 검색 결봐 기능 작업중
-    // let product_info_query_result;
-    // if (get(where, 'product_info', '')) {
-    //   const [results, total] = await this.productRepository.createQueryBuilder('product')
-    //     .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
-    //     .where(qb => {
-    //       qb.where('`product_info_to_product`.`productInfoIdx` IN (:productInfoIdx)', { productInfoIdx: get(where, 'product_info') })
-    //     })
-    //     .groupBy('`product_info_to_product`.`productIdx`')
-    //     .having('GROUP_CONCAT(`product_info_to_product`.`productInfoIdx`) LIKE :group_product_info_idx', { group_product_info_idx: '%' + get(where, 'product_info').join('%') + '%"' })
-    //     .skip((take * (page - 1) || 0))
-    //     .take((take || 10))
-    //     .getManyAndCount();
-    //   console.log({ results });
-    // }
-    // console.log(get(where, 'product_info'));
+    if (get(where, 'product_info', '')) {
+      const product_info = sortBy(map(get(where, 'product_info').split(','), o => +o));
+      where['product_info'] = product_info.join('%');
+    }
+
     const [results, total] = await this.productRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
       .leftJoinAndSelect('product.metro', 'metro')
       .leftJoinAndSelect('product.college', 'college')
       .where((qb) => {
-        qb.where('`product`.status IN (:status)', { status: get(where, 'status', ['0', '2']) });
+        qb.where('`product`.status IN (:status)', { status: get(where, 'status', ['2']) });
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
         get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         get(where, 'stayStatus', '') && qb.andWhere('`product_option`.`stayStatus` = :stayStatus', { stayStatus: get(where, 'stayStatus') });
         get(where, 'min_priceMonth', '') && qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', { min_priceMonth: get(where, 'min_priceMonth') });
         get(where, 'max_priceMonth', '') && qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', { max_priceMonth: get(where, 'max_priceMonth') });
+        get(where, 'product_info', '') && qb.where('`product`.productInfoIdxs LIKE :product_info', { product_info: '%' + get(where, 'product_info') + '%' });
         if (get(where, 'keyword', '')) {
           qb.andWhere('(' +
             '`product`.`title` LIKE :keyword' +

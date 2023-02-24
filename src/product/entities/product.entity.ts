@@ -80,6 +80,8 @@ export class ProductEntity {
   oldIdx: number;
   @Column({ type: 'text', default: '' })
   oldData: string;
+  @Column({ default: '', comment: '편의 시설 검색 쉽게 하기 위한 column' })
+  productInfoIdxs: string;
 
   @CreateDateColumn()
   createdAt: Date;

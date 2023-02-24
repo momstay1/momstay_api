@@ -11,7 +11,7 @@ import {
 import { MetroService } from './metro.service';
 import { CreateMetroDto } from './dto/create-metro.dto';
 import { UpdateMetroDto } from './dto/update-metro.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('metro')
 @ApiTags('지하철 API')
@@ -25,6 +25,11 @@ export class MetroController {
 
   @Get()
   @ApiOperation({ summary: '지하철 리스트 API' })
+  @ApiQuery({
+    name: "search",
+    description: 'search=station:역이름<br>',
+    required: false
+  })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
