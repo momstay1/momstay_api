@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isEmpty, isObject, keyBy, map, sortBy, union } from 'lodash';
+import { get, isArray, isEmpty, isObject, keyBy, map, sortBy, union } from 'lodash';
 import { CollegeService } from 'src/college/college.service';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
@@ -83,8 +83,11 @@ export class ProductService {
       detailsChn: get(createProductDto, 'detailsChn', ''),
       user: user,
       productInfo: productInfo,
-      productInfoIdxs: product_info_idxs.join(',')
+      productInfoIdxs: ''
     };
+    if (product_info_idxs && isArray(product_info_idxs)) {
+      product_data['productInfoIdxs'] = product_info_idxs.join(',');
+    }
     if (get(createProductDto, 'idx', '')) {
       product_data['idx'] = +get(createProductDto, 'idx');
     }
