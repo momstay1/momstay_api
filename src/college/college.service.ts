@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateCollegeDto } from './dto/create-college.dto';
 import { UpdateCollegeDto } from './dto/update-college.dto';
 import { CollegeEntity } from './entities/college.entity';
@@ -44,6 +44,20 @@ export class CollegeService {
       results,
       total,
     })
+  }
+
+  async findAllIdx(idxs: number[]) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const metro = await this.collegeRepository.find({
+      where: { idx: In(idxs) }
+    });
+    if (metro.length <= 0) {
+      throw new NotFoundException('조회된 대학교 정보가 없습니다.');
+    }
+
+    return metro;
   }
 
   findOne(id: number) {

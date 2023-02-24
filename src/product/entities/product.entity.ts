@@ -1,3 +1,5 @@
+import { CollegeEntity } from "src/college/entities/college.entity";
+import { MetroEntity } from "src/metro/entities/metro.entity";
 import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
 import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
@@ -66,22 +68,6 @@ export class ProductEntity {
   lng: string;            // 경도
   @Column({ default: '' })
   language: string;
-  @Column({ default: '' })
-  metro: string;
-  @Column({ default: '' })
-  college: string;
-  @Column({ default: '' })
-  metroEng: string;
-  @Column({ default: '' })
-  collegeEng: string;
-  @Column({ default: '' })
-  metroJpn: string;
-  @Column({ default: '' })
-  collegeJpn: string;
-  @Column({ default: '' })
-  metroChn: string;
-  @Column({ default: '' })
-  collegeChn: string;
   @Column({ type: 'text', default: '' })
   detailsKor: string;
   @Column({ type: 'text', default: '' })
@@ -111,4 +97,10 @@ export class ProductEntity {
 
   @ManyToMany(() => ProductInfoEntity, (pi) => pi.product)
   productInfo: ProductInfoEntity[];
+  @ManyToMany(() => MetroEntity, (metro) => metro.product)
+  @JoinTable()
+  metro: MetroEntity[];
+  @ManyToMany(() => CollegeEntity, (college) => college.product)
+  @JoinTable()
+  college: CollegeEntity[];
 }
