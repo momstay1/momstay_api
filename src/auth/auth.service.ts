@@ -41,7 +41,9 @@ export class AuthService {
   }
 
   async login(user, type): Promise<ResponseAuthDto> {
+    console.log({ user });
     const userInfo = await this.userService.fineUser(user.id);
+    console.log({ userInfo });
     if (type && type.indexOf(userInfo.group.id) == -1) {
       throw new NotFoundException('존재하지 않는 아이디 입니다.');
     }
