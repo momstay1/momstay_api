@@ -8,7 +8,7 @@ import {
   Delete,
   Query
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CollegeService } from './college.service';
 import { CreateCollegeDto } from './dto/create-college.dto';
 import { UpdateCollegeDto } from './dto/update-college.dto';
@@ -25,6 +25,11 @@ export class CollegeController {
 
   @Get()
   @ApiOperation({ summary: '대학교 리스트 API' })
+  @ApiQuery({
+    name: "search",
+    description: 'search=name:대학이름<br>',
+    required: false
+  })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,

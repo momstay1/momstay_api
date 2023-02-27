@@ -7,6 +7,8 @@ import { FileModule } from 'src/file/file.module';
 import { ProductInfoModule } from 'src/product-info/product-info.module';
 import { UsersModule } from 'src/users/users.module';
 import { AdminProductController } from './admin-product.controller';
+import { MetroModule } from 'src/metro/metro.module';
+import { CollegeModule } from 'src/college/college.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { AdminProductController } from './admin-product.controller';
     FileModule,
     ProductInfoModule,
     UsersModule,
+    MetroModule,
+    CollegeModule
   ],
   controllers: [ProductController, AdminProductController],
   providers: [ProductService],

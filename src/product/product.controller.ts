@@ -12,6 +12,13 @@ import { multerOptions } from 'src/common/common.file';
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
+  // 테스트용
+  @Get('test/:id')
+  async test(@Param('id') id: string) {
+    const data = await this.productService.test(id);
+    return data;
+  }
+
   @Post()
   @ApiOperation({
     summary: '숙소 등록 API',
@@ -38,7 +45,11 @@ export class ProductController {
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
       + 'search=user_idx:회원idx<br>'
-      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
+      + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
+      + 'search=min_priceMonth:월 최소 가격<br>'
+      + 'search=max_priceMonth:월 최대 가격<br>'
+      + 'search=product_info:편의시설 idx(2,3,4)[작업중]<br>',
     required: false
   })
   async findAll(
@@ -53,6 +64,7 @@ export class ProductController {
       },
       file_info
     } = await this.productService.findAll({ take, page }, search);
+    // await this.productService.findAll({ take, page }, search);
     return {
       results,
       total,

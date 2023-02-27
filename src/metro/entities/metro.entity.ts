@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { ProductEntity } from "src/product/entities/product.entity";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('metro')
 export class MetroEntity {
@@ -14,4 +15,7 @@ export class MetroEntity {
   stationJpn: string;
   @Column({ default: '' })
   stationChn: string;
+
+  @ManyToMany(() => ProductEntity, (product) => product.metro)
+  product: undefined;
 }

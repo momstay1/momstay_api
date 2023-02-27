@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TypeOrmModule.forFeature([MetroEntity]),
   ],
   controllers: [MetroController],
-  providers: [MetroService]
+  providers: [MetroService],
+  exports: [MetroService],
 })
 export class MetroModule { }
