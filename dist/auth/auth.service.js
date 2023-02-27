@@ -57,7 +57,9 @@ let AuthService = class AuthService {
         return null;
     }
     async login(user, type) {
+        console.log({ user });
         const userInfo = await this.userService.fineUser(user.id);
+        console.log({ userInfo });
         if (type && type.indexOf(userInfo.group.id) == -1) {
             throw new common_1.NotFoundException('존재하지 않는 아이디 입니다.');
         }

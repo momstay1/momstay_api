@@ -64,7 +64,7 @@ __decorate([
         summary: '방문 예약 등록 API',
         description: '상태값 (1:대기, 2:승인, 4:취소(게스트), 5:거절(호스트))'
     }),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'guest']),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host', 'guest']),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),

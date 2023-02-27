@@ -42,6 +42,9 @@ let ReservationService = class ReservationService {
             throw new common_1.NotAcceptableException('방문예약을 사용하지 않는 방입니다.');
         }
         const user = await this.usersService.findId(userInfo.id);
+        if (user.idx == (0, lodash_1.get)(po, ['product', 'user', 'idx'], '')) {
+            throw new common_1.NotAcceptableException('자신의 방은 예약할 수 없습니다.');
+        }
         const reservation_data = {
             visitDate: createReservationDto.visitDate,
             visitTime: createReservationDto.visitTime,
