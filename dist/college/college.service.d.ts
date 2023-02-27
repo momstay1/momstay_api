@@ -8,6 +8,7 @@ export declare class CollegeService {
     constructor(collegeRepository: Repository<CollegeEntity>);
     create(createCollegeDto: CreateCollegeDto): string;
     findAll(options: PaginationOptions, search: string[]): Promise<Pagination<CollegeEntity>>;
+    findAllIdx(idxs: number[]): Promise<CollegeEntity[]>;
     findOne(id: number): string;
     update(id: number, updateCollegeDto: UpdateCollegeDto): string;
     remove(id: number): string;

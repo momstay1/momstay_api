@@ -17,32 +17,64 @@ const common_1 = require("@nestjs/common");
 const exceptions_1 = require("@nestjs/common/exceptions");
 const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
+const college_service_1 = require("../college/college.service");
 const common_utils_1 = require("../common/common.utils");
 const file_service_1 = require("../file/file.service");
+const metro_service_1 = require("../metro/metro.service");
 const paginate_1 = require("../paginate");
 const product_info_service_1 = require("../product-info/product-info.service");
 const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const product_entity_1 = require("./entities/product.entity");
 let ProductService = class ProductService {
-    constructor(productRepository, fileService, productInfoService, userService) {
+    constructor(productRepository, fileService, productInfoService, userService, metroService, collegeService) {
         this.productRepository = productRepository;
         this.fileService = fileService;
         this.productInfoService = productInfoService;
         this.userService = userService;
+        this.metroService = metroService;
+        this.collegeService = collegeService;
+    }
+    async test(id) {
+        const code = await this.productCreateCode();
+        console.log({ code });
+        return code;
     }
     async create(createProductDto, files) {
         let productInfo;
+        let product_info_idxs;
         if ((0, lodash_1.get)(createProductDto, 'productInfoIdx', '')) {
             const productInfoIdx = (0, lodash_1.get)(createProductDto, 'productInfoIdx').split(",");
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
+            product_info_idxs = (0, lodash_1.sortBy)((0, lodash_1.map)(productInfoIdx, o => +o));
         }
         const userIdx = (0, lodash_1.get)(createProductDto, 'userIdx');
         const user = await this.userService.findIdx(+userIdx);
+        let metro = [];
+        let college = [];
+        if ((0, lodash_1.get)(createProductDto, 'metro', '')) {
+            try {
+                const metro_idxs = (0, lodash_1.map)((0, lodash_1.get)(createProductDto, 'metro').split(','), o => +o);
+                metro = await this.metroService.findAllIdx(metro_idxs);
+            }
+            catch (error) {
+                console.log({ error });
+            }
+        }
+        if ((0, lodash_1.get)(createProductDto, 'college', '')) {
+            try {
+                const college_idxs = (0, lodash_1.map)((0, lodash_1.get)(createProductDto, 'college').split(','), o => +o);
+                college = await this.collegeService.findAllIdx(college_idxs);
+            }
+            catch (error) {
+                console.log({ error });
+            }
+        }
         const product_data = {
             status: +(0, lodash_1.get)(createProductDto, 'status', 0),
             type: (0, lodash_1.get)(createProductDto, 'type', ''),
             order: '10',
+            code: await this.productCreateCode(),
             membership: (0, lodash_1.get)(createProductDto, 'membership', '0'),
             hostBusiness: (0, lodash_1.get)(createProductDto, 'hostBusiness', ''),
             title: (0, lodash_1.get)(createProductDto, 'title', ''),
@@ -50,17 +82,21 @@ let ProductService = class ProductService {
             addr1: (0, lodash_1.get)(createProductDto, 'addr1', ''),
             addr2: (0, lodash_1.get)(createProductDto, 'addr2', ''),
             language: (0, lodash_1.get)(createProductDto, 'language', ''),
-            metro: (0, lodash_1.get)(createProductDto, 'metro', ''),
             lat: (0, lodash_1.get)(createProductDto, 'lat', ''),
             lng: (0, lodash_1.get)(createProductDto, 'lng', ''),
-            college: (0, lodash_1.get)(createProductDto, 'college', ''),
+            metro: metro,
+            college: college,
             detailsKor: (0, lodash_1.get)(createProductDto, 'detailsKor', ''),
             detailsEng: (0, lodash_1.get)(createProductDto, 'detailsEng', ''),
             detailsJpn: (0, lodash_1.get)(createProductDto, 'detailsJpn', ''),
             detailsChn: (0, lodash_1.get)(createProductDto, 'detailsChn', ''),
             user: user,
             productInfo: productInfo,
+            productInfoIdxs: ''
         };
+        if (product_info_idxs && (0, lodash_1.isArray)(product_info_idxs)) {
+            product_data['productInfoIdxs'] = product_info_idxs.join(',');
+        }
         if ((0, lodash_1.get)(createProductDto, 'idx', '')) {
             product_data['idx'] = +(0, lodash_1.get)(createProductDto, 'idx');
         }
@@ -104,30 +140,53 @@ let ProductService = class ProductService {
         }
         return { product, file_info };
     }
+    async productCreateCode() {
+        const code = common_utils_1.commonUtils.generateRandomString(8).toUpperCase() + '-' + common_utils_1.commonUtils.generateRandomNumber(4);
+        const isCode = await this.productRepository.findOne({
+            where: { code: code }
+        });
+        if (isCode) {
+            this.productCreateCode();
+        }
+        else {
+            return code;
+        }
+    }
     async findAll(options, search) {
         const { take, page } = options;
         const where = common_utils_1.commonUtils.searchSplit(search);
+        if ((0, lodash_1.get)(where, 'product_info', '')) {
+            const product_info = (0, lodash_1.sortBy)((0, lodash_1.map)((0, lodash_1.get)(where, 'product_info').split(','), o => +o));
+            where['product_info'] = product_info.join('%');
+        }
         const [results, total] = await this.productRepository.createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
-            .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
-            .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
+            .leftJoinAndSelect('product.productInfo', 'product_info')
+            .leftJoinAndSelect('product.metro', 'metro')
+            .leftJoinAndSelect('product.college', 'college')
             .where((qb) => {
             qb.where('`product`.status IN (:status)', { status: (0, lodash_1.get)(where, 'status', ['2']) });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
             (0, lodash_1.get)(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
+            (0, lodash_1.get)(where, 'stayStatus', '') && qb.andWhere('`product_option`.`stayStatus` = :stayStatus', { stayStatus: (0, lodash_1.get)(where, 'stayStatus') });
+            (0, lodash_1.get)(where, 'min_priceMonth', '') && qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', { min_priceMonth: (0, lodash_1.get)(where, 'min_priceMonth') });
+            (0, lodash_1.get)(where, 'max_priceMonth', '') && qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', { max_priceMonth: (0, lodash_1.get)(where, 'max_priceMonth') });
+            (0, lodash_1.get)(where, 'product_info', '') && qb.where('`product`.productInfoIdxs LIKE :product_info', { product_info: '%' + (0, lodash_1.get)(where, 'product_info') + '%' });
             if ((0, lodash_1.get)(where, 'keyword', '')) {
                 qb.andWhere('(' +
-                    '`product`.`title` LIKE :title' +
-                    ' OR `product`.`addr1` LIKE :addr1' +
-                    ' OR `product`.`addr2` LIKE :addr2' +
-                    ' OR `product`.`metro` LIKE :metro' +
-                    ' OR `product`.`college` LIKE :college' +
+                    '`product`.`title` LIKE :keyword' +
+                    ' OR `product`.`addr1` LIKE :keyword' +
+                    ' OR `product`.`addr2` LIKE :keyword' +
+                    ' OR `metro`.`stationKor` LIKE :keyword' +
+                    ' OR `college`.`nameKor` LIKE :keyword' +
+                    ' OR `metro`.`stationEng` LIKE :keyword' +
+                    ' OR `college`.`nameEng` LIKE :keyword' +
+                    ' OR `metro`.`stationJpn` LIKE :keyword' +
+                    ' OR `college`.`nameJpn` LIKE :keyword' +
+                    ' OR `metro`.`stationChn` LIKE :keyword' +
+                    ' OR `college`.`nameChn` LIKE :keyword' +
                     ')', {
-                    title: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    addr1: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    addr2: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    metro: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    college: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    keyword: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
                 });
             }
         })
@@ -147,26 +206,29 @@ let ProductService = class ProductService {
         const where = common_utils_1.commonUtils.searchSplit(search);
         const [results, total] = await this.productRepository.createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
-            .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
-            .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
+            .leftJoinAndSelect('product.productInfo', 'product_info')
             .leftJoinAndSelect('product.user', 'user')
+            .leftJoinAndSelect('product.metro', 'metro')
+            .leftJoinAndSelect('product.college', 'college')
             .where((qb) => {
             qb.where('`product`.status IN (:status)', { status: (0, lodash_1.get)(where, 'status', ['2']) });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
             (0, lodash_1.get)(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
             if ((0, lodash_1.get)(where, 'keyword', '')) {
                 qb.andWhere('(' +
-                    '`product`.`title` LIKE :title' +
-                    ' OR `product`.`addr1` LIKE :addr1' +
-                    ' OR `product`.`addr2` LIKE :addr2' +
-                    ' OR `product`.`metro` LIKE :metro' +
-                    ' OR `product`.`college` LIKE :college' +
+                    '`product`.`title` LIKE :keyword' +
+                    ' OR `product`.`addr1` LIKE :keyword' +
+                    ' OR `product`.`addr2` LIKE :keyword' +
+                    ' OR `metro`.`stationKor` LIKE :keyword' +
+                    ' OR `college`.`nameKor` LIKE :keyword' +
+                    ' OR `metro`.`stationEng` LIKE :keyword' +
+                    ' OR `college`.`nameEng` LIKE :keyword' +
+                    ' OR `metro`.`stationJpn` LIKE :keyword' +
+                    ' OR `college`.`nameJpn` LIKE :keyword' +
+                    ' OR `metro`.`stationChn` LIKE :keyword' +
+                    ' OR `college`.`nameChn` LIKE :keyword' +
                     ')', {
-                    title: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    addr1: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    addr2: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    metro: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
-                    college: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
+                    keyword: '%' + (0, lodash_1.get)(where, 'keyword') + '%',
                 });
             }
         })
@@ -184,8 +246,7 @@ let ProductService = class ProductService {
     async findIdxAll(idx) {
         const product = await this.productRepository.createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
-            .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
-            .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
+            .leftJoinAndSelect('product.productInfo', 'product_info')
             .where((qb) => {
             qb.where('`product_option`.status = :status', { status: 2 });
             qb.andWhere('`product`.idx IN (:idx)', { idx: idx });
@@ -195,7 +256,7 @@ let ProductService = class ProductService {
     }
     async findOne(idx) {
         const product = await this.findIdxOne(idx);
-        product['userIdx'] = product.user.idx;
+        product['userIdx'] = (0, lodash_1.get)(product, ['user', 'idx'], 0);
         delete product.user;
         let file_info = await this.getFileInfo([idx]);
         return { product, file_info };
@@ -222,7 +283,7 @@ let ProductService = class ProductService {
         }
         const product = await this.productRepository.findOne({
             where: { idx: idx },
-            relations: ['productInfo', 'user']
+            relations: ['productInfo', 'user', 'metro', 'college']
         });
         if (!(0, lodash_1.get)(product, 'idx', '')) {
             throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');
@@ -242,7 +303,9 @@ ProductService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         file_service_1.FileService,
         product_info_service_1.ProductInfoService,
-        users_service_1.UsersService])
+        users_service_1.UsersService,
+        metro_service_1.MetroService,
+        college_service_1.CollegeService])
 ], ProductService);
 exports.ProductService = ProductService;
 //# sourceMappingURL=product.service.js.map

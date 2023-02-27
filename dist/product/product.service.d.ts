@@ -1,4 +1,6 @@
+import { CollegeService } from 'src/college/college.service';
 import { FileService } from 'src/file/file.service';
+import { MetroService } from 'src/metro/metro.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductInfoService } from 'src/product-info/product-info.service';
 import { UsersService } from 'src/users/users.service';
@@ -11,11 +13,15 @@ export declare class ProductService {
     private readonly fileService;
     private readonly productInfoService;
     private readonly userService;
-    constructor(productRepository: Repository<ProductEntity>, fileService: FileService, productInfoService: ProductInfoService, userService: UsersService);
+    private readonly metroService;
+    private readonly collegeService;
+    constructor(productRepository: Repository<ProductEntity>, fileService: FileService, productInfoService: ProductInfoService, userService: UsersService, metroService: MetroService, collegeService: CollegeService);
+    test(id: any): Promise<string>;
     create(createProductDto: CreateProductDto, files: any): Promise<{
         product: ProductEntity;
         file_info: any;
     }>;
+    productCreateCode(): Promise<string>;
     findAll(options: PaginationOptions, search: string[]): Promise<{
         data: Pagination<ProductEntity>;
         file_info: {};

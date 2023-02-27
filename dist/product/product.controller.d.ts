@@ -5,6 +5,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export declare class ProductController {
     private readonly productService;
     constructor(productService: ProductService);
+    test(id: string): Promise<string>;
     create(createProductDto: CreateProductDto, files: Array<Express.Multer.File>): Promise<{
         product: import("./entities/product.entity").ProductEntity;
         file_info: any;

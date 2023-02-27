@@ -20,7 +20,8 @@ CollegeModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([college_entity_1.CollegeEntity]),
         ],
         controllers: [college_controller_1.CollegeController],
-        providers: [college_service_1.CollegeService]
+        providers: [college_service_1.CollegeService],
+        exports: [college_service_1.CollegeService],
     })
 ], CollegeModule);
 exports.CollegeModule = CollegeModule;

@@ -16,6 +16,8 @@ const file_module_1 = require("../file/file.module");
 const product_info_module_1 = require("../product-info/product-info.module");
 const users_module_1 = require("../users/users.module");
 const admin_product_controller_1 = require("./admin-product.controller");
+const metro_module_1 = require("../metro/metro.module");
+const college_module_1 = require("../college/college.module");
 let ProductModule = class ProductModule {
 };
 ProductModule = __decorate([
@@ -25,6 +27,8 @@ ProductModule = __decorate([
             file_module_1.FileModule,
             product_info_module_1.ProductInfoModule,
             users_module_1.UsersModule,
+            metro_module_1.MetroModule,
+            college_module_1.CollegeModule
         ],
         controllers: [product_controller_1.ProductController, admin_product_controller_1.AdminProductController],
         providers: [product_service_1.ProductService],

@@ -46,6 +46,7 @@ let ProductOptionService = class ProductOptionService {
             status: +(0, lodash_1.get)(createProductOptionDto, 'status', 0),
             type: (0, lodash_1.get)(createProductOptionDto, 'type', ''),
             order: '10',
+            code: await this.productOptionCreateCode(),
             stayStatus: (0, lodash_1.get)(createProductOptionDto, 'stayStatus', '0'),
             visitStatus: (0, lodash_1.get)(createProductOptionDto, 'visitStatus', '0'),
             paymentStatus: (0, lodash_1.get)(createProductOptionDto, 'paymentStatus', '0'),
@@ -93,6 +94,18 @@ let ProductOptionService = class ProductOptionService {
             file_info = await this.fileService.findIndexs(fileIdxs);
         }
         return { productOption, file_info };
+    }
+    async productOptionCreateCode() {
+        const code = common_utils_1.commonUtils.generateRandomString(8).toUpperCase() + '-' + common_utils_1.commonUtils.generateRandomNumber(4);
+        const isCode = await this.productOptionRepository.findOne({
+            where: { code: code }
+        });
+        if (isCode) {
+            this.productOptionCreateCode();
+        }
+        else {
+            return code;
+        }
     }
     async findAll(options, search) {
         const { take, page } = options;

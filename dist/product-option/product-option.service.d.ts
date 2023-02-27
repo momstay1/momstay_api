@@ -16,6 +16,7 @@ export declare class ProductOptionService {
         productOption: ProductOptionEntity;
         file_info: any;
     }>;
+    productOptionCreateCode(): Promise<string>;
     findAll(options: PaginationOptions, search: string[]): Promise<{
         data: Pagination<ProductOptionEntity>;
         file_info: {};

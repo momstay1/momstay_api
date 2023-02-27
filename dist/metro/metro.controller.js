@@ -53,6 +53,11 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: '지하철 리스트 API' }),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
+        description: 'search=station:역이름<br>',
+        required: false
+    }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
     __param(2, (0, common_1.Query)('search')),

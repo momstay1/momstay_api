@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetroEntity = void 0;
+const product_entity_1 = require("../../product/entities/product.entity");
 const typeorm_1 = require("typeorm");
 let MetroEntity = class MetroEntity {
 };
@@ -37,6 +38,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], MetroEntity.prototype, "stationChn", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => product_entity_1.ProductEntity, (product) => product.metro),
+    __metadata("design:type", void 0)
+], MetroEntity.prototype, "product", void 0);
 MetroEntity = __decorate([
     (0, typeorm_1.Entity)('metro')
 ], MetroEntity);

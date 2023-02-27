@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollegeEntity = void 0;
+const product_entity_1 = require("../../product/entities/product.entity");
 const typeorm_1 = require("typeorm");
 let CollegeEntity = class CollegeEntity {
 };
@@ -33,6 +34,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], CollegeEntity.prototype, "nameChn", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => product_entity_1.ProductEntity, (product) => product.college),
+    __metadata("design:type", void 0)
+], CollegeEntity.prototype, "product", void 0);
 CollegeEntity = __decorate([
     (0, typeorm_1.Entity)('college')
 ], CollegeEntity);

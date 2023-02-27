@@ -10,6 +10,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductEntity = void 0;
+const college_entity_1 = require("../../college/entities/college.entity");
+const metro_entity_1 = require("../../metro/entities/metro.entity");
 const product_info_entity_1 = require("../../product-info/entities/product-info.entity");
 const product_option_entity_1 = require("../../product-option/entities/product-option.entity");
 const user_entity_1 = require("../../users/entities/user.entity");
@@ -109,38 +111,6 @@ __decorate([
     __metadata("design:type", String)
 ], ProductEntity.prototype, "language", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "metro", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "college", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "metroEng", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "collegeEng", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "metroJpn", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "collegeJpn", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "metroChn", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: '' }),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "collegeChn", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'text', default: '' }),
     __metadata("design:type", String)
 ], ProductEntity.prototype, "detailsKor", void 0);
@@ -165,6 +135,10 @@ __decorate([
     __metadata("design:type", String)
 ], ProductEntity.prototype, "oldData", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: '', comment: '편의 시설 검색 쉽게 하기 위한 column' }),
+    __metadata("design:type", String)
+], ProductEntity.prototype, "productInfoIdxs", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], ProductEntity.prototype, "createdAt", void 0);
@@ -187,6 +161,16 @@ __decorate([
     (0, typeorm_1.ManyToMany)(() => product_info_entity_1.ProductInfoEntity, (pi) => pi.product),
     __metadata("design:type", Array)
 ], ProductEntity.prototype, "productInfo", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => metro_entity_1.MetroEntity, (metro) => metro.product),
+    (0, typeorm_1.JoinTable)(),
+    __metadata("design:type", Array)
+], ProductEntity.prototype, "metro", void 0);
+__decorate([
+    (0, typeorm_1.ManyToMany)(() => college_entity_1.CollegeEntity, (college) => college.product),
+    (0, typeorm_1.JoinTable)(),
+    __metadata("design:type", Array)
+], ProductEntity.prototype, "college", void 0);
 ProductEntity = __decorate([
     (0, typeorm_1.Entity)('product')
 ], ProductEntity);

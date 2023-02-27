@@ -211,7 +211,7 @@ let FileService = class FileService {
                     file_type: files[i][j].mimetype,
                     file_path: files[i][j].destination,
                     file_full_path: files[i][j].path,
-                    file_storage_path: storage_url + '/' + folder + files[i][j].filename,
+                    file_storage_path: storage_url + '/' + bucket_name + '/' + folder + files[i][j].filename,
                     file_html_path: '',
                     file_html_full_path: img_url + raw_name,
                     file_html_thumb_path: '',

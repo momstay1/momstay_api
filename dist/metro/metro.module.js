@@ -20,7 +20,8 @@ MetroModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([metro_entity_1.MetroEntity]),
         ],
         controllers: [metro_controller_1.MetroController],
-        providers: [metro_service_1.MetroService]
+        providers: [metro_service_1.MetroService],
+        exports: [metro_service_1.MetroService],
     })
 ], MetroModule);
 exports.MetroModule = MetroModule;

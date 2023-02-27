@@ -1,3 +1,5 @@
+import { CollegeEntity } from "src/college/entities/college.entity";
+import { MetroEntity } from "src/metro/entities/metro.entity";
 import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
 export declare class ProductEntity {
@@ -24,23 +26,18 @@ export declare class ProductEntity {
     lat: string;
     lng: string;
     language: string;
-    metro: string;
-    college: string;
-    metroEng: string;
-    collegeEng: string;
-    metroJpn: string;
-    collegeJpn: string;
-    metroChn: string;
-    collegeChn: string;
     detailsKor: string;
     detailsEng: string;
     detailsJpn: string;
     detailsChn: string;
     oldIdx: number;
     oldData: string;
+    productInfoIdxs: string;
     createdAt: Date;
     updatedAt: Date;
     user: UsersEntity;
     productOption: undefined;
     productInfo: ProductInfoEntity[];
+    metro: MetroEntity[];
+    college: CollegeEntity[];
 }

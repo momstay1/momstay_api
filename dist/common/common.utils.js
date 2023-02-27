@@ -82,6 +82,18 @@ exports.commonUtils = {
     createCode() {
         return Math.random().toString(36).substr(2, 11);
     },
+    generateRandomString(num) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        const charactersLength = characters.length;
+        for (let i = 0; i < num; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    },
+    generateRandomNumber(num) {
+        return Math.random().toString().substr(2, num);
+    },
     isMobile(agent) {
         const mobileStr = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|iPad/i;
         return mobileStr.test(agent) ? "mobile" : "pc";

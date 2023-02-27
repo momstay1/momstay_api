@@ -25,6 +25,10 @@ let ProductController = class ProductController {
     constructor(productService) {
         this.productService = productService;
     }
+    async test(id) {
+        const data = await this.productService.test(id);
+        return data;
+    }
     async create(createProductDto, files) {
         return await this.productService.create(createProductDto, files);
     }
@@ -47,6 +51,13 @@ let ProductController = class ProductController {
         return this.productService.remove(+id);
     }
 };
+__decorate([
+    (0, common_1.Get)('test/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "test", null);
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({
@@ -74,7 +85,11 @@ __decorate([
         description: 'search=membership:(0|1)<br>'
             + 'search=keyword:메인검색<br>'
             + 'search=user_idx:회원idx<br>'
-            + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+            + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
+            + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
+            + 'search=min_priceMonth:월 최소 가격<br>'
+            + 'search=max_priceMonth:월 최대 가격<br>'
+            + 'search=product_info:편의시설 idx(2,3,4)[작업중]<br>',
         required: false
     }),
     __param(0, (0, common_1.Query)('take')),

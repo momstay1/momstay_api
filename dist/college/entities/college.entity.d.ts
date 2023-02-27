@@ -4,4 +4,5 @@ export declare class CollegeEntity {
     nameEng: string;
     nameJpn: string;
     nameChn: string;
+    product: undefined;
 }

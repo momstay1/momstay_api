@@ -49,6 +49,18 @@ let MetroService = class MetroService {
             total,
         });
     }
+    async findAllIdx(idxs) {
+        if (idxs.length <= 0) {
+            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+        }
+        const metro = await this.metroRepository.find({
+            where: { idx: (0, typeorm_2.In)(idxs) }
+        });
+        if (metro.length <= 0) {
+            throw new common_1.NotFoundException('조회된 지하철 정보가 없습니다.');
+        }
+        return metro;
+    }
     findOne(id) {
         return `This action returns a #${id} metro`;
     }

@@ -8,6 +8,7 @@ export declare class MetroService {
     constructor(metroRepository: Repository<MetroEntity>);
     create(createMetroDto: CreateMetroDto): string;
     findAll(options: PaginationOptions, search: string[]): Promise<Pagination<MetroEntity>>;
+    findAllIdx(idxs: number[]): Promise<MetroEntity[]>;
     findOne(id: number): string;
     update(id: number, updateMetroDto: UpdateMetroDto): string;
     remove(id: number): string;

@@ -5,4 +5,5 @@ export declare class MetroEntity {
     stationEng: string;
     stationJpn: string;
     stationChn: string;
+    product: undefined;
 }
