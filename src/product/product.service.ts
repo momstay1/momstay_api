@@ -188,6 +188,9 @@ export class ProductService {
         if (get(where, 'keyword', '')) {
           qb.andWhere('(' +
             '`product`.`title` LIKE :keyword' +
+            ' OR `product`.`titleEng` LIKE :keyword' +
+            ' OR `product`.`titleJpn` LIKE :keyword' +
+            ' OR `product`.`titleChn` LIKE :keyword' +
             ' OR `product`.`addr1` LIKE :keyword' +
             ' OR `product`.`addr2` LIKE :keyword' +
             ' OR `metro`.`stationKor` LIKE :keyword' +
