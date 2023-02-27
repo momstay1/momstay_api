@@ -42,6 +42,7 @@ export class ProductOptionService {
       status: +get(createProductOptionDto, 'status', 0),
       type: get(createProductOptionDto, 'type', ''),
       order: '10',
+      code: await this.productOptionCreateCode(),
       stayStatus: get(createProductOptionDto, 'stayStatus', '0'),
       visitStatus: get(createProductOptionDto, 'visitStatus', '0'),
       paymentStatus: get(createProductOptionDto, 'paymentStatus', '0'),
@@ -99,6 +100,19 @@ export class ProductOptionService {
     }
 
     return { productOption, file_info }
+  }
+
+  async productOptionCreateCode() {
+    const code = commonUtils.generateRandomString(8).toUpperCase() + '-' + commonUtils.generateRandomNumber(4);
+    const isCode = await this.productOptionRepository.findOne({
+      where: { code: code }
+    });
+
+    if (isCode) {
+      this.productOptionCreateCode();
+    } else {
+      return code;
+    }
   }
 
   async findAll(options: PaginationOptions, search: string[]) {

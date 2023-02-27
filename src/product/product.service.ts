@@ -13,6 +13,7 @@ import { In, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
+import * as moment from 'moment';
 
 @Injectable()
 export class ProductService {
@@ -24,6 +25,12 @@ export class ProductService {
     private readonly metroService: MetroService,
     private readonly collegeService: CollegeService,
   ) { }
+
+  async test(id) {
+    const code = await this.productCreateCode();
+    console.log({ code });
+    return code;
+  }
 
   async create(createProductDto: CreateProductDto, files) {
     // 생활 및 편의 정보 가져오기
@@ -66,6 +73,7 @@ export class ProductService {
       status: +get(createProductDto, 'status', 0),
       type: get(createProductDto, 'type', ''),
       order: '10',
+      code: await this.productCreateCode(),
       membership: get(createProductDto, 'membership', '0'),
       hostBusiness: get(createProductDto, 'hostBusiness', ''),
       title: get(createProductDto, 'title', ''),
@@ -139,6 +147,19 @@ export class ProductService {
     }
 
     return { product, file_info }
+  }
+
+  async productCreateCode() {
+    const code = commonUtils.generateRandomString(8).toUpperCase() + '-' + commonUtils.generateRandomNumber(4);
+    const isCode = await this.productRepository.findOne({
+      where: { code: code }
+    });
+
+    if (isCode) {
+      this.productCreateCode();
+    } else {
+      return code;
+    }
   }
 
   async findAll(options: PaginationOptions, search: string[]) {

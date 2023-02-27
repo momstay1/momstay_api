@@ -12,6 +12,13 @@ import { multerOptions } from 'src/common/common.file';
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
+  // 테스트용
+  @Get('test/:id')
+  async test(@Param('id') id: string) {
+    const data = await this.productService.test(id);
+    return data;
+  }
+
   @Post()
   @ApiOperation({
     summary: '숙소 등록 API',
