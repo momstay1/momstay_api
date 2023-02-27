@@ -1,6 +1,6 @@
 import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
@@ -38,6 +38,11 @@ export class ReservationService {
 
     // 회원 정보 가져오기
     const user = await this.usersService.findId(userInfo.id);
+
+    if (user.idx == get(po, ['product', 'user', 'idx'], '')) {
+      // 호스트 계정이 자신의 방 예약하는 경우
+      throw new NotAcceptableException('자신의 방은 예약할 수 없습니다.');
+    }
 
     const reservation_data = {
       visitDate: createReservationDto.visitDate,
