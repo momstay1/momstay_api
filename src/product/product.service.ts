@@ -43,6 +43,16 @@ export class ProductService {
       product_info_idxs = sortBy(map(productInfoIdx, o => +o));
     }
 
+    // 숙소 정보 가져오기
+    let prd;
+    if (get(createProductDto, 'idx', '')) {
+      try {
+        prd = await this.findIdxOne(+get(createProductDto, 'idx'));
+      } catch (error) {
+        console.log({ error });
+      }
+    }
+
     // 회원 정보 가져오기
     const userIdx = get(createProductDto, 'userIdx');
     const user = await this.userService.findIdx(+userIdx);
@@ -70,34 +80,52 @@ export class ProductService {
 
     // 숙소 정보
     const product_data = {
-      status: +get(createProductDto, 'status', 0),
-      type: get(createProductDto, 'type', ''),
       order: '10',
       code: await this.productCreateCode(),
-      membership: get(createProductDto, 'membership', '0'),
-      hostBusiness: get(createProductDto, 'hostBusiness', ''),
-      title: get(createProductDto, 'title', ''),
-      postCode: get(createProductDto, 'postCode', ''),
-      addr1: get(createProductDto, 'addr1', ''),
-      addr2: get(createProductDto, 'addr2', ''),
-      language: get(createProductDto, 'language', ''),
-      lat: get(createProductDto, 'lat', ''),
-      lng: get(createProductDto, 'lng', ''),
       metro: metro,
       college: college,
-      detailsKor: get(createProductDto, 'detailsKor', ''),
-      detailsEng: get(createProductDto, 'detailsEng', ''),
-      detailsJpn: get(createProductDto, 'detailsJpn', ''),
-      detailsChn: get(createProductDto, 'detailsChn', ''),
       user: user,
       productInfo: productInfo,
       productInfoIdxs: ''
     };
+
+    if (prd) {
+      product_data['order'] = prd['order'];
+      product_data['code'] = prd['code'];
+    } else {
+      product_data['order'] = '10';
+      product_data['code'] = await this.productCreateCode();
+    }
+    if (get(createProductDto, 'idx', '')) product_data['idx'] = +get(createProductDto, 'idx');
+    if (get(createProductDto, 'status', 0)) product_data['status'] = +get(createProductDto, 'status');
+    if (get(createProductDto, 'type', '')) product_data['type'] = get(createProductDto, 'type');
+    if (get(createProductDto, 'membership', '')) product_data['membership'] = get(createProductDto, 'membership');
+    if (get(createProductDto, 'hostBusiness', '')) product_data['hostBusiness'] = get(createProductDto, 'hostBusiness');
+    if (get(createProductDto, 'title', '')) product_data['title'] = get(createProductDto, 'title');
+    if (get(createProductDto, 'titleEng', '')) product_data['titleEng'] = get(createProductDto, 'titleEng');
+    if (get(createProductDto, 'titleJpn', '')) product_data['titleJpn'] = get(createProductDto, 'titleJpn');
+    if (get(createProductDto, 'titleChn', '')) product_data['titleChn'] = get(createProductDto, 'titleChn');
+    if (get(createProductDto, 'postCode', '')) product_data['postCode'] = get(createProductDto, 'postCode');
+    if (get(createProductDto, 'addr1', '')) product_data['addr1'] = get(createProductDto, 'addr1');
+    if (get(createProductDto, 'addr1Eng', '')) product_data['addr1Eng'] = get(createProductDto, 'addr1Eng');
+    if (get(createProductDto, 'addr1Jpn', '')) product_data['addr1Jpn'] = get(createProductDto, 'addr1Jpn');
+    if (get(createProductDto, 'addr1Chn', '')) product_data['addr1Chn'] = get(createProductDto, 'addr1Chn');
+    if (get(createProductDto, 'addr2', '')) product_data['addr2'] = get(createProductDto, 'addr2');
+    if (get(createProductDto, 'addr2Eng', '')) product_data['addr2Eng'] = get(createProductDto, 'addr2Eng');
+    if (get(createProductDto, 'addr2Jpn', '')) product_data['addr2Jpn'] = get(createProductDto, 'addr2Jpn');
+    if (get(createProductDto, 'addr2Chn', '')) product_data['addr2Chn'] = get(createProductDto, 'addr2Chn');
+    if (get(createProductDto, 'language', '')) product_data['language'] = get(createProductDto, 'language');
+    if (get(createProductDto, 'lat', '')) product_data['lat'] = get(createProductDto, 'lat');
+    if (get(createProductDto, 'lng', '')) product_data['lng'] = get(createProductDto, 'lng');
+    if (get(createProductDto, 'detailsKor', '')) product_data['detailsKor'] = get(createProductDto, 'detailsKor');
+    if (get(createProductDto, 'detailsEng', '')) product_data['detailsEng'] = get(createProductDto, 'detailsEng');
+    if (get(createProductDto, 'detailsJpn', '')) product_data['detailsJpn'] = get(createProductDto, 'detailsJpn');
+    if (get(createProductDto, 'detailsChn', '')) product_data['detailsChn'] = get(createProductDto, 'detailsChn');
+    if (get(createProductDto, 'status', '')) product_data['status'] = +get(createProductDto, 'status');
+    if (get(createProductDto, 'status', '')) product_data['status'] = +get(createProductDto, 'status');
+
     if (product_info_idxs && isArray(product_info_idxs)) {
       product_data['productInfoIdxs'] = product_info_idxs.join(',');
-    }
-    if (get(createProductDto, 'idx', '')) {
-      product_data['idx'] = +get(createProductDto, 'idx');
     }
     // 숙소 등록
     const productEntity = await this.productRepository.create(product_data);

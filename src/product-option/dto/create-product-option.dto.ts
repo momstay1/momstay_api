@@ -32,6 +32,18 @@ export class CreateProductOptionDto {
   readonly title: string;
   @IsOptional()
   @IsString()
+  @ApiProperty({ description: '방 이름(영어)', required: false })
+  readonly titleEng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '방 이름(일본어)', required: false })
+  readonly titleJpn: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '방 이름(중국어)', required: false })
+  readonly titleChn: string;
+  @IsOptional()
+  @IsString()
   @ApiProperty({ description: '방 가격', required: false })
   readonly price: string;
   @IsOptional()
