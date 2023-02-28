@@ -196,7 +196,7 @@ export class ProductService {
     const where = commonUtils.searchSplit(search);
 
     if (get(where, 'product_info', '')) {
-      const product_info = sortBy(map(get(where, 'product_info').split(','), o => +o));
+      const product_info = sortBy(map(get(where, 'product_info'), o => +o));
       where['product_info'] = product_info.join('%');
     }
 
