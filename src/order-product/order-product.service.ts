@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { get } from 'lodash';
+import { commonUtils } from 'src/common/common.utils';
+import { FileService } from 'src/file/file.service';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 import { Repository } from 'typeorm';
@@ -7,10 +10,13 @@ import { CreateOrderProductDto } from './dto/create-order-product.dto';
 import { UpdateOrderProductDto } from './dto/update-order-product.dto';
 import { OrderProductEntity } from './entities/order-product.entity';
 
+const surtax = 10; // 부가세
+const fee = 5; // 맘스테이 수수료
 @Injectable()
 export class OrderProductService {
   constructor(
     @InjectRepository(OrderProductEntity) private orderProductRepository: Repository<OrderProductEntity>,
+    private readonly fileService: FileService,
     // private readonly productService: ProductService,
     // private readonly productOptionService: ProductOptionService,
     // private readonly userService: UsersService,
@@ -20,20 +26,42 @@ export class OrderProductService {
     return 'This action adds a new orderProduct';
   }
 
-  async createOrderProduct(order: OrderEntity, po: ProductOptionEntity) {
+  async createOrderProduct(order: OrderEntity, po: ProductOptionEntity, createOrderDto) {
+    // 추후 민터스 또는 그외 사이트 작업시 ProductOptionEntity => ProductOptionEntity[]로 변경
+    // ProductOptionEntity[] 변경 후 아래 작업 반복문으로 작업 필요
+    // 파일 정보 가져오기
+    const file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [po['idx']]);
+
+    // 부가세 계산방법 확인 후 변경
+    // 1번
+    let texPrice = commonUtils.calcTax(po['priceMonth'], surtax+'%');
+    texPrice = commonUtils.calcTax(texPrice, fee+'%');
+    // 2번
+    // let texPrice = commonUtils.calcTax(po['priceMonth'], (surtax+fee)+'%');
+
     // 작업중
     const op_data = {
-      status: order['status'],
+      status: +order['status'],
       eq: '001',
       code: order['code'] + '-001',
-      productIdx: po['product']['idx'],
-      // productCode: po['product']['code'],
+      productIdx: ''+po['product']['idx'],
+      productCode: po['product']['code'],
       productType: '1',
       parcelCode: order['code'] + '-P01',
-      title: po['product']['title']
-
+      title: po['title'],
+      options: po['code'],
+      img: file[0]['file_storage_path'],
+      num: 1,
+      price: texPrice,
+      payPrice: texPrice,
+      userIdx: get(order, 'user', null),
+      orderIdx: order,
+      startAt: get(createOrderDto, 'startAt'),
+      endAt: get(createOrderDto, 'endAt')
     }
-    const orderProduct_data = await this.orderProductRepository.create();
+
+    if (get(createOrderDto, 'ClientMemo', '')) op_data['memo'] = get(createOrderDto, 'memo');
+    const orderProduct_data = await this.orderProductRepository.create(op_data);
     const orderProduct = await this.orderProductRepository.save(orderProduct_data);
     return orderProduct;
   }

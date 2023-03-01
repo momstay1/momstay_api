@@ -9,6 +9,7 @@ import { OrderTotalEntity } from './entities/order-total.entity';
     TypeOrmModule.forFeature([OrderTotalEntity]),
   ],
   controllers: [OrderTotalController],
-  providers: [OrderTotalService]
+  providers: [OrderTotalService],
+  exports: [OrderTotalService]
 })
 export class OrderTotalModule { }
