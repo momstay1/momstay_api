@@ -77,6 +77,15 @@ export const commonUtils = {
   async authCheck(auth, groups) {
     return filter(groups, (o) => { return auth.includes(o.id) });
   },
+  calcTax(price: number, persent: string): number {
+    let tax = +persent.replace('%', '');
+    tax = tax / 100;
+
+    // 자바스크립트 숫자 계산상 부동소수점 계산으로 부가세 계산시 소수점 발생으로 fixed 사용
+    const calcPrice = (price * (1 + tax)).toFixed();
+
+    return +calcPrice;
+  },
   createCode(): string {
     return Math.random().toString(36).substr(2, 11);
   },
