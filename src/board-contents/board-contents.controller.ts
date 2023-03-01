@@ -52,12 +52,18 @@ export class BoardContentsController {
   @ApiCreatedResponse({ type: BoardContentsEntity })
   @ApiQuery({ name: "category", required: false })
   @ApiQuery({ name: "order", required: false })
+  @ApiQuery({
+    name: "search",
+    description: 'search=status:1,2,3<br>',
+    required: false
+  })
   async findCategoryAll(
     @Param('bd_idx') bd_idx: string,
     @Query('category') category: string,
     @Query('take') take: number,
     @Query('page') page: number,
     @Query('order') order: string,
+    @Query('search') search: string,
   ) {
     const {
       bc: {
@@ -66,7 +72,7 @@ export class BoardContentsController {
         pageTotal
       },
       bcats
-    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order);
+    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order, search);
     return { bcats, total, pageTotal, results };
   }
 

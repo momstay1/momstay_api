@@ -11,5 +11,7 @@ export const bcConstants: any = {
     delete: 0, // 게시글 삭제
     uncertified: 1, // 게시글 미인증 상태
     registration: 2, // 게시글 등록 상태
+    answerWait: 3, // 게시글 답변대기 상태
+    answerComplete: 4, // 게시글 답변완료 상태
   },
 };
