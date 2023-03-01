@@ -11,7 +11,7 @@ import { BoardContentsEntity } from './entities/board-content.entity';
 import { bcConstants } from './constants';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
-import { get, keyBy } from 'lodash';
+import { get, isArray, keyBy } from 'lodash';
 import { GroupsService } from 'src/groups/groups.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 
@@ -88,12 +88,14 @@ export class BoardContentsService {
   }
 
   // 게시글 리스트 가져오기
-  async findCategoryAll(bd_idx, category: string, options: PaginationOptions, order) {
+  async findCategoryAll(bd_idx, category: string, options: PaginationOptions, order, search: string[]) {
     const { take, page } = options;
 
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([category]) }
     });
+
+    const where = commonUtils.searchSplit(search);
 
     const order_by = {};
     if (order) {
@@ -108,7 +110,15 @@ export class BoardContentsService {
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
-        qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        if (get(where, 'status', '')) {
+          qb.andWhere(
+            '`BoardContentsEntity`.`status` IN :status', 
+            { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] }
+          )
+        } else {
+          qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        }
+        // qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
         qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
       },
       relations: ['user', 'board', 'bscats'],
@@ -147,7 +157,16 @@ export class BoardContentsService {
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
-        qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        qb.andWhere(
+          '`BoardContentsEntity`.`status` IN :status', 
+          { 
+            status: [
+              bcConstants.status.registration, 
+              bcConstants.status.answerWait, 
+              bcConstants.status.answerComplete
+            ] 
+          }
+        )
         qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
         qb.andWhere('`BoardContentsEntity__user`.`idx` IN (:userIdx)', { userIdx: user.idx })
       },
