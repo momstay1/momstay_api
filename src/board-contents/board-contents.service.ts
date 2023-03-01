@@ -125,6 +125,46 @@ export class BoardContentsService {
     }
   }
 
+  async findUserCategoryAll(bd_idx, category: string, options: PaginationOptions, order, userInfo) {
+    const { take, page } = options;
+
+    const user = await this.usersService.findId(userInfo.id);
+
+    const bcats = await this.bcatsService.searching({
+      where: { bcat_id: In([category]) }
+    });
+
+    const order_by = {};
+    if (order) {
+      order = order.split(':');
+      order_by[order[0]] = order[1];
+    }
+    order_by['createdAt'] = 'DESC';
+    const [results, total] = await this.bcRepository.findAndCount({
+      order: order_by,
+      where: (qb) => {
+        qb.where('`BoardContentsEntity__board`.`idx` = :bd_idx', { bd_idx: bd_idx })
+        if (get(bcats, [0, 'bcat_idx'])) {
+          qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        }
+        qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
+        qb.andWhere('`BoardContentsEntity__user`.`idx` IN (:userIdx)', { userIdx: user.idx })
+      },
+      relations: ['user', 'board', 'bscats'],
+      take: take,
+      skip: take * (page - 1)
+    });
+
+    return {
+      bcats: bcats,
+      bc: new Pagination({
+        results,
+        total,
+      })
+    }
+  }
+
   // 공지사항 게시글 리스트 가져오기
   async findNoticeCategoryAll(bd_idx: string, category: string) {
     const bcats = await this.bcatsService.searching({

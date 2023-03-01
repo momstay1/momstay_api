@@ -38,6 +38,7 @@ import { OrderProductModule } from './order-product/order-product.module';
 import { PgDataModule } from './pg-data/pg-data.module';
 import { PgNotiModule } from './pg-noti/pg-noti.module';
 import { PgCancelModule } from './pg-cancel/pg-cancel.module';
+import { MypageModule } from './mypage/mypage.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { PgCancelModule } from './pg-cancel/pg-cancel.module';
     PgDataModule,
     PgNotiModule,
     PgCancelModule,
+    MypageModule,
   ],
   providers: [CommonService],
 })

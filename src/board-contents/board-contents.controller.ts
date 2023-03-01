@@ -38,11 +38,11 @@ export class BoardContentsController {
   };
 
   @Post()
+  @Auth(['Any'])
+  @ApiBearerAuth()
   @ApiOperation({ summary: '게시글 생성 API' })
   @ApiCreatedResponse({ type: CreateBoardContentDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
-  @ApiBearerAuth()
-  @Auth(['Any'])
   async create(@GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
     return await this.boardContentsService.create(user, createBoardContentDto);
   }

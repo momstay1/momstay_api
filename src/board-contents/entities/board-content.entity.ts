@@ -22,7 +22,7 @@ export class BoardContentsEntity {
   idx: number;
 
   @Column({ default: 2 })
-  @ApiProperty({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' })
+  @ApiProperty({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록, 3:답변대기, 4: 답변완료' })
   status: number;
 
   @Column({ default: 2 })
