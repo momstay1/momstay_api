@@ -39,6 +39,7 @@ import { PgDataModule } from './pg-data/pg-data.module';
 import { PgNotiModule } from './pg-noti/pg-noti.module';
 import { PgCancelModule } from './pg-cancel/pg-cancel.module';
 import { MypageModule } from './mypage/mypage.module';
+import { IamportService } from './iamport/iamport.service';
 
 @Module({
   imports: [
@@ -88,7 +89,7 @@ import { MypageModule } from './mypage/mypage.module';
     PgCancelModule,
     MypageModule,
   ],
-  providers: [CommonService],
+  providers: [CommonService, IamportService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
