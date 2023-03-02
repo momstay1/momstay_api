@@ -8,6 +8,8 @@ import { ProductOptionModule } from 'src/product-option/product-option.module';
 import { UsersModule } from 'src/users/users.module';
 import { OrderProductModule } from 'src/order-product/order-product.module';
 import { OrderTotalModule } from 'src/order-total/order-total.module';
+import { IamportService } from 'src/iamport/iamport.service';
+import { PgDataModule } from 'src/pg-data/pg-data.module';
 
 @Module({
   imports: [
@@ -17,9 +19,10 @@ import { OrderTotalModule } from 'src/order-total/order-total.module';
     ProductOptionModule,
     OrderProductModule,
     OrderTotalModule,
+    PgDataModule
   ],
   controllers: [OrderController],
-  providers: [OrderService],
+  providers: [OrderService, IamportService],
   exports: [OrderService]
 })
 export class OrderModule { }

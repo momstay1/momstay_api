@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { Repository } from 'typeorm';
@@ -13,6 +13,8 @@ import * as moment from 'moment';
 import { UsersService } from 'src/users/users.service';
 import { OrderProductService } from 'src/order-product/order-product.service';
 import { OrderTotalService } from 'src/order-total/order-total.service';
+import { IamportService } from 'src/iamport/iamport.service';
+import { PgDataService } from 'src/pg-data/pg-data.service';
 
 @Injectable()
 export class OrderService {
@@ -23,6 +25,8 @@ export class OrderService {
     private readonly userService: UsersService,
     private readonly orderProductService: OrderProductService,
     private readonly ordertotalService: OrderTotalService,
+    private readonly iamportService: IamportService,
+    private readonly pgDataService: PgDataService,
   ) { }
 
   async create(createOrderDto: CreateOrderDto, req) {
@@ -55,6 +59,7 @@ export class OrderService {
     if (get(createOrderDto, 'remitter', '')) ord_data['remitter'] = get(createOrderDto, 'remitter');
     // if (get(createOrderDto, 'clientMemo', '')) ord_data['clientMemo'] = get(createOrderDto, 'clientMemo');
     if (get(createOrderDto, 'adminMemo', '')) ord_data['adminMemo'] = get(createOrderDto, 'adminMemo');
+
     // 주문 설정
     if (!get(createOrderDto, 'idx', 0)) {
       // 주문 최초 등록
@@ -64,9 +69,14 @@ export class OrderService {
     } else {
       ord_data['idx'] = createOrderDto['idx'];
       const order = await this.orderRepository.findOne({ idx: ord_data['idx'] });
-      if (createOrderDto['status'] == 2 && (''+order['paiedAt']).split(' ')[0] == '0000-00-00') {
-        ord_data['paiedAt'] = get(order, 'paiedAt', moment().format('YYYY-MM-DD'));
-        // 주문 검증 로직 필요 (함수로 만들기)
+      if (createOrderDto['status'] == 2 && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
+        // 주문 검증
+        const pg_data = await this.orderVerification(createOrderDto);
+        // pg data 저장
+        await this.pgDataService.create(order['code'], pg_data);
+
+        // 결제 시간
+        ord_data['paiedAt'] = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss')
       }
     }
     // console.log({ createOrderDto });
@@ -95,7 +105,7 @@ export class OrderService {
     // 주문 상품 배열 처리시 total 주문 정보는 주문 상품의 총합으로 처리 필요
     await this.ordertotalService.orderTotaLcreate(order, orderProduct);
 
-    return { order, orderProduct };
+    return { order, orderProduct, po };
   }
 
   async ordCreateCode() {
@@ -125,5 +135,23 @@ export class OrderService {
 
   remove(id: number) {
     return `This action removes a #${id} order`;
+  }
+
+  async orderVerification(createOrderDto: CreateOrderDto) {
+    const { response } = await this.iamportService.getPaymentByImpUid(createOrderDto['imp_uid']);
+    const result = { status: true, message: '' };
+
+    // 결제 금액과 DB에 저장될 금액이 동일한지 체크
+    if (response['amount'] != createOrderDto['price']) {
+      result['status'] = false;
+      result['message'] = '실 결제 정보와 다름';
+    }
+
+    if (!result['status']) {
+      await this.iamportService.paymentCancel(createOrderDto['imp_uid'], response['amount'], result['message']);
+      throw new NotAcceptableException(result['message']);
+    }
+
+    return response;
   }
 }

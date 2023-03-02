@@ -21,9 +21,9 @@ export class OrderProductEntity {
   @Column({ length: 255, default: '' })
   eq: string;
   @Column({ length: 255, default: '' })
-  productIdx: string;
+  productOptionIdx: string;
   @Column({ length: 255, default: '' })
-  productCode: string;
+  productOptionCode: string;
   @Column({ length: 255, default: '' })
   productType: string;
 

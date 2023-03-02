@@ -10,7 +10,8 @@ export class CreateOrderDto {
   @ApiProperty({
     description: `상태<br>
     (1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정,<br>
-    7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료)`, required: false })
+    7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료)`, required: false
+  })
   status: number;
   @IsOptional()
   @ApiProperty({ description: '아임포트 uid', required: false })
@@ -21,6 +22,12 @@ export class CreateOrderDto {
   @IsOptional()
   @ApiProperty({ description: '결제 방법(bank, card, trans, vbank)', required: false })
   readonly payment: string;
+  @IsOptional()
+  @ApiProperty({ description: '결제 금액', required: false })
+  readonly price: number;
+  @IsOptional()
+  @ApiProperty({ description: '구매 상품 개수', required: false })
+  readonly num: number;
   @IsOptional()
   @ApiProperty({ description: '입주일', required: false })
   readonly startAt: string | Date;

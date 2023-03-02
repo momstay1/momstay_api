@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePgDatumDto } from './dto/create-pg-datum.dto';
-import { UpdatePgDatumDto } from './dto/update-pg-datum.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreatePgDatumDto } from './dto/create-pg-data.dto';
+import { UpdatePgDatumDto } from './dto/update-pg-data.dto';
+import { PgDataEntity } from './entities/pg-data.entity';
 
 @Injectable()
 export class PgDataService {
-  create(createPgDatumDto: CreatePgDatumDto) {
-    return 'This action adds a new pgDatum';
+  constructor(
+    @InjectRepository(PgDataEntity) private pgDataRepository: Repository<PgDataEntity>,
+  ) { }
+
+  async create(ord_code: string, createPgData) {
+    createPgData['pg_data'] = JSON.stringify(createPgData);
+    createPgData['productCode'] = ord_code;
+
+    const pg_data = await this.pgDataRepository.create(createPgData);
+    const pg = await this.pgDataRepository.save(pg_data);
+
+    return pg;
   }
 
   findAll() {

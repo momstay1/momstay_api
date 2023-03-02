@@ -10,8 +10,6 @@ import { CreateOrderProductDto } from './dto/create-order-product.dto';
 import { UpdateOrderProductDto } from './dto/update-order-product.dto';
 import { OrderProductEntity } from './entities/order-product.entity';
 
-const surtax = 10; // 부가세
-const fee = 5; // 맘스테이 수수료
 @Injectable()
 export class OrderProductService {
   constructor(
@@ -33,34 +31,39 @@ export class OrderProductService {
     const file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [po['idx']]);
 
     // 부가세 계산방법 확인 후 변경
+    // const surtax = commonUtils.getStatus('tax');
+    // const fee = commonUtils.getStatus('fee');
     // 1번
-    let texPrice = commonUtils.calcTax(po['priceMonth'], surtax+'%');
-    texPrice = commonUtils.calcTax(texPrice, fee+'%');
+    // let texPrice = commonUtils.calcTax(po['priceMonth'], surtax+'%');
+    // let texPrice = commonUtils.calcTax(createOrderDto['price'], surtax + '%');
+    // texPrice = commonUtils.calcTax(texPrice, fee + '%');
     // 2번
     // let texPrice = commonUtils.calcTax(po['priceMonth'], (surtax+fee)+'%');
+    // let texPrice = commonUtils.calcTax(createOrderDto['price'], (surtax+fee)+'%');
 
     // 작업중
     const op_data = {
       status: +order['status'],
       eq: '001',
       code: order['code'] + '-001',
-      productIdx: ''+po['product']['idx'],
-      productCode: po['product']['code'],
+      productOptionIdx: '' + po['idx'],
+      productOptionCode: po['product']['code'],
       productType: '1',
       parcelCode: order['code'] + '-P01',
       title: po['title'],
       options: po['code'],
       img: file[0]['file_storage_path'],
-      num: 1,
-      price: texPrice,
-      payPrice: texPrice,
       userIdx: get(order, 'user', null),
       orderIdx: order,
-      startAt: get(createOrderDto, 'startAt'),
-      endAt: get(createOrderDto, 'endAt')
     }
 
+    if (get(createOrderDto, 'num', '')) op_data['num'] = get(createOrderDto, 'num');
+    if (get(createOrderDto, 'price', '')) op_data['price'] = get(createOrderDto, 'price');
+    if (get(createOrderDto, 'payPrice', '')) op_data['payPrice'] = get(createOrderDto, 'payPrice');
+    if (get(createOrderDto, 'startAt', '')) op_data['startAt'] = get(createOrderDto, 'startAt');
+    if (get(createOrderDto, 'endAt', '')) op_data['endAt'] = get(createOrderDto, 'endAt');
     if (get(createOrderDto, 'ClientMemo', '')) op_data['memo'] = get(createOrderDto, 'memo');
+
     const orderProduct_data = await this.orderProductRepository.create(op_data);
     const orderProduct = await this.orderProductRepository.save(orderProduct_data);
     return orderProduct;
