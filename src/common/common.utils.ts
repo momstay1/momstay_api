@@ -1,6 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { filter, get, isArray, isObject, map } from "lodash";
+import { filter, get, isArray, isEmpty, isObject, map } from "lodash";
 import { usersConstant } from "src/users/constants";
 
 export const commonUtils = {
@@ -82,9 +82,9 @@ export const commonUtils = {
     tax = tax / 100;
 
     // 자바스크립트 숫자 계산상 부동소수점 계산으로 부가세 계산시 소수점 발생으로 fixed 사용
-    const calcPrice = (price * (1 + tax)).toFixed();
+    const calcTax = (price * tax).toFixed();
 
-    return +calcPrice;
+    return +calcTax;
   },
   createCode(): string {
     return Math.random().toString(36).substr(2, 11);
@@ -157,4 +157,14 @@ export const commonUtils = {
     }
     return result;
   },
+  getStatus(key: string | string[]) {
+    const data = {};
+
+    // 부가세
+    data['tax'] = 10;
+    // 맘스테이 수수료
+    data['fee'] = 5;
+
+    return get(data, key, '');
+  }
 };

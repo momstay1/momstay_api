@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Iamport, Request, Enum } from 'iamport-rest-client-nodejs';
+import { commonUtils } from 'src/common/common.utils';
 import { ConfigService } from 'src/config/config.service';
 
 let iamport;
@@ -44,7 +45,7 @@ export class IamportService {
       token = await getToken.request(imp_init);
       token = token.data;
     } catch (error) {
-      token = error.response.data;
+      throw new NotFoundException(error.response.data.message);
     }
     return token;
   }
@@ -63,7 +64,7 @@ export class IamportService {
       certification = await getCertification.request(imp_init);
       certification = certification.data;
     } catch (error) {
-      certification = error.response.data;
+      throw new NotFoundException(error.response.data.message);
     }
     return certification;
   }
@@ -80,7 +81,7 @@ export class IamportService {
       certification = await getCertification.request(imp_init);
       certification = certification.data;
     } catch (error) {
-      certification = error.response.data;
+      throw new NotFoundException(error.response.data.message);
     }
     return certification;
   }
@@ -97,32 +98,40 @@ export class IamportService {
       payment = await getByImpUid.request(imp_init);
       payment = payment.data;
     } catch (error) {
-      payment = error.response.data;
+      throw new NotFoundException(error.response.data.message);
     }
     console.log({ payment });
     return payment;
   }
   // 아임포트 결제 취소
-  async paymentCancel(imp_uid: string, cancelPrice: number) {
+  async paymentCancel(imp_uid: string, cancelPrice: number, reason: string) {
     const { Payments } = Request;
-    const getByImpUid = Payments.cancel({
+
+    const cancel_data = {
       imp_uid: imp_uid, // 포트원(아임포트) 거래고유번호
       merchant_uid: '', // 주문번호(imp_uid 누락시 필수)
-      amount: cancelPrice, // 취소 요청 금액
+      amount: cancelPrice,
       tax_free: null, // 부가세 지정 (취소요청금액 중 면세금액)
       checksum: null, // 현재시점의 취소 가능한 잔액 (취소전 api요청자가 기록한 취소가능 금액과 포트원에서 기록한 취소가능금액이 일치하는지 검증 null인 경우 검증 생략)
-      reason: '', // 취소 사유
+      reason: reason, // 취소 사유
       refund_holder: null,  // 가상계좌 취소에 필요한 param
       refund_bank: null,  // 가상계좌 취소에 필요한 param
       refund_account: null, // 가상계좌 취소에 필요한 param
-    });
+    };
+
+    // 취소요청금액 중 면세 금액 계산
+    if (commonUtils.getStatus('tax') > 0) {
+
+    }
+
+    const getByImpUid = Payments.cancel(cancel_data);
 
     let payment;
     try {
       payment = await getByImpUid.request(imp_init);
       payment = payment.data;
     } catch (error) {
-      payment = error.response.data;
+      throw new NotFoundException(error.response.data.message);
     }
     console.log({ payment });
     return payment;
