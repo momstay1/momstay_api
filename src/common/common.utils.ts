@@ -74,8 +74,8 @@ export const commonUtils = {
 
     return where;
   },
-  async authCheck(auth, groups) {
-    return filter(groups, (o) => { return auth.includes(o.id) });
+  async authCheck(auth, groupId) {
+    return auth.includes(groupId);
   },
   calcTax(price: number, persent: string): number {
     let tax = +persent.replace('%', '');
