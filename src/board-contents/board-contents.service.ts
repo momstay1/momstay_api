@@ -121,7 +121,7 @@ export class BoardContentsService {
         }
         if (get(where, 'status', '')) {
           qb.andWhere(
-            '`BoardContentsEntity`.`status` IN :status',
+            '`BoardContentsEntity`.`status` IN (:status)',
             { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] }
           )
         } else {
@@ -167,7 +167,7 @@ export class BoardContentsService {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
         qb.andWhere(
-          '`BoardContentsEntity`.`status` IN :status',
+          '`BoardContentsEntity`.`status` IN (:status)',
           {
             status: [
               bcConstants.status.registration,
