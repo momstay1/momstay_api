@@ -40,7 +40,7 @@ export class BoardContentsService {
     const user = await this.usersService.findId(userInfo.id);
 
     // 게시글 쓰기 권한 여부 확인
-    const writeAuth = await commonUtils.authCheck(write_auth, get(user, ['groups']));
+    const writeAuth = await commonUtils.authCheck(write_auth, get(user, ['group', 'id']));
     if (writeAuth.length <= 0) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
@@ -91,6 +91,15 @@ export class BoardContentsService {
   async findCategoryAll(bd_idx, category: string, options: PaginationOptions, order, search: string[]) {
     const { take, page } = options;
 
+    // 리스트 권한 체크
+    // // 게시판 정보 가져오기
+    // const board = await this.boardsService.findBoard({ idx: bd_idx });
+    // const lists_auth = board.lists_auth.split("|");
+    // const listsAuth = await commonUtils.authCheck(lists_auth, get(user, ['group', 'id']));
+    // if (listsAuth.length <= 0) {
+    //   throw new UnauthorizedException('권한이 없습니다.');
+    // }
+
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([category]) }
     });
@@ -112,7 +121,7 @@ export class BoardContentsService {
         }
         if (get(where, 'status', '')) {
           qb.andWhere(
-            '`BoardContentsEntity`.`status` IN :status', 
+            '`BoardContentsEntity`.`status` IN :status',
             { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] }
           )
         } else {
@@ -158,13 +167,13 @@ export class BoardContentsService {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
         qb.andWhere(
-          '`BoardContentsEntity`.`status` IN :status', 
-          { 
+          '`BoardContentsEntity`.`status` IN :status',
+          {
             status: [
-              bcConstants.status.registration, 
-              bcConstants.status.answerWait, 
+              bcConstants.status.registration,
+              bcConstants.status.answerWait,
               bcConstants.status.answerComplete
-            ] 
+            ]
           }
         )
         qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
@@ -242,11 +251,11 @@ export class BoardContentsService {
 
     const user = await this.usersService.findId(userInfo.id);
     // 게시글 쓰기 권한 여부 확인
-    const adminAuth = await commonUtils.authCheck(['root', 'admin'], get(user, ['groups']));
+    const adminAuth = await commonUtils.authCheck(['root', 'admin'], get(user, ['group']));
     if (adminAuth.length <= 0) {
       // 쓰기 권한 혹은 자신의 글이 아닌 경우
       const write_auth = board.write_auth.split("|");
-      const user_auth = await commonUtils.authCheck(write_auth, get(userInfo, ['groups']));
+      const user_auth = await commonUtils.authCheck(write_auth, get(userInfo, ['group']));
       if (user_auth.length <= 0 || get(bc, ['user', 'user_idx']) != get(user, ['user_idx'])) {
         throw new UnauthorizedException('권한이 없습니다.');
       }
@@ -412,6 +421,8 @@ export class BoardContentsService {
     arr.push(bcConstants.type.basic);
     arr.push(bcConstants.type.secret);
     arr.push(bcConstants.type.link);
+    arr.push(bcConstants.type.event);
+    arr.push(bcConstants.type.new);
     return arr;
   }
 

@@ -221,6 +221,12 @@ export class ProductService {
             ' OR `product`.`titleChn` LIKE :keyword' +
             ' OR `product`.`addr1` LIKE :keyword' +
             ' OR `product`.`addr2` LIKE :keyword' +
+            ' OR `product`.`addr1Eng` LIKE :keyword' +
+            ' OR `product`.`addr2Eng` LIKE :keyword' +
+            ' OR `product`.`addr1Jpn` LIKE :keyword' +
+            ' OR `product`.`addr2Jpn` LIKE :keyword' +
+            ' OR `product`.`addr1Chn` LIKE :keyword' +
+            ' OR `product`.`addr2Chn` LIKE :keyword' +
             ' OR `metro`.`stationKor` LIKE :keyword' +
             ' OR `college`.`nameKor` LIKE :keyword' +
             ' OR `metro`.`stationEng` LIKE :keyword' +

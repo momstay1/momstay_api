@@ -6,6 +6,8 @@ export const bcConstants: any = {
     basic: 2, // 일반게시글
     secret: 3, // 비밀글
     link: 4, // 외부링크 게시글
+    event: 5, // 이벤트 게시글
+    new: 6, // 새소식 게시글
   },
   status: {
     delete: 0, // 게시글 삭제

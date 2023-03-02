@@ -9,7 +9,7 @@ export class PgDataController {
 
   @Post()
   create(@Body() createPgDatumDto: CreatePgDatumDto) {
-    return this.pgDataService.create(createPgDatumDto);
+    // return this.pgDataService.create(createPgDatumDto);
   }
 
   @Get()
