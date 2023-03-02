@@ -63,7 +63,7 @@ export class BoardContentsController {
     @Query('take') take: number,
     @Query('page') page: number,
     @Query('order') order: string,
-    @Query('search') search: string,
+    @Query('search') search: string[],
   ) {
     const {
       bc: {

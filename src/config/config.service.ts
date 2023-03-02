@@ -60,4 +60,12 @@ export class ConfigService {
       firebase_private_key: this.getValue('FIREBASE_PRIVATE_KEY'),
     }
   }
+
+  getIamportConfig() {
+    return {
+      iamport: this.getValue('IAMPORT'),
+      iamport_key: this.getValue('IAMPORT_KEY'),
+      iamport_secret_key: this.getValue('IAMPORT_SECRET_KEY'),
+    }
+  }
 }
