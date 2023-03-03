@@ -24,8 +24,14 @@ export class OrderController {
 
   @Post()
   @ApiOperation({ summary: '주문 생성 API' })
-  async create(@Body() createOrderDto: CreateOrderDto, @Req() req) {
-    return await this.orderService.create(createOrderDto, req);
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  async create(
+    @GetUser() user: UsersEntity,
+    @Body() createOrderDto: CreateOrderDto,
+    @Req() req
+  ) {
+    return await this.orderService.create(user, createOrderDto, req);
   }
 
   // 실제 아임포트 콜백 노티 데이터 확인 후 작업
@@ -36,7 +42,6 @@ export class OrderController {
     console.log({ iamportNoti });
     // return await this.orderService.create(createOrderDto, req);
   }
-
 
   @Get()
   @ApiOperation({ summary: '주문 리스트 조회 API' })
