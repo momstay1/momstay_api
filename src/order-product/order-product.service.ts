@@ -33,13 +33,13 @@ export class OrderProductService {
     const file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [po['idx']]);
 
     const priceInfo = {
-      calcTotalPrice: await this.calcTotalPrice(get(po, 'priceMonth', 0), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
+      price: await this.calcTotalPrice(get(po, 'priceMonth', 0), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
       tax: commonUtils.getStatus('tax'),
       fee: commonUtils.getStatus('fee'),
     };
     // 월 가격 일별 가격으로 변경 후 총 가격 계산
-    priceInfo['texPrice'] = commonUtils.calcTax(priceInfo['calcTotalPrice'], priceInfo['tax'] + '%');
-    priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['calcTotalPrice'] + priceInfo['texPrice'], priceInfo['fee'] + '%');
+    priceInfo['texPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
+    priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['texPrice'], priceInfo['fee'] + '%');
 
     // 작업중
     const op_data = {
@@ -52,10 +52,10 @@ export class OrderProductService {
       parcelCode: order['code'] + '-P01',
       title: po['title'],
       options: po['code'],
-      tax: priceInfo['texPrice'],
-      fee: priceInfo['feePrice'],
-      price: priceInfo['calcTotalPrice'],
-      payPrice: priceInfo['calcTotalPrice'] + priceInfo['texPrice'] + priceInfo['feePrice'],
+      taxPrice: priceInfo['texPrice'],
+      feePrice: priceInfo['feePrice'],
+      price: priceInfo['price'],
+      payPrice: priceInfo['price'] + priceInfo['texPrice'] + priceInfo['feePrice'],
       img: file[0]['file_storage_path'],
       userIdx: get(order, 'user', null),
       orderIdx: order,
@@ -82,6 +82,28 @@ export class OrderProductService {
 
   update(id: number, updateOrderProductDto: UpdateOrderProductDto) {
     return `This action updates a #${id} orderProduct`;
+  }
+
+  async statusChange(orderIdx: number, status: number) {
+    await this.orderProductRepository.createQueryBuilder()
+      .update(OrderProductEntity)
+      .set({ status: status })
+      .where("`orderIdx` = :orderIdx", { orderIdx: orderIdx })
+      .execute()
+  }
+
+  async cancelPrice(orderIdx: number, cancelPrice: number) {
+    await this.orderProductRepository.createQueryBuilder()
+      .update(OrderProductEntity)
+      .set({
+        price: 0,
+        taxPrice: 0,
+        feePrice: 0,
+        payPrice: 0,
+        cancelPrice: cancelPrice,
+      })
+      .where("`orderIdx` = :orderIdx", { orderIdx: orderIdx })
+      .execute()
   }
 
   remove(id: number) {

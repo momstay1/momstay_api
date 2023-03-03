@@ -1,6 +1,6 @@
 import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isArray, map } from 'lodash';
+import { get, isArray, map, reduce } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -218,6 +218,93 @@ export class OrderService {
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
     return `This action updates a #${id} order`;
+  }
+
+  async guestOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
+    if (!code) {
+      throw new NotFoundException('취소할 정보가 없습니다.');
+    }
+
+    const user = await this.userService.findId(get(userInfo, 'id'));
+
+    const order = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .where(qb => {
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.where('`order`.code = :code', { code: code });
+      })
+      .getOne();
+
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('취소할 주문이 없습니다.');
+    }
+
+    const cancelReason = '게스트 취소';
+    // 취소 처리
+    this.cancelProcess(order, cancelReason);
+  }
+
+  async hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
+    if (!code || !get(updateOrderDto, 'status', '')) {
+      throw new NotFoundException('변경할 정보가 없습니다.');
+    }
+
+    const user = await this.userService.findId(get(userInfo, 'id'));
+
+    const order = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('product.user', 'user')
+      .where(qb => {
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.where('`order`.code = :code', { code: code });
+      })
+      .getOne();
+
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('변경할 주문이 없습니다.');
+    }
+
+    const cancelReason = '호스트 취소(' + get(updateOrderDto, 'cancelReason', '') + ')';
+
+    // 취소 처리
+    this.cancelProcess(order, cancelReason);
+  }
+
+  // 취소 처리
+  async cancelProcess(order, cancelReason) {
+
+    // 취소 금액 계산
+    const cancelPrice = reduce(order.orderProduct, (o, o1) => {
+      return o['payPrice'] + o1['payPrice'];
+    }, 0);
+    // 취소완료 상태 (8)
+    const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
+    console.log({ cancelPrice });
+
+    // 결제 내역 취소
+    // 결제 금액 0원 설정시 전액 취소
+    await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
+    // 주문 상태 변경
+    await this.statusChange(order['idx'], cancel_status);
+    // 주문 상품 취소 상태 변경
+    await this.orderProductService.statusChange(order['idx'], cancel_status);
+    // 주문 상품 가격 정보 변경
+    await this.orderProductService.cancelPrice(order['idx'], cancelPrice);
+    // 주문 토탈 가격 정보 변경
+    await this.ordertotalService.priceChange(order['idx'], cancelPrice);
+  }
+
+  async statusChange(idx: number, status: number) {
+    await this.orderRepository.createQueryBuilder()
+      .update(OrderEntity)
+      .set({ status: status })
+      .where(" idx IN :idx", { idx: idx })
+      .execute()
   }
 
   remove(id: number) {

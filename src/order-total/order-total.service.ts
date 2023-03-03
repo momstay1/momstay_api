@@ -32,6 +32,21 @@ export class OrderTotalService {
     return orderTotal;
   }
 
+  async priceChange(orderIdx: number, cancelPrice: number) {
+    const total = await this.orderTotalRepository.findOne({
+      where: { orderIdx: orderIdx }
+    });
+
+    total['totalPrice'] = total['totalPrice'] - cancelPrice;
+    total['totalCancelPrice'] = total['totalCancelPrice'] + cancelPrice;
+    total['payPrice'] = total['payPrice'] - cancelPrice;
+    await this.orderTotalRepository.createQueryBuilder()
+      .update(OrderTotalEntity)
+      .set(total)
+      .where("idx = :idx", { idx: total['idx'] })
+      .execute()
+  }
+
   findAll() {
     return `This action returns all orderTotal`;
   }
