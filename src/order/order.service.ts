@@ -103,12 +103,12 @@ export class OrderService {
 
     // 주문 상품 설정 기능 작업중
     // 추후 주문 상품을 배열로 전달 (한 주문에 여러 주문 상품을 처리하는 경우에 작업 필요)
-    const orderProduct = await this.orderProductService.createOrderProduct(order, po, createOrderDto);
+    const { orderProduct, priceInfo } = await this.orderProductService.createOrderProduct(order, po, createOrderDto);
     // total 주문 설정 기능 필요
     // 주문 상품 배열 처리시 total 주문 정보는 주문 상품의 총합으로 처리 필요
     await this.ordertotalService.orderTotaLcreate(order, orderProduct);
 
-    return { order, orderProduct, po };
+    return { order, orderProduct, po, priceInfo };
   }
 
   async ordCreateCode() {
