@@ -110,6 +110,6 @@ export class CreateOrderDto {
   @ApiProperty({ description: '구매상품(방) idx' })
   readonly productOptionIdx: string;
   @IsOptional()
-  @ApiProperty({ description: '구매상품 개수', required: false })
-  readonly productNum: string;
+  @ApiProperty({ description: '주문상품 idx', required: false })
+  readonly orderProductIdx: string;
 }

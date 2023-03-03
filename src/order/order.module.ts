@@ -19,7 +19,8 @@ import { PgDataModule } from 'src/pg-data/pg-data.module';
     ProductOptionModule,
     OrderProductModule,
     OrderTotalModule,
-    PgDataModule
+    PgDataModule,
+    UsersModule
   ],
   controllers: [OrderController],
   providers: [OrderService, IamportService],
