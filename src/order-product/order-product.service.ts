@@ -33,7 +33,7 @@ export class OrderProductService {
     const file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [po['idx']]);
 
     const priceInfo = {
-      calcTotalPrice: await this.calcTotalPrice(get(po, 'priceMonth'), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
+      calcTotalPrice: await this.calcTotalPrice(get(po, 'priceMonth', 0), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
       tax: commonUtils.getStatus('tax'),
       fee: commonUtils.getStatus('fee'),
     };
@@ -64,7 +64,7 @@ export class OrderProductService {
     if (get(createOrderDto, 'num', '')) op_data['num'] = get(createOrderDto, 'num');
     if (get(createOrderDto, 'startAt', '')) op_data['startAt'] = get(createOrderDto, 'startAt');
     if (get(createOrderDto, 'endAt', '')) op_data['endAt'] = get(createOrderDto, 'endAt');
-    if (get(createOrderDto, 'ClientMemo', '')) op_data['memo'] = get(createOrderDto, 'memo');
+    if (get(createOrderDto, 'ClientMemo', '')) op_data['memo'] = get(createOrderDto, 'clientMemo');
     if (get(createOrderDto, 'orderProductIdx', '')) op_data['idx'] = get(createOrderDto, 'orderProductIdx');
 
     const orderProduct_data = await this.orderProductRepository.create(op_data);
@@ -103,7 +103,7 @@ export class OrderProductService {
       // 매달 마지막 일
       const end_day = +moment(start_year + '-' + start_month).add(i, 'month').endOf('month').format('DD');
       // 월 가격 / 매달 마지막 일 = 일 평균 가격
-      const priceDay = +(priceMonth / end_day).toFixed();
+      const priceDay = priceMonth > 0 ? +(priceMonth / end_day).toFixed() : priceMonth;
 
       // 월별 주거 일수 구하기
       const last_month = moment(start_year + '-' + start_month + '-' + end_day).add(i, 'month');

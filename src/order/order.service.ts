@@ -32,7 +32,7 @@ export class OrderService {
     private readonly pgDataService: PgDataService,
   ) { }
 
-  async create(createOrderDto: CreateOrderDto, req) {
+  async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
 
     const ord_data = {};
     if (get(createOrderDto, 'status', '')) ord_data['status'] = get(createOrderDto, 'status');
@@ -90,11 +90,7 @@ export class OrderService {
     // console.log({ po });
 
     // 회원 주문인 경우 회원 정보 가져오기
-    let user = null;
-    if (get(createOrderDto, 'userIdx', '')) {
-      user = await this.userService.findIdx(+createOrderDto['userIdx']);
-      ord_data['userIdx'] = user;
-    }
+    ord_data['userIdx'] = await this.userService.findId(get(userInfo, 'id'));
 
     // 주문 수량 체크 기능 필요 (맘스테이는 필요 없음)
 
@@ -106,7 +102,7 @@ export class OrderService {
     const { orderProduct, priceInfo } = await this.orderProductService.createOrderProduct(order, po, createOrderDto);
     // total 주문 설정 기능 필요
     // 주문 상품 배열 처리시 total 주문 정보는 주문 상품의 총합으로 처리 필요
-    await this.ordertotalService.orderTotaLcreate(order, orderProduct);
+    await this.ordertotalService.orderTotalCreate(order, orderProduct);
 
     return { order, orderProduct, po, priceInfo };
   }

@@ -18,15 +18,15 @@ export class OrderTotalService {
     return 'This action adds a new orderTotal';
   }
 
-  async orderTotaLcreate(order: OrderEntity, orderProduct: OrderProductEntity) {
+  async orderTotalCreate(order: OrderEntity, orderProduct: OrderProductEntity) {
 
     const total_data = {
-      orderIdx: ''+order['idx'],
+      orderIdx: '' + order['idx'],
       totalPrice: orderProduct['price'] * orderProduct['num'],
       payPrice: orderProduct['payPrice'] * orderProduct['num'],
       origPayPrice: orderProduct['payPrice'] * orderProduct['num'],
     };
-    
+
     const orderTotal_data = await this.orderTotalRepository.create(total_data);
     const orderTotal = await this.orderTotalRepository.save(orderTotal_data);
     return orderTotal;

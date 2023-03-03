@@ -99,13 +99,10 @@ export class CreateOrderDto {
   readonly remitter: string;
   @IsOptional()
   @ApiProperty({ description: '구매자 메모', required: false })
-  readonly ClientMemo: string;
+  readonly clientMemo: string;
   @IsOptional()
   @ApiProperty({ description: '관리자 메모', required: false })
   readonly adminMemo: string;
-  @IsOptional()
-  @ApiProperty({ description: '구매자회원 idx', required: false })
-  userIdx: string;
   @IsString()
   @ApiProperty({ description: '구매상품(방) idx' })
   readonly productOptionIdx: string;
