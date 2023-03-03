@@ -214,7 +214,7 @@ export class BoardContentsService {
 
   async findOne(bc_idx: number) {
     const bc = await this.findIndex(bc_idx);
-    if (bc.status !== bcConstants.status.registration) {
+    if ([bcConstants.status.delete, bcConstants.status.uncertified].includes(bc.status)) {
       throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
     }
     bc.count = await this.countUp(bc.idx, bc.count);
@@ -251,12 +251,12 @@ export class BoardContentsService {
 
     const user = await this.usersService.findId(userInfo.id);
     // 게시글 쓰기 권한 여부 확인
-    const adminAuth = await commonUtils.authCheck(['root', 'admin'], get(user, ['group']));
+    const adminAuth = await commonUtils.authCheck(['root', 'admin'], get(user, ['group', 'id']));
     if (adminAuth.length <= 0) {
       // 쓰기 권한 혹은 자신의 글이 아닌 경우
       const write_auth = board.write_auth.split("|");
       const user_auth = await commonUtils.authCheck(write_auth, get(userInfo, ['group']));
-      if (user_auth.length <= 0 || get(bc, ['user', 'user_idx']) != get(user, ['user_idx'])) {
+      if (user_auth.length <= 0 || get(bc, ['user', 'idx']) != get(user, ['idx'])) {
         throw new UnauthorizedException('권한이 없습니다.');
       }
     }
@@ -324,7 +324,7 @@ export class BoardContentsService {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
         qb.andWhere('`BoardContentsEntity`.`status` >= :status', { status: bcConstants.status.uncertified })
-        qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
+        // qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
       },
       relations: ['user', 'board', 'bscats'],
       take: take,
