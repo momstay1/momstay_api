@@ -40,19 +40,21 @@ export class OrderProductEntity {
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   price: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
-  tax: number;
+  taxPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
-  fee: number;
+  feePrice: number;
   @Column({ default: 0 })
   point: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   payPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
-  refundPrice: number;
+  cancelPrice: number;
   @Column({ default: 0 })
-  refundPoint: number;
+  cancelPoint: number;
   @Column({ type: 'text', default: '' })
   memo: string;
+  @Column({ type: 'text', default: '' })
+  cancelReason: string;
 
   @Column({ type: 'date', default: '0' })
   startAt: string;

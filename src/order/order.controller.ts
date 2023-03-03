@@ -8,6 +8,7 @@ import {
   Delete,
   Req,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -93,9 +94,30 @@ export class OrderController {
     return await this.orderService.findOneCode(code);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
+  @Patch('/guest/:code')
+  @ApiOperation({ summary: '게스트 주문 취소 API (작업중)' })
+  @Auth(['root', 'admin', 'guest'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  async guestOrderCancel(
+    @GetUser() user: UsersEntity,
+    @Param('code') code: string,
+    @Body() updateOrderDto: UpdateOrderDto
+  ) {
+    await this.orderService.guestOrderCancel(code, user, updateOrderDto);
+  }
+
+  @Patch('host/:code')
+  @ApiOperation({ summary: '호스트 주문 거절 API (작업중)' })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  async hostOrderCancel(
+    @GetUser() user: UsersEntity,
+    @Param('code') code: string,
+    @Body() updateOrderDto: UpdateOrderDto
+  ) {
+    await this.orderService.hostOrderCancel(code, user, updateOrderDto);
   }
 
   @Delete(':id')
