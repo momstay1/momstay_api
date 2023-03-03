@@ -69,7 +69,7 @@ export class OrderProductService {
 
     const orderProduct_data = await this.orderProductRepository.create(op_data);
     const orderProduct = await this.orderProductRepository.save(orderProduct_data);
-    return orderProduct;
+    return { orderProduct, priceInfo };
   }
 
   findAll() {
