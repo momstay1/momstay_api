@@ -39,6 +39,10 @@ export class OrderProductEntity {
   num: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   price: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  tax: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  fee: number;
   @Column({ default: 0 })
   point: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })

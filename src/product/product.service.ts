@@ -47,7 +47,7 @@ export class ProductService {
     let prd;
     if (get(createProductDto, 'idx', '')) {
       try {
-        prd = await this.findIdxOne(+get(createProductDto, 'idx'));
+        prd = await this.findOneIdx(+get(createProductDto, 'idx'));
       } catch (error) {
         console.log({ error });
       }
@@ -320,7 +320,7 @@ export class ProductService {
   }
 
   async findOne(idx: number) {
-    const product = await this.findIdxOne(idx);
+    const product = await this.findOneIdx(idx);
 
     product['userIdx'] = get(product, ['user', 'idx'], 0);
     delete product.user;
@@ -331,7 +331,7 @@ export class ProductService {
   }
 
   async adminFindOne(idx: number) {
-    const product = await this.findIdxOne(idx);
+    const product = await this.findOneIdx(idx);
     let file_info = await this.getFileInfo([idx]);
     return { product, file_info };
   }
@@ -347,7 +347,7 @@ export class ProductService {
     return file_info;
   }
 
-  async findIdxOne(idx: number) {
+  async findOneIdx(idx: number) {
     if (!idx) {
       throw new NotFoundException('잘못된 정보 입니다.');
     }

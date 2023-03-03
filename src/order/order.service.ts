@@ -1,6 +1,6 @@
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get } from 'lodash';
+import { get, isArray, map } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -8,19 +8,22 @@ import { OrderEntity } from './entities/order.entity';
 import { commonUtils } from 'src/common/common.utils';
 import { ProductService } from 'src/product/product.service';
 import { ProductOptionService } from 'src/product-option/product-option.service';
-
-import * as moment from 'moment';
 import { UsersService } from 'src/users/users.service';
 import { OrderProductService } from 'src/order-product/order-product.service';
 import { OrderTotalService } from 'src/order-total/order-total.service';
 import { IamportService } from 'src/iamport/iamport.service';
 import { PgDataService } from 'src/pg-data/pg-data.service';
 
+import * as moment from 'moment';
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { UsersEntity } from 'src/users/entities/user.entity';
+
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(OrderEntity) private orderRepository: Repository<OrderEntity>,
     private readonly productService: ProductService,
+    private readonly usersService: UsersService,
     private readonly productOptionService: ProductOptionService,
     private readonly userService: UsersService,
     private readonly orderProductService: OrderProductService,
@@ -76,7 +79,7 @@ export class OrderService {
         await this.pgDataService.create(order['code'], pg_data);
 
         // 결제 시간
-        ord_data['paiedAt'] = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss')
+        ord_data['paiedAt'] = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss');
       }
     }
     // console.log({ createOrderDto });
@@ -121,12 +124,94 @@ export class OrderService {
     }
   }
 
-  findAll() {
-    return `This action returns all order`;
+  async findAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string[]) {
+    const { take, page } = options;
+
+    const user = await this.usersService.findId(userInfo.id);
+
+    const where = commonUtils.searchSplit(search);
+
+    const [results, total] = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .where(qb => {
+        get(where, 'status', '')
+          && qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
+        get(where, 'code', '')
+          && qb.where('`order`.code IN (:code)', { code: isArray(where['code']) ? where['code'] : [where['code']] });
+        get(where, 'imp_uid', '')
+          && qb.where('`order`.imp_uid IN (:imp_uid)', { imp_uid: isArray(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
+        get(where, 'payment', '')
+          && qb.where('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
+        get(where, 'clientName', '')
+          && qb.where('`order`.clientName IN (:clientName)', { clientName: isArray(where['clientName']) ? where['clientName'] : [where['clientName']] });
+        get(where, 'bank', '') &&
+          qb.where('`order`.bank IN (:bank)', { bank: isArray(where['bank']) ? where['bank'] : [where['bank']] });
+        get(where, 'account', '') &&
+          qb.where('`order`.account IN (:account)', { account: isArray(where['account']) ? where['account'] : [where['account']] });
+        get(where, 'depositer', '') &&
+          qb.where('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
+        get(where, 'remitter', '') &&
+          qb.where('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
+        if (['host', 'guest'].includes(user['group']['id'])) {
+          qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        }
+      })
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const data = new Pagination({
+      results,
+      total,
+    });
+
+    return { data }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOneIdx(userInfo: UsersEntity, idx: number) {
+    if (!idx) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const user = await this.usersService.findId(userInfo['id']);
+    const order = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .where(qb => {
+        if (['host', 'guest'].includes(user['group']['id'])) {
+          qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        }
+        qb.where('`order`.idx = :idx', { idx: idx });
+      })
+      .getOne();
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+
+    return { order };
+  }
+
+  async findOneCode(code: string) {
+    if (!code) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const order = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .where(qb => {
+        qb.where('`order`.code = :code', { code: code });
+      })
+      .getOne();
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return { order };
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
