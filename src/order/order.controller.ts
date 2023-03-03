@@ -58,12 +58,13 @@ export class OrderController {
     ,
     required: false
   })
+  @ApiQuery({ name: "order", required: false })
   async findAll(
     @GetUser() user: UsersEntity,
     @Query('take') take: number,
     @Query('page') page: number,
     @Query('search') search: string[],
-    @Query('order') order: string[],
+    @Query('order') order: string,
   ) {
     return await this.orderService.findAll(user, { take, page }, search, order);
   }

@@ -106,12 +106,9 @@ export class BoardContentsService {
 
     const where = commonUtils.searchSplit(search);
 
-    const order_by = {};
-    if (order) {
-      order = order.split(':');
-      order_by[order[0]] = order[1];
-    }
-    order_by['createdAt'] = 'DESC';
+    const order_by = commonUtils.orderSplit(order, '');
+    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
+
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
@@ -153,12 +150,8 @@ export class BoardContentsService {
       where: { bcat_id: In([category]) }
     });
 
-    const order_by = {};
-    if (order) {
-      order = order.split(':');
-      order_by[order[0]] = order[1];
-    }
-    order_by['createdAt'] = 'DESC';
+    const order_by = commonUtils.orderSplit(order, '');
+    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
@@ -310,12 +303,9 @@ export class BoardContentsService {
       where: { bcat_id: In([category]) }
     });
 
-    const order_by = {};
-    if (order) {
-      order = order.split(':');
-      order_by[order[0]] = order[1];
-    }
-    order_by['createdAt'] = 'DESC';
+    const order_by = commonUtils.orderSplit(order, '');
+    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
+
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
