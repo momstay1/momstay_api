@@ -74,6 +74,19 @@ export const commonUtils = {
 
     return where;
   },
+  orderSplit(order: string, alias: string) {
+    let order_by = {};
+    if (order) {
+      const order_arr = order.split(':');
+      if (alias && order_arr[0].indexOf('.') === -1) {
+        order_by[alias + '.' + order_arr[0]] = order_arr[1];
+      } else {
+        order_by[order_arr[0]] = order_arr[1];
+      }
+    }
+
+    return order_by;
+  },
   async authCheck(auth, groupId) {
     return auth.includes(groupId);
   },

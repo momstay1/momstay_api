@@ -124,12 +124,17 @@ export class OrderService {
     }
   }
 
-  async findAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string[]) {
+  async findAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
     const where = commonUtils.searchSplit(search);
+
+    const alias = 'order';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.user', 'user')
@@ -159,6 +164,7 @@ export class OrderService {
           qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
+      .orderBy(order_by)
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getManyAndCount();
