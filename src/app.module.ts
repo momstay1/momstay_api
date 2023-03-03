@@ -40,6 +40,7 @@ import { PgNotiModule } from './pg-noti/pg-noti.module';
 import { PgCancelModule } from './pg-cancel/pg-cancel.module';
 import { MypageModule } from './mypage/mypage.module';
 import { IamportService } from './iamport/iamport.service';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { IamportService } from './iamport/iamport.service';
     PgNotiModule,
     PgCancelModule,
     MypageModule,
+    ReviewsModule,
   ],
   providers: [CommonService, IamportService],
 })
