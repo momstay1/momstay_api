@@ -94,9 +94,22 @@ export class OrderController {
     return await this.orderService.findOneCode(code);
   }
 
+  @Patch('host/:code')
+  @ApiOperation({ summary: '호스트 주문 승인 API' })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  async hostOrderApproval(
+    @GetUser() user: UsersEntity,
+    @Param('code') code: string,
+    @Body() updateOrderDto: UpdateOrderDto
+  ) {
+    await this.orderService.hostOrderApproval(code, user, updateOrderDto);
+  }
+
   // 주문 취소 = 전체 취소만 가능
-  @Patch('/guest/:code')
-  @ApiOperation({ summary: '게스트 주문 취소 API (작업중)' })
+  @Delete('/guest/:code')
+  @ApiOperation({ summary: '게스트 주문 취소 API' })
   @Auth(['root', 'admin', 'guest'])
   @ApiBearerAuth()
   @HttpCode(204)
@@ -109,8 +122,8 @@ export class OrderController {
   }
 
   // 주문 취소 = 전체 취소만 가능
-  @Patch('host/:code')
-  @ApiOperation({ summary: '호스트 주문 거절 API (작업중)' })
+  @Delete('host/:code')
+  @ApiOperation({ summary: '호스트 주문 거절 API' })
   @Auth(['root', 'admin', 'host'])
   @ApiBearerAuth()
   @HttpCode(204)

@@ -249,6 +249,41 @@ export class OrderService {
     const cancelReason = '게스트 취소';
     // 취소 처리
     this.cancelProcess(order, cancelReason);
+
+    // 호스트 알림 발송 기능 필요
+  }
+
+  async hostOrderApproval(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
+    if (!code || !get(updateOrderDto, 'status', '')) {
+      throw new NotFoundException('변경할 정보가 없습니다.');
+    }
+    // 호스트 정보 가져오기
+    const user = await this.userService.findId(get(userInfo, 'id'));
+
+    // 주문 및 주문 정보 가져오기
+    const order = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('product.user', 'user')
+      .where(qb => {
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
+      })
+      .getOne();
+
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('변경할 주문이 없습니다.');
+    }
+
+    // 주문 배송중(호스트 승인) 상태 변경
+    const shipping_status = commonUtils.getStatus(['order_status', 'shipping']);
+    // 주문 취소 상태 변경
+    await this.statusChange(order['idx'], shipping_status);
+    // 주문 상품 취소 상태 변경
+    await this.orderProductService.statusChange(order['idx'], shipping_status);
+
+    // 게스트 알림 발송 기능 필요
   }
 
   async hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
@@ -279,6 +314,8 @@ export class OrderService {
 
     // 취소 처리
     this.cancelProcess(order, cancelReason);
+
+    // 게스트 알림 발송 기능 필요
   }
 
   // 취소 처리
