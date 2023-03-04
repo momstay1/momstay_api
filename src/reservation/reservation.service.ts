@@ -67,7 +67,7 @@ export class ReservationService {
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
         qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-        qb.where('`user`.id = :user_id', { user_id: userInfo.id });
+        qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
       })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
@@ -96,7 +96,7 @@ export class ReservationService {
       .leftJoinAndSelect('reservation.user', 'user')
       .where((qb) => {
         qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-        qb.where('`user`.id = :user_id', { user_id: userInfo.id });
+        qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
       })
       .skip((take * (page - 1) || 0))
       .take((take || 10))

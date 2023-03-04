@@ -94,6 +94,7 @@ export class OrderController {
     return await this.orderService.findOneCode(code);
   }
 
+  // 주문 취소 = 전체 취소만 가능
   @Patch('/guest/:code')
   @ApiOperation({ summary: '게스트 주문 취소 API (작업중)' })
   @Auth(['root', 'admin', 'guest'])
@@ -107,6 +108,7 @@ export class OrderController {
     await this.orderService.guestOrderCancel(code, user, updateOrderDto);
   }
 
+  // 주문 취소 = 전체 취소만 가능
   @Patch('host/:code')
   @ApiOperation({ summary: '호스트 주문 거절 API (작업중)' })
   @Auth(['root', 'admin', 'host'])

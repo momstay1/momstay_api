@@ -1,6 +1,6 @@
 import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isArray, map, reduce } from 'lodash';
+import { get, isArray, map, reduce, values } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -127,6 +127,8 @@ export class OrderService {
 
     const where = commonUtils.searchSplit(search);
 
+    where['status'] = get(where, 'status', values(commonUtils.getStatus(['order_status'])));
+
     const alias = 'order';
     let order_by = commonUtils.orderSplit(order, alias);
     order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
@@ -138,26 +140,25 @@ export class OrderService {
       .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
       .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
       .where(qb => {
-        get(where, 'status', '')
-          && qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
+        qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'code', '')
-          && qb.where('`order`.code IN (:code)', { code: isArray(where['code']) ? where['code'] : [where['code']] });
+          && qb.andWhere('`order`.code IN (:code)', { code: isArray(where['code']) ? where['code'] : [where['code']] });
         get(where, 'imp_uid', '')
-          && qb.where('`order`.imp_uid IN (:imp_uid)', { imp_uid: isArray(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
+          && qb.andWhere('`order`.imp_uid IN (:imp_uid)', { imp_uid: isArray(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
         get(where, 'payment', '')
-          && qb.where('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
+          && qb.andWhere('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
         get(where, 'clientName', '')
-          && qb.where('`order`.clientName IN (:clientName)', { clientName: isArray(where['clientName']) ? where['clientName'] : [where['clientName']] });
-        get(where, 'bank', '') &&
-          qb.where('`order`.bank IN (:bank)', { bank: isArray(where['bank']) ? where['bank'] : [where['bank']] });
-        get(where, 'account', '') &&
-          qb.where('`order`.account IN (:account)', { account: isArray(where['account']) ? where['account'] : [where['account']] });
-        get(where, 'depositer', '') &&
-          qb.where('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
-        get(where, 'remitter', '') &&
-          qb.where('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
+          && qb.andWhere('`order`.clientName IN (:clientName)', { clientName: isArray(where['clientName']) ? where['clientName'] : [where['clientName']] });
+        get(where, 'bank', '') 
+          && qb.andWhere('`order`.bank IN (:bank)', { bank: isArray(where['bank']) ? where['bank'] : [where['bank']] });
+        get(where, 'account', '') 
+          && qb.andWhere('`order`.account IN (:account)', { account: isArray(where['account']) ? where['account'] : [where['account']] });
+        get(where, 'depositer', '') 
+          && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
+        get(where, 'remitter', '') 
+          && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
         if (['host', 'guest'].includes(user['group']['id'])) {
-          qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+          qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -184,10 +185,10 @@ export class OrderService {
       .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
       .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
       .where(qb => {
-        if (['host', 'guest'].includes(user['group']['id'])) {
-          qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
-        }
         qb.where('`order`.idx = :idx', { idx: idx });
+        if (['host', 'guest'].includes(user['group']['id'])) {
+          qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        }
       })
       .getOne();
     if (!get(order, 'idx', '')) {
@@ -225,8 +226,10 @@ export class OrderService {
       throw new NotFoundException('취소할 정보가 없습니다.');
     }
 
+    // 게스트 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
 
+    // 주문 및 주문관련 정보 가져오기
     const order = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
@@ -234,7 +237,7 @@ export class OrderService {
       .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
       .where(qb => {
         qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
-        qb.where('`order`.code = :code', { code: code });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -242,6 +245,7 @@ export class OrderService {
       throw new NotFoundException('취소할 주문이 없습니다.');
     }
 
+    // 취소 사유
     const cancelReason = '게스트 취소';
     // 취소 처리
     this.cancelProcess(order, cancelReason);
@@ -251,9 +255,10 @@ export class OrderService {
     if (!code || !get(updateOrderDto, 'status', '')) {
       throw new NotFoundException('변경할 정보가 없습니다.');
     }
-
+    // 호스트 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
 
+    // 주문 및 주문 정보 가져오기
     const order = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
       .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
@@ -261,7 +266,7 @@ export class OrderService {
       .leftJoinAndSelect('product.user', 'user')
       .where(qb => {
         qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
-        qb.where('`order`.code = :code', { code: code });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -269,6 +274,7 @@ export class OrderService {
       throw new NotFoundException('변경할 주문이 없습니다.');
     }
 
+    // 취소 사유
     const cancelReason = '호스트 취소(' + get(updateOrderDto, 'cancelReason', '') + ')';
 
     // 취소 처리
@@ -284,12 +290,11 @@ export class OrderService {
     }, 0);
     // 취소완료 상태 (8)
     const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
-    console.log({ cancelPrice });
 
     // 결제 내역 취소
     // 결제 금액 0원 설정시 전액 취소
     await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
-    // 주문 상태 변경
+    // 주문 취소 상태 변경
     await this.statusChange(order['idx'], cancel_status);
     // 주문 상품 취소 상태 변경
     await this.orderProductService.statusChange(order['idx'], cancel_status);
@@ -311,6 +316,7 @@ export class OrderService {
     return `This action removes a #${id} order`;
   }
 
+  // 주문 검증
   async orderVerification(createOrderDto: CreateOrderDto) {
     const { response } = await this.iamportService.getPaymentByImpUid(createOrderDto['imp_uid']);
     const result = { status: true, message: '' };
