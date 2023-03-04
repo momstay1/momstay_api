@@ -2,14 +2,38 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Auth } from 'src/common/decorator/role.decorator';
+import { UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/common/common.file';
+import { GetUser } from 'src/auth/getuser.decorator';
+import { UsersEntity } from 'src/users/entities/user.entity';
 
 @Controller('reviews')
+@ApiTags('후기 API')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post()
-  create(@Body() createReviewDto: CreateReviewDto) {
-    return this.reviewsService.create(createReviewDto);
+  @ApiOperation({ summary: '후기 등록 API' })
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'reviewImg', maxCount: 10 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @GetUser() user: UsersEntity,
+    @Body() createReviewDto: CreateReviewDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.reviewsService.create(user, createReviewDto, files);
+  }
+
+  @Get('/test')
+  async test() {
+    await this.reviewsService.averageStar(7);
   }
 
   @Get()
@@ -19,7 +43,7 @@ export class ReviewsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.reviewsService.findOne(+id);
+    // return this.reviewsService.findOne(+id);
   }
 
   @Patch(':id')

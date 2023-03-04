@@ -162,7 +162,7 @@ export class ProductService {
       console.log({ files });
       new_file = await this.fileService.fileInfoInsert(files, product['idx']);
       console.log({ new_file });
-      fileIdxs = union(fileIdxs, ...map(new_file[product_data['idx']], (obj) => map(obj, o => "" + o.file_idx)));
+      fileIdxs = union(fileIdxs, ...map(new_file[product['idx']], (obj) => map(obj, o => "" + o.file_idx)));
       console.log({ fileIdxs });
     }
 
@@ -365,6 +365,14 @@ export class ProductService {
 
   update(id: number, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
+  }
+
+  async updateAverageStar(idx: number, {star, reviewCount}) {
+    await this.productRepository.createQueryBuilder()
+      .update(ProductEntity)
+      .set({star, reviewCount})
+      .where(" idx = :idx", { idx: idx })
+      .execute()
   }
 
   remove(id: number) {

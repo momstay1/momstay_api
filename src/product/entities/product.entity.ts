@@ -2,6 +2,7 @@ import { CollegeEntity } from "src/college/entities/college.entity";
 import { MetroEntity } from "src/metro/entities/metro.entity";
 import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
 import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
+import { ReviewEntity } from "src/reviews/entities/review.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
 import {
   Column,
@@ -82,6 +83,10 @@ export class ProductEntity {
   oldData: string;
   @Column({ default: '', comment: '편의 시설 검색 쉽게 하기 위한 column' })
   productInfoIdxs: string;
+  @Column({ type: "decimal", default: 0.0, precision: 10, scale: 1, comment: '평균 평점' })
+  star: number;
+  @Column({ default: 0, comment: '리뷰 개수' })
+  reviewCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -96,6 +101,8 @@ export class ProductEntity {
 
   @OneToMany(() => ProductOptionEntity, (po) => po.product)
   productOption: undefined;
+  @OneToMany(() => ReviewEntity, (review) => review.product)
+  review: undefined;
 
   @ManyToMany(() => ProductInfoEntity, (pi) => pi.product)
   productInfo: ProductInfoEntity[];
