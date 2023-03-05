@@ -55,7 +55,8 @@ export class ProductController {
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]) {
+    @Query('search') search: string[]
+  ) {
     const {
       data: {
         results,

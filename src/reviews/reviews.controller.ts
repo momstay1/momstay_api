@@ -2,9 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
-import { UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
+import { HttpCode, Query, UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 import { GetUser } from 'src/auth/getuser.decorator';
@@ -36,14 +36,48 @@ export class ReviewsController {
     // await this.reviewsService.averageStar(7);
   }
 
-  @Get()
-  findAll() {
-    return this.reviewsService.findAll();
+  @Get('/product/:idx')
+  @ApiOperation({ summary: '숙소 상세 후기 리스트 조회 API' })
+  @ApiQuery({
+    name: "search",
+    description: 'search=status:상태값(1:삭제|2:등록, 기본값:2)<br>'
+      ,
+    required: false
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+      ,
+    required: false
+  })
+  async findAllProduct(
+    @Param('idx') idx: number,
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
+    const {
+      data: {
+        results,
+        total,
+        pageTotal
+      },
+      file_info
+    } = await this.reviewsService.findAllProduct(idx, {take, page}, search, order);
+
+    return {
+      results,
+      total,
+      pageTotal,
+      file_info
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    // return this.reviewsService.findOne(+id);
+  @Get(':idx')
+  @ApiOperation({ summary: '후기 상세 조회 API' })
+  async findOne(@Param('idx') idx: string) {
+    return await this.reviewsService.findOne(+idx);
   }
   
   @Patch(':idx')
@@ -63,8 +97,22 @@ export class ReviewsController {
     return await this.reviewsService.update(idx, user, updateReviewDto, files);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reviewsService.remove(+id);
+  @Delete()
+  @ApiOperation({ summary: '후기 삭제 API' })
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      properties: {
+        idxs: { example: [] }
+      }
+    }
+  })
+  @HttpCode(204)
+  async statusUpdate(
+    @GetUser() user: UsersEntity,
+    @Body('idxs') idxs: []
+  ) {
+    return await this.reviewsService.statusUpdate(idxs, user);
   }
 }
