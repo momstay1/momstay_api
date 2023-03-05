@@ -33,7 +33,7 @@ export class ReviewsController {
 
   @Get('/test')
   async test() {
-    await this.reviewsService.averageStar(7);
+    // await this.reviewsService.averageStar(7);
   }
 
   @Get()
@@ -45,10 +45,22 @@ export class ReviewsController {
   findOne(@Param('id') id: string) {
     // return this.reviewsService.findOne(+id);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewsService.update(+id, updateReviewDto);
+  
+  @Patch(':idx')
+  @ApiOperation({ summary: '후기 수정 API' })
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'reviewImg', maxCount: 10 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async update(
+    @Param('idx') idx: number,
+    @GetUser() user: UsersEntity,
+    @Body() updateReviewDto: UpdateReviewDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.reviewsService.update(idx, user, updateReviewDto, files);
   }
 
   @Delete(':id')

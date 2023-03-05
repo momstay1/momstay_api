@@ -182,7 +182,7 @@ export class ReservationService {
   }
   // 상태 변경 가능한지 권한 체크
   async authCheckStatus({ group, id }, idx) {
-    if (!['root', 'admin'].includes(group)) {
+    if (!commonUtils.isAdmin(group)) {
       // 관리자가 아닌 경우
       // 회원 정보 가져오기
       const user = await this.usersService.findId(id);

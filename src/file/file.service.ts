@@ -386,21 +386,20 @@ export class FileService {
     // 파일 제거
     const fileIdx = get(dto, 'filesIdx', '');
     let fileIdxs = [];
-    if (fileIdx) {
-      console.log('-----------------------파일 제거-----------------------');
-      try {
-        const reviewFileIdxs = map(
-          await this.findCategory(category, "" + idx),
-          (o) => "" + o.file_idx
-        );
-        fileIdxs = fileIdx.split(",");
-        const delFileIdxs = reviewFileIdxs.filter(o => !fileIdxs.includes(o));
-        if (delFileIdxs.length > 0) {
-          await this.removes(delFileIdxs);
-        }
-      } catch (error) {
-        console.log({ error });
+    console.log('-----------------------파일 제거-----------------------');
+    try {
+      const File_idxs = map(
+        await this.findCategory(category, "" + idx),
+        (o) => "" + o.file_idx
+      );
+      fileIdxs = fileIdx ? fileIdx.split(",") : [];
+      const delFileIdxs = File_idxs.filter(o => !fileIdxs.includes(o));
+      console.log({delFileIdxs});
+      if (delFileIdxs.length > 0) {
+        await this.removes(delFileIdxs);
       }
+    } catch (error) {
+      console.log({ error });
     }
 
     return fileIdxs;
@@ -408,7 +407,7 @@ export class FileService {
 
   // post 또는 patch 요청시 새로 추가될 파일 등록
   async createByRequest(files, idx: number) {
-    let fileIdxs;
+    let fileIdxs = [];
     if (!isEmpty(files)) {
       console.log('-----------------------새 첨부파일 등록-----------------------');
       const new_file = await this.fileInfoInsert(files, idx);
