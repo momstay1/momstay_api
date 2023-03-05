@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { HttpCode, Query, UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -37,7 +37,13 @@ export class ReviewsController {
   }
 
   @Get('/product/:idx')
-  @ApiOperation({ summary: '숙소 상세 후기 리스트 조회 API' })
+  @ApiOperation({ 
+    summary: '숙소 상세 후기 리스트 조회 API',
+  })
+  @ApiParam({
+    name: "idx",
+    description: 'product idx값',
+  })
   @ApiQuery({
     name: "search",
     description: 'search=status:상태값(1:삭제|2:등록, 기본값:2)<br>'
@@ -76,12 +82,14 @@ export class ReviewsController {
 
   @Get(':idx')
   @ApiOperation({ summary: '후기 상세 조회 API' })
+  @ApiParam({ name: 'idx', description: 'review idx'})
   async findOne(@Param('idx') idx: string) {
     return await this.reviewsService.findOne(+idx);
   }
   
   @Patch(':idx')
   @ApiOperation({ summary: '후기 수정 API' })
+  @ApiParam({ name: 'idx', description: 'review idx'})
   @Auth(['Any'])
   @ApiBearerAuth()
   @UseInterceptors(FileFieldsInterceptor([
@@ -102,9 +110,15 @@ export class ReviewsController {
   @Auth(['Any'])
   @ApiBearerAuth()
   @ApiBody({
+    description: 'review idx를 배열로 전달 ex) [1,2,3]<br>'
+    + '관리자 계정의 경우 여러 후기 한번에 삭제 가능<br>'
+    + '일반 사용자의 경우 값은 배열이나 1개씩만 삭제 가능'
+    ,
     schema: {
       properties: {
-        idxs: { example: [] }
+        idxs: {
+          example: [],
+        }
       }
     }
   })
