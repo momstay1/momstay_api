@@ -193,5 +193,11 @@ export const commonUtils = {
     };
 
     return get(data, key, '');
+  },
+  isAdmin(groupId: string) {
+    return ['root', 'admin'].includes(groupId);
+  },
+  isRoot(groupId: string) {
+    return ['root'].includes(groupId);
   }
 };

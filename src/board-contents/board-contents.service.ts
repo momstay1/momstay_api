@@ -244,8 +244,8 @@ export class BoardContentsService {
 
     const user = await this.usersService.findId(userInfo.id);
     // 게시글 쓰기 권한 여부 확인
-    const adminAuth = await commonUtils.authCheck(['root', 'admin'], get(user, ['group', 'id']));
-    if (adminAuth.length <= 0) {
+    const adminAuth = await commonUtils.isAdmin(get(user, ['group', 'id']));
+    if (!adminAuth) {
       // 쓰기 권한 혹은 자신의 글이 아닌 경우
       const write_auth = board.write_auth.split("|");
       const user_auth = await commonUtils.authCheck(write_auth, get(userInfo, ['group']));
