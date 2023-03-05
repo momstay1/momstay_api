@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { NotFoundException, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isEmpty, map, reduce, union } from 'lodash';
+import { get, isArray, isEmpty, map, reduce, union } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
+import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductService } from 'src/product/product.service';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewEntity } from './entities/review.entity';
 
+const delete_status = 1;
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -70,6 +72,139 @@ export class ReviewsService {
     return `This action returns all reviews`;
   }
 
+  async findAllIdxs(idxs: []) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const reviews = await this.reviewRepository.find({
+      where: {idx: In(idxs)},
+      relations: ['product', 'user']
+    });
+    if (reviews.length <= 0) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return reviews;
+  }
+
+  async findAllProduct(idx: number, options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const where = commonUtils.searchSplit(search);
+    
+    where['status'] = get(where, 'status', '2');
+    const depth_zero = 0;
+
+    const alias = 'review';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
+    // depth 0인 후기 리스트 가져오기
+    const [results, total] = await this.reviewRepository.createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('review.product', 'product')
+      .where(qb => {
+        qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]})
+        qb.andWhere('`review`.`depth` = :depth', {depth: depth_zero})
+        qb.andWhere('`product`.`idx` = :productIdx', {productIdx: idx})
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const review_idxs = map(results, o => o.idx);
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['reviewImg'], review_idxs);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('후기 상세 이미지 파일 없음');
+    }
+    
+    const data = new Pagination({
+      results,
+      total,
+    });
+
+    // 답글 기능은 별도로 추가
+    // let reply = await this.reviewRepository.createQueryBuilder('review')
+    // .leftJoinAndSelect('review.user', 'user')
+    // .leftJoinAndSelect('review.product', 'product')
+    // .where(qb => {
+    //   qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]});
+    //   qb.andWhere('`review`.`group` IN :group', {group: review_idxs});
+    //   qb.andWhere('`review`.`depth` > :depth', {depth: depth_zero});
+    // })
+    // .skip((take * (page - 1) || 0))
+    // .take((take || 10))
+    // .getMany();
+
+    // reply = commonUtils.getArrayKey(reply, ['group'], true);
+
+    return {data, file_info};
+  }
+
+  async findAllUser(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+    
+    // 회원 정보 가져오기
+    const user = await this.userService.findId(get(userInfo, 'id'));
+
+    const where = commonUtils.searchSplit(search);
+    
+    where['status'] = get(where, 'status', '2');
+    const depth_zero = 0;
+
+    const alias = 'review';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
+    // depth 0인 후기 리스트 가져오기
+    const [results, total] = await this.reviewRepository.createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('review.product', 'product')
+      .where(qb => {
+        qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]})
+        qb.andWhere('`review`.`depth` = :depth', {depth: depth_zero})
+        qb.andWhere('`user`.`idx` = :userIdx', {userIdx: user['idx']})
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const review_idxs = map(results, o => o.idx);
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['reviewImg'], review_idxs);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('후기 상세 이미지 파일 없음');
+    }
+    
+    const data = new Pagination({
+      results,
+      total,
+    });
+
+    // 답글 기능은 별도로 추가
+    // let reply = await this.reviewRepository.createQueryBuilder('review')
+    // .leftJoinAndSelect('review.user', 'user')
+    // .leftJoinAndSelect('review.product', 'product')
+    // .where(qb => {
+    //   qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]});
+    //   qb.andWhere('`review`.`group` IN :group', {group: review_idxs});
+    //   qb.andWhere('`review`.`depth` > :depth', {depth: depth_zero});
+    // })
+    // .skip((take * (page - 1) || 0))
+    // .take((take || 10))
+    // .getMany();
+
+    // reply = commonUtils.getArrayKey(reply, ['group'], true);
+
+    return {data, file_info};
+  }
+
   async averageStar(review: ReviewEntity) {
     const star_data = await this.reviewRepository.createQueryBuilder('review')
       .select('SUM(`review`.`star`)', 'total_star')
@@ -104,6 +239,22 @@ export class ReviewsService {
       throw new NotFoundException('정보를 찾을 수 없습니다.');
     }
     return review;
+  }
+
+  async findOne(idx: number) {
+    const review = await this.findOneIdx(idx);
+    
+    if (review['status'] == delete_status) {
+      throw new NotFoundException('삭제된 후기 입니다.');
+    }
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['reviewImg'], [review['idx']]);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('후기 상세 이미지 파일 없음');
+    }
+    return {review, file_info};
   }
 
   async update(idx: number, userInfo: UsersEntity, updateReviewDto: UpdateReviewDto, files) {
@@ -148,5 +299,32 @@ export class ReviewsService {
 
   remove(id: number) {
     return `This action removes a #${id} review`;
+  }
+
+  async statusUpdate(idxs: [], userInfo: UsersEntity) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
+
+    // 회원 정보 가져오기
+    const user = await this.userService.findId(get(userInfo, 'id'));
+    // 후기 정보 가져오기
+    const reivews = await this.findAllIdxs(idxs);
+    if (!commonUtils.isAdmin(user['group']['id'])) {
+      // 일반 사용자인 경우 후기 한개씩만 삭제 가능
+      if (idxs.length > 1 || reivews.length > 1) {
+        throw new UnprocessableEntityException('삭제할 수 없습니다.');
+      }
+      // 일반 사용자인 경우 자신의 후기 글인지 체크
+      if (reivews[0]['user']['idx'] != user['idx']) {
+        throw new UnauthorizedException('권한이 없습니다.');
+      }
+    }
+
+    await this.reviewRepository.createQueryBuilder()
+      .update()
+      .set({status: delete_status})
+      .where("idx IN (:idxs)", { idxs: idxs })
+      .execute()
   }
 }
