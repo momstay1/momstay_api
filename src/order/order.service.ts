@@ -90,7 +90,7 @@ export class OrderService {
     // console.log({ po });
 
     // 회원 주문인 경우 회원 정보 가져오기
-    ord_data['userIdx'] = await this.userService.findId(get(userInfo, 'id'));
+    ord_data['user'] = await this.userService.findId(get(userInfo, 'id'));
 
     // 주문 수량 체크 기능 필요 (맘스테이는 필요 없음)
 
@@ -149,13 +149,13 @@ export class OrderService {
           && qb.andWhere('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
         get(where, 'clientName', '')
           && qb.andWhere('`order`.clientName IN (:clientName)', { clientName: isArray(where['clientName']) ? where['clientName'] : [where['clientName']] });
-        get(where, 'bank', '') 
+        get(where, 'bank', '')
           && qb.andWhere('`order`.bank IN (:bank)', { bank: isArray(where['bank']) ? where['bank'] : [where['bank']] });
-        get(where, 'account', '') 
+        get(where, 'account', '')
           && qb.andWhere('`order`.account IN (:account)', { account: isArray(where['account']) ? where['account'] : [where['account']] });
-        get(where, 'depositer', '') 
+        get(where, 'depositer', '')
           && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
-        get(where, 'remitter', '') 
+        get(where, 'remitter', '')
           && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
         if (['host', 'guest'].includes(user['group']['id'])) {
           qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
