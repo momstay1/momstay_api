@@ -26,14 +26,14 @@ export class ReviewsService {
   async create(userInfo: UsersEntity, createReviewDto: CreateReviewDto, files) {
     if (get(createReviewDto, 'depth', 0) > 0 && get(createReviewDto, 'group', 0) == 0) {
       throw new UnprocessableEntityException('처리 할 수 없습니다.');
-      
+
     }
     // 숙소 정보 가져오기
     const prd = await this.productService.findOneIdx(+get(createReviewDto, 'productIdx'));
-    
+
     // 회원 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
-    
+
     const review_data = {
       status: get(createReviewDto, 'status'),
       depth: get(createReviewDto, 'depth', 0),
@@ -55,17 +55,17 @@ export class ReviewsService {
 
     // 숙소 평균 평점 계산
     await this.averageStar(review);
-    
+
     // 새 첨부파일 등록
     const [fileIdxs] = await this.fileService.createByRequest(files, review['idx']);
-    console.log({fileIdxs});
+    console.log({ fileIdxs });
 
     let file_info;
     if (fileIdxs.length > 0) {
       file_info = await this.fileService.findIndexs(fileIdxs);
     }
 
-    return {review, file_info};
+    return { review, file_info };
   }
 
   findAll() {
@@ -77,7 +77,7 @@ export class ReviewsService {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
     const reviews = await this.reviewRepository.find({
-      where: {idx: In(idxs)},
+      where: { idx: In(idxs) },
       relations: ['product', 'user']
     });
     if (reviews.length <= 0) {
@@ -90,7 +90,7 @@ export class ReviewsService {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
-    
+
     where['status'] = get(where, 'status', '2');
     const depth_zero = 0;
 
@@ -103,9 +103,9 @@ export class ReviewsService {
       .leftJoinAndSelect('review.user', 'user')
       .leftJoinAndSelect('review.product', 'product')
       .where(qb => {
-        qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]})
-        qb.andWhere('`review`.`depth` = :depth', {depth: depth_zero})
-        qb.andWhere('`product`.`idx` = :productIdx', {productIdx: idx})
+        qb.where('`review`.`status` IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] })
+        qb.andWhere('`review`.`depth` = :depth', { depth: depth_zero })
+        qb.andWhere('`product`.`idx` = :productIdx', { productIdx: idx })
       })
       .orderBy(order_by)
       .skip((take * (page - 1) || 0))
@@ -120,7 +120,7 @@ export class ReviewsService {
     } catch (error) {
       console.log('후기 상세 이미지 파일 없음');
     }
-    
+
     const data = new Pagination({
       results,
       total,
@@ -141,17 +141,17 @@ export class ReviewsService {
 
     // reply = commonUtils.getArrayKey(reply, ['group'], true);
 
-    return {data, file_info};
+    return { data, file_info };
   }
 
   async findAllUser(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
-    
+
     // 회원 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
 
     const where = commonUtils.searchSplit(search);
-    
+
     where['status'] = get(where, 'status', '2');
     const depth_zero = 0;
 
@@ -164,9 +164,9 @@ export class ReviewsService {
       .leftJoinAndSelect('review.user', 'user')
       .leftJoinAndSelect('review.product', 'product')
       .where(qb => {
-        qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]})
-        qb.andWhere('`review`.`depth` = :depth', {depth: depth_zero})
-        qb.andWhere('`user`.`idx` = :userIdx', {userIdx: user['idx']})
+        qb.where('`review`.`status` IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] })
+        qb.andWhere('`review`.`depth` = :depth', { depth: depth_zero })
+        qb.andWhere('`user`.`idx` = :userIdx', { userIdx: user['idx'] })
       })
       .orderBy(order_by)
       .skip((take * (page - 1) || 0))
@@ -181,7 +181,7 @@ export class ReviewsService {
     } catch (error) {
       console.log('후기 상세 이미지 파일 없음');
     }
-    
+
     const data = new Pagination({
       results,
       total,
@@ -202,7 +202,7 @@ export class ReviewsService {
 
     // reply = commonUtils.getArrayKey(reply, ['group'], true);
 
-    return {data, file_info};
+    return { data, file_info };
   }
 
   async averageStar(review: ReviewEntity) {
@@ -212,9 +212,9 @@ export class ReviewsService {
       .leftJoin('review.product', 'product')
       .leftJoin('review.user', 'user')
       .where(qb => {
-        qb.where('`review`.`status` = :status', {status: 2})
-        qb.andWhere('`user`.`idx` = :userIdx', {userIdx: review['user']['idx']})
-        qb.andWhere('`product`.`idx` = :productIdx', {productIdx: review['product']['idx']})
+        qb.where('`review`.`status` = :status', { status: 2 })
+        qb.andWhere('`user`.`idx` = :userIdx', { userIdx: review['user']['idx'] })
+        qb.andWhere('`product`.`idx` = :productIdx', { productIdx: review['product']['idx'] })
       })
       .execute();
 
@@ -232,7 +232,7 @@ export class ReviewsService {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
     const review = await this.reviewRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: ['product', 'user']
     });
     if (!get(review, 'idx', '')) {
@@ -243,7 +243,7 @@ export class ReviewsService {
 
   async findOne(idx: number) {
     const review = await this.findOneIdx(idx);
-    
+
     if (review['status'] == delete_status) {
       throw new NotFoundException('삭제된 후기 입니다.');
     }
@@ -254,12 +254,11 @@ export class ReviewsService {
     } catch (error) {
       console.log('후기 상세 이미지 파일 없음');
     }
-    return {review, file_info};
+    return { review, file_info };
   }
 
   async update(idx: number, userInfo: UsersEntity, updateReviewDto: UpdateReviewDto, files) {
     const prevReview = await this.findOneIdx(idx);
-    console.log(prevReview['star']);
 
     // 회원 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
@@ -270,31 +269,30 @@ export class ReviewsService {
       }
     }
 
-    const {star} = prevReview;
-    console.log({star});
+    // 변경된 내용 저장
     if (get(updateReviewDto, 'status', '')) prevReview['status'] = get(updateReviewDto, 'status');
     if (get(updateReviewDto, 'star', '')) prevReview['star'] = get(updateReviewDto, 'star');
     if (get(updateReviewDto, 'contents', '')) prevReview['contents'] = get(updateReviewDto, 'contents');
     const review = await this.reviewRepository.save(prevReview);
-    // 숙소 평균 평점 계산
 
+    // 숙소 평균 평점 계산
     await this.averageStar(review);
 
     // 유지 안하는 이전파일 제거
     await this.fileService.removeByRequest(updateReviewDto, review['idx'], ['reviewImg']);
-    
+
     // 새 첨부파일 등록
     await this.fileService.createByRequest(files, review['idx']);
 
+    // 파일 정보 가져오기
     let file_info;
     try {
-      file_info = await this.fileService.findCategory(['reviewImg'], ''+review['idx']);
+      file_info = await this.fileService.findCategory(['reviewImg'], '' + review['idx']);
     } catch (error) {
-      console.log({error});
+      console.log({ error });
     }
-      
 
-    return {review, file_info};
+    return { review, file_info };
   }
 
   remove(id: number) {
@@ -323,7 +321,7 @@ export class ReviewsService {
 
     await this.reviewRepository.createQueryBuilder()
       .update()
-      .set({status: delete_status})
+      .set({ status: delete_status })
       .where("idx IN (:idxs)", { idxs: idxs })
       .execute()
   }

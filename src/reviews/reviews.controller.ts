@@ -13,7 +13,7 @@ import { UsersEntity } from 'src/users/entities/user.entity';
 @Controller('reviews')
 @ApiTags('후기 API')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) { }
 
   @Post()
   @ApiOperation({ summary: '후기 등록 API' })
@@ -37,7 +37,7 @@ export class ReviewsController {
   }
 
   @Get('/product/:idx')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '숙소 상세 후기 리스트 조회 API',
   })
   @ApiParam({
@@ -47,13 +47,13 @@ export class ReviewsController {
   @ApiQuery({
     name: "search",
     description: 'search=status:상태값(1:삭제|2:등록, 기본값:2)<br>'
-      ,
+    ,
     required: false
   })
   @ApiQuery({
     name: "order",
     description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
-      ,
+    ,
     required: false
   })
   async findAllProduct(
@@ -70,7 +70,7 @@ export class ReviewsController {
         pageTotal
       },
       file_info
-    } = await this.reviewsService.findAllProduct(idx, {take, page}, search, order);
+    } = await this.reviewsService.findAllProduct(idx, { take, page }, search, order);
 
     return {
       results,
@@ -82,14 +82,17 @@ export class ReviewsController {
 
   @Get(':idx')
   @ApiOperation({ summary: '후기 상세 조회 API' })
-  @ApiParam({ name: 'idx', description: 'review idx'})
+  @ApiParam({ name: 'idx', description: 'review idx' })
   async findOne(@Param('idx') idx: string) {
     return await this.reviewsService.findOne(+idx);
   }
-  
+
   @Patch(':idx')
-  @ApiOperation({ summary: '후기 수정 API' })
-  @ApiParam({ name: 'idx', description: 'review idx'})
+  @ApiOperation({
+    summary: '후기 수정 API',
+    description: 'status, star, content, reviewImg 만 변경 가능'
+  })
+  @ApiParam({ name: 'idx', description: 'review idx' })
   @Auth(['Any'])
   @ApiBearerAuth()
   @UseInterceptors(FileFieldsInterceptor([
@@ -111,8 +114,8 @@ export class ReviewsController {
   @ApiBearerAuth()
   @ApiBody({
     description: 'review idx를 배열로 전달 ex) [1,2,3]<br>'
-    + '관리자 계정의 경우 여러 후기 한번에 삭제 가능<br>'
-    + '일반 사용자의 경우 값은 배열이나 1개씩만 삭제 가능'
+      + '관리자 계정의 경우 여러 후기 한번에 삭제 가능<br>'
+      + '일반 사용자의 경우 1개만 삭제 가능'
     ,
     schema: {
       properties: {
