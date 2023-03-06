@@ -1,4 +1,4 @@
-import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get, isArray, map, reduce, values } from 'lodash';
 import { Repository } from 'typeorm';
@@ -72,7 +72,13 @@ export class OrderService {
     } else {
       ord_data['idx'] = createOrderDto['idx'];
       const order = await this.orderRepository.findOne({ idx: ord_data['idx'] });
+      if (order['status'] >= 1) {
+        throw new BadRequestException('이미 처리된 주문입니다.');
+      }
       if (createOrderDto['status'] == 2 && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
+        if (!get(createOrderDto, 'imp_uid', '')) {
+          throw new NotFoundException('imp_uid 정보가 없습니다.');
+        }
         // 주문 검증
         const pg_data = await this.orderVerification(createOrderDto);
         // pg data 저장
@@ -94,8 +100,8 @@ export class OrderService {
 
     // 주문 수량 체크 기능 필요 (맘스테이는 필요 없음)
 
-    const order_data = await this.orderRepository.create(ord_data);
-    const order = await this.orderRepository.save(order_data);
+    const orderEntity = await this.orderRepository.create(ord_data);
+    const order = await this.orderRepository.save(orderEntity);
 
     // 주문 상품 설정 기능 작업중
     // 추후 주문 상품을 배열로 전달 (한 주문에 여러 주문 상품을 처리하는 경우에 작업 필요)

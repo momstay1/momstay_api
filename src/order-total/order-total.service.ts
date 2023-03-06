@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { get } from 'lodash';
 import { OrderProductEntity } from 'src/order-product/entities/order-product.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { Repository } from 'typeorm';
@@ -19,16 +20,21 @@ export class OrderTotalService {
   }
 
   async orderTotalCreate(order: OrderEntity, orderProduct: OrderProductEntity) {
+    let orderTotalInfo;
+    try {
+      orderTotalInfo = await this.findOneOrderIdx(order['idx']);
+    } catch (error) {
+      orderTotalInfo = {};
+    }
 
-    const total_data = {
-      orderIdx: '' + order['idx'],
-      totalPrice: orderProduct['price'] * orderProduct['num'],
-      payPrice: orderProduct['payPrice'] * orderProduct['num'],
-      origPayPrice: orderProduct['payPrice'] * orderProduct['num'],
-    };
+    const num = get(orderProduct, ['num']) > 0 ? orderProduct['num'] : 1;
+    orderTotalInfo['orderIdx'] = '' + order['idx'];
+    orderTotalInfo['totalPrice'] = orderProduct['payPrice'] * num;
+    orderTotalInfo['payPrice'] = orderProduct['payPrice'] * num;
+    orderTotalInfo['origPayPrice'] = orderProduct['payPrice'] * num;
 
-    const orderTotal_data = await this.orderTotalRepository.create(total_data);
-    const orderTotal = await this.orderTotalRepository.save(orderTotal_data);
+    const orderTotalEntity = await this.orderTotalRepository.create(orderTotalInfo);
+    const orderTotal = await this.orderTotalRepository.save(orderTotalEntity);
     return orderTotal;
   }
 
@@ -53,6 +59,19 @@ export class OrderTotalService {
 
   findOne(id: number) {
     return `This action returns a #${id} orderTotal`;
+  }
+
+  async findOneOrderIdx(orderIdx: number) {
+    if (!orderIdx) {
+      throw new NotFoundException('주문 번호 정보가 없습니다.');
+    }
+    const orderTotal = await this.orderTotalRepository.findOne({
+      where: { orderIdx: orderIdx }
+    });
+    if (!get(orderTotal, 'idx', '')) {
+      throw new NotFoundException('조회된 정보가 없습니다.');
+    }
+    return orderTotal;
   }
 
   update(id: number, updateOrderTotalDto: UpdateOrderTotalDto) {
