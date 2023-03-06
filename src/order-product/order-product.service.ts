@@ -40,6 +40,7 @@ export class OrderProductService {
     // 월 가격 일별 가격으로 변경 후 총 가격 계산
     priceInfo['taxPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
     priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['taxPrice'], priceInfo['fee'] + '%');
+    priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
 
     // 작업중
     const op_data = {
