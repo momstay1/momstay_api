@@ -43,7 +43,7 @@ export class OrderProductService {
 
     // 작업중
     const op_data = {
-      status: +order['status'],
+      status: order['status'],
       eq: '001',
       code: order['code'] + '-001',
       productOptionIdx: '' + po['idx'],
