@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
@@ -11,6 +11,7 @@ import { UpdateOrderProductDto } from './dto/update-order-product.dto';
 import { OrderProductEntity } from './entities/order-product.entity';
 
 import * as moment from 'moment';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class OrderProductService {
@@ -32,44 +33,50 @@ export class OrderProductService {
     // 파일 정보 가져오기
     const file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [po['idx']]);
 
-    const priceInfo = {
-      price: await this.calcTotalPrice(get(po, 'priceMonth', 0), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
-      tax: commonUtils.getStatus('tax'),
-      fee: commonUtils.getStatus('fee'),
-    };
-    // 월 가격 일별 가격으로 변경 후 총 가격 계산
-    priceInfo['taxPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
-    priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['taxPrice'], priceInfo['fee'] + '%');
-    priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
-
-    // 작업중
-    const op_data = {
-      status: order['status'],
-      eq: '001',
-      code: order['code'] + '-001',
-      productOptionIdx: '' + po['idx'],
-      productOptionCode: po['product']['code'],
-      productType: '1',
-      parcelCode: order['code'] + '-P01',
-      title: po['title'],
-      options: po['code'],
-      taxPrice: priceInfo['taxPrice'],
-      feePrice: priceInfo['feePrice'],
-      price: priceInfo['price'],
-      payPrice: priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'],
-      img: file[0]['file_storage_path'],
-      user: get(order, 'user', null),
-      order: order,
+    let op = {};
+    if (get(createOrderDto, 'orderProductIdx', '')) {
+      op = await this.findOneIdx(createOrderDto['orderProductIdx']);
+      // op_data['idx'] = get(createOrderDto, 'orderProductIdx');
     }
 
-    if (get(createOrderDto, 'num', '')) op_data['num'] = get(createOrderDto, 'num');
-    if (get(createOrderDto, 'startAt', '')) op_data['startAt'] = get(createOrderDto, 'startAt');
-    if (get(createOrderDto, 'endAt', '')) op_data['endAt'] = get(createOrderDto, 'endAt');
-    if (get(createOrderDto, 'ClientMemo', '')) op_data['memo'] = get(createOrderDto, 'clientMemo');
-    if (get(createOrderDto, 'orderProductIdx', '')) op_data['idx'] = get(createOrderDto, 'orderProductIdx');
+    let priceInfo = {};
+    if (get(createOrderDto, 'startAt', '') && get(createOrderDto, 'endAt', '')) {
+      priceInfo = {
+        price: await this.calcTotalPrice(get(po, 'priceMonth', 0), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
+        tax: commonUtils.getStatus('tax'),
+        fee: commonUtils.getStatus('fee'),
+      };
+      // 월 가격 일별 가격으로 변경 후 총 가격 계산
+      priceInfo['taxPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
+      priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['taxPrice'], priceInfo['fee'] + '%');
+      priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
+    }
+    console.log({ priceInfo });
+    // 작업중
+    op['status'] = order['status'];
+    op['eq'] = '001';
+    op['code'] = order['code'] + '-001';
+    op['productOptionIdx'] = '' + po['idx'];
+    op['productOptionCode'] = po['product']['code'];
+    op['productType'] = '1';
+    op['parcelCode'] = order['code'] + '-P01';
+    op['title'] = po['title'];
+    op['options'] = po['code'];
+    op['taxPrice'] = get(priceInfo, ['taxPrice'], 0);
+    op['feePrice'] = get(priceInfo, ['feePrice'], 0);
+    op['num'] = get(createOrderDto, 'num', 1);
+    op['price'] = get(priceInfo, ['price'], 0);
+    op['payPrice'] = get(priceInfo, ['totalPrice'], 0);
+    op['img'] = file[0]['file_storage_path'];
+    op['user'] = get(order, 'user', null);
+    op['order'] = order;
 
-    const orderProduct_data = await this.orderProductRepository.create(op_data);
-    const orderProduct = await this.orderProductRepository.save(orderProduct_data);
+    if (get(createOrderDto, 'startAt', '')) op['startAt'] = get(createOrderDto, 'startAt');
+    if (get(createOrderDto, 'endAt', '')) op['endAt'] = get(createOrderDto, 'endAt');
+    if (get(createOrderDto, 'ClientMemo', '')) op['memo'] = get(createOrderDto, 'clientMemo');
+
+    const orderProductEntity = await this.orderProductRepository.create(op);
+    const orderProduct = await this.orderProductRepository.save(orderProductEntity);
     return { orderProduct, priceInfo };
   }
 
@@ -79,6 +86,19 @@ export class OrderProductService {
 
   findOne(id: number) {
     return `This action returns a #${id} orderProduct`;
+  }
+
+  async findOneIdx(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const orderProduct = await this.orderProductRepository.findOne({
+      where: { idx: idx }
+    });
+    if (!get(orderProduct, 'idx', '')) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return orderProduct;
   }
 
   update(id: number, updateOrderProductDto: UpdateOrderProductDto) {
