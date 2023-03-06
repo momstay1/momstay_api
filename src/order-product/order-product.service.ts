@@ -58,8 +58,8 @@ export class OrderProductService {
       price: priceInfo['price'],
       payPrice: priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'],
       img: file[0]['file_storage_path'],
-      userIdx: get(order, 'user', null),
-      orderIdx: order,
+      user: get(order, 'user', null),
+      order: order,
     }
 
     if (get(createOrderDto, 'num', '')) op_data['num'] = get(createOrderDto, 'num');

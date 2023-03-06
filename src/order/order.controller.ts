@@ -44,9 +44,9 @@ export class OrderController {
     // return await this.orderService.create(createOrderDto, req);
   }
 
-  @Get()
-  @ApiOperation({ summary: '주문 리스트 조회 API' })
-  @Auth(['Any'])
+  @Get('guest')
+  @ApiOperation({ summary: '게스트 주문 리스트 조회 API' })
+  @Auth(['root', 'admin', 'guest'])
   @ApiBearerAuth()
   @ApiQuery({
     name: "search",
@@ -65,14 +65,45 @@ export class OrderController {
     required: false
   })
   @ApiQuery({ name: "order", required: false })
-  async findAll(
+  async guestFindAll(
     @GetUser() user: UsersEntity,
     @Query('take') take: number,
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
   ) {
-    return await this.orderService.findAll(user, { take, page }, search, order);
+    return await this.orderService.guestFindAll(user, { take, page }, search, order);
+  }
+
+  @Get('host')
+  @ApiOperation({ summary: '호스트 주문 리스트 조회 API' })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: "search",
+    description: ''
+      + 'search=status:상태검색 (1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정,<br>'
+      + '7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료))<br>'
+      + 'search=code:주문코드검생<br>'
+      + 'search=imp_uid:아임포트 고유 아이디 검색<br>'
+      + 'search=payment:결제방법 검색(bank, card, trans, vbank)<br>'
+      + 'search=clientName:주문자명 검색<br>'
+    // + 'search=bank:은행명 검색<br>'
+    // + 'search=account:계좌번호 검색<br>'
+    // + 'search=depositer:예금주명 검색<br>'
+    // + 'search=remitter:입금자명 검색<br>'
+    ,
+    required: false
+  })
+  @ApiQuery({ name: "order", required: false })
+  async hostFindAll(
+    @GetUser() user: UsersEntity,
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string,
+  ) {
+    return await this.orderService.hostFindAll(user, { take, page }, search, order);
   }
 
   @Get(':idx')

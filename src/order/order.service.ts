@@ -120,7 +120,8 @@ export class OrderService {
     }
   }
 
-  async findAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
+  // 게스트 결제 내역 리스트
+  async guestFindAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
@@ -157,7 +158,62 @@ export class OrderService {
           && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
         get(where, 'remitter', '')
           && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
-        if (['host', 'guest'].includes(user['group']['id'])) {
+        if (user['group']['id'] == 'guest') {
+          qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        }
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const data = new Pagination({
+      results,
+      total,
+    });
+
+    return { data }
+  }
+
+  // 호스트 결제 내역 리스트
+  async hostFindAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const user = await this.usersService.findId(userInfo.id);
+
+    const where = commonUtils.searchSplit(search);
+
+    where['status'] = get(where, 'status', values(commonUtils.getStatus(['order_status'])));
+
+    const alias = 'order';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+    console.log({ order_by });
+
+    const [results, total] = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('product.user', 'user', '`user`.idx=`product`.userIdx')
+      .where(qb => {
+        qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
+        get(where, 'code', '')
+          && qb.andWhere('`order`.code IN (:code)', { code: isArray(where['code']) ? where['code'] : [where['code']] });
+        get(where, 'imp_uid', '')
+          && qb.andWhere('`order`.imp_uid IN (:imp_uid)', { imp_uid: isArray(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
+        get(where, 'payment', '')
+          && qb.andWhere('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
+        get(where, 'clientName', '')
+          && qb.andWhere('`order`.clientName IN (:clientName)', { clientName: isArray(where['clientName']) ? where['clientName'] : [where['clientName']] });
+        get(where, 'bank', '')
+          && qb.andWhere('`order`.bank IN (:bank)', { bank: isArray(where['bank']) ? where['bank'] : [where['bank']] });
+        get(where, 'account', '')
+          && qb.andWhere('`order`.account IN (:account)', { account: isArray(where['account']) ? where['account'] : [where['account']] });
+        get(where, 'depositer', '')
+          && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
+        get(where, 'remitter', '')
+          && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
+        if (user['group']['id'] == 'host') {
           qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
