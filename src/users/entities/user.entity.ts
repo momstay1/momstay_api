@@ -1,4 +1,5 @@
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
+import { CommentEntity } from 'src/comment/entities/comment.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { DeviceEntity } from 'src/device/entities/device.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
@@ -118,6 +119,9 @@ export class UsersEntity {
 
   @OneToMany(() => ReviewEntity, (review) => review.user)
   review: undefined;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comment: undefined;
 
   // @OneToOne(() => DeviceEntity, (device) => device.user)
   // device: DeviceEntity

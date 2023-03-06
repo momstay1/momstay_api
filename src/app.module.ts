@@ -42,6 +42,7 @@ import { MypageModule } from './mypage/mypage.module';
 import { IamportService } from './iamport/iamport.service';
 import { ReviewsModule } from './reviews/reviews.module';
 import { DeviceModule } from './device/device.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { DeviceModule } from './device/device.module';
     MypageModule,
     ReviewsModule,
     DeviceModule,
+    CommentModule,
   ],
   providers: [CommonService, IamportService],
 })
