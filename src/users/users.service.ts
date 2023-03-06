@@ -1,20 +1,22 @@
 import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compact, filter, get, isArray, isEmpty, map } from 'lodash';
-import * as moment from "moment";
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { Brackets, In, MoreThanOrEqual, Repository } from 'typeorm';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
 import { EmailService } from 'src/email/email.service';
 import { FileService } from 'src/file/file.service';
 import { GroupsService } from 'src/groups/groups.service';
-import { Pagination, PaginationOptions } from 'src/paginate';
 import { UserSnsService } from 'src/user-sns/user-sns.service';
-import { Brackets, In, MoreThanOrEqual, Repository } from 'typeorm';
+import { DeviceService } from 'src/device/device.service';
 import { usersConstant } from './constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
 import { Cron } from '@nestjs/schedule';
+
+import * as moment from "moment";
 
 @Injectable()
 export class UsersService {
@@ -24,6 +26,7 @@ export class UsersService {
     private readonly userSnsService: UserSnsService,
     private readonly fileService: FileService,
     private readonly emailService: EmailService,
+    private readonly deviceService: DeviceService,
   ) { }
 
   async test(id) {
@@ -185,7 +188,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['group', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -203,7 +206,7 @@ export class UsersService {
         qb.where('`email` = :email', { email: id })
         qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
       },
-      relations: ['group', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'login', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -274,6 +277,19 @@ export class UsersService {
       file_info = await this.fileService.fileInfoInsert(files, user_data['idx']);
     }
     return { user: user_data, file_info }
+  }
+
+  // 단말기 회원정보 수정
+  async updateUser(token: string, userInfo: UsersEntity) {
+    const deviceInfo = await this.deviceService.findOneToken(token);
+
+    const user = await this.findId(userInfo.id);
+
+    user['device'] = deviceInfo;
+
+    await this.usersRepository.save(user);
+
+    return { user };
   }
 
   async chpw(id: string, password: string) {
