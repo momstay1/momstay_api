@@ -38,8 +38,8 @@ export class OrderProductService {
       fee: commonUtils.getStatus('fee'),
     };
     // 월 가격 일별 가격으로 변경 후 총 가격 계산
-    priceInfo['texPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
-    priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['texPrice'], priceInfo['fee'] + '%');
+    priceInfo['taxPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
+    priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['taxPrice'], priceInfo['fee'] + '%');
 
     // 작업중
     const op_data = {
@@ -52,10 +52,10 @@ export class OrderProductService {
       parcelCode: order['code'] + '-P01',
       title: po['title'],
       options: po['code'],
-      taxPrice: priceInfo['texPrice'],
+      taxPrice: priceInfo['taxPrice'],
       feePrice: priceInfo['feePrice'],
       price: priceInfo['price'],
-      payPrice: priceInfo['price'] + priceInfo['texPrice'] + priceInfo['feePrice'],
+      payPrice: priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'],
       img: file[0]['file_storage_path'],
       userIdx: get(order, 'user', null),
       orderIdx: order,
