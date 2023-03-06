@@ -27,10 +27,10 @@ export class OrderController {
   @ApiOperation({
     summary: '주문 생성 API',
     description: '최초 실행시 productOptionIdx값만 입력<br>'
-      + '최초 실행 이후 idx(order idx), price(가격), startAt(입주일), endAt(퇴거일), orderProductIdx값 입력'
-      + '주문 완료시 status: 2, imp_uid: 아임포트 고유번호 값 입력'
-      + '주문 상태가 0이 아니고 1이상인 주문인 경우 예외 처리'
-      + 'status 값이 2일때 imp_uid값 없는 경우 예외 처리'
+      + '최초 실행 이후 idx(order idx), price(가격), startAt(입주일), endAt(퇴거일), orderProductIdx값 입력<br>'
+      + '주문 완료시 status: 2, imp_uid: 아임포트 고유번호 값 입력<br>'
+      + '주문 상태가 0이 아니고 1이상인 주문인 경우 예외 처리<br>'
+      + 'status 값이 2일때 imp_uid값 없는 경우 예외 처리<br>'
     ,
   })
   @Auth(['Any'])
