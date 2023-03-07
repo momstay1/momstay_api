@@ -1,17 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { DeviceEntity } from './entities/device.entity';
+import { commonUtils } from 'src/common/common.utils';
 
 import * as moment from 'moment';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class DeviceService {
   constructor(
     @InjectRepository(DeviceEntity) private deviceRepository: Repository<DeviceEntity>,
+    private readonly jwtService: JwtService,
     // private readonly userService: UsersService,
     // private readonly productService: ProductService,
     // private readonly fileService: FileService,
@@ -21,17 +24,32 @@ export class DeviceService {
   async create(createDeviceDto: CreateDeviceDto) {
     let deviceInfo;
     try {
-      deviceInfo = await this.findOneToken(createDeviceDto['token']);
+      if (get(createDeviceDto, 'token', '')) {
+        deviceInfo = await this.findOneToken(createDeviceDto['token']);
+      } else {
+        throw new NotAcceptableException('토큰 정보 없음');
+      }
     } catch (error) {
       console.log({ error });
       deviceInfo = {};
     }
 
-    deviceInfo['token'] = createDeviceDto['token'];
-    deviceInfo['appVersion'] = createDeviceDto['appVersion'];
-    deviceInfo['os'] = createDeviceDto['os'];
-    deviceInfo['osVersion'] = createDeviceDto['osVersion'];
     deviceInfo['environment'] = createDeviceDto['environment'];
+    if (get(createDeviceDto, 'environment') == 'web') {
+      // 웹 접속인 경우 토큰 생성
+      deviceInfo['token'] = await this.deivceCreateCode();
+    } else {
+      if (!get(createDeviceDto, 'token', '')) throw new NotAcceptableException('토큰 정보 없음');
+      if (!get(createDeviceDto, 'appVersion', '')) throw new NotAcceptableException('앱 버전 정보 없음');
+      if (!get(createDeviceDto, 'os', '')) throw new NotAcceptableException('운영체제 정보 없음');
+      if (!get(createDeviceDto, 'osVersion', '')) throw new NotAcceptableException('운영체제 버전 정보 없음');
+      // 앱 접속인 경우 단말기 정보 및 push token 저장
+      deviceInfo['token'] = createDeviceDto['token'];
+      deviceInfo['appVersion'] = createDeviceDto['appVersion'];
+      deviceInfo['os'] = createDeviceDto['os'];
+      deviceInfo['osVersion'] = createDeviceDto['osVersion'];
+    }
+
     if (get(deviceInfo, ['marketing'], '') != createDeviceDto['marketing']) {
       deviceInfo['marketing'] = createDeviceDto['marketing'];
       deviceInfo['marketingAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -112,5 +130,23 @@ export class DeviceService {
 
   remove(id: number) {
     return `This action removes a #${id} device`;
+  }
+
+  async deivceCreateCode() {
+    const code = moment().format('YYMMDD') + commonUtils.createCode().toUpperCase();
+    const token = await this.createJwt({ webToken: code })
+    const isCode = await this.deviceRepository.findOne({
+      where: { token: token }
+    });
+
+    if (isCode) {
+      await this.deivceCreateCode();
+    } else {
+      return token;
+    }
+  }
+
+  async createJwt(payload: any, options?: JwtSignOptions) {
+    return this.jwtService.sign(payload, options);
   }
 }

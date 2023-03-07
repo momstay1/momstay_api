@@ -1,22 +1,22 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 
 export class CreateDeviceDto {
 
-  @IsString()
-  @ApiProperty({ description: '토큰 정보' })
+  @IsOptional()
+  @ApiProperty({ description: '토큰 정보', required: false })
   readonly token: string;
-  @IsString()
-  @ApiProperty({ description: '앱 버전' })
+  @IsOptional()
+  @ApiProperty({ description: '앱 버전', required: false })
   readonly appVersion: string;
-  @IsString()
-  @ApiProperty({ description: '운영체제 정보' })
+  @IsOptional()
+  @ApiProperty({ description: '운영체제 정보', required: false })
   readonly os: string;
-  @IsString()
-  @ApiProperty({ description: '운영체제 버전' })
+  @IsOptional()
+  @ApiProperty({ description: '운영체제 버전', required: false })
   readonly osVersion: string;
   @IsString()
-  @ApiProperty({ description: '접속 환경 (app | web)' })
+  @ApiProperty({ description: '접속 환경 (android | ios | web)' })
   readonly environment: string;
   @IsString()
   @ApiProperty({ description: '마케팅 정보 수신 동의 여부 (1: 비동의, 2: 동의)' })
