@@ -127,10 +127,10 @@ export class OrderController {
 
   @Get('nonmember/:code')
   @ApiOperation({ summary: '비회원 주문 상세 조회 API' })
-  async findOneCode(
+  async findOneCodeByNonmember(
     @Param('code') code: string
   ) {
-    return await this.orderService.findOneCode(code);
+    return await this.orderService.findOneCodeByNonmember(code);
   }
 
   @Patch('host/:code')

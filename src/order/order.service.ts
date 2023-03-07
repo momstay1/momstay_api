@@ -143,10 +143,11 @@ export class OrderService {
     console.log({ order_by });
 
     const [results, total] = await this.orderRepository.createQueryBuilder('order')
-      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.user', 'guestUser')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
       .leftJoinAndSelect('orderProduct.productOption', 'productOption')
       .leftJoinAndSelect('productOption.product', 'product')
+      .leftJoinAndSelect('product.user', 'hostUser')
       .where(qb => {
         qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'code', '')
@@ -166,7 +167,7 @@ export class OrderService {
         get(where, 'remitter', '')
           && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
         if (user['group']['id'] == 'guest') {
-          qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
+          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -198,10 +199,11 @@ export class OrderService {
     console.log({ order_by });
 
     const [results, total] = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'guestUser')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
       .leftJoinAndSelect('orderProduct.productOption', 'productOption')
       .leftJoinAndSelect('productOption.product', 'product')
-      .leftJoinAndSelect('product.user', 'user')
+      .leftJoinAndSelect('product.user', 'hostUser')
       .where(qb => {
         qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'code', '')
@@ -221,7 +223,7 @@ export class OrderService {
         get(where, 'remitter', '')
           && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
         if (user['group']['id'] == 'host') {
-          qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
+          qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -243,14 +245,15 @@ export class OrderService {
     }
     const user = await this.usersService.findId(userInfo['id']);
     const order = await this.orderRepository.createQueryBuilder('order')
-      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.user', 'guestUser')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
+      .leftJoinAndSelect('product.user', 'hostUser')
       .where(qb => {
         qb.where('`order`.idx = :idx', { idx: idx });
         if (['host', 'guest'].includes(user['group']['id'])) {
-          qb.andWhere('`user`.idx = :userIdx', { userIdx: user['idx'] });
+          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .getOne();
@@ -265,15 +268,16 @@ export class OrderService {
     if (!idx) {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
-    const order = await this.orderRepository.createQueryBuilder('order')
-      .leftJoinAndSelect('order.user', 'user')
-      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
-      .where(qb => {
-        qb.where('`order`.idx = :idx', { idx: idx });
-      })
-      .getOne();
+    const order = await this.orderRepository.findOne({
+      where: { idx: idx },
+      relations: [
+        'user',
+        'orderProduct',
+        'orderProduct.productOption',
+        'orderProduct.productOption.product',
+        'orderProduct.productOption.product.user'
+      ]
+    });
     if (!get(order, 'idx', '')) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');
     }
@@ -281,15 +285,16 @@ export class OrderService {
     return order;
   }
 
-  async findOneCode(code: string) {
+  async findOneCodeByNonmember(code: string) {
     if (!code) {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
     const order = await this.orderRepository.createQueryBuilder('order')
-      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.user', 'guestUser')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
+      .leftJoinAndSelect('product.user', 'hostUser')
       .where(qb => {
         qb.where('`order`.code = :code', { code: code });
       })
