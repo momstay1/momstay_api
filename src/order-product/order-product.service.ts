@@ -52,11 +52,11 @@ export class OrderProductService {
       priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
     }
     console.log({ priceInfo });
+
     // 작업중
     op['status'] = order['status'];
     op['eq'] = '001';
     op['code'] = order['code'] + '-001';
-    op['productOptionIdx'] = '' + po['idx'];
     op['productOptionCode'] = po['product']['code'];
     op['productType'] = '1';
     op['parcelCode'] = order['code'] + '-P01';
@@ -70,6 +70,7 @@ export class OrderProductService {
     op['img'] = file[0]['file_storage_path'];
     op['user'] = get(order, 'user', null);
     op['order'] = order;
+    op['productOption'] = po;
 
     if (get(createOrderDto, 'startAt', '')) op['startAt'] = get(createOrderDto, 'startAt');
     if (get(createOrderDto, 'endAt', '')) op['endAt'] = get(createOrderDto, 'endAt');

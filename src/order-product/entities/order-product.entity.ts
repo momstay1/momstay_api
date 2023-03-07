@@ -78,8 +78,7 @@ export class OrderProductEntity {
     onUpdate: 'NO ACTION'
   })
   order: OrderEntity;
-  @OneToOne(() => ProductOptionEntity, (po) => po.orderProduct)
-  @JoinColumn()
+  @ManyToOne(() => ProductOptionEntity, (po) => po.orderProduct)
   productOption: ProductOptionEntity;
 
 }

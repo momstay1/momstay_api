@@ -101,7 +101,8 @@ export class OrderService {
     // 주문 수량 체크 기능 필요 (맘스테이는 필요 없음)
 
     const orderEntity = await this.orderRepository.create(ord_data);
-    const order = await this.orderRepository.save(orderEntity);
+    let order = await this.orderRepository.save(orderEntity);
+    order = await this.findOneIdx(order['idx']);
 
     // 주문 상품 설정 기능 작업중
     // 추후 주문 상품을 배열로 전달 (한 주문에 여러 주문 상품을 처리하는 경우에 작업 필요)
@@ -198,9 +199,9 @@ export class OrderService {
 
     const [results, total] = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
-      .leftJoinAndSelect('product.user', 'user', '`user`.idx=`product`.userIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
+      .leftJoinAndSelect('product.user', 'user')
       .where(qb => {
         qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'code', '')
@@ -236,7 +237,7 @@ export class OrderService {
     return { data }
   }
 
-  async findOneIdx(userInfo: UsersEntity, idx: number) {
+  async findOneIdxByUser(userInfo: UsersEntity, idx: number) {
     if (!idx) {
       throw new NotFoundException('잘못된 정보 입니다.');
     }
@@ -258,6 +259,26 @@ export class OrderService {
     }
 
     return { order };
+  }
+
+  async findOneIdx(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const order = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
+      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .where(qb => {
+        qb.where('`order`.idx = :idx', { idx: idx });
+      })
+      .getOne();
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+
+    return order;
   }
 
   async findOneCode(code: string) {

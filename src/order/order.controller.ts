@@ -118,11 +118,11 @@ export class OrderController {
   @ApiOperation({ summary: '회원 주문 상세 조회 API' })
   @Auth(['Any'])
   @ApiBearerAuth()
-  async findOneIdx(
+  async findOneIdxByUser(
     @GetUser() user: UsersEntity,
     @Param('idx') idx: string
   ) {
-    return await this.orderService.findOneIdx(user, +idx);
+    return await this.orderService.findOneIdxByUser(user, +idx);
   }
 
   @Get('nonmember/:code')

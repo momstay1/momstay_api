@@ -74,6 +74,6 @@ export class ProductOptionEntity {
 
   @ManyToMany(() => ProductInfoEntity, (pi) => pi.productOption)
   productInfo: ProductInfoEntity[];
-  @OneToOne(() => OrderProductEntity, (op) => op.productOption)
+  @OneToMany(() => OrderProductEntity, (op) => op.productOption)
   orderProduct: undefined;
 }
