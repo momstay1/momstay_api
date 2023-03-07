@@ -54,7 +54,7 @@ export class OrderController {
 
   @Get('guest')
   @ApiOperation({ summary: '게스트 주문 리스트 조회 API' })
-  @Auth(['root', 'admin', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   @ApiQuery({
     name: "search",

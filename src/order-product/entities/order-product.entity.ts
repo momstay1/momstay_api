@@ -2,12 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  JoinTable,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm";
 import { UsersEntity } from "src/users/entities/user.entity";
 import { OrderEntity } from "src/order/entities/order.entity";
+import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
 
 @Entity('order_product')
 export class OrderProductEntity {
@@ -20,8 +24,6 @@ export class OrderProductEntity {
   code: string;
   @Column({ length: 255, default: '' })
   eq: string;
-  @Column({ length: 255, default: '' })
-  productOptionIdx: string;
   @Column({ length: 255, default: '' })
   productOptionCode: string;
   @Column({ length: 255, default: '' })
@@ -76,5 +78,8 @@ export class OrderProductEntity {
     onUpdate: 'NO ACTION'
   })
   order: OrderEntity;
+  @OneToOne(() => ProductOptionEntity, (po) => po.orderProduct)
+  @JoinColumn()
+  productOption: ProductOptionEntity;
 
 }

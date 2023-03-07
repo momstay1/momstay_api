@@ -128,6 +128,17 @@ export class DeviceService {
     return { device };
   }
 
+  // 단말기 회원 정보 수정
+  async updateUser(idx: number) {
+    const deviceInfo = await this.findOneIdx(idx);
+
+    deviceInfo['user'] = null;
+
+    const device = await this.deviceRepository.save(deviceInfo);
+
+    return { device };
+  }
+
   remove(id: number) {
     return `This action removes a #${id} device`;
   }

@@ -144,8 +144,8 @@ export class OrderService {
     const [results, total] = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
       .where(qb => {
         qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'code', '')

@@ -123,8 +123,6 @@ export class UsersEntity {
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comment: undefined;
 
-  // @OneToOne(() => DeviceEntity, (device) => device.user)
-  // device: DeviceEntity
   @OneToOne(() => DeviceEntity, { cascade: true })
   @JoinColumn()
   device: DeviceEntity;

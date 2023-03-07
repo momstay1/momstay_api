@@ -1,8 +1,9 @@
+import { OrderProductEntity } from "src/order-product/entities/order-product.entity";
 import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
 import { ProductEntity } from "src/product/entities/product.entity";
 import { ReservationEntity } from "src/reservation/entities/reservation.entity";
 import { UsersEntity } from "src/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("product_option")
 export class ProductOptionEntity {
@@ -73,4 +74,6 @@ export class ProductOptionEntity {
 
   @ManyToMany(() => ProductInfoEntity, (pi) => pi.productOption)
   productInfo: ProductInfoEntity[];
+  @OneToOne(() => OrderProductEntity, (op) => op.productOption)
+  orderProduct: undefined;
 }

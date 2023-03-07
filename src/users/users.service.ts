@@ -284,7 +284,17 @@ export class UsersService {
     const deviceInfo = await this.deviceService.findOneToken(token);
 
     const user = await this.findId(userInfo.id);
+    // 단말기에 연동된 회원과 로그인한 회원이 다른 경우
+    if (get(deviceInfo, ['user', 'idx'], '') && deviceInfo['user']['idx'] != user['idx']) {
+      // 회원에 연동된 단말기 정보 제거
+      const { user } = deviceInfo;
+      console.log(deviceInfo['user']);
+      user['device'] = null;
+      await this.usersRepository.save(user);
+    }
 
+    // 단말기에 회원 정보 제거
+    deviceInfo['user'] = null;
     user['device'] = deviceInfo;
 
     await this.usersRepository.save(user);
