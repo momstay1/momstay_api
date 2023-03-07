@@ -1,5 +1,7 @@
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
+import { CommentEntity } from 'src/comment/entities/comment.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
+import { DeviceEntity } from 'src/device/entities/device.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 import { LoginEntity } from 'src/login/entities/login.entity';
 import { OrderProductEntity } from 'src/order-product/entities/order-product.entity';
@@ -14,10 +16,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -115,6 +119,15 @@ export class UsersEntity {
 
   @OneToMany(() => ReviewEntity, (review) => review.user)
   review: undefined;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comment: undefined;
+
+  // @OneToOne(() => DeviceEntity, (device) => device.user)
+  // device: DeviceEntity
+  @OneToOne(() => DeviceEntity, { cascade: true })
+  @JoinColumn()
+  device: DeviceEntity;
 
   @ManyToOne(() => GroupsEntity, (group) => group.users)
   group: GroupsEntity;

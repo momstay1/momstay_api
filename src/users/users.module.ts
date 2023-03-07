@@ -14,6 +14,7 @@ import { EmailService } from 'src/email/email.service';
 import { EmailModule } from 'src/email/email.module';
 import { RefreshTokenModule } from 'src/refresh-token/refresh-token.module';
 import { IamportService } from 'src/iamport/iamport.service';
+import { DeviceModule } from 'src/device/device.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { IamportService } from 'src/iamport/iamport.service';
     FileModule,
     EmailModule,
     LoginModule,
-    RefreshTokenModule
+    RefreshTokenModule,
+    DeviceModule,
     // forwardRef(() => FileModule),
   ],
   controllers: [UsersController, AdminUsersController],

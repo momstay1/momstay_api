@@ -191,6 +191,13 @@ export const commonUtils = {
       exchangeRequest: 11,
       exchangeComplete: 12,
     };
+    // 앱 푸시 구독(topic) 타입
+    data['app_topic'] = {
+      all: 'all', // 전체 푸시 발송
+      marketing: 'marketing', // 마케팅 동의한 회원만 발송
+      service: 'service', // 서비스 동의한 회원만 발송
+      admin: 'admin'  // 관리자에게만 발송
+    }
 
     return get(data, key, '');
   },

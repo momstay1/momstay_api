@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PushHistoryEntity } from './entities/push-history.entity';
 import { Repository } from 'typeorm';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
@@ -36,7 +36,7 @@ export class PushNotificationService {
     } else {
       message['token'] = token;
     }
-    if (data) {
+    if (!isEmpty(data)) {
       message['data'] = data;
     }
     try {
