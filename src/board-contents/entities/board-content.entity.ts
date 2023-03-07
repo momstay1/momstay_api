@@ -49,15 +49,17 @@ export class BoardContentsEntity {
   @ApiProperty({ description: '게시글 내용' })
   content: string;
 
-  @Column({ length: 255, default: '' })
-  password: string;
-
   @BeforeInsert()
   async setPassword(password: string) {
     if (this.password) {
       this.password = await commonBcrypt.setBcryptPassword(password || this.password);
     }
   }
+  @Column({ length: 255, default: '' })
+  password: string;
+  @Column({ default: 0 })
+  commentCount: number;
+
 
   @Column({ default: 0 })
   @ApiProperty({ description: '게시글 조회수' })

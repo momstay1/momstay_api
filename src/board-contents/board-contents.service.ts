@@ -77,6 +77,23 @@ export class BoardContentsService {
       .execute()
   }
 
+  // 게시글 답변 완료 상태 변경
+  async statusAnswer(bcIdx: number) {
+    const bc = await this.findIndex(bcIdx);
+    // 답변 대기 상태인 게시글만 답변 완료 상태로 변경
+    if (bc['status'] == bcConstants.status.answerWait) {
+      bc['status'] = bcConstants.status.answerComplete;
+      await this.bcRepository.save(bc);
+    }
+  }
+
+  // 게시글 답변 완료 상태 변경
+  async commentCountUp(bcIdx: number) {
+    const bc = await this.findIndex(bcIdx);
+    bc['commentCount']++;
+    await this.bcRepository.save(bc);
+  }
+
   // 게시글 상태 일괄 변경 (수정, 삭제)
   async typeChange(typeChange) {
     console.log({ typeChange });
@@ -205,8 +222,8 @@ export class BoardContentsService {
     });
   }
 
-  async findOne(bc_idx: number) {
-    const bc = await this.findIndex(bc_idx);
+  async findOne(bcIdx: number) {
+    const bc = await this.findIndex(bcIdx);
     if ([bcConstants.status.delete, bcConstants.status.uncertified].includes(bc.status)) {
       throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
     }
@@ -225,9 +242,9 @@ export class BoardContentsService {
     return bc;
   }
 
-  async findBdBcIndex(bc_idx: number) {
+  async findBdBcIndex(bcIdx: number) {
     const bc = await this.bcRepository.findOne({
-      where: { idx: bc_idx },
+      where: { idx: bcIdx },
       relations: ['user', 'board', 'bscats']
     });
     if (!bc) {
@@ -236,11 +253,11 @@ export class BoardContentsService {
     return bc;
   }
 
-  async update(userInfo, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto) {
+  async update(userInfo, bcIdx: number, updateBoardContentDto: UpdateBoardContentDto) {
     // 게시판 정보 가져오기
     const board = await this.boardsService.findBoard({ idx: updateBoardContentDto.bd_idx });
     // 게시글 정보 가져오기
-    const bc = await this.findIndex(bc_idx);
+    const bc = await this.findIndex(bcIdx);
 
     const user = await this.usersService.findId(userInfo.id);
     // 게시글 쓰기 권한 여부 확인
@@ -254,7 +271,7 @@ export class BoardContentsService {
       }
     }
 
-    bc.idx = bc_idx;
+    bc.idx = bcIdx;
     bc.status = +get(updateBoardContentDto, ['status'], 2);
     bc.type = +get(updateBoardContentDto, ['type'], 1);
     bc.writer = get(updateBoardContentDto, ['writer'], '');

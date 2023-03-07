@@ -14,6 +14,8 @@ import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewEntity } from './entities/review.entity';
 
 const delete_status = 1;
+const statusRegistration = '2';
+const depth_zero = 0;
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -91,8 +93,7 @@ export class ReviewsService {
 
     const where = commonUtils.searchSplit(search);
 
-    where['status'] = get(where, 'status', '2');
-    const depth_zero = 0;
+    where['status'] = get(where, 'status', statusRegistration);
 
     const alias = 'review';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -152,8 +153,7 @@ export class ReviewsService {
 
     const where = commonUtils.searchSplit(search);
 
-    where['status'] = get(where, 'status', '2');
-    const depth_zero = 0;
+    where['status'] = get(where, 'status', statusRegistration);
 
     const alias = 'review';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -212,7 +212,7 @@ export class ReviewsService {
       .leftJoin('review.product', 'product')
       .leftJoin('review.user', 'user')
       .where(qb => {
-        qb.where('`review`.`status` = :status', { status: 2 })
+        qb.where('`review`.`status` = :status', { status: statusRegistration })
         qb.andWhere('`user`.`idx` = :userIdx', { userIdx: review['user']['idx'] })
         qb.andWhere('`product`.`idx` = :productIdx', { productIdx: review['product']['idx'] })
       })
