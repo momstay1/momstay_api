@@ -7,20 +7,24 @@ export class ReviewEntity {
   @PrimaryGeneratedColumn()
   idx: number;
 
-  @Column({ default: 2 })
+  @Column({ default: 2, comment: '상태 (1: 삭제, 2: 등록)' })
   status: number;
-  @Column({ default: 0 })
+  @Column({ default: 0, comment: '부모 댓글 idx' })
   group: number;
-  @Column({ default: 0 })
+  @Column({ default: 0, comment: '대댓글 정보' })
   depth: number;
-  @Column({ default: 0 })
+  @Column({ default: 0, comment: '평점 (1~10)' })
   star: number;
-  @Column({ default: '' })
+  @Column({ default: '', comment: '주문 상품 idx' })
   orderProductIdx: string;
-  @Column({ type: 'text', default: '' })
+  @Column({ type: 'text', default: '', comment: '후기 내용' })
   contents: string;
-  @Column({ default: '' })
+  @Column({ default: '', comment: '권한 관련 정보 (사용 X)' })
   author: string;
+  @Column({ type:'date', default: '0', comment: '입주일' })
+  start: string;
+  @Column({ type:'date',default: '0', comment: '퇴거일' })
+  end: string;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -43,6 +43,8 @@ export class ReviewsService {
       product: prd,
       user: user,
       contents: get(createReviewDto, 'contents'),
+      start: get(createReviewDto, 'start'),
+      end: get(createReviewDto, 'end'),
     };
 
     if (get(createReviewDto, 'group', '')) review_data['group'] = get(createReviewDto, 'group');

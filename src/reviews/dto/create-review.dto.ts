@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString, Matches } from "class-validator";
 
 export class CreateReviewDto {
   @Type(() => Number)
@@ -24,9 +24,14 @@ export class CreateReviewDto {
   @IsString()
   @ApiProperty({ description: '후기 내용' })
   readonly contents: string;
-  // @IsOptional()
-  // @ApiProperty({ description: '유지될 파일 idx <br> (ex> 33,34)', required: false })
-  // readonly filesIdx: string;
+  @IsString()
+  @Matches(/^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/)
+  @ApiProperty({ description: '입주일' })
+  readonly start: string;
+  @IsString()
+  @Matches(/^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/)
+  @ApiProperty({ description: '퇴거일' })
+  readonly end: string;
 
   @IsOptional()
   @ApiProperty({ format: 'binary', description: '후기 사진', required: false })
