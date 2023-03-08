@@ -63,7 +63,7 @@ export class ReviewsService {
     console.log({ fileIdxs });
 
     let file_info;
-    if (fileIdxs.length > 0) {
+    if (get(fileIdxs, ['length'], 0) > 0) {
       file_info = await this.fileService.findIndexs(fileIdxs);
     }
 
