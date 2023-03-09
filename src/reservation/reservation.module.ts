@@ -6,6 +6,7 @@ import { ReservationEntity } from './entities/reservation.entity';
 import { ProductOptionModule } from 'src/product-option/product-option.module';
 import { UsersModule } from 'src/users/users.module';
 import { FileModule } from 'src/file/file.module';
+import { PushNotificationModule } from 'src/push-notification/push-notification.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { FileModule } from 'src/file/file.module';
     ProductOptionModule,
     UsersModule,
     FileModule,
+    PushNotificationModule
     // ProductModule,
   ],
   controllers: [ReservationController],

@@ -114,11 +114,10 @@ export class OrderService {
     await this.ordertotalService.orderTotalCreate(order, orderProduct);
 
     // 호스트에게 push 알림 발송
-    const { user: { device } } = get(po, ['product']);
-    if (get(device, 'token', '')) {
-      await this.pushNotiService.guestOrderPush(device['token'], po);
+    const { user } = get(po, ['product']);
+    if (get(user, ['device', 'token'], '')) {
+      await this.pushNotiService.guestOrderPush(user, po);
     }
-    // po.product.user.device.token
 
     return { order, orderProduct, po, priceInfo };
   }
@@ -280,10 +279,12 @@ export class OrderService {
       where: { idx: idx },
       relations: [
         'user',
+        'user.device',
         'orderProduct',
         'orderProduct.productOption',
         'orderProduct.productOption.product',
-        'orderProduct.productOption.product.user'
+        'orderProduct.productOption.product.user',
+        'orderProduct.productOption.product.user.device'
       ]
     });
     if (!get(order, 'idx', '')) {
@@ -317,7 +318,7 @@ export class OrderService {
     return `This action updates a #${id} order`;
   }
 
-  async guestOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
+  async guestOrderCancel(code: string, userInfo: UsersEntity) {
     if (!code) {
       throw new NotFoundException('취소할 정보가 없습니다.');
     }
@@ -341,15 +342,21 @@ export class OrderService {
       throw new NotFoundException('취소할 주문이 없습니다.');
     }
 
+    const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
+    if (get(order, 'status') == cancel_status) {
+      throw new NotFoundException('이미 취소 처리된 주문입니다.');
+    }
+
     // 취소 사유
     const cancelReason = '게스트 취소';
     // 취소 처리
-    this.cancelProcess(order, cancelReason);
+    await this.cancelProcess(order, cancelReason);
 
-    // 호스트에게 바로결제 취소 push 알림 발송
-    const { user: { device } } = get(order, ['orderProduct', 'productOption', 'product']);
-    if (get(device, 'token', '')) {
-      await this.pushNotiService.guestOrderCancelPush(device['token'], order['orderProduct']['productOption']);
+    // 상품 및 옵션 정보 가져오기
+    const po = await this.productOptionService.findIdx(+get(order, ['orderProduct', '0', 'productOption', 'idx']));
+    const hostUser = get(po, ['product', 'user']);
+    if (get(hostUser, ['device', 'token'], '')) {
+      await this.pushNotiService.guestOrderCancelPush(hostUser, po);
     }
   }
 
@@ -363,8 +370,8 @@ export class OrderService {
     // 주문 및 주문 정보 가져오기
     const order = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where(qb => {
         qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
@@ -383,7 +390,13 @@ export class OrderService {
     // 주문 상품 취소 상태 변경
     await this.orderProductService.statusChange(order['idx'], shipping_status);
 
-    // 게스트 알림 발송 기능 필요
+    // 주문 정보 가져오기
+    const orderInfo = await this.findOneIdx(+get(order, ['idx']));
+    const guestUser = get(orderInfo, 'user');
+    if (get(guestUser, ['device', 'token'], '')) {
+      // 게스트에게 바로결제 승인 push 알림 발송
+      await this.pushNotiService.hostOrderApprovalPush(guestUser, orderInfo);
+    }
   }
 
   async hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
@@ -396,8 +409,8 @@ export class OrderService {
     // 주문 및 주문 정보 가져오기
     const order = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where(qb => {
         qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
@@ -413,9 +426,15 @@ export class OrderService {
     const cancelReason = '호스트 취소(' + get(updateOrderDto, 'cancelReason', '') + ')';
 
     // 취소 처리
-    this.cancelProcess(order, cancelReason);
+    await this.cancelProcess(order, cancelReason);
 
-    // 게스트 알림 발송 기능 필요
+    // 주문 정보 가져오기
+    const orderInfo = await this.findOneIdx(+get(order, ['idx']));
+    const guestUser = get(orderInfo, 'user');
+    if (get(guestUser, ['device', 'token'], '')) {
+      // 게스트에게 바로결제 거절 push 알림 발송
+      await this.pushNotiService.hostOrderCancelPush(guestUser, orderInfo);
+    }
   }
 
   // 취소 처리
@@ -430,7 +449,9 @@ export class OrderService {
 
     // 결제 내역 취소
     // 결제 금액 0원 설정시 전액 취소
-    await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
+    if (order['imp_uid']) {
+      await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
+    }
     // 주문 취소 상태 변경
     await this.statusChange(order['idx'], cancel_status);
     // 주문 상품 취소 상태 변경

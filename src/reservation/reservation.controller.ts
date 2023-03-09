@@ -53,7 +53,7 @@ export class ReservationController {
 
   @Get('/guest')
   @ApiOperation({ summary: '방문 예약 리스트 (게스트) API' })
-  @Auth(['root', 'admin', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   async guestFindAll(
     @GetUser() user: UsersEntity,
@@ -97,7 +97,7 @@ export class ReservationController {
 
   @Delete('guest/:idx')
   @ApiOperation({ summary: '방문 예약 취소(게스트) API' })
-  @Auth(['root', 'admin', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   async guestCancel(
     @GetUser() user: UsersEntity,

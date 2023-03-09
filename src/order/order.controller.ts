@@ -160,15 +160,14 @@ export class OrderController {
   // 주문 취소 = 전체 취소만 가능
   @Delete('/guest/:code')
   @ApiOperation({ summary: '게스트 주문 취소 API' })
-  @Auth(['root', 'admin', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   @HttpCode(204)
   async guestOrderCancel(
     @GetUser() user: UsersEntity,
-    @Param('code') code: string,
-    @Body() updateOrderDto: UpdateOrderDto
+    @Param('code') code: string
   ) {
-    await this.orderService.guestOrderCancel(code, user, updateOrderDto);
+    await this.orderService.guestOrderCancel(code, user);
   }
 
   // 주문 취소 = 전체 취소만 가능
