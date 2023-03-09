@@ -379,10 +379,10 @@ export class UsersService {
 
   /******************** cron ********************/
   // cron 테스트
-  @Cron('*/10 * * * * *')
-  async cronTest() {
-    console.log('[cron] cronTest: ', moment().format('YYYY-MM-DD HH:mm:ss'));
-  }
+  // @Cron('*/10 * * * * *')
+  // async cronTest() {
+  //   console.log('[cron] cronTest: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+  // }
 
   // 탈퇴 회원 다음날 01시 uniquekey 제거
   @Cron('0 0 1 * * *')
