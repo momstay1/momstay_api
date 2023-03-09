@@ -16,7 +16,7 @@ export class CreateProductDto {
   readonly type: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '멤버쉽 유무', default: 0, required: false })
+  @ApiProperty({ description: '멤버쉽 유무(0: 미사용, 1: 사용)', default: 0, required: false })
   readonly membership: string;
   @IsOptional()
   @IsString()

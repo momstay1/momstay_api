@@ -43,6 +43,7 @@ import { IamportService } from './iamport/iamport.service';
 import { ReviewsModule } from './reviews/reviews.module';
 import { DeviceModule } from './device/device.module';
 import { CommentModule } from './comment/comment.module';
+import { MembershipModule } from './membership/membership.module';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { CommentModule } from './comment/comment.module';
     ReviewsModule,
     DeviceModule,
     CommentModule,
+    MembershipModule,
   ],
   providers: [CommonService, IamportService],
 })

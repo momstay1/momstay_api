@@ -201,7 +201,7 @@ export class ProductService {
     }
 
     where['status'] = get(where, 'status', '2');
-    console.log({where});
+    console.log({ where });
     const [results, total] = await this.productRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
@@ -321,6 +321,19 @@ export class ProductService {
     return product
   }
 
+  async findAllUser(userIdx: number) {
+    const products = await this.productRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.productOption', 'product_option')
+      .leftJoinAndSelect('product.productInfo', 'product_info')
+      .leftJoinAndSelect('product.user', 'user')
+      .where((qb) => {
+        qb.andWhere('`user`.idx = :userIdx', { userIdx: userIdx });
+      })
+      .getMany();
+
+    return products;
+  }
+
   async findOne(idx: number) {
     const product = await this.findOneIdx(idx);
 
@@ -367,11 +380,21 @@ export class ProductService {
     return `This action updates a #${id} product`;
   }
 
-  async updateAverageStar(idx: number, {star, reviewCount}) {
+  async updateAverageStar(idx: number, { star, reviewCount }) {
     await this.productRepository.createQueryBuilder()
       .update(ProductEntity)
-      .set({star, reviewCount})
+      .set({ star, reviewCount })
       .where(" idx = :idx", { idx: idx })
+      .execute()
+  }
+
+  async updateMembership(userIdx: number, membershipStatus: string) {
+    const products = await this.findAllUser(userIdx);
+    const productIdxs = map(products, o => o['idx']);
+    await this.productRepository.createQueryBuilder()
+      .update(ProductEntity)
+      .set({ membership: membershipStatus })
+      .where(" idx IN (:idx)", { idx: productIdxs })
       .execute()
   }
 

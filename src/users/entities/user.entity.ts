@@ -4,6 +4,7 @@ import { commonBcrypt } from 'src/common/common.bcrypt';
 import { DeviceEntity } from 'src/device/entities/device.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 import { LoginEntity } from 'src/login/entities/login.entity';
+import { MembershipHistoryEntity } from 'src/membership/entities/membership-history.entity';
 import { OrderProductEntity } from 'src/order-product/entities/order-product.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
@@ -119,6 +120,9 @@ export class UsersEntity {
 
   @OneToMany(() => ReviewEntity, (review) => review.user)
   review: undefined;
+
+  @OneToMany(() => MembershipHistoryEntity, (mh) => mh.user)
+  membershipHistory: undefined;
 
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comment: undefined;
