@@ -43,14 +43,17 @@ export class OrderTotalService {
       where: { orderIdx: orderIdx }
     });
 
-    total['totalPrice'] = total['totalPrice'] - cancelPrice;
-    total['totalCancelPrice'] = total['totalCancelPrice'] + cancelPrice;
-    total['payPrice'] = total['payPrice'] - cancelPrice;
-    await this.orderTotalRepository.createQueryBuilder()
-      .update(OrderTotalEntity)
-      .set(total)
-      .where("idx = :idx", { idx: total['idx'] })
-      .execute()
+    console.log({ total });
+
+    total['totalPrice'] = +total['totalPrice'] - cancelPrice;
+    total['totalCancelPrice'] = +total['totalCancelPrice'] + cancelPrice;
+    total['payPrice'] = +total['payPrice'] - cancelPrice;
+    console.log({ total });
+    // await this.orderTotalRepository.createQueryBuilder()
+    //   .update(OrderTotalEntity)
+    //   .set(total)
+    //   .where("idx = :idx", { idx: total['idx'] })
+    //   .execute()
   }
 
   findAll() {

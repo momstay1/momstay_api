@@ -53,12 +53,12 @@ export class OrderController {
   }
 
   @Get('test')
-  @ApiOperation({ summary: 'iamport 결제취소 테스트' })
+  @ApiOperation({ summary: '테스트' })
   async test(
-    @Query('imp_uid') imp_uid: string,
+    @Query('order_idx') order_idx: string,
     @Query('price') price: string,
   ) {
-    await this.orderService.test(imp_uid, price);
+    // await this.orderService.test(order_idx, price);
     // return await this.orderService.create(createOrderDto, req);
   }
 

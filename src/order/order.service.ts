@@ -423,7 +423,7 @@ export class OrderService {
 
     // 취소 금액 계산
     const cancelPrice = reduce(order.orderProduct, (o, o1) => {
-      return o['payPrice'] + o1['payPrice'];
+      return o + (+o1['payPrice']);
     }, 0);
     // 취소완료 상태 (8)
     const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
@@ -449,8 +449,14 @@ export class OrderService {
       .execute()
   }
 
-  async test(imp_uid: string, price: string) {
-    await this.iamportService.paymentCancel(imp_uid, +price, '게스트 취소');
+  async test(order_idx: string, price: string) {
+    // const order = await this.findOneIdx(+order_idx);
+    // console.log(order.orderProduct)
+    // const cancelPrice = reduce(order.orderProduct, (o, o1) => {
+    //   return o + (+o1['payPrice']);
+    // }, 0);
+    // console.log({ cancelPrice });
+    // await this.ordertotalService.priceChange(+order_idx, +price);
   }
 
   remove(id: number) {
