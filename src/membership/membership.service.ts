@@ -180,8 +180,7 @@ export class MembershipService {
   // 오전 01시 멤버십 기간 체크 및 상태 변경
   @Cron('0 0 1 * * *')
   async checkMembership() {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
-    console.log('-----------------------checkMembership-----------------------');
+    console.log('[cron] checkMembership: ', moment().format('YYYY-MM-DD HH:mm:ss'));
     const today = moment().format('YYYY-MM-DD');
     const memberships = await this.membershipHistoryRepository.createQueryBuilder('membership')
       .leftJoinAndSelect('membership.user', 'user')

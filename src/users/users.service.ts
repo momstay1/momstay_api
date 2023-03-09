@@ -379,17 +379,15 @@ export class UsersService {
 
   /******************** cron ********************/
   // cron 테스트
-  // @Cron('*/10 * * * * *')
-  // async cronTest() {
-  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
-  //   console.log('-----------------------cronTest-----------------------');
-  // }
+  @Cron('*/10 * * * * *')
+  async cronTest() {
+    console.log('[cron] cronTest: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+  }
 
   // 탈퇴 회원 다음날 01시 uniquekey 제거
   @Cron('0 0 1 * * *')
   async deleteUniqueKey() {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
-    console.log('-----------------------deleteUniqueKey-----------------------');
+    console.log('[cron] deleteUniqueKey: ', moment().format('YYYY-MM-DD HH:mm:ss'));
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
       .set({ uniqueKey: '', certifiInfo: '' })
