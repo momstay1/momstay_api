@@ -215,7 +215,6 @@ export class ReviewsService {
       .leftJoin('review.user', 'user')
       .where(qb => {
         qb.where('`review`.`status` = :status', { status: statusRegistration })
-        qb.andWhere('`user`.`idx` = :userIdx', { userIdx: review['user']['idx'] })
         qb.andWhere('`product`.`idx` = :productIdx', { productIdx: review['product']['idx'] })
       })
       .execute();
@@ -326,5 +325,10 @@ export class ReviewsService {
       .set({ status: delete_status })
       .where("idx IN (:idxs)", { idxs: idxs })
       .execute()
+
+    // 숙소 평균 평점 계산
+    for (const key in reivews) {
+      await this.averageStar(reivews[key]);
+    }
   }
 }
