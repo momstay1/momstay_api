@@ -10,6 +10,7 @@ import { OrderProductModule } from 'src/order-product/order-product.module';
 import { OrderTotalModule } from 'src/order-total/order-total.module';
 import { IamportService } from 'src/iamport/iamport.service';
 import { PgDataModule } from 'src/pg-data/pg-data.module';
+import { PushNotificationModule } from 'src/push-notification/push-notification.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { PgDataModule } from 'src/pg-data/pg-data.module';
     OrderProductModule,
     OrderTotalModule,
     PgDataModule,
-    UsersModule
+    UsersModule,
+    PushNotificationModule
   ],
   controllers: [OrderController],
   providers: [OrderService, IamportService],

@@ -11,6 +11,7 @@ import { PushHistoryEntity } from './entities/push-history.entity';
     HttpModule
   ],
   controllers: [PushNotificationController],
-  providers: [PushNotificationService]
+  providers: [PushNotificationService],
+  exports: [PushNotificationService]
 })
 export class PushNotificationModule { }

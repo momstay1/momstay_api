@@ -179,7 +179,7 @@ export class ProductOptionService {
     }
     const productOption = await this.productOptionRepository.findOne({
       where: { idx: idx },
-      relations: ['product', 'product.productInfo', 'product.user', 'productInfo']
+      relations: ['product', 'product.productInfo', 'productInfo', 'product.user', 'product.user.device']
     });
     if (!get(productOption, 'idx')) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');

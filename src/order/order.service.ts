@@ -17,6 +17,7 @@ import { PgDataService } from 'src/pg-data/pg-data.service';
 import * as moment from 'moment';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { UsersEntity } from 'src/users/entities/user.entity';
+import { PushNotificationService } from 'src/push-notification/push-notification.service';
 
 @Injectable()
 export class OrderService {
@@ -30,6 +31,7 @@ export class OrderService {
     private readonly ordertotalService: OrderTotalService,
     private readonly iamportService: IamportService,
     private readonly pgDataService: PgDataService,
+    private readonly pushNotiService: PushNotificationService,
   ) { }
 
   async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
@@ -110,6 +112,13 @@ export class OrderService {
     // total 주문 설정 기능 필요
     // 주문 상품 배열 처리시 total 주문 정보는 주문 상품의 총합으로 처리 필요
     await this.ordertotalService.orderTotalCreate(order, orderProduct);
+
+    // 호스트에게 push 알림 발송
+    const { user: { device } } = get(po, ['product']);
+    if (get(device, 'token', '')) {
+      await this.pushNotiService.guestOrderPush(device['token'], po);
+    }
+    // po.product.user.device.token
 
     return { order, orderProduct, po, priceInfo };
   }
@@ -252,9 +261,8 @@ export class OrderService {
       .leftJoinAndSelect('product.user', 'hostUser')
       .where(qb => {
         qb.where('`order`.idx = :idx', { idx: idx });
-        if (['host', 'guest'].includes(user['group']['id'])) {
-          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
-        }
+        user['group']['id'] == 'guest' && qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
+        user['group']['id'] == 'host' && qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
       })
       .getOne();
     if (!get(order, 'idx', '')) {
@@ -321,8 +329,8 @@ export class OrderService {
     const order = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.user', 'user')
       .leftJoinAndSelect('order.orderProduct', 'orderProduct')
-      .leftJoinAndSelect('product_option', 'productOption', '`productOption`.idx=`orderProduct`.productOptionIdx')
-      .leftJoinAndSelect('product', 'product', '`product`.idx=`productOption`.productIdx')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
       .where(qb => {
         qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
         qb.andWhere('`order`.code = :code', { code: code });
@@ -338,7 +346,14 @@ export class OrderService {
     // 취소 처리
     this.cancelProcess(order, cancelReason);
 
-    // 호스트 알림 발송 기능 필요
+    // 상품 및 옵션 정보 가져오기
+    const po = await this.productOptionService.findIdx(+order['orderProduct']);
+
+    // 호스트에게 바로결제 취소 push 알림 발송
+    const { user: { device } } = get(order, ['orderProduct', 'productOption', 'product']);
+    if (get(device, 'token', '')) {
+      await this.pushNotiService.guestOrderCancelPush(device['token'], order['orderProduct']['productOption']);
+    }
   }
 
   async hostOrderApproval(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
@@ -435,6 +450,10 @@ export class OrderService {
       .set({ status: status })
       .where(" idx IN :idx", { idx: idx })
       .execute()
+  }
+
+  async test(imp_uid: string, price: string) {
+    await this.iamportService.paymentCancel(imp_uid, +price, '게스트 취소');
   }
 
   remove(id: number) {

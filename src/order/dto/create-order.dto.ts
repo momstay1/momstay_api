@@ -99,7 +99,7 @@ export class CreateOrderDto {
   readonly remitter: string;
   @IsOptional()
   @ApiProperty({ description: '구매자 메모', required: false })
-  readonly clientMemo: string;
+  readonly memo: string;
   @IsOptional()
   @ApiProperty({ description: '관리자 메모', required: false })
   readonly adminMemo: string;

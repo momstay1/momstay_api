@@ -52,6 +52,16 @@ export class OrderController {
     // return await this.orderService.create(createOrderDto, req);
   }
 
+  @Get('test')
+  @ApiOperation({ summary: 'iamport 결제취소 테스트' })
+  async test(
+    @Query('imp_uid') imp_uid: string,
+    @Query('price') price: string,
+  ) {
+    await this.orderService.test(imp_uid, price);
+    // return await this.orderService.create(createOrderDto, req);
+  }
+
   @Get('guest')
   @ApiOperation({ summary: '게스트 주문 리스트 조회 API' })
   @Auth(['Any'])
@@ -132,6 +142,7 @@ export class OrderController {
   ) {
     return await this.orderService.findOneCodeByNonmember(code);
   }
+
 
   @Patch('host/:code')
   @ApiOperation({ summary: '호스트 주문 승인 API' })

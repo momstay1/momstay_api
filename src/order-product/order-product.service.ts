@@ -74,7 +74,7 @@ export class OrderProductService {
 
     if (get(createOrderDto, 'startAt', '')) op['startAt'] = get(createOrderDto, 'startAt');
     if (get(createOrderDto, 'endAt', '')) op['endAt'] = get(createOrderDto, 'endAt');
-    if (get(createOrderDto, 'ClientMemo', '')) op['memo'] = get(createOrderDto, 'clientMemo');
+    if (get(createOrderDto, 'memo', '')) op['memo'] = get(createOrderDto, 'memo');
 
     const orderProductEntity = await this.orderProductRepository.create(op);
     const orderProduct = await this.orderProductRepository.save(orderProductEntity);

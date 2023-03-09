@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PushHistoryEntity } from './entities/push-history.entity';
 import { Repository } from 'typeorm';
 import { get, isEmpty } from 'lodash';
+import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
@@ -21,23 +22,12 @@ export class PushNotificationService {
     private readonly http: HttpService,
   ) { }
 
-  async sendPush({ topic, token }, { title, body, data }) {
-    const message = {
-      // topic: topic,
-      // token: "",
-      notification: {
-        title: title,
-        body: body
-      },
-      // data: ''
-    };
-    if (topic) {
-      message['topic'] = topic;
+  async sendPush(target, notification) {
+    const message = { notification };
+    if (get(target, 'topic', '')) {
+      message['topic'] = target['topic'];
     } else {
-      message['token'] = token;
-    }
-    if (!isEmpty(data)) {
-      message['data'] = data;
+      message['token'] = target['token'];
     }
     try {
       const response = await this.sendFcmMessage({ message });
@@ -115,5 +105,26 @@ export class PushNotificationService {
 
   remove(id: number) {
     return `This action removes a #${id} pushNotification`;
+  }
+
+  async guestOrderPush(hostToken: string, po: ProductOptionEntity) {
+    const target = {
+      token: hostToken,
+    }
+    const notifications = {
+      title: po['product']['title'] + '숙소 ' + po['title'] + '방 결제가 완료되었습니다.',
+      body: po['product']['title'] + '숙소 ' + po['title'] + '방 결제가 완료되었습니다.',
+    };
+    await this.sendPush(target, notifications);
+  }
+  async guestOrderCancelPush(hostToken: string, po: ProductOptionEntity) {
+    const target = {
+      token: hostToken,
+    }
+    const notifications = {
+      title: po['product']['title'] + '숙소 ' + po['title'] + '방 결제를 취소했습니다.',
+      body: po['product']['title'] + '숙소 ' + po['title'] + '방 결제를 취소했습니다.',
+    };
+    await this.sendPush(target, notifications);
   }
 }
