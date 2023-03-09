@@ -346,9 +346,6 @@ export class OrderService {
     // 취소 처리
     this.cancelProcess(order, cancelReason);
 
-    // 상품 및 옵션 정보 가져오기
-    const po = await this.productOptionService.findIdx(+order['orderProduct']);
-
     // 호스트에게 바로결제 취소 push 알림 발송
     const { user: { device } } = get(order, ['orderProduct', 'productOption', 'product']);
     if (get(device, 'token', '')) {
@@ -448,7 +445,7 @@ export class OrderService {
     await this.orderRepository.createQueryBuilder()
       .update(OrderEntity)
       .set({ status: status })
-      .where(" idx IN :idx", { idx: idx })
+      .where(" idx = :idx", { idx: idx })
       .execute()
   }
 
