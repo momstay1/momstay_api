@@ -63,7 +63,12 @@ export class OrderController {
   }
 
   @Get('guest')
-  @ApiOperation({ summary: '게스트 주문 리스트 조회 API' })
+  @ApiOperation({
+    summary: '게스트 주문 리스트 조회 API',
+    description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능'
+      + '호스트, 게스트 계정 로그인 상태에서 리스트 조회시 자신의 주문 내역만 확인 가능'
+    ,
+  })
   @Auth(['Any'])
   @ApiBearerAuth()
   @ApiQuery({
@@ -94,7 +99,13 @@ export class OrderController {
   }
 
   @Get('host')
-  @ApiOperation({ summary: '호스트 주문 리스트 조회 API' })
+  @ApiOperation({
+    summary: '호스트 주문 리스트 조회 API',
+    description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능'
+      + '호스트 계정 로그인 상태에서 리스트 조회시 자신의 숙소 주문 내역만 확인 가능'
+      + '게스트는 권한 없음'
+    ,
+  })
   @Auth(['root', 'admin', 'host'])
   @ApiBearerAuth()
   @ApiQuery({

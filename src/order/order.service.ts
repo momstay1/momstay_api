@@ -174,7 +174,8 @@ export class OrderService {
           && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
         get(where, 'remitter', '')
           && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
-        if (user['group']['id'] == 'guest') {
+        if (['host', 'guest'].includes(user['group']['id'])) {
+          // 자신의 주문 내역만 확인 가능
           qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
