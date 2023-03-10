@@ -35,17 +35,9 @@ export class MetroController {
     @Query('page') page: number,
     @Query('search') search: string[]
   ) {
-    const {
-      results,
-      total,
-      pageTotal
-    } = await this.metroService.findAll({ take, page }, search);
+    const data = await this.metroService.findAll({ take, page }, search);
 
-    return {
-      results,
-      total,
-      pageTotal
-    };
+    return { ...data };
   }
 
   @Get(':id')

@@ -66,14 +66,10 @@ export class BoardContentsController {
     @Query('search') search: string[],
   ) {
     const {
-      bc: {
-        results,
-        total,
-        pageTotal
-      },
+      bc,
       bcats
     } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order, search);
-    return { bcats, total, pageTotal, results };
+    return { bcats, ...bc };
   }
 
   @Get(':bd_idx/:bc_idx')

@@ -58,18 +58,12 @@ export class ProductController {
     @Query('search') search: string[]
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.productService.findAll({ take, page }, search);
     // await this.productService.findAll({ take, page }, search);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }

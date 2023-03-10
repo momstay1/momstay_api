@@ -94,17 +94,13 @@ export class AdminBoardContentsController {
     @Query('order') order: string,
   ) {
     const {
-      bc: {
-        results,
-        total,
-        pageTotal
-      },
+      bc,
       bcats
     } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
-    const data = map(results, (obj) => {
-      return this.sanitizeBoardContent(obj);
-    });
-    return { bcats, total, pageTotal, results };
+    // const data = map(results, (obj) => {
+    //   return this.sanitizeBoardContent(obj);
+    // });
+    return { bcats, ...bc };
   }
 
   @Get(':bd_idx/:bc_idx')

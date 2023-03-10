@@ -35,18 +35,8 @@ export class AdminMembershipController {
     @Query('search') search: string[],
     @Query('order') order: string
   ) {
-    const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
-    } = await this.membershipService.findAll({ take, page }, search, order);
-    return {
-      results,
-      total,
-      pageTotal,
-    };
+    const { data } = await this.membershipService.findAll({ take, page }, search, order);
+    return { ...data };
   }
 
   @Get(':idx')

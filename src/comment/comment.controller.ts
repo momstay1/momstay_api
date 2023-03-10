@@ -39,15 +39,9 @@ export class CommentController {
     @Query('take') take: number,
     @Query('page') page: number,
   ) {
-    const {
-      data: {
-        results,
-        total,
-        pageTotal
-      }
-    } = await this.commentService.findAll(category, +foreignIdx, { take, page });
+    const { data } = await this.commentService.findAll(category, +foreignIdx, { take, page });
 
-    return { results, total, pageTotal };
+    return { ...data };
   }
 
   @Get(':id')

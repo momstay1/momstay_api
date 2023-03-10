@@ -36,17 +36,11 @@ export class ReservationController {
     @Query('page') page: number,
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.reservationService.hostFindAll({ take, page }, user);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }
@@ -61,17 +55,11 @@ export class ReservationController {
     @Query('page') page: number,
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.reservationService.guestFindAll({ take, page }, user);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }

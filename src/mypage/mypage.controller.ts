@@ -17,7 +17,7 @@ export class MypageController {
     private readonly mypageService: MypageService,
     private readonly boardContentsService: BoardContentsService,
     private readonly reviewsService: ReviewsService,
-  ) {}
+  ) { }
 
   @Post()
   create(@Body() createMypageDto: CreateMypageDto) {
@@ -45,14 +45,10 @@ export class MypageController {
     @Query('order') order: string,
   ) {
     const {
-      bc: {
-        results,
-        total,
-        pageTotal
-      },
+      bc,
       bcats
     } = await this.boardContentsService.findUserCategoryAll(bd_idx, category, { take, page }, order, user);
-    return { bcats, total, pageTotal, results };
+    return { bcats, ...bc };
   }
 
   @Get('/reviews')
@@ -77,18 +73,12 @@ export class MypageController {
     @Query('order') order: string
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
-    } = await this.reviewsService.findAllUser(user, {take, page}, search, order);
+    } = await this.reviewsService.findAllUser(user, { take, page }, search, order);
 
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }

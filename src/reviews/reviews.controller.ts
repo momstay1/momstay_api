@@ -64,18 +64,12 @@ export class ReviewsController {
     @Query('order') order: string
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.reviewsService.findAllProduct(idx, { take, page }, search, order);
 
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }
