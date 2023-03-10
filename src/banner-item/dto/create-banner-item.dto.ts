@@ -21,4 +21,7 @@ export class CreateBannerItemDto {
   @IsString()
   @ApiProperty({ description: '배너 id' })
   readonly bannerId: string;
+  @IsOptional()
+  @ApiProperty({ format: 'binary', description: '배너 아이템 이미지', required: false })
+  readonly bniImg: string[];
 }

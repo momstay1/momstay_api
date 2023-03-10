@@ -1,5 +1,5 @@
+import { BannerItemEntity } from "src/banner-item/entities/banner-item.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { BannerItemEntity } from "./banner-item.entity";
 
 @Entity('banner')
 export class BannerEntity {
@@ -14,7 +14,7 @@ export class BannerEntity {
   id: string;
   @Column({ length: 255, default: '', comment: '배너 제목' })
   title: string;
-  @Column({ type: 'text', length: 255, default: '', comment: '배너 아이템 정보' })
+  @Column({ type: 'text', default: '', comment: '배너 아이템 정보' })
   itemInfo: string;
 
   @OneToMany(() => BannerItemEntity, (bni) => bni.banner)

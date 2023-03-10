@@ -1,14 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { Repository } from 'typeorm';
-import { BannerItemService } from './banner-item.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 import { BannerEntity } from './entities/banner.entity';
-import * as moment from 'moment';
 import { FileService } from 'src/file/file.service';
 import { commonUtils } from 'src/common/common.utils';
+import { BannerItemService } from 'src/banner-item/banner-item.service';
+
+import * as moment from 'moment';
 
 const registrationStatus = 2;
 
@@ -16,7 +17,7 @@ const registrationStatus = 2;
 export class BannerService {
   constructor(
     @InjectRepository(BannerEntity) private bannerRepository: Repository<BannerEntity>,
-    private readonly biService: BannerItemService,
+    @Inject(forwardRef(() => BannerItemService)) private readonly bniService: BannerItemService,
     private readonly fileService: FileService,
   ) { }
 

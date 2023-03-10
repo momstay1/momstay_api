@@ -1,20 +1,19 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BannerService } from './banner.service';
 import { BannerController } from './banner.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BannerEntity } from './entities/banner.entity';
-import { BannerItemEntity } from './entities/banner-item.entity';
-import { BannerItemController } from './banner-item.controller';
-import { BannerItemService } from './banner-item.service';
 import { FileModule } from 'src/file/file.module';
+import { BannerItemModule } from 'src/banner-item/banner-item.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BannerEntity, BannerItemEntity]),
-    FileModule
+    TypeOrmModule.forFeature([BannerEntity]),
+    FileModule,
+    forwardRef(() => BannerItemModule),
   ],
-  controllers: [BannerController, BannerItemController],
-  providers: [BannerService, BannerItemService],
-  exports: [BannerService, BannerItemService]
+  controllers: [BannerController],
+  providers: [BannerService],
+  exports: [BannerService]
 })
 export class BannerModule { }

@@ -45,6 +45,7 @@ import { DeviceModule } from './device/device.module';
 import { CommentModule } from './comment/comment.module';
 import { MembershipModule } from './membership/membership.module';
 import { BannerModule } from './banner/banner.module';
+import { BannerItemModule } from './banner-item/banner-item.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { BannerModule } from './banner/banner.module';
     CommentModule,
     MembershipModule,
     BannerModule,
+    BannerItemModule,
   ],
   providers: [CommonService, IamportService],
 })
