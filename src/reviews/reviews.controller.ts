@@ -124,6 +124,6 @@ export class ReviewsController {
     @GetUser() user: UsersEntity,
     @Body('idxs') idxs: []
   ) {
-    return await this.reviewsService.statusUpdate(idxs, user);
+    await this.reviewsService.statusUpdate(idxs, user);
   }
 }
