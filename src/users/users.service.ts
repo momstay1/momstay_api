@@ -292,10 +292,10 @@ export class UsersService {
       console.log(deviceInfo['user']);
       user['device'] = null;
       await this.usersRepository.save(user);
+      // 단말기에 회원 정보 제거
+      deviceInfo['user'] = null;
     }
 
-    // 단말기에 회원 정보 제거
-    deviceInfo['user'] = null;
     user['device'] = deviceInfo;
 
     await this.usersRepository.save(user);
