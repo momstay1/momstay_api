@@ -243,7 +243,9 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFiles() files: Array<Express.Multer.File>
   ) {
-    return await this.usersService.update(id, updateUserDto, files);
+    const data = await this.usersService.update(id, updateUserDto, files);
+    const jwt = await this.authService.login(data['user'], '');
+    return { ...data, jwt };
   }
 
   // 회원 삭제(탈퇴)
