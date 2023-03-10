@@ -220,8 +220,8 @@ export class ReviewsService {
         qb.andWhere('`product`.`idx` = :productIdx', { productIdx: review['product']['idx'] })
       })
       .execute();
-
-    const average_star = (star_data[0].total_star / star_data[0].review_cnt).toFixed(1);
+    console.log({ star_data });
+    const average_star = star_data[0].review_cnt != 0 ? (star_data[0].total_star / star_data[0].review_cnt).toFixed(1) : 0;
     const reviews_cnt = star_data[0].review_cnt;
 
     await this.productService.updateAverageStar(review['product']['idx'], {
