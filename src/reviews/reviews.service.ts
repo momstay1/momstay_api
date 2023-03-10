@@ -13,9 +13,9 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewEntity } from './entities/review.entity';
 
-const delete_status = 1;
-const statusRegistration = '2';
-const depth_zero = 0;
+const deleteStatus = 1;
+const registrationStatus = '2';
+const depthZero = 0;
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -95,7 +95,7 @@ export class ReviewsService {
 
     const where = commonUtils.searchSplit(search);
 
-    where['status'] = get(where, 'status', statusRegistration);
+    where['status'] = get(where, 'status', registrationStatus);
 
     const alias = 'review';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -107,7 +107,7 @@ export class ReviewsService {
       .leftJoinAndSelect('review.product', 'product')
       .where(qb => {
         qb.where('`review`.`status` IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] })
-        qb.andWhere('`review`.`depth` = :depth', { depth: depth_zero })
+        qb.andWhere('`review`.`depth` = :depth', { depth: depthZero })
         qb.andWhere('`product`.`idx` = :productIdx', { productIdx: idx })
       })
       .orderBy(order_by)
@@ -137,7 +137,7 @@ export class ReviewsService {
     // .where(qb => {
     //   qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]});
     //   qb.andWhere('`review`.`group` IN :group', {group: review_idxs});
-    //   qb.andWhere('`review`.`depth` > :depth', {depth: depth_zero});
+    //   qb.andWhere('`review`.`depth` > :depth', {depth: depthZero});
     // })
     // .skip((take * (page - 1) || 0))
     // .take((take || 10))
@@ -156,7 +156,7 @@ export class ReviewsService {
 
     const where = commonUtils.searchSplit(search);
 
-    where['status'] = get(where, 'status', statusRegistration);
+    where['status'] = get(where, 'status', registrationStatus);
 
     const alias = 'review';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -168,7 +168,7 @@ export class ReviewsService {
       .leftJoinAndSelect('review.product', 'product')
       .where(qb => {
         qb.where('`review`.`status` IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] })
-        qb.andWhere('`review`.`depth` = :depth', { depth: depth_zero })
+        qb.andWhere('`review`.`depth` = :depth', { depth: depthZero })
         qb.andWhere('`user`.`idx` = :userIdx', { userIdx: user['idx'] })
       })
       .orderBy(order_by)
@@ -198,7 +198,7 @@ export class ReviewsService {
     // .where(qb => {
     //   qb.where('`review`.`status` IN (:status)', {status: isArray(where['status'])?where['status']:[where['status']]});
     //   qb.andWhere('`review`.`group` IN :group', {group: review_idxs});
-    //   qb.andWhere('`review`.`depth` > :depth', {depth: depth_zero});
+    //   qb.andWhere('`review`.`depth` > :depth', {depth: depthZero});
     // })
     // .skip((take * (page - 1) || 0))
     // .take((take || 10))
@@ -216,7 +216,7 @@ export class ReviewsService {
       .leftJoin('review.product', 'product')
       .leftJoin('review.user', 'user')
       .where(qb => {
-        qb.where('`review`.`status` = :status', { status: statusRegistration })
+        qb.where('`review`.`status` = :status', { status: registrationStatus })
         qb.andWhere('`product`.`idx` = :productIdx', { productIdx: review['product']['idx'] })
       })
       .execute();
@@ -247,7 +247,7 @@ export class ReviewsService {
   async findOne(idx: number) {
     const review = await this.findOneIdx(idx);
 
-    if (review['status'] == delete_status) {
+    if (review['status'] == deleteStatus) {
       throw new NotFoundException('삭제된 후기 입니다.');
     }
     let file_info = {};
@@ -324,7 +324,7 @@ export class ReviewsService {
 
     await this.reviewRepository.createQueryBuilder()
       .update()
-      .set({ status: delete_status })
+      .set({ status: deleteStatus })
       .where("idx IN (:idxs)", { idxs: idxs })
       .execute()
 
