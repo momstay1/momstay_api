@@ -174,7 +174,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: obj,
-      relations: ['group', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -188,7 +188,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['group', 'userSns', 'login', 'device'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -206,7 +206,7 @@ export class UsersService {
         qb.where('`email` = :email', { email: id })
         qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
       },
-      relations: ['group', 'userSns', 'login', 'device'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -221,7 +221,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { idx: idx },
-      relations: ['group', 'userSns'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -232,40 +232,41 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, files) {
     const user = await this.findId(id);
-    const groupIdxs = updateUserDto.group ? updateUserDto.group : usersConstant.default.group_idx;
+    const groupIdxs = updateUserDto['group'] ? updateUserDto['group'] : usersConstant['default']['group_idx'];
     const group = await this.groupService.findOne(groupIdxs);
 
-    user.name = updateUserDto.name;
     if (get(updateUserDto, 'status', ''))
-      user.status = +get(updateUserDto, 'status');
+      user['status'] = +get(updateUserDto, 'status');
+    if (get(updateUserDto, 'id', ''))
+      user['id'] = get(updateUserDto, 'id');
     if (get(updateUserDto, 'name', ''))
-      user.name = get(updateUserDto, 'name');
+      user['name'] = get(updateUserDto, 'name');
     if (get(updateUserDto, 'email', ''))
-      user.email = get(updateUserDto, 'email');
+      user['email'] = get(updateUserDto, 'email');
     if (get(updateUserDto, 'other', ''))
-      user.other = get(updateUserDto, 'other');
+      user['other'] = get(updateUserDto, 'other');
     if (get(updateUserDto, 'language', ''))
-      user.language = get(updateUserDto, 'language');
+      user['language'] = get(updateUserDto, 'language');
     if (get(updateUserDto, 'gender', ''))
-      user.gender = get(updateUserDto, 'gender');
+      user['gender'] = get(updateUserDto, 'gender');
     if (get(updateUserDto, 'countryCode', ''))
-      user.countryCode = get(updateUserDto, 'countryCode');
+      user['countryCode'] = get(updateUserDto, 'countryCode');
     if (get(updateUserDto, 'phone', ''))
-      user.phone = get(updateUserDto, 'phone');
+      user['phone'] = get(updateUserDto, 'phone');
     if (get(updateUserDto, 'birthday', ''))
-      user.birthday = get(updateUserDto, 'birthday');
+      user['birthday'] = get(updateUserDto, 'birthday');
     if (get(updateUserDto, 'memo', ''))
-      user.memo = get(updateUserDto, 'memo');
+      user['memo'] = get(updateUserDto, 'memo');
     if (get(updateUserDto, 'marketing', ''))
-      user.marketing = get(updateUserDto, 'marketing');
+      user['marketing'] = get(updateUserDto, 'marketing');
     if (get(updateUserDto, 'uniqueKey', ''))
-      user.marketing = get(updateUserDto, 'uniqueKey');
+      user['marketing'] = get(updateUserDto, 'uniqueKey');
     if (get(updateUserDto, 'certifiInfo', ''))
-      user.marketing = get(updateUserDto, 'certifiInfo');
+      user['marketing'] = get(updateUserDto, 'certifiInfo');
 
-    user.group = group;
+    user['group'] = group;
     if (get(updateUserDto, 'password')) {
-      user.password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
+      user['password'] = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
     }
     const user_data = await this.usersRepository.save(user);
 
