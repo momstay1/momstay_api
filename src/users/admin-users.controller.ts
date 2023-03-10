@@ -79,16 +79,8 @@ export class AdminUsersController {
     @Query('page') page: number,
     @Query('search') search: string[]
   ) {
-    const {
-      results,
-      total,
-      pageTotal
-    } = await this.usersService.findAll(user, { take, page }, search);
-    return {
-      results,
-      total,
-      pageTotal
-    };
+    const data = await this.usersService.findAll(user, { take, page }, search);
+    return { ...data };
   }
 
   // 회원 정보 가져오기

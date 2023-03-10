@@ -27,7 +27,7 @@ export class ProductOptionService {
     let product;
     if (get(createProductOptionDto, 'productIdx', '')) {
       const productIdx = get(createProductOptionDto, 'productIdx');
-      product = await this.productService.findIdxOne(+productIdx);
+      product = await this.productService.findOneIdx(+productIdx);
     }
 
     // 방 생활 시설 정보 가져오기
@@ -39,26 +39,30 @@ export class ProductOptionService {
 
     // 방 정보
     const product_option_data = {
-      status: +get(createProductOptionDto, 'status', 0),
-      type: get(createProductOptionDto, 'type', ''),
       order: '10',
       code: await this.productOptionCreateCode(),
-      stayStatus: get(createProductOptionDto, 'stayStatus', '0'),
-      visitStatus: get(createProductOptionDto, 'visitStatus', '0'),
-      paymentStatus: get(createProductOptionDto, 'paymentStatus', '0'),
-      title: get(createProductOptionDto, 'title', ''),
-      price: +get(createProductOptionDto, 'price', 0),
-      priceMonth: +get(createProductOptionDto, 'priceMonth', 0),
-      priceWeek: +get(createProductOptionDto, 'priceWeek', 0),
-      priceDay: +get(createProductOptionDto, 'priceDay', 0),
-      detailsKor: get(createProductOptionDto, 'detailsKor', ''),
-      detailsEng: get(createProductOptionDto, 'detailsEng', ''),
-      detailsJpn: get(createProductOptionDto, 'detailsJpn', ''),
-      detailsChn: get(createProductOptionDto, 'detailsChn', ''),
-      // privateFacility: get(createProductOptionDto, 'privateFacility', ''),
       product: product,
       productInfo: productInfo,
     };
+
+    if (get(createProductOptionDto, 'status', 0)) product_option_data['status'] = +get(createProductOptionDto, 'status');
+    if (get(createProductOptionDto, 'type', '')) product_option_data['type'] = get(createProductOptionDto, 'type');
+    if (get(createProductOptionDto, 'stayStatus', '')) product_option_data['stayStatus'] = get(createProductOptionDto, 'stayStatus');
+    if (get(createProductOptionDto, 'visitStatus', '')) product_option_data['visitStatus'] = get(createProductOptionDto, 'visitStatus');
+    if (get(createProductOptionDto, 'paymentStatus', '')) product_option_data['paymentStatus'] = get(createProductOptionDto, 'paymentStatus');
+    if (get(createProductOptionDto, 'title', '')) product_option_data['title'] = get(createProductOptionDto, 'title');
+    if (get(createProductOptionDto, 'titleEng', '')) product_option_data['titleEng'] = get(createProductOptionDto, 'titleEng');
+    if (get(createProductOptionDto, 'titleJpn', '')) product_option_data['titleJpn'] = get(createProductOptionDto, 'titleJpn');
+    if (get(createProductOptionDto, 'titleChn', '')) product_option_data['titleChn'] = get(createProductOptionDto, 'titleChn');
+    if (get(createProductOptionDto, 'price', '')) product_option_data['price'] = +get(createProductOptionDto, 'price');
+    if (get(createProductOptionDto, 'priceMonth', '')) product_option_data['priceMonth'] = +get(createProductOptionDto, 'priceMonth');
+    if (get(createProductOptionDto, 'priceWeek', '')) product_option_data['priceWeek'] = +get(createProductOptionDto, 'priceWeek');
+    if (get(createProductOptionDto, 'priceDay', '')) product_option_data['priceDay'] = +get(createProductOptionDto, 'priceDay');
+    if (get(createProductOptionDto, 'detailsKor', '')) product_option_data['detailsKor'] = get(createProductOptionDto, 'detailsKor');
+    if (get(createProductOptionDto, 'detailsEng', '')) product_option_data['detailsEng'] = get(createProductOptionDto, 'detailsEng');
+    if (get(createProductOptionDto, 'detailsJpn', '')) product_option_data['detailsJpn'] = get(createProductOptionDto, 'detailsJpn');
+    if (get(createProductOptionDto, 'detailsChn', '')) product_option_data['detailsChn'] = get(createProductOptionDto, 'detailsChn');
+
     if (get(createProductOptionDto, 'idx', '')) {
       product_option_data['idx'] = +get(createProductOptionDto, 'idx');
     }
@@ -150,6 +154,7 @@ export class ProductOptionService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data, file_info }
@@ -175,7 +180,7 @@ export class ProductOptionService {
     }
     const productOption = await this.productOptionRepository.findOne({
       where: { idx: idx },
-      relations: ['product', 'product.productInfo', 'product.user', 'productInfo']
+      relations: ['product', 'product.productInfo', 'productInfo', 'product.user', 'product.user.device']
     });
     if (!get(productOption, 'idx')) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');

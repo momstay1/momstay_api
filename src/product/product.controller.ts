@@ -49,26 +49,21 @@ export class ProductController {
       + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
       + 'search=min_priceMonth:월 최소 가격<br>'
       + 'search=max_priceMonth:월 최대 가격<br>'
-      + 'search=product_info:편의시설 idx(2,3,4)[작업중]<br>',
+      + 'search=product_info:편의시설 idx(2,3,4)<br>',
     required: false
   })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]) {
+    @Query('search') search: string[]
+  ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.productService.findAll({ take, page }, search);
     // await this.productService.findAll({ take, page }, search);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }

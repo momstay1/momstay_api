@@ -11,7 +11,7 @@ import { BoardContentsEntity } from './entities/board-content.entity';
 import { bcConstants } from './constants';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
-import { get, keyBy } from 'lodash';
+import { get, isArray, keyBy } from 'lodash';
 import { GroupsService } from 'src/groups/groups.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 
@@ -40,7 +40,7 @@ export class BoardContentsService {
     const user = await this.usersService.findId(userInfo.id);
 
     // 게시글 쓰기 권한 여부 확인
-    const writeAuth = await commonUtils.authCheck(write_auth, get(user, ['groups']));
+    const writeAuth = await commonUtils.authCheck(write_auth, get(user, ['group', 'id']));
     if (writeAuth.length <= 0) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
@@ -77,6 +77,23 @@ export class BoardContentsService {
       .execute()
   }
 
+  // 게시글 답변 완료 상태 변경
+  async statusAnswer(bcIdx: number) {
+    const bc = await this.findIndex(bcIdx);
+    // 답변 대기 상태인 게시글만 답변 완료 상태로 변경
+    if (bc['status'] == bcConstants.status.answerWait) {
+      bc['status'] = bcConstants.status.answerComplete;
+      await this.bcRepository.save(bc);
+    }
+  }
+
+  // 게시글 답변 완료 상태 변경
+  async commentCountUp(bcIdx: number) {
+    const bc = await this.findIndex(bcIdx);
+    bc['commentCount']++;
+    await this.bcRepository.save(bc);
+  }
+
   // 게시글 상태 일괄 변경 (수정, 삭제)
   async typeChange(typeChange) {
     console.log({ typeChange });
@@ -88,19 +105,27 @@ export class BoardContentsService {
   }
 
   // 게시글 리스트 가져오기
-  async findCategoryAll(bd_idx, category: string, options: PaginationOptions, order) {
+  async findCategoryAll(bd_idx, category: string, options: PaginationOptions, order, search: string[]) {
     const { take, page } = options;
+
+    // 리스트 권한 체크
+    // // 게시판 정보 가져오기
+    // const board = await this.boardsService.findBoard({ idx: bd_idx });
+    // const lists_auth = board.lists_auth.split("|");
+    // const listsAuth = await commonUtils.authCheck(lists_auth, get(user, ['group', 'id']));
+    // if (listsAuth.length <= 0) {
+    //   throw new UnauthorizedException('권한이 없습니다.');
+    // }
 
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([category]) }
     });
 
-    const order_by = {};
-    if (order) {
-      order = order.split(':');
-      order_by[order[0]] = order[1];
-    }
-    order_by['createdAt'] = 'DESC';
+    const where = commonUtils.searchSplit(search);
+
+    const order_by = commonUtils.orderSplit(order, '');
+    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
+
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
@@ -108,7 +133,15 @@ export class BoardContentsService {
         if (get(bcats, [0, 'bcat_idx'])) {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
-        qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        if (get(where, 'status', '')) {
+          qb.andWhere(
+            '`BoardContentsEntity`.`status` IN (:status)',
+            { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] }
+          )
+        } else {
+          qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
+        }
+        // qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
         qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
       },
       relations: ['user', 'board', 'bscats'],
@@ -121,6 +154,53 @@ export class BoardContentsService {
       bc: new Pagination({
         results,
         total,
+        page,
+      })
+    }
+  }
+
+  async findUserCategoryAll(bd_idx, category: string, options: PaginationOptions, order, userInfo) {
+    const { take, page } = options;
+
+    const user = await this.usersService.findId(userInfo.id);
+
+    const bcats = await this.bcatsService.searching({
+      where: { bcat_id: In([category]) }
+    });
+
+    const order_by = commonUtils.orderSplit(order, '');
+    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
+    const [results, total] = await this.bcRepository.findAndCount({
+      order: order_by,
+      where: (qb) => {
+        qb.where('`BoardContentsEntity__board`.`idx` = :bd_idx', { bd_idx: bd_idx })
+        if (get(bcats, [0, 'bcat_idx'])) {
+          qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
+        }
+        qb.andWhere(
+          '`BoardContentsEntity`.`status` IN (:status)',
+          {
+            status: [
+              bcConstants.status.registration,
+              bcConstants.status.answerWait,
+              bcConstants.status.answerComplete
+            ]
+          }
+        )
+        qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
+        qb.andWhere('`BoardContentsEntity__user`.`idx` IN (:userIdx)', { userIdx: user.idx })
+      },
+      relations: ['user', 'board', 'bscats'],
+      take: take,
+      skip: take * (page - 1)
+    });
+
+    return {
+      bcats: bcats,
+      bc: new Pagination({
+        results,
+        total,
+        page,
       })
     }
   }
@@ -144,9 +224,9 @@ export class BoardContentsService {
     });
   }
 
-  async findOne(bc_idx: number) {
-    const bc = await this.findIndex(bc_idx);
-    if (bc.status !== bcConstants.status.registration) {
+  async findOne(bcIdx: number) {
+    const bc = await this.findIndex(bcIdx);
+    if ([bcConstants.status.delete, bcConstants.status.uncertified].includes(bc.status)) {
       throw new NotAcceptableException('접근 할 수 없는 게시글 입니다.');
     }
     bc.count = await this.countUp(bc.idx, bc.count);
@@ -164,9 +244,9 @@ export class BoardContentsService {
     return bc;
   }
 
-  async findBdBcIndex(bc_idx: number) {
+  async findBdBcIndex(bcIdx: number) {
     const bc = await this.bcRepository.findOne({
-      where: { idx: bc_idx },
+      where: { idx: bcIdx },
       relations: ['user', 'board', 'bscats']
     });
     if (!bc) {
@@ -175,25 +255,25 @@ export class BoardContentsService {
     return bc;
   }
 
-  async update(userInfo, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto) {
+  async update(userInfo, bcIdx: number, updateBoardContentDto: UpdateBoardContentDto) {
     // 게시판 정보 가져오기
     const board = await this.boardsService.findBoard({ idx: updateBoardContentDto.bd_idx });
     // 게시글 정보 가져오기
-    const bc = await this.findIndex(bc_idx);
+    const bc = await this.findIndex(bcIdx);
 
     const user = await this.usersService.findId(userInfo.id);
     // 게시글 쓰기 권한 여부 확인
-    const adminAuth = await commonUtils.authCheck(['root', 'admin'], get(user, ['groups']));
-    if (adminAuth.length <= 0) {
+    const adminAuth = await commonUtils.isAdmin(get(user, ['group', 'id']));
+    if (!adminAuth) {
       // 쓰기 권한 혹은 자신의 글이 아닌 경우
       const write_auth = board.write_auth.split("|");
-      const user_auth = await commonUtils.authCheck(write_auth, get(userInfo, ['groups']));
-      if (user_auth.length <= 0 || get(bc, ['user', 'user_idx']) != get(user, ['user_idx'])) {
+      const user_auth = await commonUtils.authCheck(write_auth, get(userInfo, ['group']));
+      if (user_auth.length <= 0 || get(bc, ['user', 'idx']) != get(user, ['idx'])) {
         throw new UnauthorizedException('권한이 없습니다.');
       }
     }
 
-    bc.idx = bc_idx;
+    bc.idx = bcIdx;
     bc.status = +get(updateBoardContentDto, ['status'], 2);
     bc.type = +get(updateBoardContentDto, ['type'], 1);
     bc.writer = get(updateBoardContentDto, ['writer'], '');
@@ -242,12 +322,9 @@ export class BoardContentsService {
       where: { bcat_id: In([category]) }
     });
 
-    const order_by = {};
-    if (order) {
-      order = order.split(':');
-      order_by[order[0]] = order[1];
-    }
-    order_by['createdAt'] = 'DESC';
+    const order_by = commonUtils.orderSplit(order, '');
+    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
+
     const [results, total] = await this.bcRepository.findAndCount({
       order: order_by,
       where: (qb) => {
@@ -256,7 +333,7 @@ export class BoardContentsService {
           qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
         }
         qb.andWhere('`BoardContentsEntity`.`status` >= :status', { status: bcConstants.status.uncertified })
-        qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
+        // qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
       },
       relations: ['user', 'board', 'bscats'],
       take: take,
@@ -268,6 +345,7 @@ export class BoardContentsService {
       bc: new Pagination({
         results,
         total,
+        page,
       })
     }
   }
@@ -353,6 +431,8 @@ export class BoardContentsService {
     arr.push(bcConstants.type.basic);
     arr.push(bcConstants.type.secret);
     arr.push(bcConstants.type.link);
+    arr.push(bcConstants.type.event);
+    arr.push(bcConstants.type.new);
     return arr;
   }
 

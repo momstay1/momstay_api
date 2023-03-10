@@ -38,11 +38,11 @@ export class BoardContentsController {
   };
 
   @Post()
+  @Auth(['Any'])
+  @ApiBearerAuth()
   @ApiOperation({ summary: '게시글 생성 API' })
   @ApiCreatedResponse({ type: CreateBoardContentDto })
   @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
-  @ApiBearerAuth()
-  @Auth(['Any'])
   async create(@GetUser() user: UsersEntity, @Body() createBoardContentDto: CreateBoardContentDto) {
     return await this.boardContentsService.create(user, createBoardContentDto);
   }
@@ -52,22 +52,24 @@ export class BoardContentsController {
   @ApiCreatedResponse({ type: BoardContentsEntity })
   @ApiQuery({ name: "category", required: false })
   @ApiQuery({ name: "order", required: false })
+  @ApiQuery({
+    name: "search",
+    description: 'search=status:1,2,3<br>',
+    required: false
+  })
   async findCategoryAll(
     @Param('bd_idx') bd_idx: string,
     @Query('category') category: string,
     @Query('take') take: number,
     @Query('page') page: number,
     @Query('order') order: string,
+    @Query('search') search: string[],
   ) {
     const {
-      bc: {
-        results,
-        total,
-        pageTotal
-      },
+      bc,
       bcats
-    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order);
-    return { bcats, total, pageTotal, results };
+    } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order, search);
+    return { bcats, ...bc };
   }
 
   @Get(':bd_idx/:bc_idx')

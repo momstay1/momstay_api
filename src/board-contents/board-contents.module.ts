@@ -23,6 +23,7 @@ import { AdminBoardContentsController } from './admin-board-contents.controller'
     GroupsModule
   ],
   controllers: [BoardContentsController, AdminBoardContentsController, NoticeContentsController],
-  providers: [BoardContentsService]
+  providers: [BoardContentsService],
+  exports: [BoardContentsService]
 })
 export class BoardContentsModule { }

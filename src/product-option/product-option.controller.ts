@@ -52,17 +52,11 @@ export class ProductOptionController {
     @Query('page') page: number,
     @Query('search') search: string[]) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.productOptionService.findAll({ take, page }, search);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }

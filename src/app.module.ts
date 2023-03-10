@@ -38,6 +38,12 @@ import { OrderProductModule } from './order-product/order-product.module';
 import { PgDataModule } from './pg-data/pg-data.module';
 import { PgNotiModule } from './pg-noti/pg-noti.module';
 import { PgCancelModule } from './pg-cancel/pg-cancel.module';
+import { MypageModule } from './mypage/mypage.module';
+import { IamportService } from './iamport/iamport.service';
+import { ReviewsModule } from './reviews/reviews.module';
+import { DeviceModule } from './device/device.module';
+import { CommentModule } from './comment/comment.module';
+import { MembershipModule } from './membership/membership.module';
 
 @Module({
   imports: [
@@ -85,8 +91,13 @@ import { PgCancelModule } from './pg-cancel/pg-cancel.module';
     PgDataModule,
     PgNotiModule,
     PgCancelModule,
+    MypageModule,
+    ReviewsModule,
+    DeviceModule,
+    CommentModule,
+    MembershipModule,
   ],
-  providers: [CommonService],
+  providers: [CommonService, IamportService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

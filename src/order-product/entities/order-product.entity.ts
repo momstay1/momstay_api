@@ -2,12 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  JoinTable,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm";
 import { UsersEntity } from "src/users/entities/user.entity";
 import { OrderEntity } from "src/order/entities/order.entity";
+import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
 
 @Entity('order_product')
 export class OrderProductEntity {
@@ -21,9 +25,7 @@ export class OrderProductEntity {
   @Column({ length: 255, default: '' })
   eq: string;
   @Column({ length: 255, default: '' })
-  productIdx: string;
-  @Column({ length: 255, default: '' })
-  productCode: string;
+  productOptionCode: string;
   @Column({ length: 255, default: '' })
   productType: string;
 
@@ -39,16 +41,22 @@ export class OrderProductEntity {
   num: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   price: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  taxPrice: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  feePrice: number;
   @Column({ default: 0 })
   point: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   payPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
-  refundPrice: number;
+  cancelPrice: number;
   @Column({ default: 0 })
-  refundPoint: number;
+  cancelPoint: number;
   @Column({ type: 'text', default: '' })
   memo: string;
+  @Column({ type: 'text', default: '' })
+  cancelReason: string;
 
   @Column({ type: 'date', default: '0' })
   startAt: string;
@@ -70,5 +78,7 @@ export class OrderProductEntity {
     onUpdate: 'NO ACTION'
   })
   order: OrderEntity;
+  @ManyToOne(() => ProductOptionEntity, (po) => po.orderProduct)
+  productOption: ProductOptionEntity;
 
 }

@@ -103,6 +103,7 @@ export class DefectService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 

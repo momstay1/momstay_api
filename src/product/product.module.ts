@@ -17,7 +17,7 @@ import { CollegeModule } from 'src/college/college.module';
     ProductInfoModule,
     UsersModule,
     MetroModule,
-    CollegeModule
+    CollegeModule,
   ],
   controllers: [ProductController, AdminProductController],
   providers: [ProductService],

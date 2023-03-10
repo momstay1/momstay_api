@@ -48,6 +48,7 @@
     "dotenv": "^16.0.0",
     "fs": "^0.0.1-security",
     "googleapis": "^111.0.0",
+    "iamport-rest-client-nodejs": "^0.9.11",
     "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.4",

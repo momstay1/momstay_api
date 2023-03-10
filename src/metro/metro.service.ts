@@ -43,6 +43,7 @@ export class MetroService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 

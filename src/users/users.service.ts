@@ -1,20 +1,22 @@
 import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compact, filter, get, isArray, isEmpty, map } from 'lodash';
-import * as moment from "moment";
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { Brackets, In, MoreThanOrEqual, Repository } from 'typeorm';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { commonUtils } from 'src/common/common.utils';
 import { EmailService } from 'src/email/email.service';
 import { FileService } from 'src/file/file.service';
 import { GroupsService } from 'src/groups/groups.service';
-import { Pagination, PaginationOptions } from 'src/paginate';
 import { UserSnsService } from 'src/user-sns/user-sns.service';
-import { Brackets, In, MoreThanOrEqual, Repository } from 'typeorm';
+import { DeviceService } from 'src/device/device.service';
 import { usersConstant } from './constants';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
 import { Cron } from '@nestjs/schedule';
+
+import * as moment from "moment";
 
 @Injectable()
 export class UsersService {
@@ -24,6 +26,7 @@ export class UsersService {
     private readonly userSnsService: UserSnsService,
     private readonly fileService: FileService,
     private readonly emailService: EmailService,
+    private readonly deviceService: DeviceService,
   ) { }
 
   async test(id) {
@@ -158,6 +161,7 @@ export class UsersService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 
@@ -171,7 +175,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: obj,
-      relations: ['group', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -185,7 +189,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
-      relations: ['group', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -203,7 +207,7 @@ export class UsersService {
         qb.where('`email` = :email', { email: id })
         qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
       },
-      relations: ['group', 'userSns', 'login'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -218,7 +222,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { idx: idx },
-      relations: ['group', 'userSns'],
+      relations: ['group', 'userSns', 'device'],
     });
     if (!user) {
       throw new NotFoundException('존재하지 않는 회원 입니다.');
@@ -229,40 +233,41 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, files) {
     const user = await this.findId(id);
-    const groupIdxs = updateUserDto.group ? updateUserDto.group : usersConstant.default.group_idx;
+    const groupIdxs = updateUserDto['group'] ? updateUserDto['group'] : usersConstant['default']['group_idx'];
     const group = await this.groupService.findOne(groupIdxs);
 
-    user.name = updateUserDto.name;
     if (get(updateUserDto, 'status', ''))
-      user.status = +get(updateUserDto, 'status');
+      user['status'] = +get(updateUserDto, 'status');
+    if (get(updateUserDto, 'id', ''))
+      user['id'] = get(updateUserDto, 'id');
     if (get(updateUserDto, 'name', ''))
-      user.name = get(updateUserDto, 'name');
+      user['name'] = get(updateUserDto, 'name');
     if (get(updateUserDto, 'email', ''))
-      user.email = get(updateUserDto, 'email');
+      user['email'] = get(updateUserDto, 'email');
     if (get(updateUserDto, 'other', ''))
-      user.other = get(updateUserDto, 'other');
+      user['other'] = get(updateUserDto, 'other');
     if (get(updateUserDto, 'language', ''))
-      user.language = get(updateUserDto, 'language');
+      user['language'] = get(updateUserDto, 'language');
     if (get(updateUserDto, 'gender', ''))
-      user.gender = get(updateUserDto, 'gender');
+      user['gender'] = get(updateUserDto, 'gender');
     if (get(updateUserDto, 'countryCode', ''))
-      user.countryCode = get(updateUserDto, 'countryCode');
+      user['countryCode'] = get(updateUserDto, 'countryCode');
     if (get(updateUserDto, 'phone', ''))
-      user.phone = get(updateUserDto, 'phone');
+      user['phone'] = get(updateUserDto, 'phone');
     if (get(updateUserDto, 'birthday', ''))
-      user.birthday = get(updateUserDto, 'birthday');
+      user['birthday'] = get(updateUserDto, 'birthday');
     if (get(updateUserDto, 'memo', ''))
-      user.memo = get(updateUserDto, 'memo');
+      user['memo'] = get(updateUserDto, 'memo');
     if (get(updateUserDto, 'marketing', ''))
-      user.marketing = get(updateUserDto, 'marketing');
+      user['marketing'] = get(updateUserDto, 'marketing');
     if (get(updateUserDto, 'uniqueKey', ''))
-      user.marketing = get(updateUserDto, 'uniqueKey');
+      user['marketing'] = get(updateUserDto, 'uniqueKey');
     if (get(updateUserDto, 'certifiInfo', ''))
-      user.marketing = get(updateUserDto, 'certifiInfo');
+      user['marketing'] = get(updateUserDto, 'certifiInfo');
 
-    user.group = group;
+    user['group'] = group;
     if (get(updateUserDto, 'password')) {
-      user.password = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
+      user['password'] = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
     }
     const user_data = await this.usersRepository.save(user);
 
@@ -274,6 +279,29 @@ export class UsersService {
       file_info = await this.fileService.fileInfoInsert(files, user_data['idx']);
     }
     return { user: user_data, file_info }
+  }
+
+  // 단말기 회원정보 수정
+  async updateUser(token: string, userInfo: UsersEntity) {
+    const deviceInfo = await this.deviceService.findOneToken(token);
+
+    const user = await this.findId(userInfo.id);
+    // 단말기에 연동된 회원과 로그인한 회원이 다른 경우
+    if (get(deviceInfo, ['user', 'idx'], '') && deviceInfo['user']['idx'] != user['idx']) {
+      // 회원에 연동된 단말기 정보 제거
+      const { user } = deviceInfo;
+      console.log(deviceInfo['user']);
+      user['device'] = null;
+      await this.usersRepository.save(user);
+      // 단말기에 회원 정보 제거
+      deviceInfo['user'] = null;
+    }
+
+    user['device'] = deviceInfo;
+
+    await this.usersRepository.save(user);
+
+    return { user };
   }
 
   async chpw(id: string, password: string) {
@@ -355,15 +383,13 @@ export class UsersService {
   // cron 테스트
   // @Cron('*/10 * * * * *')
   // async cronTest() {
-  //   console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
-  //   console.log('-----------------------cronTest-----------------------');
+  //   console.log('[cron] cronTest: ', moment().format('YYYY-MM-DD HH:mm:ss'));
   // }
 
   // 탈퇴 회원 다음날 01시 uniquekey 제거
   @Cron('0 0 1 * * *')
   async deleteUniqueKey() {
-    console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
-    console.log('-----------------------deleteUniqueKey-----------------------');
+    console.log('[cron] deleteUniqueKey: ', moment().format('YYYY-MM-DD HH:mm:ss'));
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
       .set({ uniqueKey: '', certifiInfo: '' })

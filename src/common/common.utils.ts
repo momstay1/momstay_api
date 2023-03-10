@@ -1,6 +1,6 @@
 import { INestApplication } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { filter, get, isArray, isObject, map } from "lodash";
+import { filter, get, isArray, isEmpty, isObject, map } from "lodash";
 import { usersConstant } from "src/users/constants";
 
 export const commonUtils = {
@@ -74,8 +74,30 @@ export const commonUtils = {
 
     return where;
   },
-  async authCheck(auth, groups) {
-    return filter(groups, (o) => { return auth.includes(o.id) });
+  orderSplit(order: string, alias: string) {
+    let order_by = {};
+    if (order) {
+      const order_arr = order.split(':');
+      if (alias && order_arr[0].indexOf('.') === -1) {
+        order_by[alias + '.' + order_arr[0]] = order_arr[1];
+      } else {
+        order_by[order_arr[0]] = order_arr[1];
+      }
+    }
+
+    return order_by;
+  },
+  async authCheck(auth, groupId) {
+    return auth.includes(groupId);
+  },
+  calcTax(price: number, persent: string): number {
+    let tax = +persent.replace('%', '');
+    tax = tax / 100;
+
+    // 자바스크립트 숫자 계산상 부동소수점 계산으로 부가세 계산시 소수점 발생으로 fixed 사용
+    const calcTax = (price * tax).toFixed();
+
+    return +calcTax;
   },
   createCode(): string {
     return Math.random().toString(36).substr(2, 11);
@@ -148,4 +170,41 @@ export const commonUtils = {
     }
     return result;
   },
+  getStatus(key: string | string[]) {
+    const data = {};
+
+    // 부가세
+    data['tax'] = 10;
+    // 맘스테이 수수료
+    data['fee'] = 5;
+    // 1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정, 7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료
+    data['order_status'] = {
+      waitingForPayment: 1,
+      paymentCompleted: 2,
+      preparingForDelivery: 3,
+      shipping: 4,
+      purchaseConfirmation: 6,
+      cancellationRequest: 7,
+      cancellationCompleted: 8,
+      returnRequest: 9,
+      returnComplete: 10,
+      exchangeRequest: 11,
+      exchangeComplete: 12,
+    };
+    // 앱 푸시 구독(topic) 타입
+    data['app_topic'] = {
+      all: 'all', // 전체 푸시 발송
+      marketing: 'marketing', // 마케팅 동의한 회원만 발송
+      service: 'service', // 서비스 동의한 회원만 발송
+      admin: 'admin'  // 관리자에게만 발송
+    }
+
+    return get(data, key, '');
+  },
+  isAdmin(groupId: string) {
+    return ['root', 'admin'].includes(groupId);
+  },
+  isRoot(groupId: string) {
+    return ['root'].includes(groupId);
+  }
 };

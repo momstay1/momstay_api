@@ -6,7 +6,7 @@ import {
   UnsupportedMediaTypeException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { keyBy } from 'lodash';
+import { get, isEmpty, keyBy, map, union } from 'lodash';
 import { In, Like, Repository } from 'typeorm';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
@@ -379,6 +379,42 @@ export class FileService {
         console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);
       })
       .toBuffer()
+  }
+
+  // post 또는 patch 요청시 변경된 파일 제거
+  async removeByRequest(dto: any, idx: number, category: string[]) {
+    // 파일 제거
+    const fileIdx = get(dto, 'filesIdx', '');
+    let fileIdxs = [];
+    console.log('-----------------------파일 제거-----------------------');
+    try {
+      const File_idxs = map(
+        await this.findCategory(category, "" + idx),
+        (o) => "" + o.file_idx
+      );
+      fileIdxs = fileIdx ? fileIdx.split(",") : [];
+      const delFileIdxs = File_idxs.filter(o => !fileIdxs.includes(o));
+      console.log({delFileIdxs});
+      if (delFileIdxs.length > 0) {
+        await this.removes(delFileIdxs);
+      }
+    } catch (error) {
+      console.log({ error });
+    }
+
+    return fileIdxs;
+  }
+
+  // post 또는 patch 요청시 새로 추가될 파일 등록
+  async createByRequest(files, idx: number) {
+    let fileIdxs = [];
+    if (!isEmpty(files)) {
+      console.log('-----------------------새 첨부파일 등록-----------------------');
+      const new_file = await this.fileInfoInsert(files, idx);
+      fileIdxs = map(new_file[idx], (obj) => map(obj, o => "" + o.file_idx));
+    }
+
+    return fileIdxs;
   }
 
 }

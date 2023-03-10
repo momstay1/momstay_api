@@ -46,6 +46,7 @@ export class DefectPlaceService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 

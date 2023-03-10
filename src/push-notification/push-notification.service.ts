@@ -9,7 +9,12 @@ import { AxiosError } from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PushHistoryEntity } from './entities/push-history.entity';
 import { Repository } from 'typeorm';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
+import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
+import { UsersEntity } from 'src/users/entities/user.entity';
+import { DeviceEntity } from 'src/device/entities/device.entity';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
@@ -21,23 +26,12 @@ export class PushNotificationService {
     private readonly http: HttpService,
   ) { }
 
-  async sendPush({ topic, token }, { title, body, data }) {
-    const message = {
-      // topic: topic,
-      // token: "",
-      notification: {
-        title: title,
-        body: body
-      },
-      // data: ''
-    };
-    if (topic) {
-      message['topic'] = topic;
+  async sendPush(target, notification) {
+    const message = { notification };
+    if (get(target, 'topic', '')) {
+      message['topic'] = target['topic'];
     } else {
-      message['token'] = token;
-    }
-    if (data) {
-      message['data'] = data;
+      message['token'] = target['token'];
     }
     try {
       const response = await this.sendFcmMessage({ message });
@@ -115,5 +109,143 @@ export class PushNotificationService {
 
   remove(id: number) {
     return `This action removes a #${id} pushNotification`;
+  }
+
+  async isApp(device: DeviceEntity) {
+    return ['android', 'ios'].includes(get(device, 'environment', 'web'));
+  }
+
+  async guestOrderPush(hostUser: UsersEntity, po: ProductOptionEntity) {
+    const isApp = await this.isApp(get(hostUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: hostUser['device']['token'],
+      }
+      const notifications = {
+        title: po['product']['title'] + '숙소 ' + po['title'] + '방 결제가 완료되었습니다.',
+        body: po['product']['title'] + '숙소 ' + po['title'] + '방 결제가 완료되었습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+  async guestOrderCancelPush(hostUser: UsersEntity, po: ProductOptionEntity) {
+    const isApp = await this.isApp(get(hostUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: hostUser['device']['token'],
+      }
+      const notifications = {
+        title: po['product']['title'] + '숙소 ' + po['title'] + '방 결제를 취소했습니다.',
+        body: po['product']['title'] + '숙소 ' + po['title'] + '방 결제를 취소했습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+  async hostOrderCancelPush(guestUser: UsersEntity, order: OrderEntity) {
+    const isApp = await this.isApp(get(guestUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: guestUser['device']['token'],
+      }
+      const notifications = {
+        title: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
+          + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 거절했습니다.',
+        body: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
+          + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 거절했습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+  async hostOrderApprovalPush(guestUser: UsersEntity, order: OrderEntity) {
+    const isApp = await this.isApp(get(guestUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: guestUser['device']['token'],
+      }
+      const notifications = {
+        title: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
+          + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 승인했습니다.',
+        body: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
+          + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 승인했습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+
+  async guestReservationPush(hostUser: UsersEntity, po: ProductOptionEntity) {
+    const isApp = await this.isApp(get(hostUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: hostUser['device']['token'],
+      }
+      const notifications = {
+        title: po['product']['title'] + '숙소 ' + po['title'] + '방 방문예약이 있습니다.',
+        body: po['product']['title'] + '숙소 ' + po['title'] + '방 방문예약이 있습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+  async guestReservationCancelPush(hostUser: UsersEntity, reservation: ReservationEntity) {
+    const isApp = await this.isApp(get(hostUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: hostUser['device']['token'],
+      }
+      const notifications = {
+        title:
+          reservation['productOption']['product']['title']
+          + '숙소 '
+          + reservation['productOption']['title']
+          + '방 방문예약이 취소되었습니다.',
+        body:
+          reservation['productOption']['product']['title']
+          + '숙소 '
+          + reservation['productOption']['title']
+          + '방 방문예약이 취소되었습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+  async hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity) {
+    const isApp = await this.isApp(get(guestUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: guestUser['device']['token'],
+      }
+      const notifications = {
+        title: '호스트가 '
+          + reservation['productOption']['product']['title']
+          + '숙소 '
+          + reservation['productOption']['title']
+          + '방 방문예약을 거절했습니다.',
+        body: '호스트가 '
+          + reservation['productOption']['product']['title']
+          + '숙소 '
+          + reservation['productOption']['title']
+          + '방 방문예약을 거절했습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
+  }
+  async hostReservationApprovalPush(guestUser: UsersEntity, reservation: ReservationEntity) {
+    const isApp = await this.isApp(get(guestUser, ['device']));
+    if (isApp) {
+      const target = {
+        token: guestUser['device']['token'],
+      }
+      const notifications = {
+        title: '호스트가 '
+          + reservation['productOption']['product']['title']
+          + '숙소 '
+          + reservation['productOption']['title']
+          + '방 방문예약을 승인했습니다.',
+        body: '호스트가 '
+          + reservation['productOption']['product']['title']
+          + '숙소 '
+          + reservation['productOption']['title']
+          + '방 방문예약을 승인했습니다.',
+      };
+      await this.sendPush(target, notifications);
+    }
   }
 }

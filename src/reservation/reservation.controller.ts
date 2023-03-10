@@ -36,24 +36,18 @@ export class ReservationController {
     @Query('page') page: number,
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.reservationService.hostFindAll({ take, page }, user);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }
 
   @Get('/guest')
   @ApiOperation({ summary: '방문 예약 리스트 (게스트) API' })
-  @Auth(['root', 'admin', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   async guestFindAll(
     @GetUser() user: UsersEntity,
@@ -61,17 +55,11 @@ export class ReservationController {
     @Query('page') page: number,
   ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
     } = await this.reservationService.guestFindAll({ take, page }, user);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }
@@ -97,7 +85,7 @@ export class ReservationController {
 
   @Delete('guest/:idx')
   @ApiOperation({ summary: '방문 예약 취소(게스트) API' })
-  @Auth(['root', 'admin', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   async guestCancel(
     @GetUser() user: UsersEntity,

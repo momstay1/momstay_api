@@ -1,22 +1,28 @@
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
+import { CommentEntity } from 'src/comment/entities/comment.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
+import { DeviceEntity } from 'src/device/entities/device.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 import { LoginEntity } from 'src/login/entities/login.entity';
+import { MembershipHistoryEntity } from 'src/membership/entities/membership-history.entity';
 import { OrderProductEntity } from 'src/order-product/entities/order-product.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 import { ProductEntity } from 'src/product/entities/product.entity';
 import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
+import { ReviewEntity } from 'src/reviews/entities/review.entity';
 import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -111,6 +117,19 @@ export class UsersEntity {
 
   @OneToMany(() => UserSnsEntity, (us) => us.user)
   userSns: undefined;
+
+  @OneToMany(() => ReviewEntity, (review) => review.user)
+  review: undefined;
+
+  @OneToMany(() => MembershipHistoryEntity, (mh) => mh.user)
+  membershipHistory: undefined;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comment: undefined;
+
+  @OneToOne(() => DeviceEntity, { cascade: true })
+  @JoinColumn()
+  device: DeviceEntity;
 
   @ManyToOne(() => GroupsEntity, (group) => group.users)
   group: GroupsEntity;

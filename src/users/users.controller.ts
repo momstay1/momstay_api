@@ -45,6 +45,8 @@ import { multerOptions } from 'src/common/common.file';
 import { LoginService } from 'src/login/login.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { IamportService } from 'src/iamport/iamport.service';
+import { DeviceService } from 'src/device/device.service';
 
 @Controller('users')
 @ApiTags('유저 API')
@@ -53,7 +55,9 @@ export class UsersController {
     private authService: AuthService,
     private readonly usersService: UsersService,
     private readonly loginService: LoginService,
-    private readonly refreshTokenService: RefreshTokenService
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly iamportService: IamportService,
+    private readonly deviceService: DeviceService,
   ) { }
 
   // 회원 생성
@@ -80,8 +84,13 @@ export class UsersController {
   @ApiBody({ type: LoginUserDto })
   @ApiCreatedResponse({ type: ResponseAuthDto })
   @ApiUnauthorizedResponse({ type: ResponseErrDto })
-  async login(@GetUser() user: UsersEntity, @Req() req) {
+  async login(
+    @GetUser() user: UsersEntity,
+    @Body('token') token: string,
+    @Req() req
+  ) {
     const jwt = await this.authService.login(user, '');
+    await this.usersService.updateUser(token, user);
     await this.loginService.create(user, req);
     await this.refreshTokenService.insert(user, jwt);
     return jwt;
@@ -172,8 +181,9 @@ export class UsersController {
   // 테스트용
   @Get('test/:id')
   async test(@Param('id') id: string) {
-    const data = await this.usersService.test(id);
-    return data;
+    const data = await this.iamportService.getPaymentByImpUid(id);
+    // const data = await this.usersService.test(id);
+    // return data;
   }
 
   // 비회원 비밀번호 재설정
@@ -233,7 +243,9 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFiles() files: Array<Express.Multer.File>
   ) {
-    return await this.usersService.update(id, updateUserDto, files);
+    const data = await this.usersService.update(id, updateUserDto, files);
+    const jwt = await this.authService.login(data['user'], '');
+    return { ...data, jwt };
   }
 
   // 회원 삭제(탈퇴)

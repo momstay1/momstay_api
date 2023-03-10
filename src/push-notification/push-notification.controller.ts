@@ -16,14 +16,15 @@ export class PushNotificationController {
   async test() {
     const target = {
       // token: 'cJfclSYOSzOS86FH2TQHOz:APA91bGHhZpeZ3sg90Q6RnuPTCtWwJ_y0o3nVyh-xPCOQXYlj4XZb_HLHyp7gQFEY56YcIQPmZjUwSVNfZuOienzIkc2KYZoIJQyYToH4ZJ6T6EPZE_EMcZFNEtE4Z5riCpmazJRjJxE',
-      token: '',
-      topic: 'all',
-      // topic: '',
+      token: '5BAA98BFE537F9A4577F2899A647F122A0C9436F1421024A678E3211C93672C2',
+      // token: '',
+      // topic: 'all',
+      topic: '',
     }
     const notifications = {
       title: '앱 푸시 테스트',
       body: '앱 푸시 테스트 입니다.',
-      data: { status: 200 }
+      data: {}
     };
     return await this.pushNotificationService.sendPush(target, notifications);
   }

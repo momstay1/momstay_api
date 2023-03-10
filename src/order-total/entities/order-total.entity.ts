@@ -17,6 +17,8 @@ export class OrderTotalEntity {
   orderIdx: string;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '주문 총 금액' })
   totalPrice: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '취소 주문 총 금액' })
+  totalCancelPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '배송비' })
   shipPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '추가배송비' })

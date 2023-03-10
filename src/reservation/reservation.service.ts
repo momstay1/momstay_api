@@ -5,6 +5,7 @@ import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductOptionService } from 'src/product-option/product-option.service';
+import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -18,6 +19,7 @@ export class ReservationService {
     private readonly productOptionService: ProductOptionService,
     private readonly usersService: UsersService,
     private readonly fileService: FileService,
+    private readonly pushNotiService: PushNotificationService,
   ) { }
 
   async create(userInfo, createReservationDto: CreateReservationDto) {
@@ -39,7 +41,7 @@ export class ReservationService {
     // 회원 정보 가져오기
     const user = await this.usersService.findId(userInfo.id);
 
-    if (user.idx == get(po, ['product', 'user', 'idx'], '')) {
+    if (user['group']['id'] == 'host' && user['idx'] == get(po, ['product', 'user', 'idx'], '')) {
       // 호스트 계정이 자신의 방 예약하는 경우
       throw new NotAcceptableException('자신의 방은 예약할 수 없습니다.');
     }
@@ -56,6 +58,11 @@ export class ReservationService {
     const reservationEntity = await this.reservationRepository.create(reservation_data);
     const reservation = await this.reservationRepository.save(reservationEntity);
 
+    // 호스트에게 방문예약 push 알림 발송
+    const hostUser = get(po, ['product', 'user']);
+    if (get(hostUser, ['device', 'token'], '')) {
+      await this.pushNotiService.guestReservationPush(hostUser, po);
+    }
     return { reservation };
   }
 
@@ -67,7 +74,7 @@ export class ReservationService {
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
         qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-        qb.where('`user`.id = :user_id', { user_id: userInfo.id });
+        qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
       })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
@@ -84,6 +91,7 @@ export class ReservationService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data, file_info }
@@ -96,7 +104,7 @@ export class ReservationService {
       .leftJoinAndSelect('reservation.user', 'user')
       .where((qb) => {
         qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-        qb.where('`user`.id = :user_id', { user_id: userInfo.id });
+        qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
       })
       .skip((take * (page - 1) || 0))
       .take((take || 10))
@@ -113,6 +121,7 @@ export class ReservationService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data, file_info }
@@ -136,7 +145,14 @@ export class ReservationService {
     }
     const reservation = await this.reservationRepository.findOne({
       where: { idx: idx },
-      relations: ['productOption', 'productOption.product', 'productOption.product.user', 'user']
+      relations: [
+        'productOption',
+        'productOption.product',
+        'productOption.product.user',
+        'productOption.product.user.device',
+        'user',
+        'user.device'
+      ]
     });
     if (!reservation.idx) {
       throw new NotFoundException('정보를 찾을 수 없습니다.');
@@ -152,6 +168,11 @@ export class ReservationService {
     await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
 
     await this.changeStatus(2, idx);
+    // 게스트에게 방문예약 거절 push 알림 발송
+    const { user } = reservation;
+    if (get(user, ['device', 'token'], '')) {
+      await this.pushNotiService.hostReservationApprovalPush(user, reservation);
+    }
   }
 
   async guestCancel(userInfo, idx: number) {
@@ -162,6 +183,12 @@ export class ReservationService {
     await this.authCheckStatus(userInfo, reservation.user.idx);
 
     await this.changeStatus(4, idx);
+
+    // 호스트에게 방문예약 취소 push 알림 발송
+    const { user } = get(reservation, ['productOption', 'product']);
+    if (get(user, ['device', 'token'], '')) {
+      await this.pushNotiService.guestReservationCancelPush(user, reservation);
+    }
   }
   async hostCancel(userInfo, idx: number) {
     // 방문 예약 정보 가져오기
@@ -171,6 +198,12 @@ export class ReservationService {
     await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
 
     await this.changeStatus(5, idx);
+
+    // 게스트에게 방문예약 거절 push 알림 발송
+    const { user } = reservation;
+    if (get(user, ['device', 'token'], '')) {
+      await this.pushNotiService.hostReservationCancelPush(user, reservation);
+    }
   }
 
   // 이미 처리된 상태인지 체크
@@ -182,7 +215,7 @@ export class ReservationService {
   }
   // 상태 변경 가능한지 권한 체크
   async authCheckStatus({ group, id }, idx) {
-    if (!['root', 'admin'].includes(group)) {
+    if (!commonUtils.isAdmin(group)) {
       // 관리자가 아닌 경우
       // 회원 정보 가져오기
       const user = await this.usersService.findId(id);

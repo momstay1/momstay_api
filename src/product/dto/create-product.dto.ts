@@ -16,7 +16,7 @@ export class CreateProductDto {
   readonly type: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '멤버쉽 유무', default: 0, required: false })
+  @ApiProperty({ description: '멤버쉽 유무(0: 미사용, 1: 사용)', default: 0, required: false })
   readonly membership: string;
   @IsOptional()
   @IsString()
@@ -28,6 +28,18 @@ export class CreateProductDto {
   readonly title: string;
   @IsOptional()
   @IsString()
+  @ApiProperty({ description: '숙소 명(영어)', required: false })
+  readonly titleEng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '숙소 명(일본어)', required: false })
+  readonly titleJpn: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '숙소 명(중국어)', required: false })
+  readonly titleChn: string;
+  @IsOptional()
+  @IsString()
   @ApiProperty({ description: '우편번호', required: false })
   readonly postCode: string;
   @IsOptional()
@@ -36,8 +48,32 @@ export class CreateProductDto {
   readonly addr1: string;
   @IsOptional()
   @IsString()
+  @ApiProperty({ description: '주소(영어)', required: false })
+  readonly addr1Eng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '주소(일본어)', required: false })
+  readonly addr1Jpn: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '주소(중국어)', required: false })
+  readonly addr1Chn: string;
+  @IsOptional()
+  @IsString()
   @ApiProperty({ description: '상세주소', required: false })
   readonly addr2: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '상세주소(영어)', required: false })
+  readonly addr2Eng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '상세주소(일본어)', required: false })
+  readonly addr2Jpn: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '상세주소(중국어)', required: false })
+  readonly addr2Chn: string;
   @IsOptional()
   @IsString()
   @ApiProperty({ description: '호스트 사용 언어 <br>(KR: 한국어, EN: 영어, JP: 일어, CH: 중국어)', example: "KR,EN", default: "KR", required: false })
