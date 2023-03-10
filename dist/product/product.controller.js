@@ -33,13 +33,8 @@ let ProductController = class ProductController {
         return await this.productService.create(createProductDto, files);
     }
     async findAll(take, page, search) {
-        const { data: { results, total, pageTotal }, file_info } = await this.productService.findAll({ take, page }, search);
-        return {
-            results,
-            total,
-            pageTotal,
-            file_info
-        };
+        const { data, file_info } = await this.productService.findAll({ take, page }, search);
+        return Object.assign(Object.assign({}, data), { file_info });
     }
     async findOne(idx) {
         return await this.productService.findOne(+idx);
@@ -89,7 +84,7 @@ __decorate([
             + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
             + 'search=min_priceMonth:월 최소 가격<br>'
             + 'search=max_priceMonth:월 최대 가격<br>'
-            + 'search=product_info:편의시설 idx(2,3,4)[작업중]<br>',
+            + 'search=product_info:편의시설 idx(2,3,4)<br>',
         required: false
     }),
     __param(0, (0, common_1.Query)('take')),

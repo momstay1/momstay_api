@@ -3,18 +3,16 @@ import { CreatePushNotificationDto } from './dto/create-push-notification.dto';
 import { UpdatePushNotificationDto } from './dto/update-push-notification.dto';
 import { PushHistoryEntity } from './entities/push-history.entity';
 import { Repository } from 'typeorm';
+import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
+import { UsersEntity } from 'src/users/entities/user.entity';
+import { DeviceEntity } from 'src/device/entities/device.entity';
 export declare class PushNotificationService {
     private pushHistoryRepository;
     private readonly http;
     constructor(pushHistoryRepository: Repository<PushHistoryEntity>, http: HttpService);
-    sendPush({ topic, token }: {
-        topic: any;
-        token: any;
-    }, { title, body, data }: {
-        title: any;
-        body: any;
-        data: any;
-    }): Promise<void>;
+    sendPush(target: any, notification: any): Promise<void>;
     historySave(response: any): Promise<void>;
     private sendFcmMessage;
     private getAccessToken;
@@ -23,4 +21,13 @@ export declare class PushNotificationService {
     findOne(id: number): string;
     update(id: number, updatePushNotificationDto: UpdatePushNotificationDto): string;
     remove(id: number): string;
+    isApp(device: DeviceEntity): Promise<boolean>;
+    guestOrderPush(hostUser: UsersEntity, po: ProductOptionEntity): Promise<void>;
+    guestOrderCancelPush(hostUser: UsersEntity, po: ProductOptionEntity): Promise<void>;
+    hostOrderCancelPush(guestUser: UsersEntity, order: OrderEntity): Promise<void>;
+    hostOrderApprovalPush(guestUser: UsersEntity, order: OrderEntity): Promise<void>;
+    guestReservationPush(hostUser: UsersEntity, po: ProductOptionEntity): Promise<void>;
+    guestReservationCancelPush(hostUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
+    hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
+    hostReservationApprovalPush(guestUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
 }

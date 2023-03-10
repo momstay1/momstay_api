@@ -19,4 +19,9 @@ export declare class ConfigService {
         firebase_client_email: string;
         firebase_private_key: string;
     };
+    getIamportConfig(): {
+        iamport: string;
+        iamport_key: string;
+        iamport_secret_key: string;
+    };
 }

@@ -8,17 +8,21 @@ import { SnsLoginUserDto } from './dto/sns.login-user.dto';
 import { LoginService } from 'src/login/login.service';
 import { RefreshTokenService } from 'src/refresh-token/refresh-token.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { IamportService } from 'src/iamport/iamport.service';
+import { DeviceService } from 'src/device/device.service';
 export declare class UsersController {
     private authService;
     private readonly usersService;
     private readonly loginService;
     private readonly refreshTokenService;
-    constructor(authService: AuthService, usersService: UsersService, loginService: LoginService, refreshTokenService: RefreshTokenService);
+    private readonly iamportService;
+    private readonly deviceService;
+    constructor(authService: AuthService, usersService: UsersService, loginService: LoginService, refreshTokenService: RefreshTokenService, iamportService: IamportService, deviceService: DeviceService);
     create(createUserDto: CreateUserDto, files: Array<Express.Multer.File>): Promise<{
         user: UsersEntity;
         file_info: any;
     }>;
-    login(user: UsersEntity, req: any): Promise<ResponseAuthDto>;
+    login(user: UsersEntity, token: string, req: any): Promise<ResponseAuthDto>;
     reissued(req: any): Promise<ResponseAuthDto>;
     snsLogin(snsLoginUserDto: SnsLoginUserDto): Promise<ResponseAuthDto>;
     emailChk(email: string, code: string): Promise<void>;
@@ -32,10 +36,11 @@ export declare class UsersController {
             type: string;
         };
     }>;
-    test(id: string): Promise<any>;
+    test(id: string): Promise<void>;
     changePassword(id: string, password: string): Promise<UsersEntity>;
     resettingPassword(user: UsersEntity, prevpassword: string, password: string): Promise<UsersEntity>;
     update(id: string, updateUserDto: UpdateUserDto, files: Array<Express.Multer.File>): Promise<{
+        jwt: ResponseAuthDto;
         user: UsersEntity;
         file_info: any;
     }>;

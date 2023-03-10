@@ -50,6 +50,7 @@ let DefectPlaceService = class DefectPlaceService {
         return new paginate_1.Pagination({
             results,
             total,
+            page,
         });
     }
     async findOne(idx) {

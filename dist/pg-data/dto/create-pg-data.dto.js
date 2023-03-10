@@ -4,4 +4,4 @@ exports.CreatePgDatumDto = void 0;
 class CreatePgDatumDto {
 }
 exports.CreatePgDatumDto = CreatePgDatumDto;
-//# sourceMappingURL=create-pg-datum.dto.js.map
+//# sourceMappingURL=create-pg-data.dto.js.map

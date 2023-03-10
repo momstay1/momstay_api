@@ -34,19 +34,24 @@ const common_file_1 = require("../common/common.file");
 const login_service_1 = require("../login/login.service");
 const refresh_token_service_1 = require("../refresh-token/refresh-token.service");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const iamport_service_1 = require("../iamport/iamport.service");
+const device_service_1 = require("../device/device.service");
 let UsersController = class UsersController {
-    constructor(authService, usersService, loginService, refreshTokenService) {
+    constructor(authService, usersService, loginService, refreshTokenService, iamportService, deviceService) {
         this.authService = authService;
         this.usersService = usersService;
         this.loginService = loginService;
         this.refreshTokenService = refreshTokenService;
+        this.iamportService = iamportService;
+        this.deviceService = deviceService;
     }
     async create(createUserDto, files) {
         const data = await this.usersService.create(createUserDto, files);
         return data;
     }
-    async login(user, req) {
+    async login(user, token, req) {
         const jwt = await this.authService.login(user, '');
+        await this.usersService.updateUser(token, user);
         await this.loginService.create(user, req);
         await this.refreshTokenService.insert(user, jwt);
         return jwt;
@@ -80,8 +85,7 @@ let UsersController = class UsersController {
         return await this.usersService.email(email, type);
     }
     async test(id) {
-        const data = await this.usersService.test(id);
-        return data;
+        const data = await this.iamportService.getPaymentByImpUid(id);
     }
     async changePassword(id, password) {
         const data = await this.usersService.chpw(id, password);
@@ -92,7 +96,9 @@ let UsersController = class UsersController {
         return data;
     }
     async update(id, updateUserDto, files) {
-        return await this.usersService.update(id, updateUserDto, files);
+        const data = await this.usersService.update(id, updateUserDto, files);
+        const jwt = await this.authService.login(data['user'], '');
+        return Object.assign(Object.assign({}, data), { jwt });
     }
     async leave(id) {
         await this.usersService.leave(id);
@@ -122,9 +128,10 @@ __decorate([
     (0, swagger_1.ApiCreatedResponse)({ type: response_auth_dto_1.ResponseAuthDto }),
     (0, swagger_1.ApiUnauthorizedResponse)({ type: response_err_dto_1.ResponseErrDto }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
-    __param(1, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)('token')),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Object]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "login", null);
 __decorate([
@@ -288,7 +295,9 @@ UsersController = __decorate([
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         users_service_1.UsersService,
         login_service_1.LoginService,
-        refresh_token_service_1.RefreshTokenService])
+        refresh_token_service_1.RefreshTokenService,
+        iamport_service_1.IamportService,
+        device_service_1.DeviceService])
 ], UsersController);
 exports.UsersController = UsersController;
 //# sourceMappingURL=users.controller.js.map

@@ -34,9 +34,9 @@ let BoardContentsController = class BoardContentsController {
     async create(user, createBoardContentDto) {
         return await this.boardContentsService.create(user, createBoardContentDto);
     }
-    async findCategoryAll(bd_idx, category, take, page, order) {
-        const { bc: { results, total, pageTotal }, bcats } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order);
-        return { bcats, total, pageTotal, results };
+    async findCategoryAll(bd_idx, category, take, page, order, search) {
+        const { bc, bcats } = await this.boardContentsService.findCategoryAll(bd_idx, category, { take, page }, order, search);
+        return Object.assign({ bcats }, bc);
     }
     async findOne(bd_idx, bc_idx) {
         const bc = await this.boardContentsService.findOne(bc_idx);
@@ -49,11 +49,11 @@ let BoardContentsController = class BoardContentsController {
 };
 __decorate([
     (0, common_1.Post)(),
+    (0, role_decorator_1.Auth)(['Any']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '게시글 생성 API' }),
     (0, swagger_1.ApiCreatedResponse)({ type: create_board_content_dto_1.CreateBoardContentDto }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Auth)(['Any']),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -66,13 +66,19 @@ __decorate([
     (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
     (0, swagger_1.ApiQuery)({ name: "category", required: false }),
     (0, swagger_1.ApiQuery)({ name: "order", required: false }),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
+        description: 'search=status:1,2,3<br>',
+        required: false
+    }),
     __param(0, (0, common_1.Param)('bd_idx')),
     __param(1, (0, common_1.Query)('category')),
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('page')),
     __param(4, (0, common_1.Query)('order')),
+    __param(5, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number, String]),
+    __metadata("design:paramtypes", [String, String, Number, Number, String, Array]),
     __metadata("design:returntype", Promise)
 ], BoardContentsController.prototype, "findCategoryAll", null);
 __decorate([

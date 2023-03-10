@@ -43,6 +43,12 @@ const order_product_module_1 = require("./order-product/order-product.module");
 const pg_data_module_1 = require("./pg-data/pg-data.module");
 const pg_noti_module_1 = require("./pg-noti/pg-noti.module");
 const pg_cancel_module_1 = require("./pg-cancel/pg-cancel.module");
+const mypage_module_1 = require("./mypage/mypage.module");
+const iamport_service_1 = require("./iamport/iamport.service");
+const reviews_module_1 = require("./reviews/reviews.module");
+const device_module_1 = require("./device/device.module");
+const comment_module_1 = require("./comment/comment.module");
+const membership_module_1 = require("./membership/membership.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
@@ -91,8 +97,13 @@ AppModule = __decorate([
             pg_data_module_1.PgDataModule,
             pg_noti_module_1.PgNotiModule,
             pg_cancel_module_1.PgCancelModule,
+            mypage_module_1.MypageModule,
+            reviews_module_1.ReviewsModule,
+            device_module_1.DeviceModule,
+            comment_module_1.CommentModule,
+            membership_module_1.MembershipModule,
         ],
-        providers: [common_service_1.CommonService],
+        providers: [common_service_1.CommonService, iamport_service_1.IamportService],
     })
 ], AppModule);
 exports.AppModule = AppModule;

@@ -20,7 +20,8 @@ OrderTotalModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([order_total_entity_1.OrderTotalEntity]),
         ],
         controllers: [order_total_controller_1.OrderTotalController],
-        providers: [order_total_service_1.OrderTotalService]
+        providers: [order_total_service_1.OrderTotalService],
+        exports: [order_total_service_1.OrderTotalService]
     })
 ], OrderTotalModule);
 exports.OrderTotalModule = OrderTotalModule;

@@ -15,6 +15,7 @@ const reservation_entity_1 = require("./entities/reservation.entity");
 const product_option_module_1 = require("../product-option/product-option.module");
 const users_module_1 = require("../users/users.module");
 const file_module_1 = require("../file/file.module");
+const push_notification_module_1 = require("../push-notification/push-notification.module");
 let ReservationModule = class ReservationModule {
 };
 ReservationModule = __decorate([
@@ -24,6 +25,7 @@ ReservationModule = __decorate([
             product_option_module_1.ProductOptionModule,
             users_module_1.UsersModule,
             file_module_1.FileModule,
+            push_notification_module_1.PushNotificationModule
         ],
         controllers: [reservation_controller_1.ReservationController],
         providers: [reservation_service_1.ReservationService],

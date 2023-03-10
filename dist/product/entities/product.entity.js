@@ -14,6 +14,7 @@ const college_entity_1 = require("../../college/entities/college.entity");
 const metro_entity_1 = require("../../metro/entities/metro.entity");
 const product_info_entity_1 = require("../../product-info/entities/product-info.entity");
 const product_option_entity_1 = require("../../product-option/entities/product-option.entity");
+const review_entity_1 = require("../../reviews/entities/review.entity");
 const user_entity_1 = require("../../users/entities/user.entity");
 const typeorm_1 = require("typeorm");
 let ProductEntity = class ProductEntity {
@@ -139,6 +140,14 @@ __decorate([
     __metadata("design:type", String)
 ], ProductEntity.prototype, "productInfoIdxs", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.0, precision: 10, scale: 1, comment: '평균 평점' }),
+    __metadata("design:type", Number)
+], ProductEntity.prototype, "star", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0, comment: '리뷰 개수' }),
+    __metadata("design:type", Number)
+], ProductEntity.prototype, "reviewCount", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], ProductEntity.prototype, "createdAt", void 0);
@@ -157,6 +166,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => product_option_entity_1.ProductOptionEntity, (po) => po.product),
     __metadata("design:type", void 0)
 ], ProductEntity.prototype, "productOption", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => review_entity_1.ReviewEntity, (review) => review.product),
+    __metadata("design:type", void 0)
+], ProductEntity.prototype, "review", void 0);
 __decorate([
     (0, typeorm_1.ManyToMany)(() => product_info_entity_1.ProductInfoEntity, (pi) => pi.product),
     __metadata("design:type", Array)

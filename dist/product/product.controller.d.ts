@@ -11,10 +11,11 @@ export declare class ProductController {
         file_info: any;
     }>;
     findAll(take: number, page: number, search: string[]): Promise<{
-        results: import("./entities/product.entity").ProductEntity[];
-        total: number;
-        pageTotal: number;
         file_info: {};
+        results: import("./entities/product.entity").ProductEntity[];
+        pageTotal: number;
+        total: number;
+        page: number;
     }>;
     findOne(idx: string): Promise<{
         product: import("./entities/product.entity").ProductEntity;

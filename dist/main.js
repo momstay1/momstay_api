@@ -16,7 +16,7 @@ async function bootstrap() {
         forbidNonWhitelisted: true,
     }));
     common_utils_1.commonUtils.setupSwagger(app);
-    await app.listen(3111);
+    await app.listen(3112);
 }
 async function makeOrmConfig() {
     const configService = new config_service_1.ConfigService(process.env);

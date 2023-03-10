@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminBoardContentsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const lodash_1 = require("lodash");
 const admin_user_entity_1 = require("../admin-users/entities/admin-user.entity");
 const getuser_decorator_1 = require("../auth/getuser.decorator");
 const common_utils_1 = require("../common/common.utils");
@@ -43,11 +42,8 @@ let AdminBoardContentsController = class AdminBoardContentsController {
         await this.boardContentsService.typeChange(statusChange);
     }
     async findCategoryAll(bd_idx, category, take, page, order) {
-        const { bc: { results, total, pageTotal }, bcats } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
-        const data = (0, lodash_1.map)(results, (obj) => {
-            return this.sanitizeBoardContent(obj);
-        });
-        return { bcats, total, pageTotal, results };
+        const { bc, bcats } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
+        return Object.assign({ bcats }, bc);
     }
     async findOne(bd_idx, bc_idx) {
         const bc = await this.boardContentsService.findBdBcIndex(bc_idx);

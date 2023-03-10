@@ -35,7 +35,7 @@ let ProductOptionService = class ProductOptionService {
         let product;
         if ((0, lodash_1.get)(createProductOptionDto, 'productIdx', '')) {
             const productIdx = (0, lodash_1.get)(createProductOptionDto, 'productIdx');
-            product = await this.productService.findIdxOne(+productIdx);
+            product = await this.productService.findOneIdx(+productIdx);
         }
         let productInfo;
         if ((0, lodash_1.get)(createProductOptionDto, 'productInfoIdx', '')) {
@@ -43,25 +43,45 @@ let ProductOptionService = class ProductOptionService {
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
         }
         const product_option_data = {
-            status: +(0, lodash_1.get)(createProductOptionDto, 'status', 0),
-            type: (0, lodash_1.get)(createProductOptionDto, 'type', ''),
             order: '10',
             code: await this.productOptionCreateCode(),
-            stayStatus: (0, lodash_1.get)(createProductOptionDto, 'stayStatus', '0'),
-            visitStatus: (0, lodash_1.get)(createProductOptionDto, 'visitStatus', '0'),
-            paymentStatus: (0, lodash_1.get)(createProductOptionDto, 'paymentStatus', '0'),
-            title: (0, lodash_1.get)(createProductOptionDto, 'title', ''),
-            price: +(0, lodash_1.get)(createProductOptionDto, 'price', 0),
-            priceMonth: +(0, lodash_1.get)(createProductOptionDto, 'priceMonth', 0),
-            priceWeek: +(0, lodash_1.get)(createProductOptionDto, 'priceWeek', 0),
-            priceDay: +(0, lodash_1.get)(createProductOptionDto, 'priceDay', 0),
-            detailsKor: (0, lodash_1.get)(createProductOptionDto, 'detailsKor', ''),
-            detailsEng: (0, lodash_1.get)(createProductOptionDto, 'detailsEng', ''),
-            detailsJpn: (0, lodash_1.get)(createProductOptionDto, 'detailsJpn', ''),
-            detailsChn: (0, lodash_1.get)(createProductOptionDto, 'detailsChn', ''),
             product: product,
             productInfo: productInfo,
         };
+        if ((0, lodash_1.get)(createProductOptionDto, 'status', 0))
+            product_option_data['status'] = +(0, lodash_1.get)(createProductOptionDto, 'status');
+        if ((0, lodash_1.get)(createProductOptionDto, 'type', ''))
+            product_option_data['type'] = (0, lodash_1.get)(createProductOptionDto, 'type');
+        if ((0, lodash_1.get)(createProductOptionDto, 'stayStatus', ''))
+            product_option_data['stayStatus'] = (0, lodash_1.get)(createProductOptionDto, 'stayStatus');
+        if ((0, lodash_1.get)(createProductOptionDto, 'visitStatus', ''))
+            product_option_data['visitStatus'] = (0, lodash_1.get)(createProductOptionDto, 'visitStatus');
+        if ((0, lodash_1.get)(createProductOptionDto, 'paymentStatus', ''))
+            product_option_data['paymentStatus'] = (0, lodash_1.get)(createProductOptionDto, 'paymentStatus');
+        if ((0, lodash_1.get)(createProductOptionDto, 'title', ''))
+            product_option_data['title'] = (0, lodash_1.get)(createProductOptionDto, 'title');
+        if ((0, lodash_1.get)(createProductOptionDto, 'titleEng', ''))
+            product_option_data['titleEng'] = (0, lodash_1.get)(createProductOptionDto, 'titleEng');
+        if ((0, lodash_1.get)(createProductOptionDto, 'titleJpn', ''))
+            product_option_data['titleJpn'] = (0, lodash_1.get)(createProductOptionDto, 'titleJpn');
+        if ((0, lodash_1.get)(createProductOptionDto, 'titleChn', ''))
+            product_option_data['titleChn'] = (0, lodash_1.get)(createProductOptionDto, 'titleChn');
+        if ((0, lodash_1.get)(createProductOptionDto, 'price', ''))
+            product_option_data['price'] = +(0, lodash_1.get)(createProductOptionDto, 'price');
+        if ((0, lodash_1.get)(createProductOptionDto, 'priceMonth', ''))
+            product_option_data['priceMonth'] = +(0, lodash_1.get)(createProductOptionDto, 'priceMonth');
+        if ((0, lodash_1.get)(createProductOptionDto, 'priceWeek', ''))
+            product_option_data['priceWeek'] = +(0, lodash_1.get)(createProductOptionDto, 'priceWeek');
+        if ((0, lodash_1.get)(createProductOptionDto, 'priceDay', ''))
+            product_option_data['priceDay'] = +(0, lodash_1.get)(createProductOptionDto, 'priceDay');
+        if ((0, lodash_1.get)(createProductOptionDto, 'detailsKor', ''))
+            product_option_data['detailsKor'] = (0, lodash_1.get)(createProductOptionDto, 'detailsKor');
+        if ((0, lodash_1.get)(createProductOptionDto, 'detailsEng', ''))
+            product_option_data['detailsEng'] = (0, lodash_1.get)(createProductOptionDto, 'detailsEng');
+        if ((0, lodash_1.get)(createProductOptionDto, 'detailsJpn', ''))
+            product_option_data['detailsJpn'] = (0, lodash_1.get)(createProductOptionDto, 'detailsJpn');
+        if ((0, lodash_1.get)(createProductOptionDto, 'detailsChn', ''))
+            product_option_data['detailsChn'] = (0, lodash_1.get)(createProductOptionDto, 'detailsChn');
         if ((0, lodash_1.get)(createProductOptionDto, 'idx', '')) {
             product_option_data['idx'] = +(0, lodash_1.get)(createProductOptionDto, 'idx');
         }
@@ -140,6 +160,7 @@ let ProductOptionService = class ProductOptionService {
         const data = new paginate_1.Pagination({
             results,
             total,
+            page,
         });
         return { data, file_info };
     }
@@ -161,7 +182,7 @@ let ProductOptionService = class ProductOptionService {
         }
         const productOption = await this.productOptionRepository.findOne({
             where: { idx: idx },
-            relations: ['product', 'product.productInfo', 'product.user', 'productInfo']
+            relations: ['product', 'product.productInfo', 'productInfo', 'product.user', 'product.user.device']
         });
         if (!(0, lodash_1.get)(productOption, 'idx')) {
             throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');

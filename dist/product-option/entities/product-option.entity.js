@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductOptionEntity = void 0;
+const order_product_entity_1 = require("../../order-product/entities/order-product.entity");
 const product_info_entity_1 = require("../../product-info/entities/product-info.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
 const reservation_entity_1 = require("../../reservation/entities/reservation.entity");
@@ -131,6 +132,10 @@ __decorate([
     (0, typeorm_1.ManyToMany)(() => product_info_entity_1.ProductInfoEntity, (pi) => pi.productOption),
     __metadata("design:type", Array)
 ], ProductOptionEntity.prototype, "productInfo", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => order_product_entity_1.OrderProductEntity, (op) => op.productOption),
+    __metadata("design:type", void 0)
+], ProductOptionEntity.prototype, "orderProduct", void 0);
 ProductOptionEntity = __decorate([
     (0, typeorm_1.Entity)("product_option")
 ], ProductOptionEntity);

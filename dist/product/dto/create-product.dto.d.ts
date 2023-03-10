@@ -5,9 +5,18 @@ export declare class CreateProductDto {
     readonly membership: string;
     readonly hostBusiness: string;
     readonly title: string;
+    readonly titleEng: string;
+    readonly titleJpn: string;
+    readonly titleChn: string;
     readonly postCode: string;
     readonly addr1: string;
+    readonly addr1Eng: string;
+    readonly addr1Jpn: string;
+    readonly addr1Chn: string;
     readonly addr2: string;
+    readonly addr2Eng: string;
+    readonly addr2Jpn: string;
+    readonly addr2Chn: string;
     readonly language: string;
     readonly metro: string;
     readonly lat: string;

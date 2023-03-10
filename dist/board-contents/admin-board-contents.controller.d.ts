@@ -12,10 +12,11 @@ export declare class AdminBoardContentsController {
     statusChange(statusChange: any): Promise<void>;
     typeChange(statusChange: any): Promise<void>;
     findCategoryAll(bd_idx: string, category: string, take: number, page: number, order: string): Promise<{
-        bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
-        total: number;
-        pageTotal: number;
         results: BoardContentsEntity[];
+        pageTotal: number;
+        total: number;
+        page: number;
+        bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
     }>;
     findOne(bd_idx: number, bc_idx: number): Promise<BoardContentsEntity>;
     update(user: AdminUsersEntity, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;

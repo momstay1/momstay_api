@@ -30,7 +30,7 @@ __decorate([
 ], BoardContentsEntity.prototype, "idx", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 2 }),
-    (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록' }),
+    (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록 2: 등록, 3:답변대기, 4: 답변완료' }),
     __metadata("design:type", Number)
 ], BoardContentsEntity.prototype, "status", void 0);
 __decorate([
@@ -64,15 +64,19 @@ __decorate([
     __metadata("design:type", String)
 ], BoardContentsEntity.prototype, "content", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 255, default: '' }),
-    __metadata("design:type", String)
-], BoardContentsEntity.prototype, "password", void 0);
-__decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BoardContentsEntity.prototype, "setPassword", null);
+__decorate([
+    (0, typeorm_1.Column)({ length: 255, default: '' }),
+    __metadata("design:type", String)
+], BoardContentsEntity.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], BoardContentsEntity.prototype, "commentCount", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, swagger_1.ApiProperty)({ description: '게시글 조회수' }),

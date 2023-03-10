@@ -10,8 +10,9 @@ export declare class BoardContentsEntity {
     linkStatus: string;
     link: string;
     content: string;
-    password: string;
     setPassword(password: string): Promise<void>;
+    password: string;
+    commentCount: number;
     count: number;
     order: number;
     createdAt: Date;

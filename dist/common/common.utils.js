@@ -76,8 +76,27 @@ exports.commonUtils = {
         }
         return where;
     },
-    async authCheck(auth, groups) {
-        return (0, lodash_1.filter)(groups, (o) => { return auth.includes(o.id); });
+    orderSplit(order, alias) {
+        let order_by = {};
+        if (order) {
+            const order_arr = order.split(':');
+            if (alias && order_arr[0].indexOf('.') === -1) {
+                order_by[alias + '.' + order_arr[0]] = order_arr[1];
+            }
+            else {
+                order_by[order_arr[0]] = order_arr[1];
+            }
+        }
+        return order_by;
+    },
+    async authCheck(auth, groupId) {
+        return auth.includes(groupId);
+    },
+    calcTax(price, persent) {
+        let tax = +persent.replace('%', '');
+        tax = tax / 100;
+        const calcTax = (price * tax).toFixed();
+        return +calcTax;
     },
     createCode() {
         return Math.random().toString(36).substr(2, 11);
@@ -150,5 +169,36 @@ exports.commonUtils = {
         }
         return result;
     },
+    getStatus(key) {
+        const data = {};
+        data['tax'] = 10;
+        data['fee'] = 5;
+        data['order_status'] = {
+            waitingForPayment: 1,
+            paymentCompleted: 2,
+            preparingForDelivery: 3,
+            shipping: 4,
+            purchaseConfirmation: 6,
+            cancellationRequest: 7,
+            cancellationCompleted: 8,
+            returnRequest: 9,
+            returnComplete: 10,
+            exchangeRequest: 11,
+            exchangeComplete: 12,
+        };
+        data['app_topic'] = {
+            all: 'all',
+            marketing: 'marketing',
+            service: 'service',
+            admin: 'admin'
+        };
+        return (0, lodash_1.get)(data, key, '');
+    },
+    isAdmin(groupId) {
+        return ['root', 'admin'].includes(groupId);
+    },
+    isRoot(groupId) {
+        return ['root'].includes(groupId);
+    }
 };
 //# sourceMappingURL=common.utils.js.map

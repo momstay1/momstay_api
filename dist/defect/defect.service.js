@@ -100,6 +100,7 @@ let DefectService = class DefectService {
         return new paginate_1.Pagination({
             results,
             total,
+            page,
         });
     }
     async findAllPlaceCount(place_idx) {

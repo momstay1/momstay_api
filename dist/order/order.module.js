@@ -15,6 +15,11 @@ const order_entity_1 = require("./entities/order.entity");
 const product_module_1 = require("../product/product.module");
 const product_option_module_1 = require("../product-option/product-option.module");
 const users_module_1 = require("../users/users.module");
+const order_product_module_1 = require("../order-product/order-product.module");
+const order_total_module_1 = require("../order-total/order-total.module");
+const iamport_service_1 = require("../iamport/iamport.service");
+const pg_data_module_1 = require("../pg-data/pg-data.module");
+const push_notification_module_1 = require("../push-notification/push-notification.module");
 let OrderModule = class OrderModule {
 };
 OrderModule = __decorate([
@@ -24,9 +29,14 @@ OrderModule = __decorate([
             product_module_1.ProductModule,
             users_module_1.UsersModule,
             product_option_module_1.ProductOptionModule,
+            order_product_module_1.OrderProductModule,
+            order_total_module_1.OrderTotalModule,
+            pg_data_module_1.PgDataModule,
+            users_module_1.UsersModule,
+            push_notification_module_1.PushNotificationModule
         ],
         controllers: [order_controller_1.OrderController],
-        providers: [order_service_1.OrderService],
+        providers: [order_service_1.OrderService, iamport_service_1.IamportService],
         exports: [order_service_1.OrderService]
     })
 ], OrderModule);

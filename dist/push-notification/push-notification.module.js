@@ -22,7 +22,8 @@ PushNotificationModule = __decorate([
             axios_1.HttpModule
         ],
         controllers: [push_notification_controller_1.PushNotificationController],
-        providers: [push_notification_service_1.PushNotificationService]
+        providers: [push_notification_service_1.PushNotificationService],
+        exports: [push_notification_service_1.PushNotificationService]
     })
 ], PushNotificationModule);
 exports.PushNotificationModule = PushNotificationModule;

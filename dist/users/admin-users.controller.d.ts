@@ -16,8 +16,9 @@ export declare class AdminUsersController {
     login(user: UsersEntity): Promise<ResponseAuthDto>;
     findAll(user: UsersEntity, take: number, page: number, search: string[]): Promise<{
         results: UsersEntity[];
-        total: number;
         pageTotal: number;
+        total: number;
+        page: number;
     }>;
     findId(id: string): Promise<UsersEntity>;
     update(id: string, updateUserDto: UpdateUserDto, files: Array<Express.Multer.File>): Promise<{

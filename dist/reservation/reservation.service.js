@@ -20,15 +20,17 @@ const common_utils_1 = require("../common/common.utils");
 const file_service_1 = require("../file/file.service");
 const paginate_1 = require("../paginate");
 const product_option_service_1 = require("../product-option/product-option.service");
+const push_notification_service_1 = require("../push-notification/push-notification.service");
 const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const reservation_entity_1 = require("./entities/reservation.entity");
 let ReservationService = class ReservationService {
-    constructor(reservationRepository, productOptionService, usersService, fileService) {
+    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService) {
         this.reservationRepository = reservationRepository;
         this.productOptionService = productOptionService;
         this.usersService = usersService;
         this.fileService = fileService;
+        this.pushNotiService = pushNotiService;
     }
     async create(userInfo, createReservationDto) {
         const po = await this.productOptionService.findIdx(createReservationDto.productOptionIdx);
@@ -42,7 +44,7 @@ let ReservationService = class ReservationService {
             throw new common_1.NotAcceptableException('방문예약을 사용하지 않는 방입니다.');
         }
         const user = await this.usersService.findId(userInfo.id);
-        if (user.idx == (0, lodash_1.get)(po, ['product', 'user', 'idx'], '')) {
+        if (user['group']['id'] == 'host' && user['idx'] == (0, lodash_1.get)(po, ['product', 'user', 'idx'], '')) {
             throw new common_1.NotAcceptableException('자신의 방은 예약할 수 없습니다.');
         }
         const reservation_data = {
@@ -56,6 +58,10 @@ let ReservationService = class ReservationService {
         };
         const reservationEntity = await this.reservationRepository.create(reservation_data);
         const reservation = await this.reservationRepository.save(reservationEntity);
+        const hostUser = (0, lodash_1.get)(po, ['product', 'user']);
+        if ((0, lodash_1.get)(hostUser, ['device', 'token'], '')) {
+            await this.pushNotiService.guestReservationPush(hostUser, po);
+        }
         return { reservation };
     }
     async hostFindAll(options, userInfo) {
@@ -66,7 +72,7 @@ let ReservationService = class ReservationService {
             .leftJoinAndSelect('product.user', 'user')
             .where((qb) => {
             qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-            qb.where('`user`.id = :user_id', { user_id: userInfo.id });
+            qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
         })
             .skip((take * (page - 1) || 0))
             .take((take || 10))
@@ -83,6 +89,7 @@ let ReservationService = class ReservationService {
         const data = new paginate_1.Pagination({
             results,
             total,
+            page,
         });
         return { data, file_info };
     }
@@ -94,7 +101,7 @@ let ReservationService = class ReservationService {
             .leftJoinAndSelect('reservation.user', 'user')
             .where((qb) => {
             qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-            qb.where('`user`.id = :user_id', { user_id: userInfo.id });
+            qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
         })
             .skip((take * (page - 1) || 0))
             .take((take || 10))
@@ -111,6 +118,7 @@ let ReservationService = class ReservationService {
         const data = new paginate_1.Pagination({
             results,
             total,
+            page,
         });
         return { data, file_info };
     }
@@ -132,7 +140,14 @@ let ReservationService = class ReservationService {
         }
         const reservation = await this.reservationRepository.findOne({
             where: { idx: idx },
-            relations: ['productOption', 'productOption.product', 'productOption.product.user', 'user']
+            relations: [
+                'productOption',
+                'productOption.product',
+                'productOption.product.user',
+                'productOption.product.user.device',
+                'user',
+                'user.device'
+            ]
         });
         if (!reservation.idx) {
             throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
@@ -144,18 +159,30 @@ let ReservationService = class ReservationService {
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
         await this.changeStatus(2, idx);
+        const { user } = reservation;
+        if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
+            await this.pushNotiService.hostReservationApprovalPush(user, reservation);
+        }
     }
     async guestCancel(userInfo, idx) {
         const reservation = await this.findOneIdx(idx);
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.user.idx);
         await this.changeStatus(4, idx);
+        const { user } = (0, lodash_1.get)(reservation, ['productOption', 'product']);
+        if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
+            await this.pushNotiService.guestReservationCancelPush(user, reservation);
+        }
     }
     async hostCancel(userInfo, idx) {
         const reservation = await this.findOneIdx(idx);
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
         await this.changeStatus(5, idx);
+        const { user } = reservation;
+        if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
+            await this.pushNotiService.hostReservationCancelPush(user, reservation);
+        }
     }
     async processCheckStatus(status) {
         if (status != 1) {
@@ -163,7 +190,7 @@ let ReservationService = class ReservationService {
         }
     }
     async authCheckStatus({ group, id }, idx) {
-        if (!['root', 'admin'].includes(group)) {
+        if (!common_utils_1.commonUtils.isAdmin(group)) {
             const user = await this.usersService.findId(id);
             if (user.idx != idx) {
                 throw new common_1.NotAcceptableException('거부할 수 없는 방문 예약 입니다.');
@@ -184,7 +211,8 @@ ReservationService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         product_option_service_1.ProductOptionService,
         users_service_1.UsersService,
-        file_service_1.FileService])
+        file_service_1.FileService,
+        push_notification_service_1.PushNotificationService])
 ], ReservationService);
 exports.ReservationService = ReservationService;
 //# sourceMappingURL=reservation.service.js.map

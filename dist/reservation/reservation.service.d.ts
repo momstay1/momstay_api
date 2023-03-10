@@ -1,6 +1,7 @@
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductOptionService } from 'src/product-option/product-option.service';
+import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -10,7 +11,8 @@ export declare class ReservationService {
     private readonly productOptionService;
     private readonly usersService;
     private readonly fileService;
-    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService);
+    private readonly pushNotiService;
+    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService);
     create(userInfo: any, createReservationDto: CreateReservationDto): Promise<{
         reservation: ReservationEntity;
     }>;

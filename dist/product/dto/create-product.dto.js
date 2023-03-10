@@ -35,7 +35,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '멤버쉽 유무', default: 0, required: false }),
+    (0, swagger_1.ApiProperty)({ description: '멤버쉽 유무(0: 미사용, 1: 사용)', default: 0, required: false }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "membership", void 0);
 __decorate([
@@ -53,6 +53,24 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '숙소 명(영어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "titleEng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '숙소 명(일본어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "titleJpn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '숙소 명(중국어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "titleChn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '우편번호', required: false }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "postCode", void 0);
@@ -65,9 +83,45 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '주소(영어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "addr1Eng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '주소(일본어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "addr1Jpn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '주소(중국어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "addr1Chn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '상세주소', required: false }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "addr2", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '상세주소(영어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "addr2Eng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '상세주소(일본어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "addr2Jpn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '상세주소(중국어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "addr2Chn", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

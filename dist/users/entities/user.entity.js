@@ -11,13 +11,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersEntity = void 0;
 const board_content_entity_1 = require("../../board-contents/entities/board-content.entity");
+const comment_entity_1 = require("../../comment/entities/comment.entity");
 const common_bcrypt_1 = require("../../common/common.bcrypt");
+const device_entity_1 = require("../../device/entities/device.entity");
 const group_entity_1 = require("../../groups/entities/group.entity");
 const login_entity_1 = require("../../login/entities/login.entity");
+const membership_history_entity_1 = require("../../membership/entities/membership-history.entity");
 const order_product_entity_1 = require("../../order-product/entities/order-product.entity");
 const order_entity_1 = require("../../order/entities/order.entity");
 const product_entity_1 = require("../../product/entities/product.entity");
 const reservation_entity_1 = require("../../reservation/entities/reservation.entity");
+const review_entity_1 = require("../../reviews/entities/review.entity");
 const user_sns_entity_1 = require("../../user-sns/entities/user-sns.entity");
 const typeorm_1 = require("typeorm");
 let UsersEntity = class UsersEntity {
@@ -145,6 +149,23 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => user_sns_entity_1.UserSnsEntity, (us) => us.user),
     __metadata("design:type", void 0)
 ], UsersEntity.prototype, "userSns", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => review_entity_1.ReviewEntity, (review) => review.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "review", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => membership_history_entity_1.MembershipHistoryEntity, (mh) => mh.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "membershipHistory", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => comment_entity_1.CommentEntity, (comment) => comment.user),
+    __metadata("design:type", void 0)
+], UsersEntity.prototype, "comment", void 0);
+__decorate([
+    (0, typeorm_1.OneToOne)(() => device_entity_1.DeviceEntity, { cascade: true }),
+    (0, typeorm_1.JoinColumn)(),
+    __metadata("design:type", device_entity_1.DeviceEntity)
+], UsersEntity.prototype, "device", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => group_entity_1.GroupsEntity, (group) => group.users),
     __metadata("design:type", group_entity_1.GroupsEntity)

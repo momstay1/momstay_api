@@ -44,12 +44,8 @@ let AdminUsersController = class AdminUsersController {
         return this.authService.login(user, ['root', 'admin']);
     }
     async findAll(user, take, page, search) {
-        const { results, total, pageTotal } = await this.usersService.findAll(user, { take, page }, search);
-        return {
-            results,
-            total,
-            pageTotal
-        };
+        const data = await this.usersService.findAll(user, { take, page }, search);
+        return Object.assign({}, data);
     }
     async findId(id) {
         const data = await this.usersService.findId(id);

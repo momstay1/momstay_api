@@ -6,6 +6,7 @@ export declare class OrderProductController {
     constructor(orderProductService: OrderProductService);
     create(createOrderProductDto: CreateOrderProductDto): string;
     findAll(): string;
+    calcPrice(price: string, start: string, end: string): Promise<number>;
     findOne(id: string): string;
     update(id: string, updateOrderProductDto: UpdateOrderProductDto): string;
     remove(id: string): string;

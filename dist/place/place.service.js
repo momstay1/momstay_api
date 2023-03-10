@@ -51,6 +51,7 @@ let PlaceService = class PlaceService {
         return new paginate_1.Pagination({
             results,
             total,
+            page,
         });
     }
     async findAllDefect(options) {

@@ -10,10 +10,11 @@ export declare class ProductOptionController {
         file_info: any;
     }>;
     findAll(take: number, page: number, search: string[]): Promise<{
-        results: import("./entities/product-option.entity").ProductOptionEntity[];
-        total: number;
-        pageTotal: number;
         file_info: {};
+        results: import("./entities/product-option.entity").ProductOptionEntity[];
+        pageTotal: number;
+        total: number;
+        page: number;
     }>;
     findOne(idx: string): Promise<{
         productOption: import("./entities/product-option.entity").ProductOptionEntity;

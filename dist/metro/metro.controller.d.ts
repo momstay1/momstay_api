@@ -7,8 +7,9 @@ export declare class MetroController {
     create(createMetroDto: CreateMetroDto): string;
     findAll(take: number, page: number, search: string[]): Promise<{
         results: import("./entities/metro.entity").MetroEntity[];
-        total: number;
         pageTotal: number;
+        total: number;
+        page: number;
     }>;
     findOne(id: string): string;
     update(id: string, updateMetroDto: UpdateMetroDto): string;

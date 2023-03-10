@@ -13,6 +13,7 @@ exports.OrderProductEntity = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
 const order_entity_1 = require("../../order/entities/order.entity");
+const product_option_entity_1 = require("../../product-option/entities/product-option.entity");
 let OrderProductEntity = class OrderProductEntity {
 };
 __decorate([
@@ -34,11 +35,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
     __metadata("design:type", String)
-], OrderProductEntity.prototype, "productIdx", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ length: 255, default: '' }),
-    __metadata("design:type", String)
-], OrderProductEntity.prototype, "productCode", void 0);
+], OrderProductEntity.prototype, "productOptionCode", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
     __metadata("design:type", String)
@@ -68,6 +65,14 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderProductEntity.prototype, "price", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], OrderProductEntity.prototype, "taxPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], OrderProductEntity.prototype, "feePrice", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], OrderProductEntity.prototype, "point", void 0);
@@ -78,15 +83,19 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
     __metadata("design:type", Number)
-], OrderProductEntity.prototype, "refundPrice", void 0);
+], OrderProductEntity.prototype, "cancelPrice", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
-], OrderProductEntity.prototype, "refundPoint", void 0);
+], OrderProductEntity.prototype, "cancelPoint", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', default: '' }),
     __metadata("design:type", String)
 ], OrderProductEntity.prototype, "memo", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', default: '' }),
+    __metadata("design:type", String)
+], OrderProductEntity.prototype, "cancelReason", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'date', default: '0' }),
     __metadata("design:type", String)
@@ -117,6 +126,10 @@ __decorate([
     }),
     __metadata("design:type", order_entity_1.OrderEntity)
 ], OrderProductEntity.prototype, "order", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => product_option_entity_1.ProductOptionEntity, (po) => po.orderProduct),
+    __metadata("design:type", product_option_entity_1.ProductOptionEntity)
+], OrderProductEntity.prototype, "productOption", void 0);
 OrderProductEntity = __decorate([
     (0, typeorm_1.Entity)('order_product')
 ], OrderProductEntity);

@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const order_product_service_1 = require("./order-product.service");
 const create_order_product_dto_1 = require("./dto/create-order-product.dto");
 const update_order_product_dto_1 = require("./dto/update-order-product.dto");
+const swagger_1 = require("@nestjs/swagger");
 let OrderProductController = class OrderProductController {
     constructor(orderProductService) {
         this.orderProductService = orderProductService;
@@ -26,6 +27,9 @@ let OrderProductController = class OrderProductController {
     }
     findAll() {
         return this.orderProductService.findAll();
+    }
+    async calcPrice(price, start, end) {
+        return await this.orderProductService.calcTotalPrice(+price, start, end);
     }
     findOne(id) {
         return this.orderProductService.findOne(+id);
@@ -50,6 +54,16 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], OrderProductController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('calc-price/:price/:start/:end'),
+    (0, swagger_1.ApiOperation)({ summary: '가격 계산' }),
+    __param(0, (0, common_1.Param)('price')),
+    __param(1, (0, common_1.Param)('start')),
+    __param(2, (0, common_1.Param)('end')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], OrderProductController.prototype, "calcPrice", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

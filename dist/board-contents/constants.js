@@ -9,11 +9,15 @@ exports.bcConstants = {
         basic: 2,
         secret: 3,
         link: 4,
+        event: 5,
+        new: 6,
     },
     status: {
         delete: 0,
         uncertified: 1,
         registration: 2,
+        answerWait: 3,
+        answerComplete: 4,
     },
 };
 //# sourceMappingURL=constants.js.map

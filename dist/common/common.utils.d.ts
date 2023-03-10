@@ -7,10 +7,15 @@ export declare const commonUtils: {
     sanitizeEntity: (array: any, privateElement: any) => any[];
     setupSwagger(app: INestApplication): void;
     searchSplit(search: string[]): {};
-    authCheck(auth: any, groups: any): Promise<any[]>;
+    orderSplit(order: string, alias: string): {};
+    authCheck(auth: any, groupId: any): Promise<any>;
+    calcTax(price: number, persent: string): number;
     createCode(): string;
     generateRandomString(num: any): string;
     generateRandomNumber(num: any): string;
     isMobile(agent: string): string;
     getArrayKey(arr: any, pks: string | string[], is_push: boolean): {};
+    getStatus(key: string | string[]): any;
+    isAdmin(groupId: string): boolean;
+    isRoot(groupId: string): boolean;
 };

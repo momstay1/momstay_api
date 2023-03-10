@@ -32,4 +32,6 @@ export declare class FileService {
     isImage(type: any): 0 | 1;
     private imageZip;
     sharpFile(file: any): Promise<void>;
+    removeByRequest(dto: any, idx: number, category: string[]): Promise<any[]>;
+    createByRequest(files: any, idx: number): Promise<any[]>;
 }

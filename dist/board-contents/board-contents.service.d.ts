@@ -16,16 +16,22 @@ export declare class BoardContentsService {
     constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService);
     create(userInfo: any, bc: CreateBoardContentDto): Promise<any>;
     statusChange(statusChange: any): Promise<void>;
+    statusAnswer(bcIdx: number): Promise<void>;
+    commentCountUp(bcIdx: number): Promise<void>;
     typeChange(typeChange: any): Promise<void>;
-    findCategoryAll(bd_idx: any, category: string, options: PaginationOptions, order: any): Promise<{
+    findCategoryAll(bd_idx: any, category: string, options: PaginationOptions, order: any, search: string[]): Promise<{
+        bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
+        bc: Pagination<BoardContentsEntity>;
+    }>;
+    findUserCategoryAll(bd_idx: any, category: string, options: PaginationOptions, order: any, userInfo: any): Promise<{
         bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
         bc: Pagination<BoardContentsEntity>;
     }>;
     findNoticeCategoryAll(bd_idx: string, category: string): Promise<BoardContentsEntity[]>;
-    findOne(bc_idx: number): Promise<BoardContentsEntity>;
+    findOne(bcIdx: number): Promise<BoardContentsEntity>;
     findIndex(idx: number): Promise<BoardContentsEntity>;
-    findBdBcIndex(bc_idx: number): Promise<BoardContentsEntity>;
-    update(userInfo: any, bc_idx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
+    findBdBcIndex(bcIdx: number): Promise<BoardContentsEntity>;
+    update(userInfo: any, bcIdx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
     countUp(bc_idx: any, bc_count: number): Promise<number>;
     adminFindCategoryAll(bd_idx: any, category: string, options: PaginationOptions, order: any): Promise<{
         bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];

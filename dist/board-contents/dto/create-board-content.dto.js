@@ -17,7 +17,7 @@ class CreateBoardContentDto {
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록, 2:등록' }),
+    (0, swagger_1.ApiProperty)({ description: '게시글 상태 0: 삭제, 1:미등록, 2:등록, 3:답변대기, 4: 답변완료' }),
     __metadata("design:type", String)
 ], CreateBoardContentDto.prototype, "status", void 0);
 __decorate([

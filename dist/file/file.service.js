@@ -299,6 +299,33 @@ let FileService = class FileService {
         })
             .toBuffer();
     }
+    async removeByRequest(dto, idx, category) {
+        const fileIdx = (0, lodash_1.get)(dto, 'filesIdx', '');
+        let fileIdxs = [];
+        console.log('-----------------------파일 제거-----------------------');
+        try {
+            const File_idxs = (0, lodash_1.map)(await this.findCategory(category, "" + idx), (o) => "" + o.file_idx);
+            fileIdxs = fileIdx ? fileIdx.split(",") : [];
+            const delFileIdxs = File_idxs.filter(o => !fileIdxs.includes(o));
+            console.log({ delFileIdxs });
+            if (delFileIdxs.length > 0) {
+                await this.removes(delFileIdxs);
+            }
+        }
+        catch (error) {
+            console.log({ error });
+        }
+        return fileIdxs;
+    }
+    async createByRequest(files, idx) {
+        let fileIdxs = [];
+        if (!(0, lodash_1.isEmpty)(files)) {
+            console.log('-----------------------새 첨부파일 등록-----------------------');
+            const new_file = await this.fileInfoInsert(files, idx);
+            fileIdxs = (0, lodash_1.map)(new_file[idx], (obj) => (0, lodash_1.map)(obj, o => "" + o.file_idx));
+        }
+        return fileIdxs;
+    }
 };
 FileService = __decorate([
     (0, common_1.Injectable)(),

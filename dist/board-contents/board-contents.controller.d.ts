@@ -8,11 +8,12 @@ export declare class BoardContentsController {
     constructor(boardContentsService: BoardContentsService);
     sanitizeBoardContent: (bc: any) => any[];
     create(user: UsersEntity, createBoardContentDto: CreateBoardContentDto): Promise<any>;
-    findCategoryAll(bd_idx: string, category: string, take: number, page: number, order: string): Promise<{
-        bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
-        total: number;
-        pageTotal: number;
+    findCategoryAll(bd_idx: string, category: string, take: number, page: number, order: string, search: string[]): Promise<{
         results: BoardContentsEntity[];
+        pageTotal: number;
+        total: number;
+        page: number;
+        bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
     }>;
     findOne(bd_idx: number, bc_idx: number): Promise<BoardContentsEntity>;
     update(user: UsersEntity, bc_idx: string, updateBoardContentDto: UpdateBoardContentDto): Promise<any[]>;

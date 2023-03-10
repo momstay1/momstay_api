@@ -8,16 +8,18 @@ export declare class ReservationController {
         reservation: import("./entities/reservation.entity").ReservationEntity;
     }>;
     hostFindAll(user: UsersEntity, take: number, page: number): Promise<{
-        results: import("./entities/reservation.entity").ReservationEntity[];
-        total: number;
-        pageTotal: number;
         file_info: {};
+        results: import("./entities/reservation.entity").ReservationEntity[];
+        pageTotal: number;
+        total: number;
+        page: number;
     }>;
     guestFindAll(user: UsersEntity, take: number, page: number): Promise<{
-        results: import("./entities/reservation.entity").ReservationEntity[];
-        total: number;
-        pageTotal: number;
         file_info: {};
+        results: import("./entities/reservation.entity").ReservationEntity[];
+        pageTotal: number;
+        total: number;
+        page: number;
     }>;
     findOne(idx: string): Promise<{
         reservation: import("./entities/reservation.entity").ReservationEntity;

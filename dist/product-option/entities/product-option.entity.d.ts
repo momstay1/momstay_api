@@ -29,4 +29,5 @@ export declare class ProductOptionEntity {
     product: ProductEntity;
     reservation: undefined;
     productInfo: ProductInfoEntity[];
+    orderProduct: undefined;
 }

@@ -59,6 +59,24 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 이름(영어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "titleEng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 이름(일본어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "titleJpn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 이름(중국어)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "titleChn", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '방 가격', required: false }),
     __metadata("design:type", String)
 ], CreateProductOptionDto.prototype, "price", void 0);

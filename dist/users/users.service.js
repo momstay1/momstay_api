@@ -16,25 +16,27 @@ exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
-const moment = require("moment");
+const paginate_1 = require("../paginate");
+const typeorm_2 = require("typeorm");
 const common_bcrypt_1 = require("../common/common.bcrypt");
 const common_utils_1 = require("../common/common.utils");
 const email_service_1 = require("../email/email.service");
 const file_service_1 = require("../file/file.service");
 const groups_service_1 = require("../groups/groups.service");
-const paginate_1 = require("../paginate");
 const user_sns_service_1 = require("../user-sns/user-sns.service");
-const typeorm_2 = require("typeorm");
+const device_service_1 = require("../device/device.service");
 const constants_1 = require("./constants");
 const user_entity_1 = require("./entities/user.entity");
 const schedule_1 = require("@nestjs/schedule");
+const moment = require("moment");
 let UsersService = class UsersService {
-    constructor(usersRepository, groupService, userSnsService, fileService, emailService) {
+    constructor(usersRepository, groupService, userSnsService, fileService, emailService, deviceService) {
         this.usersRepository = usersRepository;
         this.groupService = groupService;
         this.userSnsService = userSnsService;
         this.fileService = fileService;
         this.emailService = emailService;
+        this.deviceService = deviceService;
     }
     async test(id) {
         try {
@@ -139,6 +141,7 @@ let UsersService = class UsersService {
         return new paginate_1.Pagination({
             results,
             total,
+            page,
         });
     }
     async count() {
@@ -150,7 +153,7 @@ let UsersService = class UsersService {
         }
         const user = await this.usersRepository.findOne({
             where: obj,
-            relations: ['group', 'userSns', 'login'],
+            relations: ['group', 'userSns', 'device'],
         });
         if (!user) {
             throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
@@ -163,7 +166,7 @@ let UsersService = class UsersService {
         }
         const user = await this.usersRepository.findOne({
             where: { id: id },
-            relations: ['group', 'userSns', 'login'],
+            relations: ['group', 'userSns', 'device'],
         });
         if (!user) {
             throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
@@ -179,7 +182,7 @@ let UsersService = class UsersService {
                 qb.where('`email` = :email', { email: id });
                 qb.orWhere('`UsersEntity`.`id` = :id', { id: id });
             },
-            relations: ['group', 'userSns', 'login'],
+            relations: ['group', 'userSns', 'device'],
         });
         if (!user) {
             throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
@@ -192,7 +195,7 @@ let UsersService = class UsersService {
         }
         const user = await this.usersRepository.findOne({
             where: { idx: idx },
-            relations: ['group', 'userSns'],
+            relations: ['group', 'userSns', 'device'],
         });
         if (!user) {
             throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
@@ -201,38 +204,39 @@ let UsersService = class UsersService {
     }
     async update(id, updateUserDto, files) {
         const user = await this.findId(id);
-        const groupIdxs = updateUserDto.group ? updateUserDto.group : constants_1.usersConstant.default.group_idx;
+        const groupIdxs = updateUserDto['group'] ? updateUserDto['group'] : constants_1.usersConstant['default']['group_idx'];
         const group = await this.groupService.findOne(groupIdxs);
-        user.name = updateUserDto.name;
         if ((0, lodash_1.get)(updateUserDto, 'status', ''))
-            user.status = +(0, lodash_1.get)(updateUserDto, 'status');
+            user['status'] = +(0, lodash_1.get)(updateUserDto, 'status');
+        if ((0, lodash_1.get)(updateUserDto, 'id', ''))
+            user['id'] = (0, lodash_1.get)(updateUserDto, 'id');
         if ((0, lodash_1.get)(updateUserDto, 'name', ''))
-            user.name = (0, lodash_1.get)(updateUserDto, 'name');
+            user['name'] = (0, lodash_1.get)(updateUserDto, 'name');
         if ((0, lodash_1.get)(updateUserDto, 'email', ''))
-            user.email = (0, lodash_1.get)(updateUserDto, 'email');
+            user['email'] = (0, lodash_1.get)(updateUserDto, 'email');
         if ((0, lodash_1.get)(updateUserDto, 'other', ''))
-            user.other = (0, lodash_1.get)(updateUserDto, 'other');
+            user['other'] = (0, lodash_1.get)(updateUserDto, 'other');
         if ((0, lodash_1.get)(updateUserDto, 'language', ''))
-            user.language = (0, lodash_1.get)(updateUserDto, 'language');
+            user['language'] = (0, lodash_1.get)(updateUserDto, 'language');
         if ((0, lodash_1.get)(updateUserDto, 'gender', ''))
-            user.gender = (0, lodash_1.get)(updateUserDto, 'gender');
+            user['gender'] = (0, lodash_1.get)(updateUserDto, 'gender');
         if ((0, lodash_1.get)(updateUserDto, 'countryCode', ''))
-            user.countryCode = (0, lodash_1.get)(updateUserDto, 'countryCode');
+            user['countryCode'] = (0, lodash_1.get)(updateUserDto, 'countryCode');
         if ((0, lodash_1.get)(updateUserDto, 'phone', ''))
-            user.phone = (0, lodash_1.get)(updateUserDto, 'phone');
+            user['phone'] = (0, lodash_1.get)(updateUserDto, 'phone');
         if ((0, lodash_1.get)(updateUserDto, 'birthday', ''))
-            user.birthday = (0, lodash_1.get)(updateUserDto, 'birthday');
+            user['birthday'] = (0, lodash_1.get)(updateUserDto, 'birthday');
         if ((0, lodash_1.get)(updateUserDto, 'memo', ''))
-            user.memo = (0, lodash_1.get)(updateUserDto, 'memo');
+            user['memo'] = (0, lodash_1.get)(updateUserDto, 'memo');
         if ((0, lodash_1.get)(updateUserDto, 'marketing', ''))
-            user.marketing = (0, lodash_1.get)(updateUserDto, 'marketing');
+            user['marketing'] = (0, lodash_1.get)(updateUserDto, 'marketing');
         if ((0, lodash_1.get)(updateUserDto, 'uniqueKey', ''))
-            user.marketing = (0, lodash_1.get)(updateUserDto, 'uniqueKey');
+            user['marketing'] = (0, lodash_1.get)(updateUserDto, 'uniqueKey');
         if ((0, lodash_1.get)(updateUserDto, 'certifiInfo', ''))
-            user.marketing = (0, lodash_1.get)(updateUserDto, 'certifiInfo');
-        user.group = group;
+            user['marketing'] = (0, lodash_1.get)(updateUserDto, 'certifiInfo');
+        user['group'] = group;
         if ((0, lodash_1.get)(updateUserDto, 'password')) {
-            user.password = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(updateUserDto, 'password'));
+            user['password'] = await common_bcrypt_1.commonBcrypt.setBcryptPassword((0, lodash_1.get)(updateUserDto, 'password'));
         }
         const user_data = await this.usersRepository.save(user);
         let file_info;
@@ -243,6 +247,20 @@ let UsersService = class UsersService {
             file_info = await this.fileService.fileInfoInsert(files, user_data['idx']);
         }
         return { user: user_data, file_info };
+    }
+    async updateUser(token, userInfo) {
+        const deviceInfo = await this.deviceService.findOneToken(token);
+        const user = await this.findId(userInfo.id);
+        if ((0, lodash_1.get)(deviceInfo, ['user', 'idx'], '') && deviceInfo['user']['idx'] != user['idx']) {
+            const { user } = deviceInfo;
+            console.log(deviceInfo['user']);
+            user['device'] = null;
+            await this.usersRepository.save(user);
+            deviceInfo['user'] = null;
+        }
+        user['device'] = deviceInfo;
+        await this.usersRepository.save(user);
+        return { user };
     }
     async chpw(id, password) {
         const user = await this.findId(id);
@@ -306,8 +324,7 @@ let UsersService = class UsersService {
         return await this.usersRepository.findOne({ id: id });
     }
     async deleteUniqueKey() {
-        console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
-        console.log('-----------------------deleteUniqueKey-----------------------');
+        console.log('[cron] deleteUniqueKey: ', moment().format('YYYY-MM-DD HH:mm:ss'));
         await this.usersRepository.createQueryBuilder()
             .update(user_entity_1.UsersEntity)
             .set({ uniqueKey: '', certifiInfo: '' })
@@ -328,7 +345,8 @@ UsersService = __decorate([
         groups_service_1.GroupsService,
         user_sns_service_1.UserSnsService,
         file_service_1.FileService,
-        email_service_1.EmailService])
+        email_service_1.EmailService,
+        device_service_1.DeviceService])
 ], UsersService);
 exports.UsersService = UsersService;
 //# sourceMappingURL=users.service.js.map

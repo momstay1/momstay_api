@@ -2,6 +2,7 @@ export declare class OrderTotalEntity {
     idx: number;
     orderIdx: string;
     totalPrice: number;
+    totalCancelPrice: number;
     shipPrice: number;
     shipAddPrice: number;
     pointDc: number;

@@ -28,7 +28,7 @@ ProductModule = __decorate([
             product_info_module_1.ProductInfoModule,
             users_module_1.UsersModule,
             metro_module_1.MetroModule,
-            college_module_1.CollegeModule
+            college_module_1.CollegeModule,
         ],
         controllers: [product_controller_1.ProductController, admin_product_controller_1.AdminProductController],
         providers: [product_service_1.ProductService],

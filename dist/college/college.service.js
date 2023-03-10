@@ -47,6 +47,7 @@ let CollegeService = class CollegeService {
         return new paginate_1.Pagination({
             results,
             total,
+            page,
         });
     }
     async findAllIdx(idxs) {

@@ -31,6 +31,7 @@ export declare class ProductService {
         file_info: {};
     }>;
     findIdxAll(idx: number[]): Promise<ProductEntity[]>;
+    findAllUser(userIdx: number): Promise<ProductEntity[]>;
     findOne(idx: number): Promise<{
         product: ProductEntity;
         file_info: {};
@@ -40,7 +41,12 @@ export declare class ProductService {
         file_info: {};
     }>;
     getFileInfo(idxs: number[]): Promise<{}>;
-    findIdxOne(idx: number): Promise<ProductEntity>;
+    findOneIdx(idx: number): Promise<ProductEntity>;
     update(id: number, updateProductDto: UpdateProductDto): string;
+    updateAverageStar(idx: number, { star, reviewCount }: {
+        star: any;
+        reviewCount: any;
+    }): Promise<void>;
+    updateMembership(userIdx: number, membershipStatus: string): Promise<void>;
     remove(id: number): string;
 }

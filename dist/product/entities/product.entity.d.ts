@@ -33,10 +33,13 @@ export declare class ProductEntity {
     oldIdx: number;
     oldData: string;
     productInfoIdxs: string;
+    star: number;
+    reviewCount: number;
     createdAt: Date;
     updatedAt: Date;
     user: UsersEntity;
     productOption: undefined;
+    review: undefined;
     productInfo: ProductInfoEntity[];
     metro: MetroEntity[];
     college: CollegeEntity[];

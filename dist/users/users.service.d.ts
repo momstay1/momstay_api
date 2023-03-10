@@ -1,9 +1,10 @@
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { Repository } from 'typeorm';
 import { EmailService } from 'src/email/email.service';
 import { FileService } from 'src/file/file.service';
 import { GroupsService } from 'src/groups/groups.service';
-import { Pagination, PaginationOptions } from 'src/paginate';
 import { UserSnsService } from 'src/user-sns/user-sns.service';
-import { Repository } from 'typeorm';
+import { DeviceService } from 'src/device/device.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
@@ -13,7 +14,8 @@ export declare class UsersService {
     private readonly userSnsService;
     private readonly fileService;
     private readonly emailService;
-    constructor(usersRepository: Repository<UsersEntity>, groupService: GroupsService, userSnsService: UserSnsService, fileService: FileService, emailService: EmailService);
+    private readonly deviceService;
+    constructor(usersRepository: Repository<UsersEntity>, groupService: GroupsService, userSnsService: UserSnsService, fileService: FileService, emailService: EmailService, deviceService: DeviceService);
     test(id: any): Promise<any>;
     email(email: string, type: string): Promise<{
         result: {
@@ -36,6 +38,9 @@ export declare class UsersService {
     update(id: string, updateUserDto: UpdateUserDto, files: any): Promise<{
         user: UsersEntity;
         file_info: any;
+    }>;
+    updateUser(token: string, userInfo: UsersEntity): Promise<{
+        user: UsersEntity;
     }>;
     chpw(id: string, password: string): Promise<UsersEntity>;
     rspw(userdata: any, prevpassword: string, password: string): Promise<UsersEntity>;

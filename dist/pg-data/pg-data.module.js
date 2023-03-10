@@ -10,12 +10,18 @@ exports.PgDataModule = void 0;
 const common_1 = require("@nestjs/common");
 const pg_data_service_1 = require("./pg-data.service");
 const pg_data_controller_1 = require("./pg-data.controller");
+const pg_data_entity_1 = require("./entities/pg-data.entity");
+const typeorm_1 = require("@nestjs/typeorm");
 let PgDataModule = class PgDataModule {
 };
 PgDataModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([pg_data_entity_1.PgDataEntity]),
+        ],
         controllers: [pg_data_controller_1.PgDataController],
-        providers: [pg_data_service_1.PgDataService]
+        providers: [pg_data_service_1.PgDataService],
+        exports: [pg_data_service_1.PgDataService]
     })
 ], PgDataModule);
 exports.PgDataModule = PgDataModule;

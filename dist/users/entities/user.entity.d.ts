@@ -1,3 +1,4 @@
+import { DeviceEntity } from 'src/device/entities/device.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 export declare class UsersEntity {
     idx: number;
@@ -29,6 +30,10 @@ export declare class UsersEntity {
     login: undefined;
     reservation: undefined;
     userSns: undefined;
+    review: undefined;
+    membershipHistory: undefined;
+    comment: undefined;
+    device: DeviceEntity;
     group: GroupsEntity;
     createdAt: Date;
     updatedAt: Date;

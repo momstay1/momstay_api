@@ -26,6 +26,10 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "totalPrice", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '취소 주문 총 금액' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "totalCancelPrice", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '배송비' }),
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "shipPrice", void 0);

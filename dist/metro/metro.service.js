@@ -47,6 +47,7 @@ let MetroService = class MetroService {
         return new paginate_1.Pagination({
             results,
             total,
+            page,
         });
     }
     async findAllIdx(idxs) {

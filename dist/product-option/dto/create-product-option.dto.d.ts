@@ -6,6 +6,9 @@ export declare class CreateProductOptionDto {
     readonly visitStatus: string;
     readonly paymentStatus: string;
     readonly title: string;
+    readonly titleEng: string;
+    readonly titleJpn: string;
+    readonly titleChn: string;
     readonly price: string;
     readonly priceMonth: string;
     readonly priceWeek: string;

@@ -6,6 +6,7 @@ class Pagination {
         this.results = paginationResult.results;
         this.pageTotal = paginationResult.results.length;
         this.total = paginationResult.total;
+        this.page = paginationResult.page;
     }
 }
 exports.Pagination = Pagination;

@@ -28,22 +28,12 @@ let ReservationController = class ReservationController {
         return await this.reservationService.create(user, createReservationDto);
     }
     async hostFindAll(user, take, page) {
-        const { data: { results, total, pageTotal }, file_info } = await this.reservationService.hostFindAll({ take, page }, user);
-        return {
-            results,
-            total,
-            pageTotal,
-            file_info
-        };
+        const { data, file_info } = await this.reservationService.hostFindAll({ take, page }, user);
+        return Object.assign(Object.assign({}, data), { file_info });
     }
     async guestFindAll(user, take, page) {
-        const { data: { results, total, pageTotal }, file_info } = await this.reservationService.guestFindAll({ take, page }, user);
-        return {
-            results,
-            total,
-            pageTotal,
-            file_info
-        };
+        const { data, file_info } = await this.reservationService.guestFindAll({ take, page }, user);
+        return Object.assign(Object.assign({}, data), { file_info });
     }
     async findOne(idx) {
         return await this.reservationService.findOne(+idx);
@@ -88,7 +78,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('/guest'),
     (0, swagger_1.ApiOperation)({ summary: '방문 예약 리스트 (게스트) API' }),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'guest']),
+    (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Query)('take')),
@@ -121,7 +111,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)('guest/:idx'),
     (0, swagger_1.ApiOperation)({ summary: '방문 예약 취소(게스트) API' }),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'guest']),
+    (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Param)('idx')),

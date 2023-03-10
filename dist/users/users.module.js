@@ -21,6 +21,8 @@ const file_module_1 = require("../file/file.module");
 const login_module_1 = require("../login/login.module");
 const email_module_1 = require("../email/email.module");
 const refresh_token_module_1 = require("../refresh-token/refresh-token.module");
+const iamport_service_1 = require("../iamport/iamport.service");
+const device_module_1 = require("../device/device.module");
 let UsersModule = class UsersModule {
 };
 UsersModule = __decorate([
@@ -33,10 +35,11 @@ UsersModule = __decorate([
             file_module_1.FileModule,
             email_module_1.EmailModule,
             login_module_1.LoginModule,
-            refresh_token_module_1.RefreshTokenModule
+            refresh_token_module_1.RefreshTokenModule,
+            device_module_1.DeviceModule,
         ],
         controllers: [users_controller_1.UsersController, admin_users_controller_1.AdminUsersController],
-        providers: [users_service_1.UsersService, common_service_1.CommonService],
+        providers: [users_service_1.UsersService, common_service_1.CommonService, iamport_service_1.IamportService],
         exports: [users_service_1.UsersService],
     })
 ], UsersModule);

@@ -30,13 +30,8 @@ let ProductOptionController = class ProductOptionController {
         return await this.productOptionService.create(createProductOptionDto, files);
     }
     async findAll(take, page, search) {
-        const { data: { results, total, pageTotal }, file_info } = await this.productOptionService.findAll({ take, page }, search);
-        return {
-            results,
-            total,
-            pageTotal,
-            file_info
-        };
+        const { data, file_info } = await this.productOptionService.findAll({ take, page }, search);
+        return Object.assign(Object.assign({}, data), { file_info });
     }
     async findOne(idx) {
         return await this.productOptionService.findOne(+idx);

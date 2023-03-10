@@ -26,13 +26,13 @@ let PushNotificationController = class PushNotificationController {
     }
     async test() {
         const target = {
-            token: '',
-            topic: 'all',
+            token: '5BAA98BFE537F9A4577F2899A647F122A0C9436F1421024A678E3211C93672C2',
+            topic: '',
         };
         const notifications = {
             title: '앱 푸시 테스트',
             body: '앱 푸시 테스트 입니다.',
-            data: { status: 200 }
+            data: {}
         };
         return await this.pushNotificationService.sendPush(target, notifications);
     }

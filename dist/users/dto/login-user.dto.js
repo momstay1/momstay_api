@@ -27,5 +27,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: '비밀번호' }),
     __metadata("design:type", String)
 ], LoginUserDto.prototype, "password", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: '단말기 토큰 정보' }),
+    __metadata("design:type", String)
+], LoginUserDto.prototype, "token", void 0);
 exports.LoginUserDto = LoginUserDto;
 //# sourceMappingURL=login-user.dto.js.map

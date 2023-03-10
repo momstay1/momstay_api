@@ -34,7 +34,8 @@ BoardContentsModule = __decorate([
             groups_module_1.GroupsModule
         ],
         controllers: [board_contents_controller_1.BoardContentsController, admin_board_contents_controller_1.AdminBoardContentsController, notice_contents_controller_1.NoticeContentsController],
-        providers: [board_contents_service_1.BoardContentsService]
+        providers: [board_contents_service_1.BoardContentsService],
+        exports: [board_contents_service_1.BoardContentsService]
     })
 ], BoardContentsModule);
 exports.BoardContentsModule = BoardContentsModule;

@@ -26,12 +26,8 @@ let CollegeController = class CollegeController {
         return this.collegeService.create(createCollegeDto);
     }
     async findAll(take, page, search) {
-        const { results, total, pageTotal } = await this.collegeService.findAll({ take, page }, search);
-        return {
-            results,
-            total,
-            pageTotal
-        };
+        const data = await this.collegeService.findAll({ take, page }, search);
+        return Object.assign({}, data);
     }
     findOne(id) {
         return this.collegeService.findOne(+id);

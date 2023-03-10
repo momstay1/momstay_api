@@ -26,12 +26,8 @@ let MetroController = class MetroController {
         return this.metroService.create(createMetroDto);
     }
     async findAll(take, page, search) {
-        const { results, total, pageTotal } = await this.metroService.findAll({ take, page }, search);
-        return {
-            results,
-            total,
-            pageTotal
-        };
+        const data = await this.metroService.findAll({ take, page }, search);
+        return Object.assign({}, data);
     }
     findOne(id) {
         return this.metroService.findOne(+id);

@@ -4,6 +4,10 @@ export declare class CreateOrderDto {
     readonly imp_uid: string;
     readonly billingKey: string;
     readonly payment: string;
+    readonly price: number;
+    readonly num: number;
+    readonly startAt: string | Date;
+    readonly endAt: string | Date;
     readonly clientName: string;
     readonly clientEmail: string;
     readonly clientPhone1: string;
@@ -25,9 +29,8 @@ export declare class CreateOrderDto {
     readonly account: string;
     readonly depositer: string;
     readonly remitter: string;
-    readonly ClientMemo: string;
+    readonly memo: string;
     readonly adminMemo: string;
-    userIdx: string;
     readonly productOptionIdx: string;
-    readonly productNum: string;
+    readonly orderProductIdx: string;
 }

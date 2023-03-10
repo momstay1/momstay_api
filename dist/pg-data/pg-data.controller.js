@@ -15,14 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PgDataController = void 0;
 const common_1 = require("@nestjs/common");
 const pg_data_service_1 = require("./pg-data.service");
-const create_pg_datum_dto_1 = require("./dto/create-pg-datum.dto");
-const update_pg_datum_dto_1 = require("./dto/update-pg-datum.dto");
+const create_pg_data_dto_1 = require("./dto/create-pg-data.dto");
+const update_pg_data_dto_1 = require("./dto/update-pg-data.dto");
 let PgDataController = class PgDataController {
     constructor(pgDataService) {
         this.pgDataService = pgDataService;
     }
     create(createPgDatumDto) {
-        return this.pgDataService.create(createPgDatumDto);
     }
     findAll() {
         return this.pgDataService.findAll();
@@ -41,7 +40,7 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_pg_datum_dto_1.CreatePgDatumDto]),
+    __metadata("design:paramtypes", [create_pg_data_dto_1.CreatePgDatumDto]),
     __metadata("design:returntype", void 0)
 ], PgDataController.prototype, "create", null);
 __decorate([
@@ -62,7 +61,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_pg_datum_dto_1.UpdatePgDatumDto]),
+    __metadata("design:paramtypes", [String, update_pg_data_dto_1.UpdatePgDatumDto]),
     __metadata("design:returntype", void 0)
 ], PgDataController.prototype, "update", null);
 __decorate([
