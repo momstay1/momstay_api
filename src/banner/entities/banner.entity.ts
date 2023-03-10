@@ -17,7 +17,7 @@ export class BannerEntity {
   @Column({ type: 'text', length: 255, default: '', comment: '배너 아이템 정보' })
   itemInfo: string;
 
-  @OneToMany(() => BannerItemEntity, (bi) => bi.banner)
+  @OneToMany(() => BannerItemEntity, (bni) => bni.banner)
   bannerItem: BannerItemEntity[];
 
   @CreateDateColumn()

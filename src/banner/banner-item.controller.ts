@@ -1,4 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagger';
+import { multerOptions } from 'src/common/common.file';
+import { Auth } from 'src/common/decorator/role.decorator';
 import { BannerItemService } from './banner-item.service';
 import { CreateBannerItemDto } from './dto/create-banner-item.dto';
 import { UpdateBannerItemDto } from './dto/update-banner-item.dto';
@@ -8,8 +12,18 @@ export class BannerItemController {
   constructor(private readonly bannerItemService: BannerItemService) { }
 
   @Post()
-  create(@Body() createBannerItemDto: CreateBannerItemDto) {
-    return this.bannerItemService.create(createBannerItemDto);
+  @ApiOperation({ summary: '배너 아이템 등록 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'bniImg', maxCount: 10 },
+  ], multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @Body() createBannerItemDto: CreateBannerItemDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return await this.bannerItemService.create(createBannerItemDto, files);
   }
 
   @Get()
