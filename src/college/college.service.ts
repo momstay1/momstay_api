@@ -43,6 +43,7 @@ export class CollegeService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 

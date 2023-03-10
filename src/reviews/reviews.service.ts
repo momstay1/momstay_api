@@ -127,6 +127,7 @@ export class ReviewsService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     // 답글 기능은 별도로 추가
@@ -187,6 +188,7 @@ export class ReviewsService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     // 답글 기능은 별도로 추가

@@ -161,6 +161,7 @@ export class UsersService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 

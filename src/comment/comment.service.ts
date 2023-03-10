@@ -71,6 +71,7 @@ export class CommentService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
     return { data };
 

@@ -86,6 +86,7 @@ export class MembershipService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data }

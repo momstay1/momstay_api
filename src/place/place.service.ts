@@ -46,6 +46,7 @@ export class PlaceService {
     return new Pagination({
       results,
       total,
+      page,
     })
   }
 

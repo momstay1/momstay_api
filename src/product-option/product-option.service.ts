@@ -154,6 +154,7 @@ export class ProductOptionService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data, file_info }

@@ -154,6 +154,7 @@ export class BoardContentsService {
       bc: new Pagination({
         results,
         total,
+        page,
       })
     }
   }
@@ -199,6 +200,7 @@ export class BoardContentsService {
       bc: new Pagination({
         results,
         total,
+        page,
       })
     }
   }
@@ -343,6 +345,7 @@ export class BoardContentsService {
       bc: new Pagination({
         results,
         total,
+        page,
       })
     }
   }

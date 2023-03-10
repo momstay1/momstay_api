@@ -91,6 +91,7 @@ export class ReservationService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data, file_info }
@@ -120,6 +121,7 @@ export class ReservationService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data, file_info }

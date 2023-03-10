@@ -187,6 +187,7 @@ export class OrderService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data }
@@ -243,6 +244,7 @@ export class OrderService {
     const data = new Pagination({
       results,
       total,
+      page,
     });
 
     return { data }
