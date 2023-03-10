@@ -44,6 +44,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { DeviceModule } from './device/device.module';
 import { CommentModule } from './comment/comment.module';
 import { MembershipModule } from './membership/membership.module';
+import { BannerModule } from './banner/banner.module';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { MembershipModule } from './membership/membership.module';
     DeviceModule,
     CommentModule,
     MembershipModule,
+    BannerModule,
   ],
   providers: [CommonService, IamportService],
 })
