@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { filter, get, isArray, map } from 'lodash';
+import { filter, get, isArray, isEmpty, map, union } from 'lodash';
 import { BannerService } from 'src/banner/banner.service';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateBannerItemDto } from './dto/create-banner-item.dto';
 import { UpdateBannerItemDto } from './dto/update-banner-item.dto';
 import { BannerItemEntity } from './entities/banner-item.entity';
@@ -24,8 +24,13 @@ export class BannerItemService {
     const { bannerId } = createBannerItemDto;
     const bannerInfo = await this.bannerService.findOneId(bannerId);
 
+    let del_bni;
+    if (bannerInfo['bannerItem']) {
+      // 기존 배너 아이템 idx별로 정리
+      del_bni = commonUtils.getArrayKey(bannerInfo['bannerItem'], ['idx'], true);
+    }
+
     // 배너 아이템 데이터 정리
-    const bni_idxs = [];
     let bni_content = JSON.parse(get(createBannerItemDto, 'content'));
     if (!isArray(bni_content)) bni_content = [bni_content];
     for (const key in bni_content) {
@@ -45,7 +50,9 @@ export class BannerItemService {
       }
       const bannerItemEntity = await this.bniRepository.create(bni_data);
       const bannerItem = await this.bniRepository.save(bannerItemEntity);
-      bni_idxs.push(bannerItem['idx']);
+
+      // 수정된 배너아이템은 del_bni에서 제거
+      if (get(del_bni, [bannerItem['idx']], '')) delete del_bni[bannerItem['idx']];
 
       bannerItem['content'] = JSON.parse(bannerItem['content']);
       if (!get(bannerItem, ['content', 'section_idx'], '')) {
@@ -84,8 +91,20 @@ export class BannerItemService {
       }
     }
 
-    // 삭제된 배너 아이템 제거 기능 작업 필요
-
+    if (!isEmpty(del_bni)) {
+      // 삭제된 배너 아이템 제거 기능 작업 필요
+      let del_bni_idxs = [];
+      for (const key in del_bni) {
+        const idxs = map(del_bni[key], o => o.idx);
+        del_bni_idxs = union(del_bni_idxs, idxs);
+      }
+      // 배너 아이템 첨부파일 제거
+      const del_files = await this.fileService.findCategoryForeignAll([categoryName], del_bni_idxs);
+      const del_file_idxs = map(del_files, o => '' + o.file_idx);
+      await this.fileService.removes(del_file_idxs);
+      // 배너 아이템 제거
+      await this.removeIdxs(del_bni_idxs);
+    }
 
     const banner = await this.bannerService.findOneId(bannerId);
     const fileIdxs = map(banner['bannerItem'], o => o.idx)
@@ -117,5 +136,12 @@ export class BannerItemService {
 
   remove(id: number) {
     return `This action removes a #${id} banner`;
+  }
+
+  async removeIdxs(idxs: number[]) {
+    await this.bniRepository.createQueryBuilder()
+      .delete()
+      .where({ idx: In(idxs) })
+      .execute();
   }
 }
