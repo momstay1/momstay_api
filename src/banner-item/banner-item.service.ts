@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { filter, get, isArray, map } from 'lodash';
 import { BannerService } from 'src/banner/banner.service';
+import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Repository } from 'typeorm';
 import { CreateBannerItemDto } from './dto/create-banner-item.dto';
@@ -20,47 +21,86 @@ export class BannerItemService {
 
   async create(createBannerItemDto: CreateBannerItemDto, files) {
     // 배너 정보 가져오기
-    const banner = await this.bannerService.findOneId(createBannerItemDto['bannerId']);
-    console.log({ files });
-    console.log(files[categoryName]);
+    const { bannerId } = createBannerItemDto;
+    const bannerInfo = await this.bannerService.findOneId(bannerId);
 
     // 배너 아이템 데이터 정리
+    const bni_idxs = [];
     let bni_content = JSON.parse(get(createBannerItemDto, 'content'));
-    console.log({ bni_content });
     if (!isArray(bni_content)) bni_content = [bni_content];
     for (const key in bni_content) {
-      // const bni_data = {
-      //   status: +get(createBannerItemDto, 'status', registrationStatus),
-      //   order: +key,
-      //   content: JSON.stringify(bni_content[key]),
-      //   start: get(createBannerItemDto, 'start', '0'),
-      //   end: get(createBannerItemDto, 'end', '0'),
-      //   banner: banner
-      // };
-      // if (get(bni_content, [key, 'section_idx'], '')) {
-      //   bni_data['idx'] = bni_content[key]['section_idx'];
-      // }
-      // const bannerItemEntity = await this.bniRepository.create(bni_data);
-      // const bannerItem = await this.bniRepository.save(bannerItemEntity);
+      // 배너 아이템 데이터 설정
+      const bni_data = {
+        status: +get(bni_content[key], 'status', registrationStatus),
+        order: +get(bni_content[key], 'order', key),
+        content: JSON.stringify(bni_content[key]),
+        start: get(bni_content[key], 'start', '0'),
+        end: get(bni_content[key], 'end', '0'),
+        banner: bannerInfo
+      };
+      const bni = { update_idx: 0 };
+      if (get(bni_content, [key, 'section_idx'], '')) {
+        // section idx 존재하는 경우 수정
+        bni['update_idx'] = bni_data['idx'] = bni_content[key]['section_idx'];
+      }
+      const bannerItemEntity = await this.bniRepository.create(bni_data);
+      const bannerItem = await this.bniRepository.save(bannerItemEntity);
+      bni_idxs.push(bannerItem['idx']);
 
-      // section_idx 설정 후 다시 저장
-      // bannerItem['content'] = JSON.parse(bannerItem['content']);
-      // bannerItem['content']['section_idx'] = bannerItem['idx'];
-      // bannerItem['content'] = JSON.stringify(bannerItem['content']);
-      // await this.bniRepository.save(bannerItem);
+      bannerItem['content'] = JSON.parse(bannerItem['content']);
+      if (!get(bannerItem, ['content', 'section_idx'], '')) {
+        // section_idx 없는 경우 설정 후 다시 저장
+        bannerItem['content']['section_idx'] = bannerItem['idx'];
+        bannerItem['content'] = JSON.stringify(bannerItem['content']);
+        await this.bniRepository.save(bannerItem);
+      }
 
+      // 배너 아이템 첨부파일 설정
       if (get(bni_content, [key, 'file_name'], '')) {
-        const file = filter(files[categoryName], o => {
+        const file = {};
+        // 파일 저장시 배너 아이템 첨부파일 구분하기위해
+        // 배너 아이템 content 내에 파일 이름과 첨부된 파일 이름 매칭
+        // 수정된 배너 아이템의 경우 첨부된 파일이 없으면 매칭이 안됨
+        file[categoryName] = filter(files[categoryName], o => {
           if (!isArray(bni_content[key]['file_name'])) bni_content[key]['file_name'] = [bni_content[key]['file_name']];
           if (bni_content[key]['file_name'].includes(o.originalname)) return o;
         })
-        console.log({ file });
-        // 새 첨부파일 등록
-        // const [fileIdxs] = await this.fileService.createByRequest(files, bannerItem['idx']);
+        if (bni['update_idx'] > 0 && file[categoryName].length > 0) {
+          try {
+            // 배너 아이템 첨부파일 수정하는 경우 기존 첨부파일 삭제
+            const files = await this.fileService.findCategory([categoryName], '' + bni['update_idx']);
+            const delFileIdxs = map(files, o => '' + o.file_idx);
+            if (delFileIdxs.length > 0) {
+              await this.fileService.removes(delFileIdxs);
+            }
+          } catch (error) {
+            console.log('삭제할 파일정보가 없습니다.');
+          }
+        }
+        if (file[categoryName].length > 0) {
+          // 배너 아이템 별 첨부파일 등록
+          await this.fileService.createByRequest(file, bannerItem['idx']);
+        }
       }
     }
 
+    // 삭제된 배너 아이템 제거 기능 작업 필요
 
+
+    const banner = await this.bannerService.findOneId(bannerId);
+    const fileIdxs = map(banner['bannerItem'], o => o.idx)
+    let file_info = {};
+    if (fileIdxs.length > 0) {
+      // 파일 정보 가져오기
+      try {
+        file_info = await this.fileService.findCategoryForeignAll([categoryName], fileIdxs);
+        file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+      } catch (error) {
+        console.log('파일정보가 없습니다.');
+      }
+    }
+
+    return { banner, file_info };
   }
 
   findAll() {
