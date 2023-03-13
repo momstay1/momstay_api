@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { filter, get, isArray, isEmpty, map, union } from 'lodash';
+import { cloneDeep, filter, get, isArray, isEmpty, map, union } from 'lodash';
 import { BannerService } from 'src/banner/banner.service';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
@@ -20,6 +20,7 @@ export class BannerItemService {
   ) { }
 
   async create(createBannerItemDto: CreateBannerItemDto, files) {
+    console.log(files[categoryName]);
     // 배너 정보 가져오기
     const { bannerId } = createBannerItemDto;
     const bannerInfo = await this.bannerService.findOneId(bannerId);
@@ -32,21 +33,28 @@ export class BannerItemService {
 
     // 배너 아이템 데이터 정리
     let bni_content = JSON.parse(get(createBannerItemDto, 'content'));
-    if (!isArray(bni_content)) bni_content = [bni_content];
+    bni_content = isArray(bni_content) ? bni_content : [];
+
     for (const key in bni_content) {
+      // content 내용 복사
+      const content = cloneDeep(bni_content[key]);
+
+      // file_order 제외
+      if (get(content, 'file_order', -1) >= 0) delete content['file_order'];
+
       // 배너 아이템 데이터 설정
       const bni_data = {
-        status: +get(bni_content[key], 'status', registrationStatus),
-        order: +get(bni_content[key], 'order', key),
-        content: JSON.stringify(bni_content[key]),
-        start: get(bni_content[key], 'start', '0'),
-        end: get(bni_content[key], 'end', '0'),
+        status: +get(content, 'status', registrationStatus),
+        order: +get(content, 'order', key),
+        content: JSON.stringify(content),
+        start: get(content, 'start', '0'),
+        end: get(content, 'end', '0'),
         banner: bannerInfo
       };
       const bni = { update_idx: 0 };
-      if (get(bni_content, [key, 'section_idx'], '')) {
+      if (get(content, ['section_idx'], '')) {
         // section idx 존재하는 경우 수정
-        bni['update_idx'] = bni_data['idx'] = bni_content[key]['section_idx'];
+        bni['update_idx'] = bni_data['idx'] = content['section_idx'];
       }
       const bannerItemEntity = await this.bniRepository.create(bni_data);
       const bannerItem = await this.bniRepository.save(bannerItemEntity);
@@ -63,15 +71,19 @@ export class BannerItemService {
       }
 
       // 배너 아이템 첨부파일 설정
-      if (get(bni_content, [key, 'file_name'], '')) {
+      if (get(bni_content, [key, 'file_order'], -1) >= 0) {
         const file = {};
+        file[categoryName] = [];
         // 파일 저장시 배너 아이템 첨부파일 구분하기위해
-        // 배너 아이템 content 내에 파일 이름과 첨부된 파일 이름 매칭
-        // 수정된 배너 아이템의 경우 첨부된 파일이 없으면 매칭이 안됨
-        file[categoryName] = filter(files[categoryName], o => {
-          if (!isArray(bni_content[key]['file_name'])) bni_content[key]['file_name'] = [bni_content[key]['file_name']];
-          if (bni_content[key]['file_name'].includes(o.originalname)) return o;
-        })
+        // 배너 아이템 content 내에 파일 순서와 첨부된 파일 순서 매칭
+        // 수정된 배너 아이템의 첨부된 파일이 없으면 file_order 값이 없으므로 매칭이 안됨
+        bni_content[key]['file_order'] = isArray(bni_content[key]['file_order']) ? bni_content[key]['file_order'] : [bni_content[key]['file_order']];
+        for (const i in files[categoryName]) {
+          if (bni_content[key]['file_order'].includes(+i)) {
+            file[categoryName].push(files[categoryName][i]);
+          }
+        }
+
         if (bni['update_idx'] > 0 && file[categoryName].length > 0) {
           try {
             // 배너 아이템 첨부파일 수정하는 경우 기존 첨부파일 삭제
