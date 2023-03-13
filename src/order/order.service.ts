@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isArray, map, reduce, values } from 'lodash';
+import { get, isArray, isEmpty, map, reduce, values } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -363,8 +363,8 @@ export class OrderService {
     }
   }
 
-  async hostOrderApproval(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
-    if (!code || !get(updateOrderDto, 'status', '')) {
+  async hostOrderApproval(code: string, userInfo: UsersEntity) {
+    if (!code) {
       throw new NotFoundException('변경할 정보가 없습니다.');
     }
     // 호스트 정보 가져오기
@@ -403,7 +403,7 @@ export class OrderService {
   }
 
   async hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
-    if (!code || !get(updateOrderDto, 'status', '')) {
+    if (!code) {
       throw new NotFoundException('변경할 정보가 없습니다.');
     }
     // 호스트 정보 가져오기
@@ -458,7 +458,7 @@ export class OrderService {
     // 주문 취소 상태 변경
     await this.statusChange(order['idx'], cancel_status);
     // 주문 상품 취소 상태 변경
-    await this.orderProductService.statusChange(order['idx'], cancel_status);
+    await this.orderProductService.statusChange(order['idx'], cancel_status, cancelReason);
     // 주문 상품 가격 정보 변경
     await this.orderProductService.cancelPrice(order['idx'], cancelPrice);
     // 주문 토탈 가격 정보 변경

@@ -163,9 +163,8 @@ export class OrderController {
   async hostOrderApproval(
     @GetUser() user: UsersEntity,
     @Param('code') code: string,
-    @Body() updateOrderDto: UpdateOrderDto
   ) {
-    await this.orderService.hostOrderApproval(code, user, updateOrderDto);
+    await this.orderService.hostOrderApproval(code, user);
   }
 
   // 주문 취소 = 전체 취소만 가능

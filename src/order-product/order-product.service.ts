@@ -106,10 +106,14 @@ export class OrderProductService {
     return `This action updates a #${id} orderProduct`;
   }
 
-  async statusChange(orderIdx: number, status: number) {
+  async statusChange(orderIdx: number, status: number, cancelReason?: string) {
+    const set = { status: status };
+    if (cancelReason) {
+      set['cancelReason'] = cancelReason;
+    }
     await this.orderProductRepository.createQueryBuilder()
       .update(OrderProductEntity)
-      .set({ status: status })
+      .set(set)
       .where("`orderIdx` = :orderIdx", { orderIdx: orderIdx })
       .execute()
   }
