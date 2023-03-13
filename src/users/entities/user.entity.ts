@@ -1,3 +1,4 @@
+import { BlockEntity } from 'src/block/entities/block.entity';
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
 import { CommentEntity } from 'src/comment/entities/comment.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
@@ -126,6 +127,9 @@ export class UsersEntity {
 
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comment: undefined;
+
+  @OneToMany(() => BlockEntity, (block) => block.user)
+  block: BlockEntity[];
 
   @OneToOne(() => DeviceEntity, { cascade: true })
   @JoinColumn()

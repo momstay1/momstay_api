@@ -46,6 +46,7 @@ import { CommentModule } from './comment/comment.module';
 import { MembershipModule } from './membership/membership.module';
 import { BannerModule } from './banner/banner.module';
 import { BannerItemModule } from './banner-item/banner-item.module';
+import { BlockModule } from './block/block.module';
 
 @Module({
   imports: [
@@ -100,6 +101,7 @@ import { BannerItemModule } from './banner-item/banner-item.module';
     MembershipModule,
     BannerModule,
     BannerItemModule,
+    BlockModule,
   ],
   providers: [CommonService, IamportService],
 })
