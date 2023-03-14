@@ -10,6 +10,7 @@ import { OrderProductEntity } from 'src/order-product/entities/order-product.ent
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 import { ProductEntity } from 'src/product/entities/product.entity';
+import { ReportCumulativeEntity } from 'src/report-cumulative/entities/report-cumulative.entity';
 import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
 import { ReviewEntity } from 'src/reviews/entities/review.entity';
 import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
@@ -130,6 +131,8 @@ export class UsersEntity {
 
   @OneToMany(() => BlockEntity, (block) => block.user)
   block: BlockEntity[];
+  @OneToMany(() => ReportCumulativeEntity, (rc) => rc.user)
+  reportCumulative: undefined;
 
   @OneToOne(() => DeviceEntity, { cascade: true })
   @JoinColumn()

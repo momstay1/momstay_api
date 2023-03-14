@@ -32,7 +32,9 @@ export class BannerService {
   async findOne(id: string) {
     const banner = await this.findOneId(id);
 
-    banner['itemInfo'] = JSON.parse(banner['itemInfo']);
+    if (get(banner, ['itemInfo'], '')) {
+      banner['itemInfo'] = JSON.parse(banner['itemInfo']);
+    }
 
     let bni_idxs = [];
     if (banner['bannerItem'].length > 0) {
