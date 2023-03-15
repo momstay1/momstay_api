@@ -214,14 +214,19 @@ export class FileService {
   }
 
   async removes(idxs: string[]) {
-    const files = await this.findIndexs(idxs);
+    try {
+      const files = await this.findIndexs(idxs);
+      await this.deleteFile(files);
+      await this.deleteStorageFile(files);
+      await this.fileRepository.createQueryBuilder()
+        .delete()
+        .where(" file_idx IN (:idxs)", { idxs: idxs })
+        .execute()
+    } catch (error) {
+      console.log({ error });
+      console.log('삭제할 파일이 없습니다', { idxs });
+    }
 
-    await this.deleteFile(files);
-    await this.deleteStorageFile(files);
-    await this.fileRepository.createQueryBuilder()
-      .delete()
-      .where(" file_idx IN (:idxs)", { idxs: idxs })
-      .execute()
   }
 
   async deleteStorageFile(files) {
@@ -394,7 +399,7 @@ export class FileService {
       );
       fileIdxs = fileIdx ? fileIdx.split(",") : [];
       const delFileIdxs = File_idxs.filter(o => !fileIdxs.includes(o));
-      console.log({delFileIdxs});
+      console.log({ delFileIdxs });
       if (delFileIdxs.length > 0) {
         await this.removes(delFileIdxs);
       }

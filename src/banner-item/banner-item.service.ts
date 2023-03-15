@@ -83,7 +83,7 @@ export class BannerItemService {
             file[categoryName].push(files[categoryName][i]);
           }
         }
-
+        console.log(123);
         if (bni['update_idx'] > 0 && file[categoryName].length > 0) {
           try {
             // 배너 아이템 첨부파일 수정하는 경우 기존 첨부파일 삭제
@@ -96,6 +96,7 @@ export class BannerItemService {
             console.log('삭제할 파일정보가 없습니다.');
           }
         }
+        console.log(234);
         if (file[categoryName].length > 0) {
           // 배너 아이템 별 첨부파일 등록
           await this.fileService.createByRequest(file, bannerItem['idx']);
@@ -111,9 +112,14 @@ export class BannerItemService {
         del_bni_idxs = union(del_bni_idxs, idxs);
       }
       // 배너 아이템 첨부파일 제거
-      const del_files = await this.fileService.findCategoryForeignAll([categoryName], del_bni_idxs);
-      const del_file_idxs = map(del_files, o => '' + o.file_idx);
-      await this.fileService.removes(del_file_idxs);
+      try {
+        const del_files = await this.fileService.findCategoryForeignAll([categoryName], del_bni_idxs);
+        const del_file_idxs = map(del_files, o => '' + o.file_idx);
+        await this.fileService.removes(del_file_idxs);
+      } catch (error) {
+        console.log({ error });
+        console.log('삭제할 파일이 없습니다');
+      }
       // 배너 아이템 제거
       await this.removeIdxs(del_bni_idxs);
     }
