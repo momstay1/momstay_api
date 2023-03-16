@@ -77,6 +77,10 @@ let UsersController = class UsersController {
         const data = await this.usersService.findOne({ uniqueKey: uniquekey });
         return data;
     }
+    async certification(imp_uid) {
+        const data = await this.iamportService.getCertification(imp_uid);
+        return data;
+    }
     async loginChk(id) {
         const data = await this.usersService.fineUser(id);
         return data;
@@ -196,6 +200,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getUniqueKey", null);
+__decorate([
+    (0, common_1.Get)('certification/:imp_uid'),
+    (0, swagger_1.ApiOperation)({ summary: '본인인증 내역 조회 API' }),
+    (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
+    __param(0, (0, common_1.Param)('imp_uid')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "certification", null);
 __decorate([
     (0, common_1.Get)('logincheck/:id'),
     (0, swagger_1.ApiOperation)({ summary: '로그인시 아이디 체크 API' }),

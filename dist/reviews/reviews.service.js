@@ -215,6 +215,10 @@ let ReviewsService = class ReviewsService {
             prevReview['star'] = (0, lodash_1.get)(updateReviewDto, 'star');
         if ((0, lodash_1.get)(updateReviewDto, 'contents', ''))
             prevReview['contents'] = (0, lodash_1.get)(updateReviewDto, 'contents');
+        if ((0, lodash_1.get)(updateReviewDto, 'start', ''))
+            prevReview['start'] = (0, lodash_1.get)(updateReviewDto, 'start');
+        if ((0, lodash_1.get)(updateReviewDto, 'end', ''))
+            prevReview['end'] = (0, lodash_1.get)(updateReviewDto, 'end');
         const review = await this.reviewRepository.save(prevReview);
         await this.averageStar(review);
         await this.fileService.removeByRequest(updateReviewDto, review['idx'], ['reviewImg']);
@@ -224,7 +228,7 @@ let ReviewsService = class ReviewsService {
             file_info = await this.fileService.findCategory(['reviewImg'], '' + review['idx']);
         }
         catch (error) {
-            console.log({ error });
+            console.log(error['response']['message']);
         }
         return { review, file_info };
     }

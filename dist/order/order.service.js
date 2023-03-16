@@ -320,10 +320,6 @@ let OrderService = class OrderService {
         if (!(0, lodash_1.get)(order, 'idx', '')) {
             throw new common_1.NotFoundException('취소할 주문이 없습니다.');
         }
-        const cancel_status = common_utils_1.commonUtils.getStatus(['order_status', 'cancellationCompleted']);
-        if ((0, lodash_1.get)(order, 'status') == cancel_status) {
-            throw new common_1.NotFoundException('이미 취소 처리된 주문입니다.');
-        }
         const cancelReason = '게스트 취소';
         await this.cancelProcess(order, cancelReason);
         const po = await this.productOptionService.findIdx(+(0, lodash_1.get)(order, ['orderProduct', '0', 'productOption', 'idx']));
@@ -332,8 +328,8 @@ let OrderService = class OrderService {
             await this.pushNotiService.guestOrderCancelPush(hostUser, po);
         }
     }
-    async hostOrderApproval(code, userInfo, updateOrderDto) {
-        if (!code || !(0, lodash_1.get)(updateOrderDto, 'status', '')) {
+    async hostOrderApproval(code, userInfo) {
+        if (!code) {
             throw new common_1.NotFoundException('변경할 정보가 없습니다.');
         }
         const user = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
@@ -351,6 +347,9 @@ let OrderService = class OrderService {
             throw new common_1.NotFoundException('변경할 주문이 없습니다.');
         }
         const shipping_status = common_utils_1.commonUtils.getStatus(['order_status', 'shipping']);
+        if (order['status'] == shipping_status) {
+            throw new common_1.NotAcceptableException('이미 승인 처리된 주문입니다.');
+        }
         await this.statusChange(order['idx'], shipping_status);
         await this.orderProductService.statusChange(order['idx'], shipping_status);
         const orderInfo = await this.findOneIdx(+(0, lodash_1.get)(order, ['idx']));
@@ -360,7 +359,7 @@ let OrderService = class OrderService {
         }
     }
     async hostOrderCancel(code, userInfo, updateOrderDto) {
-        if (!code || !(0, lodash_1.get)(updateOrderDto, 'status', '')) {
+        if (!code) {
             throw new common_1.NotFoundException('변경할 정보가 없습니다.');
         }
         const user = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
@@ -386,15 +385,18 @@ let OrderService = class OrderService {
         }
     }
     async cancelProcess(order, cancelReason) {
+        const cancel_status = common_utils_1.commonUtils.getStatus(['order_status', 'cancellationCompleted']);
+        if (order['status'] == cancel_status) {
+            throw new common_1.NotAcceptableException('이미 취소 처리된 주문입니다.');
+        }
         const cancelPrice = (0, lodash_1.reduce)(order.orderProduct, (o, o1) => {
             return o + (+o1['payPrice']);
         }, 0);
-        const cancel_status = common_utils_1.commonUtils.getStatus(['order_status', 'cancellationCompleted']);
         if (order['imp_uid']) {
             await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
         }
         await this.statusChange(order['idx'], cancel_status);
-        await this.orderProductService.statusChange(order['idx'], cancel_status);
+        await this.orderProductService.statusChange(order['idx'], cancel_status, cancelReason);
         await this.orderProductService.cancelPrice(order['idx'], cancelPrice);
         await this.ordertotalService.priceChange(order['idx'], cancelPrice);
     }

@@ -24,7 +24,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ProductEntity.prototype, "idx", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 2 }),
+    (0, typeorm_1.Column)({ default: 2, comment: '숙소 상태 (0: 미등록, 1: 미사용, 2: 사용)' }),
     __metadata("design:type", Number)
 ], ProductEntity.prototype, "status", void 0);
 __decorate([

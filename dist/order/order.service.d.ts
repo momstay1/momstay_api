@@ -46,7 +46,7 @@ export declare class OrderService {
     }>;
     update(id: number, updateOrderDto: UpdateOrderDto): string;
     guestOrderCancel(code: string, userInfo: UsersEntity): Promise<void>;
-    hostOrderApproval(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto): Promise<void>;
+    hostOrderApproval(code: string, userInfo: UsersEntity): Promise<void>;
     hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto): Promise<void>;
     cancelProcess(order: any, cancelReason: any): Promise<void>;
     statusChange(idx: number, status: number): Promise<void>;

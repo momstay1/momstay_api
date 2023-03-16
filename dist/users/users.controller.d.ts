@@ -28,6 +28,7 @@ export declare class UsersController {
     emailChk(email: string, code: string): Promise<void>;
     getProfile(user: UsersEntity): Promise<UsersEntity>;
     getUniqueKey(uniquekey: string): Promise<UsersEntity>;
+    certification(imp_uid: string): Promise<any>;
     loginChk(id: string): Promise<UsersEntity>;
     email(email: string, type: string): Promise<{
         result: {

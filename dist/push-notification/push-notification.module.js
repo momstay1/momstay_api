@@ -13,13 +13,15 @@ const push_notification_controller_1 = require("./push-notification.controller")
 const axios_1 = require("@nestjs/axios");
 const typeorm_1 = require("@nestjs/typeorm");
 const push_history_entity_1 = require("./entities/push-history.entity");
+const users_module_1 = require("../users/users.module");
 let PushNotificationModule = class PushNotificationModule {
 };
 PushNotificationModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([push_history_entity_1.PushHistoryEntity]),
-            axios_1.HttpModule
+            axios_1.HttpModule,
+            users_module_1.UsersModule
         ],
         controllers: [push_notification_controller_1.PushNotificationController],
         providers: [push_notification_service_1.PushNotificationService],

@@ -1,3 +1,4 @@
+import { BlockEntity } from 'src/block/entities/block.entity';
 import { DeviceEntity } from 'src/device/entities/device.entity';
 import { GroupsEntity } from 'src/groups/entities/group.entity';
 export declare class UsersEntity {
@@ -33,6 +34,8 @@ export declare class UsersEntity {
     review: undefined;
     membershipHistory: undefined;
     comment: undefined;
+    block: BlockEntity[];
+    reportCumulative: undefined;
     device: DeviceEntity;
     group: GroupsEntity;
     createdAt: Date;

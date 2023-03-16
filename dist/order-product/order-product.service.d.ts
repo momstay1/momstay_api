@@ -18,7 +18,7 @@ export declare class OrderProductService {
     findOne(id: number): string;
     findOneIdx(idx: number): Promise<OrderProductEntity>;
     update(id: number, updateOrderProductDto: UpdateOrderProductDto): string;
-    statusChange(orderIdx: number, status: number): Promise<void>;
+    statusChange(orderIdx: number, status: number, cancelReason?: string): Promise<void>;
     cancelPrice(orderIdx: number, cancelPrice: number): Promise<void>;
     remove(id: number): string;
     calcTotalPrice(priceMonth: number, start: string | Date, end: string | Date): Promise<number>;

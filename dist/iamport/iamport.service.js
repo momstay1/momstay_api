@@ -28,7 +28,6 @@ let IamportService = class IamportService {
             apiKey: iamport_key,
             apiSecret: iamport_secret_key,
         });
-        ;
     }
     async getBanks() {
         const { Banks } = iamport_rest_client_nodejs_1.Request;
@@ -53,13 +52,19 @@ let IamportService = class IamportService {
         return token;
     }
     async getCertification(imp_uid) {
+        const iamport = 'imp65825226';
+        const iamport_key = '0568292538093639';
+        const iamport_secret_key = 'm89vemChTh78hpGAhHxDlSA2tpk2GAI3ISyXfbe8smhJLYk2FRF0Kg3eFnglXZoGSXE78SgBexk0wF3b';
         const { Certifications } = iamport_rest_client_nodejs_1.Request;
         const getCertification = Certifications.getCertification({
             imp_uid: imp_uid,
         });
         let certification;
         try {
-            certification = await getCertification.request(imp_init);
+            certification = await getCertification.request(new iamport_rest_client_nodejs_1.Iamport({
+                apiKey: iamport_key,
+                apiSecret: iamport_secret_key,
+            }));
             certification = certification.data;
         }
         catch (error) {

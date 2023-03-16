@@ -24,6 +24,14 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),
     __metadata("design:type", String)
+], PushHistoryEntity.prototype, "title", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', default: '' }),
+    __metadata("design:type", String)
+], PushHistoryEntity.prototype, "content", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 255, default: '' }),
+    __metadata("design:type", String)
 ], PushHistoryEntity.prototype, "topic", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255, default: '' }),

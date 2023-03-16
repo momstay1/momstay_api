@@ -46,8 +46,8 @@ let OrderController = class OrderController {
     async findOneCodeByNonmember(code) {
         return await this.orderService.findOneCodeByNonmember(code);
     }
-    async hostOrderApproval(user, code, updateOrderDto) {
-        await this.orderService.hostOrderApproval(code, user, updateOrderDto);
+    async hostOrderApproval(user, code) {
+        await this.orderService.hostOrderApproval(code, user);
     }
     async guestOrderCancel(user, code) {
         await this.orderService.guestOrderCancel(code, user);
@@ -101,8 +101,8 @@ __decorate([
     (0, common_1.Get)('guest'),
     (0, swagger_1.ApiOperation)({
         summary: '게스트 주문 리스트 조회 API',
-        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능'
-            + '호스트, 게스트 계정 로그인 상태에서 리스트 조회시 자신의 주문 내역만 확인 가능',
+        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능<br>'
+            + '호스트, 게스트 계정 로그인 상태에서 리스트 조회시 자신의 주문 내역만 확인 가능<br>',
     }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
@@ -131,8 +131,8 @@ __decorate([
     (0, common_1.Get)('host'),
     (0, swagger_1.ApiOperation)({
         summary: '호스트 주문 리스트 조회 API',
-        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능'
-            + '호스트 계정 로그인 상태에서 리스트 조회시 자신의 숙소 주문 내역만 확인 가능'
+        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능<br>'
+            + '호스트 계정 로그인 상태에서 리스트 조회시 자신의 숙소 주문 내역만 확인 가능<br>'
             + '게스트는 권한 없음',
     }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
@@ -185,9 +185,8 @@ __decorate([
     (0, common_1.HttpCode)(204),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Param)('code')),
-    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String, update_order_dto_1.UpdateOrderDto]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String]),
     __metadata("design:returntype", Promise)
 ], OrderController.prototype, "hostOrderApproval", null);
 __decorate([

@@ -25,7 +25,7 @@ export declare class OrderController {
     findOneCodeByNonmember(code: string): Promise<{
         order: import("./entities/order.entity").OrderEntity;
     }>;
-    hostOrderApproval(user: UsersEntity, code: string, updateOrderDto: UpdateOrderDto): Promise<void>;
+    hostOrderApproval(user: UsersEntity, code: string): Promise<void>;
     guestOrderCancel(user: UsersEntity, code: string): Promise<void>;
     hostOrderCancel(user: UsersEntity, code: string, updateOrderDto: UpdateOrderDto): Promise<void>;
     remove(id: string): string;

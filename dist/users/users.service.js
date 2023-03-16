@@ -149,56 +149,56 @@ let UsersService = class UsersService {
     }
     async findOne(obj) {
         if ((0, lodash_1.isEmpty)(obj)) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('user.service.fineOne: 조회할 정보가 없습니다.');
         }
         const user = await this.usersRepository.findOne({
             where: obj,
-            relations: ['group', 'userSns', 'device'],
+            relations: ['group', 'userSns', 'device', 'block'],
         });
         if (!user) {
-            throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
+            throw new common_1.NotFoundException('user.service.fineOne: 존재하지 않는 회원 입니다.');
         }
         return user;
     }
     async findId(id) {
         if (!id) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('user.service.fineId: 조회할 정보가 없습니다.');
         }
         const user = await this.usersRepository.findOne({
             where: { id: id },
-            relations: ['group', 'userSns', 'device'],
+            relations: ['group', 'userSns', 'device', 'block'],
         });
         if (!user) {
-            throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
+            throw new common_1.NotFoundException('user.service.fineId: 존재하지 않는 회원 입니다.');
         }
         return user;
     }
     async fineUser(id) {
         if (!id) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('user.service.fineUser: 조회할 정보가 없습니다.');
         }
         const user = await this.usersRepository.findOne({
             where: (qb) => {
                 qb.where('`email` = :email', { email: id });
                 qb.orWhere('`UsersEntity`.`id` = :id', { id: id });
             },
-            relations: ['group', 'userSns', 'device'],
+            relations: ['group', 'userSns', 'device', 'block'],
         });
         if (!user) {
-            throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
+            throw new common_1.NotFoundException('user.service.fineUser: 존재하지 않는 회원 입니다.');
         }
         return user;
     }
     async findIdx(idx) {
         if (!idx) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('user.service.findIdx: 조회할 정보가 없습니다.');
         }
         const user = await this.usersRepository.findOne({
             where: { idx: idx },
-            relations: ['group', 'userSns', 'device'],
+            relations: ['group', 'userSns', 'device', 'block'],
         });
         if (!user) {
-            throw new common_1.NotFoundException('존재하지 않는 회원 입니다.');
+            throw new common_1.NotFoundException('user.service.findIdx: 존재하지 않는 회원 입니다.');
         }
         return user;
     }

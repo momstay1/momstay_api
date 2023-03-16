@@ -49,6 +49,10 @@ const reviews_module_1 = require("./reviews/reviews.module");
 const device_module_1 = require("./device/device.module");
 const comment_module_1 = require("./comment/comment.module");
 const membership_module_1 = require("./membership/membership.module");
+const banner_module_1 = require("./banner/banner.module");
+const banner_item_module_1 = require("./banner-item/banner-item.module");
+const block_module_1 = require("./block/block.module");
+const report_cumulative_module_1 = require("./report-cumulative/report-cumulative.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
@@ -102,6 +106,10 @@ AppModule = __decorate([
             device_module_1.DeviceModule,
             comment_module_1.CommentModule,
             membership_module_1.MembershipModule,
+            banner_module_1.BannerModule,
+            banner_item_module_1.BannerItemModule,
+            block_module_1.BlockModule,
+            report_cumulative_module_1.ReportCumulativeModule,
         ],
         providers: [common_service_1.CommonService, iamport_service_1.IamportService],
     })

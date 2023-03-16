@@ -8,16 +8,21 @@ import { OrderEntity } from 'src/order/entities/order.entity';
 import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { DeviceEntity } from 'src/device/entities/device.entity';
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { UsersService } from 'src/users/users.service';
 export declare class PushNotificationService {
     private pushHistoryRepository;
     private readonly http;
-    constructor(pushHistoryRepository: Repository<PushHistoryEntity>, http: HttpService);
-    sendPush(target: any, notification: any): Promise<void>;
-    historySave(response: any): Promise<void>;
+    private readonly userService;
+    constructor(pushHistoryRepository: Repository<PushHistoryEntity>, http: HttpService, userService: UsersService);
+    sendPush(target: any, notification: any): Promise<any>;
+    historySave(response: any, userInfo?: UsersEntity): Promise<void>;
     private sendFcmMessage;
     private getAccessToken;
     create(createPushNotificationDto: CreatePushNotificationDto): string;
-    findAll(): string;
+    findAll(options: PaginationOptions, search: string[], order: string, userInfo?: UsersEntity): Promise<{
+        data: Pagination<PushHistoryEntity>;
+    }>;
     findOne(id: number): string;
     update(id: number, updatePushNotificationDto: UpdatePushNotificationDto): string;
     remove(id: number): string;

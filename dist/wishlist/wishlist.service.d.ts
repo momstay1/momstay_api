@@ -14,7 +14,7 @@ export declare class WishlistService {
     constructor(wishlistRepository: Repository<WishlistEntity>, userService: UsersService, productService: ProductService, fileService: FileService);
     create(user: UsersEntity, createWishlistDto: CreateWishlistDto): Promise<any>;
     findAll(): string;
-    findUserAll(user: UsersEntity): Promise<{
+    findUserAll(userInfo: UsersEntity): Promise<{
         product: import("../product/entities/product.entity").ProductEntity[];
         file_info: {};
     }>;

@@ -59,6 +59,7 @@ let ReservationService = class ReservationService {
         const reservationEntity = await this.reservationRepository.create(reservation_data);
         const reservation = await this.reservationRepository.save(reservationEntity);
         const hostUser = (0, lodash_1.get)(po, ['product', 'user']);
+        console.log(hostUser.device);
         if ((0, lodash_1.get)(hostUser, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationPush(hostUser, po);
         }
@@ -72,7 +73,9 @@ let ReservationService = class ReservationService {
             .leftJoinAndSelect('product.user', 'user')
             .where((qb) => {
             qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-            qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
+            if (userInfo['group'] == 'host') {
+                qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
+            }
         })
             .skip((take * (page - 1) || 0))
             .take((take || 10))
@@ -101,7 +104,9 @@ let ReservationService = class ReservationService {
             .leftJoinAndSelect('reservation.user', 'user')
             .where((qb) => {
             qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
-            qb.andWhere('`user`.id = :user_id', { user_id: userInfo.id });
+            if (['host', 'guest'].includes(userInfo['group'])) {
+                qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
+            }
         })
             .skip((take * (page - 1) || 0))
             .take((take || 10))

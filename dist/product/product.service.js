@@ -314,7 +314,6 @@ let ProductService = class ProductService {
             .leftJoinAndSelect('product.productOption', 'product_option')
             .leftJoinAndSelect('product.productInfo', 'product_info')
             .where((qb) => {
-            qb.where('`product_option`.status = :status', { status: 2 });
             qb.andWhere('`product`.idx IN (:idx)', { idx: idx });
         })
             .getMany();

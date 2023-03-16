@@ -17,6 +17,10 @@ const common_1 = require("@nestjs/common");
 const push_notification_service_1 = require("./push-notification.service");
 const create_push_notification_dto_1 = require("./dto/create-push-notification.dto");
 const update_push_notification_dto_1 = require("./dto/update-push-notification.dto");
+const swagger_1 = require("@nestjs/swagger");
+const role_decorator_1 = require("../common/decorator/role.decorator");
+const getuser_decorator_1 = require("../auth/getuser.decorator");
+const user_entity_1 = require("../users/entities/user.entity");
 let PushNotificationController = class PushNotificationController {
     constructor(pushNotificationService) {
         this.pushNotificationService = pushNotificationService;
@@ -36,8 +40,13 @@ let PushNotificationController = class PushNotificationController {
         };
         return await this.pushNotificationService.sendPush(target, notifications);
     }
-    findAll() {
-        return this.pushNotificationService.findAll();
+    async findAll(user, take, page, search, order) {
+        const { data } = await this.pushNotificationService.findAll({ take, page }, search, order, user);
+        return Object.assign({}, data);
+    }
+    async findAllNonMember(take, page, search, order) {
+        const { data } = await this.pushNotificationService.findAll({ take, page }, search, order);
+        return Object.assign({}, data);
     }
     findOne(id) {
         return this.pushNotificationService.findOne(+id);
@@ -64,10 +73,47 @@ __decorate([
 ], PushNotificationController.prototype, "test", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: '알림 리스트 API' }),
+    (0, role_decorator_1.Auth)(['Any']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
+        required: false
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "order",
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false
+    }),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('search')),
+    __param(4, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number, Array, String]),
+    __metadata("design:returntype", Promise)
 ], PushNotificationController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('nonmember'),
+    (0, swagger_1.ApiOperation)({ summary: '비회원 알림 리스트 API' }),
+    (0, swagger_1.ApiQuery)({
+        name: "search",
+        required: false
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "order",
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false
+    }),
+    __param(0, (0, common_1.Query)('take')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('order')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, Array, String]),
+    __metadata("design:returntype", Promise)
+], PushNotificationController.prototype, "findAllNonMember", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -92,6 +138,7 @@ __decorate([
 ], PushNotificationController.prototype, "remove", null);
 PushNotificationController = __decorate([
     (0, common_1.Controller)('push-notification'),
+    (0, swagger_1.ApiTags)('알림 API'),
     __metadata("design:paramtypes", [push_notification_service_1.PushNotificationService])
 ], PushNotificationController);
 exports.PushNotificationController = PushNotificationController;

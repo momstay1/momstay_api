@@ -22,13 +22,18 @@ const typeorm_1 = require("@nestjs/typeorm");
 const push_history_entity_1 = require("./entities/push-history.entity");
 const typeorm_2 = require("typeorm");
 const lodash_1 = require("lodash");
+const paginate_1 = require("../paginate");
+const common_utils_1 = require("../common/common.utils");
+const users_service_1 = require("../users/users.service");
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
 let accessToken;
+const registrationStatus = '200';
 let PushNotificationService = class PushNotificationService {
-    constructor(pushHistoryRepository, http) {
+    constructor(pushHistoryRepository, http, userService) {
         this.pushHistoryRepository = pushHistoryRepository;
         this.http = http;
+        this.userService = userService;
     }
     async sendPush(target, notification) {
         const message = { notification };
@@ -38,24 +43,30 @@ let PushNotificationService = class PushNotificationService {
         else {
             message['token'] = target['token'];
         }
+        let response;
         try {
-            const response = await this.sendFcmMessage({ message });
-            await this.historySave(response);
+            response = await this.sendFcmMessage({ message });
         }
         catch (error) {
-            await this.historySave(error.response);
+            response = error.response;
         }
+        return response;
     }
-    async historySave(response) {
+    async historySave(response, userInfo) {
         const data = JSON.parse(response.config.data);
         const push_history_data = {
             status: '' + response.status,
             topic: (0, lodash_1.get)(data, ['message', 'topic'], ''),
             token: (0, lodash_1.get)(data, ['message', 'token'], ''),
+            title: (0, lodash_1.get)(data, ['message', 'notification', 'title'], ''),
+            content: (0, lodash_1.get)(data, ['message', 'notification', 'body'], ''),
             data: (0, lodash_1.get)(data, ['message', 'data'], '') && JSON.stringify((0, lodash_1.get)(data, ['message', 'data'])),
             notifications: response.config.data,
             error: (0, lodash_1.get)(response, ['data', 'error'], '') && JSON.stringify((0, lodash_1.get)(response, ['data', 'error'])),
         };
+        if ((0, lodash_1.get)(userInfo, 'idx', '')) {
+            push_history_data['userIdx'] = userInfo['idx'];
+        }
         const pushHistory = await this.pushHistoryRepository.create(push_history_data);
         await this.pushHistoryRepository.save(pushHistory);
     }
@@ -86,8 +97,37 @@ let PushNotificationService = class PushNotificationService {
     create(createPushNotificationDto) {
         return 'This action adds a new pushNotification';
     }
-    findAll() {
-        return `This action returns all pushNotification`;
+    async findAll(options, search, order, userInfo) {
+        const { take, page } = options;
+        let user;
+        if ((0, lodash_1.get)(userInfo, 'id', '')) {
+            user = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
+        }
+        const where = common_utils_1.commonUtils.searchSplit(search);
+        const topic = ['all', 'marketing'];
+        where['status'] = (0, lodash_1.get)(where, 'status', registrationStatus);
+        const alias = 'push';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
+        const [results, total] = await this.pushHistoryRepository.createQueryBuilder('push')
+            .where(qb => {
+            qb.where('`push`.`status` IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
+            qb.andWhere('(`push`.`userIdx` = :userIdx'
+                + ' OR `push`.`topic` IN (:topic))', {
+                userIdx: (0, lodash_1.get)(user, 'idx', ''),
+                topic: topic
+            });
+        })
+            .orderBy(order_by)
+            .skip((take * (page - 1) || 0))
+            .take((take || 10))
+            .getManyAndCount();
+        const data = new paginate_1.Pagination({
+            results,
+            total,
+            page,
+        });
+        return { data };
     }
     findOne(id) {
         return `This action returns a #${id} pushNotification`;
@@ -108,10 +148,11 @@ let PushNotificationService = class PushNotificationService {
                 token: hostUser['device']['token'],
             };
             const notifications = {
-                title: po['product']['title'] + '숙소 ' + po['title'] + '방 결제가 완료되었습니다.',
-                body: po['product']['title'] + '숙소 ' + po['title'] + '방 결제가 완료되었습니다.',
+                title: '바로결제 완료',
+                body: po['product']['title'] + ' ' + po['title'] + ' 결제가 완료되었습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, hostUser);
         }
     }
     async guestOrderCancelPush(hostUser, po) {
@@ -121,10 +162,11 @@ let PushNotificationService = class PushNotificationService {
                 token: hostUser['device']['token'],
             };
             const notifications = {
-                title: po['product']['title'] + '숙소 ' + po['title'] + '방 결제를 취소했습니다.',
-                body: po['product']['title'] + '숙소 ' + po['title'] + '방 결제를 취소했습니다.',
+                title: '바로결제 취소',
+                body: po['product']['title'] + ' ' + po['title'] + '결제를 게스트가 취소했습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, hostUser);
         }
     }
     async hostOrderCancelPush(guestUser, order) {
@@ -134,12 +176,12 @@ let PushNotificationService = class PushNotificationService {
                 token: guestUser['device']['token'],
             };
             const notifications = {
-                title: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
-                    + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 거절했습니다.',
-                body: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
-                    + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 거절했습니다.',
+                title: '바로결제 거절',
+                body: order['orderProduct']['productOption']['product']['title']
+                    + ' ' + order['orderProduct']['productOption']['title'] + ' 결제를 호스트가 거절했습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, guestUser);
         }
     }
     async hostOrderApprovalPush(guestUser, order) {
@@ -149,12 +191,12 @@ let PushNotificationService = class PushNotificationService {
                 token: guestUser['device']['token'],
             };
             const notifications = {
-                title: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
-                    + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 승인했습니다.',
-                body: '호스트가 ' + order['orderProduct']['productOption']['product']['title']
-                    + '숙소 ' + order['orderProduct']['productOption']['title'] + '방 결제를 승인했습니다.',
+                title: '바로결제 승인',
+                body: order['orderProduct']['productOption']['product']['title']
+                    + ' ' + order['orderProduct']['productOption']['title'] + ' 결제를 호스트가 승인했습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, guestUser);
         }
     }
     async guestReservationPush(hostUser, po) {
@@ -164,10 +206,12 @@ let PushNotificationService = class PushNotificationService {
                 token: hostUser['device']['token'],
             };
             const notifications = {
-                title: po['product']['title'] + '숙소 ' + po['title'] + '방 방문예약이 있습니다.',
-                body: po['product']['title'] + '숙소 ' + po['title'] + '방 방문예약이 있습니다.',
+                title: '방문예약 신청',
+                body: po['product']['title'] + ' ' + po['title'] + ' 방문예약이 신청되었습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            console.log({ response });
+            await this.historySave(response, hostUser);
         }
     }
     async guestReservationCancelPush(hostUser, reservation) {
@@ -177,16 +221,14 @@ let PushNotificationService = class PushNotificationService {
                 token: hostUser['device']['token'],
             };
             const notifications = {
-                title: reservation['productOption']['product']['title']
-                    + '숙소 '
-                    + reservation['productOption']['title']
-                    + '방 방문예약이 취소되었습니다.',
+                title: '방문예약 취소',
                 body: reservation['productOption']['product']['title']
-                    + '숙소 '
+                    + ' '
                     + reservation['productOption']['title']
-                    + '방 방문예약이 취소되었습니다.',
+                    + ' 방문예약을 게스트가 취소했습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, hostUser);
         }
     }
     async hostReservationCancelPush(guestUser, reservation) {
@@ -196,18 +238,14 @@ let PushNotificationService = class PushNotificationService {
                 token: guestUser['device']['token'],
             };
             const notifications = {
-                title: '호스트가 '
-                    + reservation['productOption']['product']['title']
-                    + '숙소 '
+                title: '방문예약 거절',
+                body: reservation['productOption']['product']['title']
+                    + ' '
                     + reservation['productOption']['title']
-                    + '방 방문예약을 거절했습니다.',
-                body: '호스트가 '
-                    + reservation['productOption']['product']['title']
-                    + '숙소 '
-                    + reservation['productOption']['title']
-                    + '방 방문예약을 거절했습니다.',
+                    + ' 방문예약을 호스트가 거절했습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, guestUser);
         }
     }
     async hostReservationApprovalPush(guestUser, reservation) {
@@ -217,18 +255,14 @@ let PushNotificationService = class PushNotificationService {
                 token: guestUser['device']['token'],
             };
             const notifications = {
-                title: '호스트가 '
-                    + reservation['productOption']['product']['title']
-                    + '숙소 '
+                title: '방문예약 승인',
+                body: reservation['productOption']['product']['title']
+                    + ' '
                     + reservation['productOption']['title']
-                    + '방 방문예약을 승인했습니다.',
-                body: '호스트가 '
-                    + reservation['productOption']['product']['title']
-                    + '숙소 '
-                    + reservation['productOption']['title']
-                    + '방 방문예약을 승인했습니다.',
+                    + ' 방문예약을 호스트가 승인했습니다.',
             };
-            await this.sendPush(target, notifications);
+            const response = await this.sendPush(target, notifications);
+            await this.historySave(response, guestUser);
         }
     }
 };
@@ -236,7 +270,8 @@ PushNotificationService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(push_history_entity_1.PushHistoryEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        dist_1.HttpService])
+        dist_1.HttpService,
+        users_service_1.UsersService])
 ], PushNotificationService);
 exports.PushNotificationService = PushNotificationService;
 //# sourceMappingURL=push-notification.service.js.map
