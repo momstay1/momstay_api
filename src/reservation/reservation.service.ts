@@ -60,6 +60,7 @@ export class ReservationService {
 
     // 호스트에게 방문예약 push 알림 발송
     const hostUser = get(po, ['product', 'user']);
+    console.log(hostUser.device);
     if (get(hostUser, ['device', 'token'], '')) {
       await this.pushNotiService.guestReservationPush(hostUser, po);
     }
