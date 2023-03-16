@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isArray, map, reduce, values } from 'lodash';
+import { get, isArray, isEmpty, map, reduce, values } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -345,11 +345,6 @@ export class OrderService {
       throw new NotFoundException('취소할 주문이 없습니다.');
     }
 
-    const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
-    if (get(order, 'status') == cancel_status) {
-      throw new NotFoundException('이미 취소 처리된 주문입니다.');
-    }
-
     // 취소 사유
     const cancelReason = '게스트 취소';
     // 취소 처리
@@ -363,8 +358,8 @@ export class OrderService {
     }
   }
 
-  async hostOrderApproval(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
-    if (!code || !get(updateOrderDto, 'status', '')) {
+  async hostOrderApproval(code: string, userInfo: UsersEntity) {
+    if (!code) {
       throw new NotFoundException('변경할 정보가 없습니다.');
     }
     // 호스트 정보 가져오기
@@ -388,6 +383,10 @@ export class OrderService {
 
     // 주문 배송중(호스트 승인) 상태 변경
     const shipping_status = commonUtils.getStatus(['order_status', 'shipping']);
+    if (order['status'] == shipping_status) {
+      throw new NotAcceptableException('이미 승인 처리된 주문입니다.');
+    }
+
     // 주문 취소 상태 변경
     await this.statusChange(order['idx'], shipping_status);
     // 주문 상품 취소 상태 변경
@@ -403,7 +402,7 @@ export class OrderService {
   }
 
   async hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
-    if (!code || !get(updateOrderDto, 'status', '')) {
+    if (!code) {
       throw new NotFoundException('변경할 정보가 없습니다.');
     }
     // 호스트 정보 가져오기
@@ -442,13 +441,16 @@ export class OrderService {
 
   // 취소 처리
   async cancelProcess(order, cancelReason) {
+    // 취소완료 상태 (8)
+    const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
+    if (order['status'] == cancel_status) {
+      throw new NotAcceptableException('이미 취소 처리된 주문입니다.');
+    }
 
     // 취소 금액 계산
     const cancelPrice = reduce(order.orderProduct, (o, o1) => {
       return o + (+o1['payPrice']);
     }, 0);
-    // 취소완료 상태 (8)
-    const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
 
     // 결제 내역 취소
     // 결제 금액 0원 설정시 전액 취소
@@ -458,7 +460,7 @@ export class OrderService {
     // 주문 취소 상태 변경
     await this.statusChange(order['idx'], cancel_status);
     // 주문 상품 취소 상태 변경
-    await this.orderProductService.statusChange(order['idx'], cancel_status);
+    await this.orderProductService.statusChange(order['idx'], cancel_status, cancelReason);
     // 주문 상품 가격 정보 변경
     await this.orderProductService.cancelPrice(order['idx'], cancelPrice);
     // 주문 토탈 가격 정보 변경

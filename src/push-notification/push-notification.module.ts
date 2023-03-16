@@ -4,11 +4,13 @@ import { PushNotificationController } from './push-notification.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PushHistoryEntity } from './entities/push-history.entity';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PushHistoryEntity]),
-    HttpModule
+    HttpModule,
+    UsersModule
   ],
   controllers: [PushNotificationController],
   providers: [PushNotificationService],

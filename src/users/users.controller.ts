@@ -158,6 +158,15 @@ export class UsersController {
     return data;
   }
 
+  // 회원 정보 가져오기
+  @Get('certification/:imp_uid')
+  @ApiOperation({ summary: '본인인증 내역 조회 API' })
+  @ApiOkResponse({ type: ProfileUserDto })
+  async certification(@Param('imp_uid') imp_uid: string,) {
+    const data = await this.iamportService.getCertification(imp_uid);
+    return data;
+  }
+
   // 로그인시 아이디 또는 이메일 회원 체크
   @Get('logincheck/:id')
   @ApiOperation({ summary: '로그인시 아이디 체크 API' })

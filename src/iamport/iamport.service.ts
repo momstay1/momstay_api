@@ -14,14 +14,10 @@ export class IamportService {
     iamport = impConfig.iamport;
     iamport_key = impConfig.iamport_key;
     iamport_secret_key = impConfig.iamport_secret_key;
-    // 밀림 아임포트 key정보
-    // iamport = 'imp65825226';
-    // iamport_key = '0568292538093639';
-    // iamport_secret_key = 'm89vemChTh78hpGAhHxDlSA2tpk2GAI3ISyXfbe8smhJLYk2FRF0Kg3eFnglXZoGSXE78SgBexk0wF3b';
     imp_init = new Iamport({
       apiKey: iamport_key,
       apiSecret: iamport_secret_key,
-    });;
+    });
   }
 
   // 모든 은행 정보를 조회 (테스트)
@@ -54,6 +50,10 @@ export class IamportService {
   // 401 에러 인증 토큰이 전달되지 않았거나 유효하지 않은 경우
   // 404 에러 휴대폰 본인인증결과를 찾을 수 없음
   async getCertification(imp_uid: string) {
+    // 밀림 아임포트 key정보 (테스트용)
+    const iamport = 'imp65825226';
+    const iamport_key = '0568292538093639';
+    const iamport_secret_key = 'm89vemChTh78hpGAhHxDlSA2tpk2GAI3ISyXfbe8smhJLYk2FRF0Kg3eFnglXZoGSXE78SgBexk0wF3b';
     const { Certifications } = Request;
     const getCertification = Certifications.getCertification({
       imp_uid: imp_uid,
@@ -61,7 +61,11 @@ export class IamportService {
 
     let certification;
     try {
-      certification = await getCertification.request(imp_init);
+      certification = await getCertification.request(new Iamport({
+        apiKey: iamport_key,
+        apiSecret: iamport_secret_key,
+      }));
+      // certification = await getCertification.request(imp_init);
       certification = certification.data;
     } catch (error) {
       throw new NotFoundException(error.response.data.message);
