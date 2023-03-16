@@ -43,15 +43,15 @@ export class WishlistService {
     return `This action returns all wishlist`;
   }
 
-  async findUserAll(user: UsersEntity) {
-    const user_data = await this.userService.findId(user.id);
+  async findUserAll(userInfo: UsersEntity) {
+    const user = await this.userService.findId(userInfo['id']);
     const wishlist = await this.wishlistRepository.find({
-      where: { user_idx: user_data.idx }
+      where: { user_idx: user['idx'] }
     });
     if (!wishlist) {
       throw new NotFoundException('찜 목록이 없습니다.');
     }
-    const wishlist_idxs = map(wishlist, o => o.product_idx);
+    const wishlist_idxs = map(wishlist, o => o['product_idx']);
     const product = await this.productService.findIdxAll(wishlist_idxs);
     let file_info = {};
     try {

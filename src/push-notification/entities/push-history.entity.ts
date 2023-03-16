@@ -7,6 +7,10 @@ export class PushHistoryEntity {
   @Column({ length: 255, default: '' })
   status: string;
   @Column({ length: 255, default: '' })
+  title: string;
+  @Column({ type: 'text', default: '' })
+  content: string;
+  @Column({ length: 255, default: '' })
   topic: string;
   @Column({ length: 255, default: '' })
   token: string;

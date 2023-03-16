@@ -1,3 +1,4 @@
+import { BlockEntity } from 'src/block/entities/block.entity';
 import { BoardContentsEntity } from 'src/board-contents/entities/board-content.entity';
 import { CommentEntity } from 'src/comment/entities/comment.entity';
 import { commonBcrypt } from 'src/common/common.bcrypt';
@@ -9,6 +10,7 @@ import { OrderProductEntity } from 'src/order-product/entities/order-product.ent
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
 import { ProductEntity } from 'src/product/entities/product.entity';
+import { ReportCumulativeEntity } from 'src/report-cumulative/entities/report-cumulative.entity';
 import { ReservationEntity } from 'src/reservation/entities/reservation.entity';
 import { ReviewEntity } from 'src/reviews/entities/review.entity';
 import { UserSnsEntity } from 'src/user-sns/entities/user-sns.entity';
@@ -126,6 +128,11 @@ export class UsersEntity {
 
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comment: undefined;
+
+  @OneToMany(() => BlockEntity, (block) => block.user)
+  block: BlockEntity[];
+  @OneToMany(() => ReportCumulativeEntity, (rc) => rc.user)
+  reportCumulative: undefined;
 
   @OneToOne(() => DeviceEntity, { cascade: true })
   @JoinColumn()

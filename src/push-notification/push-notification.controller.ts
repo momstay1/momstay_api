@@ -1,9 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PushNotificationService } from './push-notification.service';
 import { CreatePushNotificationDto } from './dto/create-push-notification.dto';
 import { UpdatePushNotificationDto } from './dto/update-push-notification.dto';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Auth } from 'src/common/decorator/role.decorator';
+import { GetUser } from 'src/auth/getuser.decorator';
+import { UsersEntity } from 'src/users/entities/user.entity';
 
 @Controller('push-notification')
+@ApiTags('알림 API')
 export class PushNotificationController {
   constructor(private readonly pushNotificationService: PushNotificationService) { }
 
@@ -30,8 +35,50 @@ export class PushNotificationController {
   }
 
   @Get()
-  findAll() {
-    return this.pushNotificationService.findAll();
+  @ApiOperation({ summary: '알림 리스트 API' })
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: "search",
+    // description: 'search=status:상태값(200:성공|400:실패, 기본값:200)<br>',
+    required: false
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false
+  })
+  async findAll(
+    @GetUser() user: UsersEntity,
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
+    const { data } = await this.pushNotificationService.findAll({ take, page }, search, order, user);
+    return { ...data };
+  }
+
+  @Get('nonmember')
+  @ApiOperation({ summary: '비회원 알림 리스트 API' })
+  @ApiQuery({
+    name: "search",
+    // description: 'search=status:상태값(200:성공|400:실패, 기본값:200)<br>',
+    required: false
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false
+  })
+  async findAllNonMember(
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
+    const { data } = await this.pushNotificationService.findAll({ take, page }, search, order);
+    return { ...data };
   }
 
   @Get(':id')
