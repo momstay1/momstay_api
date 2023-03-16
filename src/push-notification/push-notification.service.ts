@@ -106,11 +106,15 @@ export class PushNotificationService {
     return 'This action adds a new pushNotification';
   }
 
-  async findAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
+  async findAll(options: PaginationOptions, search: string[], order: string, userInfo?: UsersEntity) {
     const { take, page } = options;
 
-    // 회원 정보 가져오기
-    const user = await this.userService.findId(get(userInfo, 'id'));
+    let user;
+    if (get(userInfo, 'id', '')) {
+      // 회원 정보 가져오기
+      user = await this.userService.findId(get(userInfo, 'id'));
+    }
+
 
     const where = commonUtils.searchSplit(search);
     const topic = ['all', 'marketing'];
@@ -129,7 +133,7 @@ export class PushNotificationService {
           + ' OR `push`.`topic` IN (:topic))'
           ,
           {
-            userIdx: user['idx'],
+            userIdx: get(user, 'idx', ''),
             topic: topic
           }
         )

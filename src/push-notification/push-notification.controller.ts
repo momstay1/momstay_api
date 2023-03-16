@@ -55,7 +55,29 @@ export class PushNotificationController {
     @Query('search') search: string[],
     @Query('order') order: string
   ) {
-    const { data } = await this.pushNotificationService.findAll(user, { take, page }, search, order);
+    const { data } = await this.pushNotificationService.findAll({ take, page }, search, order, user);
+    return { ...data };
+  }
+
+  @Get('nonmember')
+  @ApiOperation({ summary: '비회원 알림 리스트 API' })
+  @ApiQuery({
+    name: "search",
+    // description: 'search=status:상태값(200:성공|400:실패, 기본값:200)<br>',
+    required: false
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false
+  })
+  async findAllNonMember(
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
+    const { data } = await this.pushNotificationService.findAll({ take, page }, search, order);
     return { ...data };
   }
 
