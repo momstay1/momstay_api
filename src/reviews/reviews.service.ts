@@ -276,6 +276,8 @@ export class ReviewsService {
     if (get(updateReviewDto, 'status', '')) prevReview['status'] = get(updateReviewDto, 'status');
     if (get(updateReviewDto, 'star', '')) prevReview['star'] = get(updateReviewDto, 'star');
     if (get(updateReviewDto, 'contents', '')) prevReview['contents'] = get(updateReviewDto, 'contents');
+    if (get(updateReviewDto, 'start', '')) prevReview['start'] = get(updateReviewDto, 'start');
+    if (get(updateReviewDto, 'end', '')) prevReview['end'] = get(updateReviewDto, 'end');
     const review = await this.reviewRepository.save(prevReview);
 
     // 숙소 평균 평점 계산
@@ -292,7 +294,7 @@ export class ReviewsService {
     try {
       file_info = await this.fileService.findCategory(['reviewImg'], '' + review['idx']);
     } catch (error) {
-      console.log({ error });
+      console.log(error['response']['message']);
     }
 
     return { review, file_info };

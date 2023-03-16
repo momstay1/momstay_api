@@ -404,7 +404,7 @@ export class FileService {
         await this.removes(delFileIdxs);
       }
     } catch (error) {
-      console.log({ error });
+      console.log(error['response']['message']);
     }
 
     return fileIdxs;
