@@ -263,8 +263,7 @@ export class OrderService {
       .leftJoinAndSelect('product.user', 'hostUser')
       .where(qb => {
         qb.where('`order`.idx = :idx', { idx: idx });
-        user['group']['id'] == 'guest' && qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
-        user['group']['id'] == 'host' && qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
       })
       .getOne();
     if (!get(order, 'idx', '')) {
