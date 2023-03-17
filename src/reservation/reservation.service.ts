@@ -29,10 +29,10 @@ export class ReservationService {
       // 사용중이 아닌경우
       throw new NotAcceptableException('게시하지 않은 방입니다.');
     }
-    if (po.stayStatus != '1') {
-      // 공실이 아닌 경우
-      throw new NotAcceptableException('해당 방은 공실 상태가 아닙니다.');
-    }
+    // if (po.stayStatus != '1') {
+    //   // 공실이 아닌 경우
+    //   throw new NotAcceptableException('해당 방은 공실 상태가 아닙니다.');
+    // }
     if (po.visitStatus != '2') {
       // 방문예약 상태 미사용인경우
       throw new NotAcceptableException('방문예약을 사용하지 않는 방입니다.');

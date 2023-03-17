@@ -135,15 +135,36 @@ export class OrderController {
     return await this.orderService.hostFindAll(user, { take, page }, search, order);
   }
 
-  @Get(':idx')
-  @ApiOperation({ summary: '회원 주문 상세 조회 API' })
+  @Get('guest/:idx')
+  @ApiOperation({
+    summary: '게스트 주문 상세 조회 API',
+    description: '게스트가 바로결제한 주문의 상세 조회 모든 계정 조회 가능<br>'
+      + '자신이 바로결제한 주문만 조회 가능<br>'
+      + '관리자 계정의 경우 모든 계정의 주문 상세 조회 가능'
+  })
   @Auth(['Any'])
   @ApiBearerAuth()
-  async findOneIdxByUser(
+  async findOneIdxByGuest(
     @GetUser() user: UsersEntity,
     @Param('idx') idx: string
   ) {
-    return await this.orderService.findOneIdxByUser(user, +idx);
+    return await this.orderService.findOneIdxByGuest(user, +idx);
+  }
+
+  @Get('host/:idx')
+  @ApiOperation({
+    summary: '호스트 주문 상세 조회 API',
+    description: '호스트가 관리하는 숙소의 상세 조회 자신의 숙소 주문 상세만 조회 가능<br>'
+      + '게스트 계정은 권한 없음<br>'
+      + '관리자 계정의 경우 모든 주문 상세 조회 가능'
+  })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  async findOneIdxByHost(
+    @GetUser() user: UsersEntity,
+    @Param('idx') idx: string
+  ) {
+    return await this.orderService.findOneIdxByHost(user, +idx);
   }
 
   @Get('nonmember/:code')
