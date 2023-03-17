@@ -23,6 +23,7 @@ const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
 let accessToken;
 const registrationStatus = '200';
+const notificationStatus = '2'; // 알림 동의
 @Injectable()
 export class PushNotificationService {
   constructor(
@@ -171,7 +172,7 @@ export class PushNotificationService {
   // 게스트 방 결제 완료시 호스트에게 push 발송
   async guestOrderPush(hostUser: UsersEntity, po: ProductOptionEntity) {
     const isApp = await this.isApp(get(hostUser, ['device']));
-    if (isApp) {
+    if (isApp && hostUser['device']['notification'] == notificationStatus) {
       const target = {
         token: hostUser['device']['token'],
       }
@@ -186,7 +187,7 @@ export class PushNotificationService {
   // 게스트 방 결제 취소시 호스트에게 push 발송
   async guestOrderCancelPush(hostUser: UsersEntity, po: ProductOptionEntity) {
     const isApp = await this.isApp(get(hostUser, ['device']));
-    if (isApp) {
+    if (isApp && hostUser['device']['notification'] == notificationStatus) {
       const target = {
         token: hostUser['device']['token'],
       }
@@ -201,7 +202,7 @@ export class PushNotificationService {
   // 호스트가 방 결제 거절시 게스트에게 push 발송
   async hostOrderCancelPush(guestUser: UsersEntity, order: OrderEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
-    if (isApp) {
+    if (isApp && guestUser['device']['notification'] == notificationStatus) {
       const target = {
         token: guestUser['device']['token'],
       }
@@ -217,7 +218,7 @@ export class PushNotificationService {
   // 호스트가 방 결제 승인시 게스트에게 push 발송
   async hostOrderApprovalPush(guestUser: UsersEntity, order: OrderEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
-    if (isApp) {
+    if (isApp && guestUser['device']['notification'] == notificationStatus) {
       const target = {
         token: guestUser['device']['token'],
       }
@@ -233,7 +234,7 @@ export class PushNotificationService {
   // 게스트 방문예약 신청시 호스트에게 push 발송
   async guestReservationPush(hostUser: UsersEntity, po: ProductOptionEntity) {
     const isApp = await this.isApp(get(hostUser, ['device']));
-    if (isApp) {
+    if (isApp && hostUser['device']['notification'] == notificationStatus) {
       const target = {
         token: hostUser['device']['token'],
       }
@@ -249,7 +250,7 @@ export class PushNotificationService {
   // 게스트 방문예약 취소시 호스트에게 push 발송
   async guestReservationCancelPush(hostUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(hostUser, ['device']));
-    if (isApp) {
+    if (isApp && hostUser['device']['notification'] == notificationStatus) {
       const target = {
         token: hostUser['device']['token'],
       }
@@ -268,7 +269,7 @@ export class PushNotificationService {
   // 호스트가 방문에약 거절시 게스트에게 push 발송
   async hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
-    if (isApp) {
+    if (isApp && guestUser['device']['notification'] == notificationStatus) {
       const target = {
         token: guestUser['device']['token'],
       }
@@ -286,7 +287,7 @@ export class PushNotificationService {
   // 호스트가 방문에약 승인시 게스트에게 push 발송
   async hostReservationApprovalPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
-    if (isApp) {
+    if (isApp && guestUser['device']['notification'] == notificationStatus) {
       const target = {
         token: guestUser['device']['token'],
       }

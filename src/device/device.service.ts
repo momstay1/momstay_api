@@ -23,6 +23,7 @@ export class DeviceService {
   // 단말기 등록
   async create(createDeviceDto: CreateDeviceDto) {
     let deviceInfo;
+    const today = moment().format('YYYY-MM-DD HH:mm:ss');
     try {
       if (get(createDeviceDto, 'token', '')) {
         deviceInfo = await this.findOneToken(createDeviceDto['token']);
@@ -31,7 +32,14 @@ export class DeviceService {
       }
     } catch (error) {
       console.log({ error });
-      deviceInfo = {};
+      deviceInfo = {
+        notification: '2',
+        notificationAt: today,
+        marketing: '2',
+        marketingAt: today,
+        service: '2',
+        serviceAt: today,
+      };
     }
 
     deviceInfo['environment'] = createDeviceDto['environment'];
@@ -50,13 +58,17 @@ export class DeviceService {
       deviceInfo['osVersion'] = createDeviceDto['osVersion'];
     }
 
-    if (get(deviceInfo, ['marketing'], '') != createDeviceDto['marketing']) {
-      deviceInfo['marketing'] = createDeviceDto['marketing'];
-      deviceInfo['marketingAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+    if (deviceInfo['notification'] != get(createDeviceDto, ['notification'], '2')) {
+      deviceInfo['notification'] = createDeviceDto['notification'];
+      deviceInfo['notificationAt'] = today;
     }
-    if (get(deviceInfo, ['service'], '') != createDeviceDto['service']) {
+    if (deviceInfo['marketing'] != get(createDeviceDto, ['marketing'], '2')) {
+      deviceInfo['marketing'] = createDeviceDto['marketing'];
+      deviceInfo['marketingAt'] = today;
+    }
+    if (deviceInfo['service'] != get(createDeviceDto, ['service'], '2')) {
       deviceInfo['service'] = createDeviceDto['service'];
-      deviceInfo['serviceAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+      deviceInfo['serviceAt'] = today;
     }
 
     const device = await this.deviceRepository.save(deviceInfo);
@@ -108,19 +120,24 @@ export class DeviceService {
   // 단말기 정보 수정
   async update(idx: number, updateDeviceDto: UpdateDeviceDto) {
     const deviceInfo = await this.findOneIdx(idx);
+    const today = moment().format('YYYY-MM-DD HH:mm:ss');
 
     if (get(updateDeviceDto, 'token', '')) deviceInfo['token'] = updateDeviceDto['token'];
     if (get(updateDeviceDto, 'appVersion', '')) deviceInfo['appVersion'] = updateDeviceDto['appVersion'];
     if (get(updateDeviceDto, 'os', '')) deviceInfo['os'] = updateDeviceDto['os'];
     if (get(updateDeviceDto, 'osVersion', '')) deviceInfo['osVersion'] = updateDeviceDto['osVersion'];
     if (get(updateDeviceDto, 'environment', '')) deviceInfo['environment'] = updateDeviceDto['environment'];
+    if (get(updateDeviceDto, 'notification', '')) {
+      deviceInfo['notification'] = updateDeviceDto['notification'];
+      deviceInfo['notificationAt'] = today;
+    }
     if (get(updateDeviceDto, 'marketing', '')) {
       deviceInfo['marketing'] = updateDeviceDto['marketing'];
-      deviceInfo['marketingAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+      deviceInfo['marketingAt'] = today;
     }
     if (get(updateDeviceDto, 'service', '')) {
       deviceInfo['service'] = updateDeviceDto['service'];
-      deviceInfo['serviceAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+      deviceInfo['serviceAt'] = today;
     }
 
     const device = await this.deviceRepository.save(deviceInfo);

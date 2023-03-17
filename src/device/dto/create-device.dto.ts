@@ -19,9 +19,12 @@ export class CreateDeviceDto {
   @ApiProperty({ description: '접속 환경 (android | ios | web)' })
   readonly environment: string;
   @IsString()
-  @ApiProperty({ description: '마케팅 정보 수신 동의 여부 (1: 비동의, 2: 동의)' })
+  @ApiProperty({ description: '일반 알림 수신 동의 여부 (1: 비동의, 2: 동의)', required: false })
+  readonly notification: string;
+  @IsString()
+  @ApiProperty({ description: '마케팅 정보 수신 동의 여부 (1: 비동의, 2: 동의)', required: false })
   readonly marketing: string;
   @IsString()
-  @ApiProperty({ description: '서비스 정보 수신 동의 여부 (1: 비동의, 2: 동의)' })
+  @ApiProperty({ description: '서비스 정보 수신 동의 여부 (1: 비동의, 2: 동의)', required: false })
   readonly service: string;
 }
