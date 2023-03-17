@@ -39,13 +39,21 @@ __decorate([
     __metadata("design:type", String)
 ], DeviceEntity.prototype, "environment", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 255, default: '', comment: '마케팅 알림 수신 정보 동의 여부 (1: 비동의, 2: 동의)' }),
+    (0, typeorm_1.Column)({ length: 255, default: '2', comment: '일반 알림 수신 정보 동의 여부 (1: 비동의, 2: 동의)' }),
+    __metadata("design:type", String)
+], DeviceEntity.prototype, "notification", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 255, default: '2', comment: '마케팅 알림 수신 정보 동의 여부 (1: 비동의, 2: 동의)' }),
     __metadata("design:type", String)
 ], DeviceEntity.prototype, "marketing", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 255, default: '', comment: '서비스 알림 수신 정보 동의 여부 (1: 비동의, 2: 동의)' }),
+    (0, typeorm_1.Column)({ length: 255, default: '2', comment: '서비스 알림 수신 정보 동의 여부 (1: 비동의, 2: 동의)' }),
     __metadata("design:type", String)
 ], DeviceEntity.prototype, "service", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', default: '0', comment: '일반 알림 동의 여부 수정된 날짜' }),
+    __metadata("design:type", Object)
+], DeviceEntity.prototype, "notificationAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'datetime', default: '0', comment: '마케팅 동의 여부 수정된 날짜' }),
     __metadata("design:type", Object)

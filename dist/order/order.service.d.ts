@@ -37,7 +37,10 @@ export declare class OrderService {
     hostFindAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<OrderEntity>;
     }>;
-    findOneIdxByUser(userInfo: UsersEntity, idx: number): Promise<{
+    findOneIdxByGuest(userInfo: UsersEntity, idx: number): Promise<{
+        order: OrderEntity;
+    }>;
+    findOneIdxByHost(userInfo: UsersEntity, idx: number): Promise<{
         order: OrderEntity;
     }>;
     findOneIdx(idx: number): Promise<OrderEntity>;

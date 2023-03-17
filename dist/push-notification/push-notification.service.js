@@ -29,6 +29,7 @@ const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
 let accessToken;
 const registrationStatus = '200';
+const notificationStatus = '2';
 let PushNotificationService = class PushNotificationService {
     constructor(pushHistoryRepository, http, userService) {
         this.pushHistoryRepository = pushHistoryRepository;
@@ -143,7 +144,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async guestOrderPush(hostUser, po) {
         const isApp = await this.isApp((0, lodash_1.get)(hostUser, ['device']));
-        if (isApp) {
+        if (isApp && hostUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: hostUser['device']['token'],
             };
@@ -157,7 +158,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async guestOrderCancelPush(hostUser, po) {
         const isApp = await this.isApp((0, lodash_1.get)(hostUser, ['device']));
-        if (isApp) {
+        if (isApp && hostUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: hostUser['device']['token'],
             };
@@ -171,7 +172,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async hostOrderCancelPush(guestUser, order) {
         const isApp = await this.isApp((0, lodash_1.get)(guestUser, ['device']));
-        if (isApp) {
+        if (isApp && guestUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: guestUser['device']['token'],
             };
@@ -186,7 +187,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async hostOrderApprovalPush(guestUser, order) {
         const isApp = await this.isApp((0, lodash_1.get)(guestUser, ['device']));
-        if (isApp) {
+        if (isApp && guestUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: guestUser['device']['token'],
             };
@@ -201,7 +202,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async guestReservationPush(hostUser, po) {
         const isApp = await this.isApp((0, lodash_1.get)(hostUser, ['device']));
-        if (isApp) {
+        if (isApp && hostUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: hostUser['device']['token'],
             };
@@ -216,7 +217,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async guestReservationCancelPush(hostUser, reservation) {
         const isApp = await this.isApp((0, lodash_1.get)(hostUser, ['device']));
-        if (isApp) {
+        if (isApp && hostUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: hostUser['device']['token'],
             };
@@ -233,7 +234,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async hostReservationCancelPush(guestUser, reservation) {
         const isApp = await this.isApp((0, lodash_1.get)(guestUser, ['device']));
-        if (isApp) {
+        if (isApp && guestUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: guestUser['device']['token'],
             };
@@ -250,7 +251,7 @@ let PushNotificationService = class PushNotificationService {
     }
     async hostReservationApprovalPush(guestUser, reservation) {
         const isApp = await this.isApp((0, lodash_1.get)(guestUser, ['device']));
-        if (isApp) {
+        if (isApp && guestUser['device']['notification'] == notificationStatus) {
             const target = {
                 token: guestUser['device']['token'],
             };

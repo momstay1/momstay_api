@@ -4,6 +4,7 @@ export declare class CreateDeviceDto {
     readonly os: string;
     readonly osVersion: string;
     readonly environment: string;
+    readonly notification: string;
     readonly marketing: string;
     readonly service: string;
 }

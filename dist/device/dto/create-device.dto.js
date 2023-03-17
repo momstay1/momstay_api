@@ -41,12 +41,17 @@ __decorate([
 ], CreateDeviceDto.prototype, "environment", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '마케팅 정보 수신 동의 여부 (1: 비동의, 2: 동의)' }),
+    (0, swagger_1.ApiProperty)({ description: '일반 알림 수신 동의 여부 (1: 비동의, 2: 동의)', required: false }),
+    __metadata("design:type", String)
+], CreateDeviceDto.prototype, "notification", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '마케팅 정보 수신 동의 여부 (1: 비동의, 2: 동의)', required: false }),
     __metadata("design:type", String)
 ], CreateDeviceDto.prototype, "marketing", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '서비스 정보 수신 동의 여부 (1: 비동의, 2: 동의)' }),
+    (0, swagger_1.ApiProperty)({ description: '서비스 정보 수신 동의 여부 (1: 비동의, 2: 동의)', required: false }),
     __metadata("design:type", String)
 ], CreateDeviceDto.prototype, "service", void 0);
 exports.CreateDeviceDto = CreateDeviceDto;

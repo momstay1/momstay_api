@@ -6,8 +6,10 @@ export declare class DeviceEntity {
     os: string;
     osVersion: string;
     environment: string;
+    notification: string;
     marketing: string;
     service: string;
+    notificationAt: Date | string;
     marketingAt: Date | string;
     serviceAt: Date | string;
     createdAt: Date;

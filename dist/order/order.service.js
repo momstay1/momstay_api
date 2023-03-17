@@ -237,7 +237,7 @@ let OrderService = class OrderService {
         });
         return { data };
     }
-    async findOneIdxByUser(userInfo, idx) {
+    async findOneIdxByGuest(userInfo, idx) {
         if (!idx) {
             throw new common_1.NotFoundException('잘못된 정보 입니다.');
         }
@@ -250,8 +250,32 @@ let OrderService = class OrderService {
             .leftJoinAndSelect('product.user', 'hostUser')
             .where(qb => {
             qb.where('`order`.idx = :idx', { idx: idx });
-            user['group']['id'] == 'guest' && qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
-            user['group']['id'] == 'host' && qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
+            if (!['root', 'admin'].includes(user['group']['id'])) {
+                qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
+            }
+        })
+            .getOne();
+        if (!(0, lodash_1.get)(order, 'idx', '')) {
+            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+        }
+        return { order };
+    }
+    async findOneIdxByHost(userInfo, idx) {
+        if (!idx) {
+            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+        }
+        const user = await this.usersService.findId(userInfo['id']);
+        const order = await this.orderRepository.createQueryBuilder('order')
+            .leftJoinAndSelect('order.user', 'guestUser')
+            .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+            .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+            .leftJoinAndSelect('productOption.product', 'product')
+            .leftJoinAndSelect('product.user', 'hostUser')
+            .where(qb => {
+            qb.where('`order`.idx = :idx', { idx: idx });
+            if (!['root', 'admin'].includes(user['group']['id'])) {
+                qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
+            }
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {

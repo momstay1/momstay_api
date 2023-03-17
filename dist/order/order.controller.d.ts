@@ -19,7 +19,10 @@ export declare class OrderController {
     hostFindAll(user: UsersEntity, take: number, page: number, search: string[], order: string): Promise<{
         data: import("../paginate").Pagination<import("./entities/order.entity").OrderEntity>;
     }>;
-    findOneIdxByUser(user: UsersEntity, idx: string): Promise<{
+    findOneIdxByGuest(user: UsersEntity, idx: string): Promise<{
+        order: import("./entities/order.entity").OrderEntity;
+    }>;
+    findOneIdxByHost(user: UsersEntity, idx: string): Promise<{
         order: import("./entities/order.entity").OrderEntity;
     }>;
     findOneCodeByNonmember(code: string): Promise<{

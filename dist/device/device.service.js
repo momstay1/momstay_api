@@ -28,6 +28,7 @@ let DeviceService = class DeviceService {
     }
     async create(createDeviceDto) {
         let deviceInfo;
+        const today = moment().format('YYYY-MM-DD HH:mm:ss');
         try {
             if ((0, lodash_1.get)(createDeviceDto, 'token', '')) {
                 deviceInfo = await this.findOneToken(createDeviceDto['token']);
@@ -38,7 +39,14 @@ let DeviceService = class DeviceService {
         }
         catch (error) {
             console.log({ error });
-            deviceInfo = {};
+            deviceInfo = {
+                notification: '2',
+                notificationAt: today,
+                marketing: '2',
+                marketingAt: today,
+                service: '2',
+                serviceAt: today,
+            };
         }
         deviceInfo['environment'] = createDeviceDto['environment'];
         if ((0, lodash_1.get)(createDeviceDto, 'environment') == 'web') {
@@ -58,13 +66,17 @@ let DeviceService = class DeviceService {
             deviceInfo['os'] = createDeviceDto['os'];
             deviceInfo['osVersion'] = createDeviceDto['osVersion'];
         }
-        if ((0, lodash_1.get)(deviceInfo, ['marketing'], '') != createDeviceDto['marketing']) {
-            deviceInfo['marketing'] = createDeviceDto['marketing'];
-            deviceInfo['marketingAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+        if (deviceInfo['notification'] != (0, lodash_1.get)(createDeviceDto, ['notification'], '2')) {
+            deviceInfo['notification'] = createDeviceDto['notification'];
+            deviceInfo['notificationAt'] = today;
         }
-        if ((0, lodash_1.get)(deviceInfo, ['service'], '') != createDeviceDto['service']) {
+        if (deviceInfo['marketing'] != (0, lodash_1.get)(createDeviceDto, ['marketing'], '2')) {
+            deviceInfo['marketing'] = createDeviceDto['marketing'];
+            deviceInfo['marketingAt'] = today;
+        }
+        if (deviceInfo['service'] != (0, lodash_1.get)(createDeviceDto, ['service'], '2')) {
             deviceInfo['service'] = createDeviceDto['service'];
-            deviceInfo['serviceAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+            deviceInfo['serviceAt'] = today;
         }
         const device = await this.deviceRepository.save(deviceInfo);
         return { device };
@@ -104,6 +116,7 @@ let DeviceService = class DeviceService {
     }
     async update(idx, updateDeviceDto) {
         const deviceInfo = await this.findOneIdx(idx);
+        const today = moment().format('YYYY-MM-DD HH:mm:ss');
         if ((0, lodash_1.get)(updateDeviceDto, 'token', ''))
             deviceInfo['token'] = updateDeviceDto['token'];
         if ((0, lodash_1.get)(updateDeviceDto, 'appVersion', ''))
@@ -114,13 +127,17 @@ let DeviceService = class DeviceService {
             deviceInfo['osVersion'] = updateDeviceDto['osVersion'];
         if ((0, lodash_1.get)(updateDeviceDto, 'environment', ''))
             deviceInfo['environment'] = updateDeviceDto['environment'];
+        if ((0, lodash_1.get)(updateDeviceDto, 'notification', '')) {
+            deviceInfo['notification'] = updateDeviceDto['notification'];
+            deviceInfo['notificationAt'] = today;
+        }
         if ((0, lodash_1.get)(updateDeviceDto, 'marketing', '')) {
             deviceInfo['marketing'] = updateDeviceDto['marketing'];
-            deviceInfo['marketingAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+            deviceInfo['marketingAt'] = today;
         }
         if ((0, lodash_1.get)(updateDeviceDto, 'service', '')) {
             deviceInfo['service'] = updateDeviceDto['service'];
-            deviceInfo['serviceAt'] = moment().format('YYYY-MM-DD HH:mm:ss');
+            deviceInfo['serviceAt'] = today;
         }
         const device = await this.deviceRepository.save(deviceInfo);
         return { device };

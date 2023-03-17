@@ -37,9 +37,6 @@ let ReservationService = class ReservationService {
         if (po.status != 2) {
             throw new common_1.NotAcceptableException('게시하지 않은 방입니다.');
         }
-        if (po.stayStatus != '1') {
-            throw new common_1.NotAcceptableException('해당 방은 공실 상태가 아닙니다.');
-        }
         if (po.visitStatus != '2') {
             throw new common_1.NotAcceptableException('방문예약을 사용하지 않는 방입니다.');
         }

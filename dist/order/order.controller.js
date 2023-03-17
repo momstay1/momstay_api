@@ -40,8 +40,11 @@ let OrderController = class OrderController {
     async hostFindAll(user, take, page, search, order) {
         return await this.orderService.hostFindAll(user, { take, page }, search, order);
     }
-    async findOneIdxByUser(user, idx) {
-        return await this.orderService.findOneIdxByUser(user, +idx);
+    async findOneIdxByGuest(user, idx) {
+        return await this.orderService.findOneIdxByGuest(user, +idx);
+    }
+    async findOneIdxByHost(user, idx) {
+        return await this.orderService.findOneIdxByHost(user, +idx);
     }
     async findOneCodeByNonmember(code) {
         return await this.orderService.findOneCodeByNonmember(code);
@@ -159,8 +162,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrderController.prototype, "hostFindAll", null);
 __decorate([
-    (0, common_1.Get)(':idx'),
-    (0, swagger_1.ApiOperation)({ summary: '회원 주문 상세 조회 API' }),
+    (0, common_1.Get)('guest/:idx'),
+    (0, swagger_1.ApiOperation)({
+        summary: '게스트 주문 상세 조회 API',
+        description: '게스트가 바로결제한 주문의 상세 조회 모든 계정 조회 가능<br>'
+            + '자신이 바로결제한 주문만 조회 가능<br>'
+            + '관리자 계정의 경우 모든 계정의 주문 상세 조회 가능'
+    }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),
@@ -168,7 +176,23 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_entity_1.UsersEntity, String]),
     __metadata("design:returntype", Promise)
-], OrderController.prototype, "findOneIdxByUser", null);
+], OrderController.prototype, "findOneIdxByGuest", null);
+__decorate([
+    (0, common_1.Get)('host/:idx'),
+    (0, swagger_1.ApiOperation)({
+        summary: '호스트 주문 상세 조회 API',
+        description: '호스트가 관리하는 숙소의 상세 조회 자신의 숙소 주문 상세만 조회 가능<br>'
+            + '게스트 계정은 권한 없음<br>'
+            + '관리자 계정의 경우 모든 주문 상세 조회 가능'
+    }),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('idx')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String]),
+    __metadata("design:returntype", Promise)
+], OrderController.prototype, "findOneIdxByHost", null);
 __decorate([
     (0, common_1.Get)('nonmember/:code'),
     (0, swagger_1.ApiOperation)({ summary: '비회원 주문 상세 조회 API' }),
