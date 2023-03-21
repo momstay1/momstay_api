@@ -39,7 +39,7 @@ export class UsersService {
     private readonly userLeaveService: UserLeaveService,
     private readonly userDormantService: UserDormantService,
     private readonly excelService: ExcelService,
-  ) {}
+  ) { }
 
   async test(id) {
     try {
@@ -543,8 +543,8 @@ export class UsersService {
       .addSelect('SUM(IF(`status` = 5, 1, 0))', 'dormant_cnt')
       .addSelect(
         'SUM(IF(Date_format(`leaveAt`, "%y-%m-%d") = "' +
-          today +
-          '" AND `status` = 9, 1, 0))',
+        today +
+        '" AND `status` = 9, 1, 0))',
         'new_leave_cnt',
       )
       .addSelect(
