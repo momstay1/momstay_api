@@ -27,7 +27,7 @@ import { createReadStream } from 'fs';
 @Controller('admin/reservation')
 @ApiTags('방문 예약(관리자) API')
 export class AdminReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(private readonly reservationService: ReservationService) { }
 
   // @Post()
   // @ApiOperation({
