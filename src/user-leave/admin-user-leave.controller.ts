@@ -5,8 +5,9 @@ import { UpdateUserLeaveDto } from './dto/update-user-leave.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 
-@Controller('user-leave')
-export class UserLeaveController {
+@Controller('admin-user-leave')
+@ApiTags('탈퇴 회원(관리자) API')
+export class AdminUserLeaveController {
   constructor(private readonly userLeaveService: UserLeaveService) { }
 
   // @Post()
@@ -14,8 +15,33 @@ export class UserLeaveController {
   //   return this.userLeaveService.create(createUserLeaveDto);
   // }
 
-  // @Get()
-  // findAll() {}
+  @Get()
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '탈퇴회원 리스트 조회 API',
+  })
+  @ApiQuery({
+    name: "search",
+    description: 'search=id:탈퇴회원 id<br>'
+    ,
+    required: false
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
+  })
+  async findAll(
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
+    const { data } = await this.userLeaveService.findAll({ take, page }, search, order);
+    return { ...data };
+  }
 
   // @Get(':id')
   // findOne(@Param('id') id: string) {

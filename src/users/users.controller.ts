@@ -239,8 +239,29 @@ export class UsersController {
   }
 
   // 회원 수정
+  @Patch('activity/:id')
+  @ApiOperation({ summary: '회원 활동 날짜 수정 API' })
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  async lastActivity(
+    @Param('id') id: string,
+  ) {
+    await this.usersService.lastActivity(id);
+  }
+
+  // 휴면 회원 복원
+  @Patch('dormant/recovery/:id')
+  @ApiOperation({ summary: '휴면 회원 복원 API' })
+  async dormantRecovery(
+    @Param('id') id: string,
+  ) {
+    const data = await this.usersService.dormantRecovery(id);
+  }
+
+  // 회원 수정
   @Patch(':id')
-  @Auth(['root', 'admin', 'host', 'guest'])
+  @Auth(['Any'])
   @ApiBearerAuth()
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'profile', maxCount: 1 },
@@ -259,9 +280,21 @@ export class UsersController {
 
   // 회원 삭제(탈퇴)
   @Delete('leave/:id')
+  @ApiOperation({ summary: '회원 탈퇴 API' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        reason: { type: 'string', description: '탈퇴 사유' },
+      }
+    }
+  })
   @HttpCode(204)
-  async leave(@Param('id') id: string) {
-    await this.usersService.leave(id);
+  async leave(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+  ) {
+    await this.usersService.leave(id, reason);
   }
 
 }

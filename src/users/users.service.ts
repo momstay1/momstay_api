@@ -15,6 +15,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
 import { Cron } from '@nestjs/schedule';
+import { UserLeaveService } from 'src/user-leave/user-leave.service';
+import { UserDormantService } from 'src/user-dormant/user-dormant.service';
 
 import * as moment from "moment";
 
@@ -27,6 +29,8 @@ export class UsersService {
     private readonly fileService: FileService,
     private readonly emailService: EmailService,
     private readonly deviceService: DeviceService,
+    private readonly userLeaveService: UserLeaveService,
+    private readonly userDormantService: UserDormantService,
   ) { }
 
   async test(id) {
@@ -328,23 +332,77 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async leave(id: string) {
+  async lastActivity(id: string) {
     const user = await this.findId(id);
+    user['activitedAt'] = new Date();
+
+    await this.usersRepository.save(user);
+  }
+
+  async leave(id: string, reason: string) {
+    const user = await this.findId(id);
+    const userLeave = await this.userLeaveService.leaveUser(user, reason);
     user.status = usersConstant.status.leave;
-    user.id = '';
+    // user.id = '';
     user.password = '';
     user.prevPassword = '';
     user.name = '';
     user.email = '';
     user.gender = '';
+    user.language = '';
+    user.countryCode = '';
+    user.other = '';
+    user.phone = '';
+    user.birthday = '0000-00-00';
+    user.oldData = '';
+    user.leaveAt = new Date();
+    user.marketing = '0';
+    await this.usersRepository.save(user);
+  }
+
+  async dormant(user: UsersEntity) {
+    const userDormant = await this.userDormantService.dormantUser(user);
+    user.status = usersConstant.status.dormant;
+    user.name = '';
+    user.email = '';
+    user.gender = '';
+    user.language = '';
+    user.countryCode = '';
     user.phone = '';
     user.birthday = '0000-00-00';
     user.other = '';
     user.oldData = '';
-    user.oldData = '';
-    user.leaveAt = new Date(moment().format('YYYY-MM-DD'));
     user.marketing = '0';
     await this.usersRepository.save(user);
+  }
+
+  async dormantRecovery(id: string) {
+    // const user = await this.findId(id);
+    const dormantUser = await this.userDormantService.findOneId(id);
+    if (get(dormantUser, 'idx', '')) {
+      dormantUser.userInfo = JSON.parse(dormantUser.userInfo);
+      const { userInfo } = dormantUser;
+      const user_data = {
+        idx: userInfo['idx'],
+        status: usersConstant.status.registration,
+        activitedAt: new Date(),
+        name: userInfo['name'],
+        email: userInfo['email'],
+        gender: userInfo['gender'],
+        language: userInfo['language'],
+        memo: userInfo['memo'],
+        countryCode: userInfo['countryCode'],
+        other: userInfo['other'],
+        phone: userInfo['phone'],
+        birthday: userInfo['birthday'],
+        oldData: userInfo['oldData'],
+        marketing: userInfo['marketing'],
+      }
+      const userEntity = await this.usersRepository.create(user_data);
+      await this.usersRepository.save(userEntity);
+
+      await this.userDormantService.remove(dormantUser.idx);
+    }
   }
 
   async removes(ids) {
@@ -392,10 +450,62 @@ export class UsersService {
     console.log('[cron] deleteUniqueKey: ', moment().format('YYYY-MM-DD HH:mm:ss'));
     await this.usersRepository.createQueryBuilder()
       .update(UsersEntity)
-      .set({ uniqueKey: '', certifiInfo: '' })
+      .set({ id: '', uniqueKey: '', certifiInfo: '' })
       .where(" status = :status", { status: usersConstant.status.leave })
       .execute()
   }
 
+  // 매일 01시 휴면 회원 안내
+  // @Cron('0 0 1 * * *')
+  // async dormantNotice() {
+  //   console.log('[cron] dormantNotice: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+  //   const yearAgo = moment().add(-11, 'month').format('YYYY-MM-DD');
+  //   const group = [3]; // 휴면 안내할 그룹
+  //   const users = await this.usersRepository.createQueryBuilder('user')
+  //     .where(qb => {
+  //       qb.where('group.idx IN (:group)', { group: group })
+  //       qb.andWhere('user.status = :status', { status: usersConstant.status.registration })
+  //       qb.andWhere('user.activitedAt < :activitedAt', { activitedAt: yearAgo })
+  //     })
+  //     .getMany();
+  //   console.log('휴면 회원 안내 숫자: ', users.length);
+  //   if (users.length > 0) {
+  //     // 휴면 회원 안내
+  //     for (const key in users) {
+  //       this.emailService.snedMail(
+  //         1,
+  //         users[key].email,
+  //         'momstay - Guidelines for Conversion of Dormant Members',
+  //         `Accounts that have not logged in or used the service for more than a year <br>
+  //         will be converted to dormant accounts, and personal information will be destroyed or stored and managed separately for safe personal information management.
+  //         `
+  //       );
+  //     }
+  //   }
+  // }
+
+  // 매일 01시 휴면 회원 처리
+  @Cron('0 0 1 * * *')
+  // @Cron('*/10 * * * * *') // 테스트용 시간
+  async dormantUser() {
+    console.log('[cron] dormantUser: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+    const yearAgo = moment().add(-1, 'year').format('YYYY-MM-DD');
+    const group = [3]; // 휴면 처리할 그룹
+    const users = await this.usersRepository.createQueryBuilder('user')
+      .leftJoin('user.group', 'group')
+      .where(qb => {
+        qb.where('group.idx IN (:group)', { group: group })
+        qb.andWhere('user.status = :status', { status: usersConstant.status.registration })
+        qb.andWhere('user.activitedAt < :activitedAt', { activitedAt: yearAgo })
+      })
+      .getMany();
+    console.log('휴면 회원 숫자: ', users.length);
+    if (users.length > 0) {
+      // 휴면 회원 처리
+      for (const key in users) {
+        await this.dormant(users[key]);
+      }
+    }
+  }
 
 }

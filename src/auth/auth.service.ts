@@ -21,9 +21,14 @@ export class AuthService {
   ) { }
 
   async validateUser(id: string, password: string): Promise<any> {
-    const user = await this.userService.fineUser(id);
+    let user = await this.userService.fineUser(id);
+    if (user.status == usersConstant.status.dormant) {
+      // 휴면 회원인 경우 회원 복원 처리
+      await this.userService.dormantRecovery(user.id);
+      user = await this.userService.fineUser(id);
+    }
     if (user.status != usersConstant.status.registration) {
-      throw new NotFoundException('존재하지 않는 아이디 입니다.');
+      throw new NotFoundException('auth.service.validateUser: 존재하지 않는 아이디 입니다.');
     }
     const isHashValid = await commonBcrypt.isHashValid(password, user.password);
     const isSha1HashValid = await commonBcrypt.isSha1HashValid(password, user.prevPassword);
@@ -35,7 +40,7 @@ export class AuthService {
       const { password, ...result } = user;
       return result;
     } else {
-      throw new NotAcceptableException('비밀번호가 틀립니다.');
+      throw new NotAcceptableException('auth.service.validateUser: 비밀번호가 틀립니다.');
     }
     return null;
   }

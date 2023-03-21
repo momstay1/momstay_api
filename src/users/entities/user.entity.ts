@@ -147,6 +147,8 @@ export class UsersEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'datetime', default: '0' })
+  @Column({ type: 'date', default: '0', comment: '마지막 활동 날짜' })
+  activitedAt: Date;
+  @Column({ type: 'datetime', default: '0', comment: '탈퇴 처리한 날짜' })
   leaveAt: Date;
 }
