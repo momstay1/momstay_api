@@ -74,7 +74,8 @@ export class PushNotificationController {
     if (body) {
       notifications['body'] = body;
     }
-    await this.pushNotificationService.sendPush(target, notifications);
+    const response = await this.pushNotificationService.sendPush(target, notifications);
+    await this.pushNotificationService.historySave(response);
   }
 
   @Get()
