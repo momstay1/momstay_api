@@ -5,7 +5,7 @@ import { UpdateUserLeaveDto } from './dto/update-user-leave.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 
-@Controller('admin-user-leave')
+@Controller('admin/user-leave')
 @ApiTags('탈퇴 회원(관리자) API')
 export class AdminUserLeaveController {
   constructor(private readonly userLeaveService: UserLeaveService) { }

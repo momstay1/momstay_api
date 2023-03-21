@@ -1,6 +1,6 @@
 import { Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, map } from 'lodash';
+import { get, isArray, map } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
@@ -12,6 +12,8 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
 
+
+const status = [1, 2, 4, 5];
 @Injectable()
 export class ReservationService {
   constructor(
@@ -74,7 +76,7 @@ export class ReservationService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
+        qb.where('`reservation`.status IN (:status)', { status: status });
         if (userInfo['group'] == 'host') {
           qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
         }
@@ -106,7 +108,7 @@ export class ReservationService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('reservation.user', 'user')
       .where((qb) => {
-        qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
+        qb.where('`reservation`.status IN (:status)', { status: status });
         if (['host', 'guest'].includes(userInfo['group'])) {
           qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
         }
@@ -132,15 +134,67 @@ export class ReservationService {
     return { data, file_info }
   }
 
-  async findOne(idx: number) {
-    const reservation = await this.findOneIdx(idx);
+  async findAll(userInfo, options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', status);
+
+    const alias = 'reservation';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
+    const [results, total] = await this.reservationRepository.createQueryBuilder('reservation')
+      .leftJoinAndSelect('reservation.user', 'guestUser')
+      .leftJoinAndSelect('reservation.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
+      .leftJoinAndSelect('product.user', 'hostUser')
+      .where((qb) => {
+        qb.where('`reservation`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
+        get(where, 'po_title', '') && qb.andWhere('`productOption`.title LIKE :po_title', { po_title: '%' + where['po_title'] + '%' })
+        get(where, 'name', '') && qb.andWhere('`guestUser`.name LIKE :name', { name: '%' + where['name'] + '%' })
+        get(where, 'email', '') && qb.andWhere('`guestUser`.email LIKE :email', { email: '%' + where['email'] + '%' })
+        get(where, 'min_visit_date', '') && qb.andWhere('`reservation`.visitDate >= :min_visit_date', { min_visit_date: where['min_visit_date'] })
+        get(where, 'max_visit_date', '') && qb.andWhere('`reservation`.visitDate <= :max_visit_date', { max_visit_date: where['max_visit_date'] })
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const product_option_idxs = map(results, o => o.productOption.idx);
     let file_info = {};
     try {
-      file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [reservation.productOption.idx]);
+      file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
       file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
     } catch (error) {
       console.log('방 리스트 이미지 파일 없음');
     }
+    const data = new Pagination({
+      results,
+      total,
+      page,
+    });
+
+    return { data, file_info }
+  }
+
+  async findOne(idx: number) {
+    const reservation = await this.findOneIdx(idx);
+    let file_info = {};
+    let po_file = [];
+    let product_file = [];
+    try {
+      po_file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [reservation.productOption.idx]);
+    } catch (error) {
+      console.log('방 리스트 이미지 파일 없음');
+    }
+    try {
+      product_file = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [reservation.productOption.product.idx]);
+    } catch (error) {
+      console.log('숙소 리스트 이미지 파일 없음');
+    }
+    file_info = commonUtils.getArrayKey([...po_file, ...product_file], ['file_foreign_idx', 'file_category'], true);
     return { reservation, file_info };
   }
 

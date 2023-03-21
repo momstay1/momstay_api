@@ -5,7 +5,7 @@ import { UpdateUserDormantDto } from './dto/update-user-dormant.dto';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 
-@Controller('admin-user-dormant')
+@Controller('admin/user-dormant')
 @ApiTags('휴면 회원(관리자) API')
 export class AdminUserDormantController {
   constructor(private readonly userDormantService: UserDormantService) { }
