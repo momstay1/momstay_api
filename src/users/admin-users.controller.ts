@@ -52,7 +52,7 @@ export class AdminUsersController {
   constructor(
     private authService: AuthService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   // 회원 생성
   @Post()
@@ -188,6 +188,7 @@ export class AdminUsersController {
   @ApiOperation({ summary: '회원 아이디 조회(아이디) API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async findId(@Param('id') id: string) {
+    console.log({ id });
     const data = await this.usersService.findId(id);
     return data;
   }
