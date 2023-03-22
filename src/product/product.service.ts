@@ -15,6 +15,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
 import * as moment from 'moment';
 
+const registrationStatus = '2';
 @Injectable()
 export class ProductService {
   constructor(
@@ -190,18 +191,21 @@ export class ProductService {
     }
   }
 
-  async findAll(options: PaginationOptions, search: string[]) {
+  async findAll(options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', [registrationStatus]);
 
     if (get(where, 'product_info', '')) {
       const product_info = sortBy(map(get(where, 'product_info'), o => +o));
       where['product_info'] = product_info.join('%');
     }
 
-    where['status'] = get(where, 'status', '2');
-    console.log({ where });
+    const alias = 'product';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
     const [results, total] = await this.productRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
@@ -210,7 +214,7 @@ export class ProductService {
       .where((qb) => {
         qb.where('`product`.status IN (:status)', { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] });
         (get(where, 'membership', '')) && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
-        (get(where, 'user_idx', '')) && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
+        // (get(where, 'user_idx', '')) && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         (get(where, 'stayStatus', '')) && qb.andWhere('`product_option`.`stayStatus` = :stayStatus', { stayStatus: get(where, 'stayStatus') });
         (get(where, 'min_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', { min_priceMonth: +get(where, 'min_priceMonth') });
         (get(where, 'max_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', { max_priceMonth: +get(where, 'max_priceMonth') });
@@ -244,6 +248,7 @@ export class ProductService {
           );
         }
       })
+      .orderBy(order_by)
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getManyAndCount();
@@ -260,10 +265,16 @@ export class ProductService {
     return { data, file_info }
   }
 
-  async adminFindAll(options: PaginationOptions, search: string[]) {
+  async adminFindAll(options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', [registrationStatus]);
+
+    const alias = 'product';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
     const [results, total] = await this.productRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
@@ -271,9 +282,11 @@ export class ProductService {
       .leftJoinAndSelect('product.metro', 'metro')
       .leftJoinAndSelect('product.college', 'college')
       .where((qb) => {
-        qb.where('`product`.status IN (:status)', { status: get(where, 'status', ['2']) });
+        qb.where('`product`.status IN (:status)', { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] });
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
-        get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
+        (get(where, 'title', '')) && qb.andWhere('`product`.title LIKE :title', { title: '%' + get(where, 'title') + '%' });
+        (get(where, 'name', '')) && qb.andWhere('`user`.name LIKE :name', { name: '%' + get(where, 'name') + '%' });
+        // get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         if (get(where, 'keyword', '')) {
           qb.andWhere('(' +
             '`product`.`title` LIKE :keyword' +
@@ -294,6 +307,7 @@ export class ProductService {
           );
         }
       })
+      .orderBy(order_by)
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getManyAndCount();

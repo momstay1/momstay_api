@@ -44,7 +44,7 @@ export class ProductController {
     name: "search",
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
-      + 'search=user_idx:회원idx<br>'
+      + 'search=user_idx:회원idx(사용안함)<br>'
       + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
       + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
       + 'search=min_priceMonth:월 최소 가격<br>'
@@ -52,15 +52,22 @@ export class ProductController {
       + 'search=product_info:편의시설 idx(2,3,4)<br>',
     required: false
   })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
+  })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]
+    @Query('search') search: string[],
+    @Query('order') order: string
   ) {
     const {
       data,
       file_info
-    } = await this.productService.findAll({ take, page }, search);
+    } = await this.productService.findAll({ take, page }, search, order);
     // await this.productService.findAll({ take, page }, search);
     return {
       ...data,

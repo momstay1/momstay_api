@@ -8,7 +8,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 
 @Controller('admin/product')
-@ApiTags('관리자 숙소 API')
+@ApiTags('숙소(관리자) API')
 export class AdminProductController {
   constructor(private readonly productService: ProductService) { }
 
@@ -31,30 +31,36 @@ export class AdminProductController {
   // 숙소 리스트 조회
   @Get()
   @ApiOperation({ summary: '숙소 리스트 조회 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiQuery({
     name: "search",
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
-      + 'search=user_idx:회원idx<br>'
+      + 'search=user_idx:회원idx(사용안함)<br>'
+      + 'search=title:숙소이름<br>'
+      + 'search=name:호스트이름<br>'
       + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+    required: false
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
     required: false
   })
   async adminFindAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]) {
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
     const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
+      data,
       file_info
-    } = await this.productService.adminFindAll({ take, page }, search);
+    } = await this.productService.adminFindAll({ take, page }, search, order);
     return {
-      results,
-      total,
-      pageTotal,
+      ...data,
       file_info
     };
   }
