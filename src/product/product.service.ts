@@ -214,7 +214,7 @@ export class ProductService {
       .where((qb) => {
         qb.where('`product`.status IN (:status)', { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] });
         (get(where, 'membership', '')) && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
-        // (get(where, 'user_idx', '')) && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
+        (get(where, 'user_idx', '')) && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         (get(where, 'stayStatus', '')) && qb.andWhere('`product_option`.`stayStatus` = :stayStatus', { stayStatus: get(where, 'stayStatus') });
         (get(where, 'min_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', { min_priceMonth: +get(where, 'min_priceMonth') });
         (get(where, 'max_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', { max_priceMonth: +get(where, 'max_priceMonth') });

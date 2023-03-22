@@ -44,7 +44,7 @@ export class ProductController {
     name: "search",
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
-      + 'search=user_idx:회원idx(사용안함)<br>'
+      + 'search=user_idx:회원idx<br>'
       + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
       + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
       + 'search=min_priceMonth:월 최소 가격<br>'
