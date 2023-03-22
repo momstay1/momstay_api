@@ -28,7 +28,7 @@ import { createReadStream } from 'fs';
 @Controller('product-option')
 @ApiTags('방 API')
 export class ProductOptionController {
-  constructor(private readonly productOptionService: ProductOptionService) {}
+  constructor(private readonly productOptionService: ProductOptionService) { }
 
   @Post()
   @ApiOperation({ summary: '방 생성 API' })
@@ -78,6 +78,12 @@ export class ProductOptionController {
     name: 'order',
     description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
     required: false,
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
   })
   async findAll(
     @Query('take') take: number,
