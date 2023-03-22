@@ -20,7 +20,7 @@ import { UsersService } from 'src/users/users.service';
 import { UsersEntity } from './entities/user.entity';
 
 @Controller('admin/users')
-@ApiTags('관리자 유저 API')
+@ApiTags('유저(관리자) API')
 export class AdminUsersController {
   constructor(
     private authService: AuthService,
@@ -59,6 +59,7 @@ export class AdminUsersController {
   // 회원 리스트 조회
   @Get()
   @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiOperation({ summary: '관리자_회원 리스트 API' })
   @ApiQuery({
     name: "search",
@@ -72,7 +73,6 @@ export class AdminUsersController {
       + 'search=createdAt_lte:종료날짜<br>',
     required: false
   })
-  @ApiBearerAuth()
   async findAll(
     @GetUser() user: UsersEntity,
     @Query('take') take: number,
@@ -86,9 +86,11 @@ export class AdminUsersController {
   // 회원 정보 가져오기
   @Get(':id')
   @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiOperation({ summary: '회원 아이디 조회 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   async findId(@Param('id') id: string) {
+    console.log({ id });
     const data = await this.usersService.findId(id);
     return data;
   }
@@ -96,6 +98,7 @@ export class AdminUsersController {
   // 회원 수정 (sns 정보 수정 및 그룹 정보수정 기능 추가 작업 필요)
   @Patch(':id')
   @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiOperation({ summary: '관리자_회원정보수정 API' })
   @ApiOkResponse({ type: ProfileUserDto })
   @ApiBody({ type: UpdateUserDto })
@@ -115,6 +118,7 @@ export class AdminUsersController {
   // 회원 삭제
   @Delete()
   @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiOperation({ summary: '관리자_회원정보삭제 API' })
   @ApiBody({ type: DeleteUserDto })
   @HttpCode(204)
