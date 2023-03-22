@@ -6,12 +6,13 @@ import { UpdateProductOptionDto } from './dto/update-product-option.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductOptionEntity } from './entities/product-option.entity';
 import { In, Repository } from 'typeorm';
-import { get, isEmpty, map, merge, union } from 'lodash';
+import { get, isArray, isEmpty, map, merge, union } from 'lodash';
 import { ProductService } from 'src/product/product.service';
 import { FileService } from 'src/file/file.service';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { ProductInfoService } from 'src/product-info/product-info.service';
 
+const registrationStatus = '2';
 @Injectable()
 export class ProductOptionService {
   constructor(
@@ -119,17 +120,23 @@ export class ProductOptionService {
     }
   }
 
-  async findAll(options: PaginationOptions, search: string[]) {
+  async findAll(options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', [registrationStatus]);
+
+    const alias = 'product_option';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
     const [results, total] = await this.productOptionRepository.createQueryBuilder('product_option')
       .leftJoinAndSelect('product_option.product', 'product')
       .leftJoinAndSelect('product_option.productInfo', 'productInfo')
       .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
       .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
       .where((qb) => {
-        qb.where('`product_option`.status IN (:status)', { status: get(where, 'status', ['2']) });
+        qb.where('`product_option`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'title') });
         get(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: get(where, 'product_idx') });
         get(where, 'title', '') && qb.andWhere('`product`.`title` LIKE :title', { title: '%' + get(where, 'title') + '%' });
@@ -138,6 +145,7 @@ export class ProductOptionService {
         get(where, 'metro', '') && qb.andWhere('`product`.`metro` LIKE :metro', { metro: '%' + get(where, 'metro') + '%' });
         get(where, 'college', '') && qb.andWhere('`product`.`college` LIKE :college', { college: '%' + get(where, 'college') + '%' });
       })
+      .orderBy(order_by)
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getManyAndCount();

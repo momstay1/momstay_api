@@ -47,14 +47,22 @@ export class ProductOptionController {
       + "search=status:상태값(0:미등록|1:미사용|2:사용)<br>",
     required: false
   })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
+  })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]) {
+    @Query('search') search: string[],
+    @Query('order') order: string
+  ) {
     const {
       data,
       file_info
-    } = await this.productOptionService.findAll({ take, page }, search);
+    } = await this.productOptionService.findAll({ take, page }, search, order);
     return {
       ...data,
       file_info
