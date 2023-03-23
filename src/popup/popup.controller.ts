@@ -59,27 +59,35 @@ export class PopupController {
     required: false,
   })
   async findAll(@Query() filterDto: PopupFilterDto) {
-    return this.popupService.findAll(filterDto);
+    return await this.popupService.findAll(filterDto);
   }
 
   @Get(':idx')
   @ApiOperation({ summary: '팝업 상세 조회 API' })
   @ApiParam({ name: 'idx', description: 'popup idx' })
   async findOne(@Param('idx') idx: string) {
-    return this.popupService.findOne(+idx);
+    return await this.popupService.findOne(+idx);
   }
 
-  /**
-   * [팝업 수정 구현]
-   * TODO 필수값 체크
-   *  - 팝업 데이터 basic{status, title, startAt, endAt, order} detail{link} Img
-   *  - 필수값 title, Img
-   * TODO DB에 데이터 저장 요청
-   * TODO DB에 저장된 팝업 idx, Img idx 리턴
-   */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePopupDto: UpdatePopupDto) {
-    return this.popupService.update(+id, updatePopupDto);
+  @Patch(':idx')
+  @ApiOperation({
+    summary: '팝업 수정 API',
+    description:
+      'status, title, startPeriod, endPeriod, order, link, popupImg 만 변경 가능',
+  })
+  @ApiParam({ name: 'idx', description: 'popup idx' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'popupImg', maxCount: 1 }], multerOptions()),
+  )
+  @ApiConsumes('multipart/form-data')
+  async update(
+    @Param('idx') idx: number,
+    @Body() updatePopupDto: UpdatePopupDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return await this.popupService.update(+idx, updatePopupDto, files);
   }
 
   /**
@@ -88,7 +96,7 @@ export class PopupController {
    * TODO DB에서 전달받은 Idx 데이터의 status 변경 요청 (논리 삭제)
    */
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.popupService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.popupService.remove(+id);
   }
 }

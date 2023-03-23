@@ -95,11 +95,34 @@ export class PopupService {
     return { popup, file_info };
   }
 
-  update(id: number, updatePopupDto: UpdatePopupDto) {
-    return `This action updates a #${id} popup`;
+  async update(idx: number, updatePopupDto: UpdatePopupDto, files) {
+    // 팝업 수정
+    const prevPopup = await this.findOneIdx(idx);
+    const popup = { ...prevPopup, ...updatePopupDto };
+    const popupRes = await this.popupRepository.save(popup);
+
+    // 유지 안하는 이전파일 제거
+    await this.fileService.removeByRequest(updatePopupDto, popupRes['idx'], [
+      'popupImg',
+    ]);
+    // 새 첨부파일 등록
+    await this.fileService.createByRequest(files, popupRes['idx']);
+
+    // 파일 정보 가져오기
+    let file_info;
+    try {
+      file_info = await this.fileService.findCategory(
+        ['popupImg'],
+        '' + popupRes['idx'],
+      );
+    } catch (error) {
+      console.log(error['response']['message']);
+    }
+
+    return { popupRes, file_info };
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} popup`;
   }
 }
