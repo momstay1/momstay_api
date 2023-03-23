@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
@@ -91,16 +91,27 @@ export class AdminReservationController {
   //   return await this.reservationService.findOne(+idx);
   // }
 
-  // @Patch(':idx')
-  // @ApiOperation({ summary: '방문 예약 승인(호스트) API' })
-  // @Auth(['root', 'admin', 'host'])
-  // @ApiBearerAuth()
-  // async update(
-  //   @GetUser() user: UsersEntity,
-  //   @Param('idx') idx: string,
-  // ) {
-  //   return await this.reservationService.update(user, +idx);
-  // }
+  @Patch()
+  @ApiOperation({
+    summary: '방문 예약 상태 변경(관리자) API',
+    description: 'status: 상태값<br>idxs: 방문예약 idx 배열'
+  })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiBody({
+    schema: {
+      properties: {
+        status: { type: 'string' },
+        idxs: { example: [] }
+      }
+    }
+  })
+  async adminStatusChange(
+    @Body('status') status: string,
+    @Body('idxs') idxs: number[],
+  ) {
+    return await this.reservationService.adminChangeStatus(+status, idxs);
+  }
 
   // @Delete('guest/:idx')
   // @ApiOperation({ summary: '방문 예약 취소(게스트) API' })

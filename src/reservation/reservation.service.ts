@@ -7,7 +7,7 @@ import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductOptionService } from 'src/product-option/product-option.service';
 import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { UsersService } from 'src/users/users.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
@@ -219,6 +219,28 @@ export class ReservationService {
     return reservation;
   }
 
+  async findIdxs(idxs: number[]): Promise<Array<ReservationEntity>> {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const reservation = await this.reservationRepository.find({
+      where: { idx: In(idxs) },
+      relations: [
+        'productOption',
+        'productOption.product',
+        'productOption.product.user',
+        'productOption.product.user.device',
+        'user',
+        'user.device'
+      ]
+    });
+    if (reservation.length <= 0) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return reservation;
+  }
+
+  // 방문 예약 승인(호스트)
   async update(userInfo, idx: number) {
     // 방문 예약 정보 가져오기
     const reservation = await this.findOneIdx(idx);
@@ -234,6 +256,7 @@ export class ReservationService {
     }
   }
 
+  // 방문 예약 취소(게스트)
   async guestCancel(userInfo, idx: number) {
     // 방문 예약 정보 가져오기
     const reservation = await this.findOneIdx(idx);
@@ -249,6 +272,8 @@ export class ReservationService {
       await this.pushNotiService.guestReservationCancelPush(user, reservation);
     }
   }
+
+  // 방문 예약 거절(호스트)
   async hostCancel(userInfo, idx: number) {
     // 방문 예약 정보 가져오기
     const reservation = await this.findOneIdx(idx);
@@ -285,11 +310,23 @@ export class ReservationService {
     }
   }
   // 상태 변경
-  async changeStatus(status: number, idx: number) {
+  async changeStatus(status: number, idx: number | number[]) {
     await this.reservationRepository.createQueryBuilder()
       .update(ReservationEntity)
       .set({ status: status })
       .where(" idx IN (:idx)", { idx: idx })
       .execute()
+  }
+
+  // 방문 예약 상태 변경(관리자)
+  async adminChangeStatus(status: number, idxs: number[]) {
+    const reservations = await this.findIdxs(idxs);
+    await this.changeStatus(status, idxs);
+
+    for (const key in reservations) {
+      const guestUser = reservations[key].user;
+      const hostUser = reservations[key].productOption.product.user;
+      await this.pushNotiService.adminReservationStatusChange(guestUser, hostUser, reservations[key]);
+    }
   }
 }

@@ -302,4 +302,30 @@ export class PushNotificationService {
       await this.historySave(response, guestUser);
     }
   }
+  // 관리자가 방문예약 일괄 상태 변경시 호스트 게스트에게 push 발송
+  async adminReservationStatusChange(guestUser: UsersEntity, hostUser: UsersEntity, reservation: ReservationEntity) {
+
+    const target = {};
+    const notifications = {
+      title: '방문예약 변경',
+      body: reservation['productOption']['product']['title']
+        + ' '
+        + reservation['productOption']['title']
+        + ' 방문예약을 관리자가 변경했습니다.',
+    };
+
+    const guestIsApp = await this.isApp(get(guestUser, ['device']));
+    if (guestIsApp && guestUser['device']['notification'] == notificationStatus) {
+      target['token'] = guestUser['device']['token'];
+      const response = await this.sendPush(target, notifications);
+      await this.historySave(response, guestUser);
+    }
+
+    const hostIsApp = await this.isApp(get(hostUser, ['device']));
+    if (hostIsApp && hostUser['device']['notification'] == notificationStatus) {
+      target['token'] = hostUser['device']['token'];
+      const response = await this.sendPush(target, notifications);
+      await this.historySave(response, hostUser);
+    }
+  }
 }
