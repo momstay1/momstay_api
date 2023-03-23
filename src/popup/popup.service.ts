@@ -3,8 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
+import { Pagination } from 'src/paginate';
 import { Repository } from 'typeorm';
 import { CreatePopupDto } from './dto/create-popup.dto';
+import { PopupFilterDto } from './dto/popup-filter.dto';
 import { UpdatePopupDto } from './dto/update-popup.dto';
 import { PopupEntity } from './entities/popup.entity';
 
@@ -41,8 +43,21 @@ export class PopupService {
     return { popup, file_info };
   }
 
-  findAll() {
-    return `This action returns all popup`;
+  async findAll(filterDto: PopupFilterDto) {
+    const { take, page } = filterDto;
+    const [results, total] = await this.popupRepository
+      .createQueryBuilder('popup')
+      .orderBy('createdAt', 'DESC')
+      .skip(take * (page - 1) || 0)
+      .take(take)
+      .getManyAndCount();
+
+    const data = new Pagination({
+      results,
+      total,
+      page,
+    });
+    return { data };
   }
 
   async findOneIdx(idx: number) {

@@ -15,15 +15,18 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import {
   UploadedFiles,
   UseInterceptors,
+  Query,
 } from '@nestjs/common/decorators';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
+import { PopupFilterDto } from './dto/popup-filter.dto';
 @Controller('popup')
 @ApiTags('팝업 API')
 export class PopupController {
@@ -44,15 +47,19 @@ export class PopupController {
     return await this.popupService.create(createPopupDto, files);
   }
 
-  /**
-   * [팝업 목록 조회 구현]
-   * TODO 페이지 값 및 노출해야할 데이터 수 체크
-   * TODO DB에서 팝업 전체 데이터 조회
-   * TODO 조회 결과 리턴
-   */
   @Get()
-  findAll() {
-    return this.popupService.findAll();
+  @ApiOperation({ summary: '팝업 리스트 조회 API' })
+  @ApiQuery({
+    name: 'take',
+    description: '요청 시 가져올 데이터 수',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+  })
+  async findAll(@Query() filterDto: PopupFilterDto) {
+    return this.popupService.findAll(filterDto);
   }
 
   @Get(':idx')
