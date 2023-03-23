@@ -48,7 +48,7 @@ import { BannerModule } from './banner/banner.module';
 import { BannerItemModule } from './banner-item/banner-item.module';
 import { BlockModule } from './block/block.module';
 import { ReportCumulativeModule } from './report-cumulative/report-cumulative.module';
-import { MessageModule } from './message/message.module';
+import { PopupModule } from './popup/popup.module';
 
 @Module({
   imports: [
@@ -105,7 +105,7 @@ import { MessageModule } from './message/message.module';
     BannerItemModule,
     BlockModule,
     ReportCumulativeModule,
-    MessageModule,
+    PopupModule,
   ],
   providers: [CommonService, IamportService],
 })
