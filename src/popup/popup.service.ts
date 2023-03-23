@@ -10,6 +10,7 @@ import { FileService } from 'src/file/file.service';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { Repository } from 'typeorm';
 import { CreatePopupDto } from './dto/create-popup.dto';
+import { PopupFilterDto } from './dto/popup-filter.dto';
 import { UpdatePopupDto } from './dto/update-popup.dto';
 import { PopupEntity } from './entities/popup.entity';
 
