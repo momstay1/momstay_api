@@ -22,7 +22,7 @@ export class PopupService {
     @InjectRepository(PopupEntity)
     private popupRepository: Repository<PopupEntity>,
     private fileService: FileService,
-  ) {}
+  ) { }
   async create(createPopupDto: CreatePopupDto, files) {
     // 팝업 데이터 가져오기
     const popup_data = {

@@ -14,4 +14,4 @@ import { AdminPopupController } from './admin-popup.controller';
   controllers: [PopupController, AdminPopupController],
   providers: [PopupService],
 })
-export class PopupModule {}
+export class PopupModule { }
