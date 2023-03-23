@@ -10,28 +10,36 @@ import {
 import { PopupService } from './popup.service';
 import { CreatePopupDto } from './dto/create-popup.dto';
 import { UpdatePopupDto } from './dto/update-popup.dto';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
-import { UseInterceptors } from '@nestjs/common/decorators';
-
+import {
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common/decorators';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { multerOptions } from 'src/common/common.file';
 @Controller('popup')
 export class PopupController {
   constructor(private readonly popupService: PopupService) {}
 
-  /**
-   * [팝업 생성 구현]
-   * TODO 필수값 체크
-   *  - 팝업 데이터 basic{status, title, startAt, endAt, order} detail{link} Img
-   *  - 필수값 title, Img
-   * TODO DB에 데이터 저장 요청
-   * TODO DB에 저장된 팝업 idx, Img idx 리턴
-   */
   @Post()
   @ApiOperation({ summary: '팝업 생성 API' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
-  create(@Body() createPopupDto: CreatePopupDto) {
-    return this.popupService.create(createPopupDto);
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'popupImg', maxCount: 1 }], multerOptions()),
+  )
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @Body() createPopupDto: CreatePopupDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return await this.popupService.create(createPopupDto, files);
   }
 
   /**
