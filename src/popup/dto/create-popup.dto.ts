@@ -33,7 +33,6 @@ export class CreatePopupDto {
   @IsOptional()
   @ApiProperty({ description: '팝업 링크', required: false })
   readonly link: string;
-
   @ApiProperty({
     format: 'binary',
     description: '팝업 사진 (최대 1장)',
