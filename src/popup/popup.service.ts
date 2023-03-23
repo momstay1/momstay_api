@@ -45,8 +45,39 @@ export class PopupService {
     return `This action returns all popup`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} popup`;
+  async findOneIdx(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('잘못된 정보 입니다.');
+    }
+    const popup = await this.popupRepository.findOne({
+      where: { idx },
+    });
+    if (!get(popup, 'idx')) {
+      throw new NotFoundException('정보를 찾을 수 없습니다.');
+    }
+    return popup;
+  }
+
+  async findOne(idx: number) {
+    const popup = await this.findOneIdx(idx);
+    if (popup.status === deleteStatus) {
+      throw new NotFoundException('삭제된 후기 입니다.');
+    }
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(
+        ['popupImg'],
+        [popup.idx],
+      );
+      file_info = commonUtils.getArrayKey(
+        file_info,
+        ['file_foreign_idx', 'file_category'],
+        true,
+      );
+    } catch (error) {
+      console.log('후기 상세 이미지 파일 없음');
+    }
+    return { popup, file_info };
   }
 
   update(id: number, updatePopupDto: UpdatePopupDto) {

@@ -15,6 +15,7 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import {
@@ -24,6 +25,7 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 @Controller('popup')
+@ApiTags('팝업 API')
 export class PopupController {
   constructor(private readonly popupService: PopupService) {}
 
@@ -53,15 +55,11 @@ export class PopupController {
     return this.popupService.findAll();
   }
 
-  /**
-   * [팝업 상세 조회 구현]
-   * TODO Idx 파라미터 체크
-   * TODO 전달받은 Idx를 가진 DB 데이터 조회
-   * TODO 조회 결과 리턴
-   */
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.popupService.findOne(+id);
+  @Get(':idx')
+  @ApiOperation({ summary: '팝업 상세 조회 API' })
+  @ApiParam({ name: 'idx', description: 'popup idx' })
+  async findOne(@Param('idx') idx: string) {
+    return this.popupService.findOne(+idx);
   }
 
   /**
