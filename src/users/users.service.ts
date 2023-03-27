@@ -265,9 +265,9 @@ export class UsersService {
     if (get(updateUserDto, 'marketing', ''))
       user['marketing'] = get(updateUserDto, 'marketing');
     if (get(updateUserDto, 'uniqueKey', ''))
-      user['marketing'] = get(updateUserDto, 'uniqueKey');
+      user['uniqueKey'] = get(updateUserDto, 'uniqueKey');
     if (get(updateUserDto, 'certifiInfo', ''))
-      user['marketing'] = get(updateUserDto, 'certifiInfo');
+      user['certifiInfo'] = get(updateUserDto, 'certifiInfo');
 
     user['group'] = group;
     if (get(updateUserDto, 'password')) {
