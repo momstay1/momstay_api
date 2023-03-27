@@ -31,7 +31,7 @@ export class ReviewsService {
     private readonly userService: UsersService,
     private readonly fileService: FileService,
     private readonly excelService: ExcelService,
-  ) {}
+  ) { }
 
   async create(userInfo: UsersEntity, createReviewDto: CreateReviewDto, files) {
     if (
