@@ -86,9 +86,9 @@ export class ReviewsController {
     summary: '후기 수정 API',
     description: 'status, star, content, reviewImg 만 변경 가능'
   })
-  @ApiParam({ name: 'idx', description: 'review idx' })
   @Auth(['Any'])
   @ApiBearerAuth()
+  @ApiParam({ name: 'idx', description: 'review idx' })
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'reviewImg', maxCount: 10 },
   ], multerOptions()))

@@ -27,7 +27,7 @@ export class ReviewsService {
 
   async create(userInfo: UsersEntity, createReviewDto: CreateReviewDto, files) {
     if (get(createReviewDto, 'depth', 0) > 0 && get(createReviewDto, 'group', 0) == 0) {
-      throw new UnprocessableEntityException('처리 할 수 없습니다.');
+      throw new UnprocessableEntityException('reviews.service.create: 처리 할 수 없습니다.');
 
     }
     // 숙소 정보 가져오기
@@ -78,14 +78,14 @@ export class ReviewsService {
 
   async findAllIdxs(idxs: []) {
     if (idxs.length <= 0) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('reviews.service.findAllIdxs: 잘못된 정보 입니다.');
     }
     const reviews = await this.reviewRepository.find({
       where: { idx: In(idxs) },
       relations: ['product', 'user']
     });
     if (reviews.length <= 0) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('reviews.service.findAllIdxs: 정보를 찾을 수 없습니다.');
     }
     return reviews;
   }
@@ -232,14 +232,14 @@ export class ReviewsService {
 
   async findOneIdx(idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('reviews.service.findOneIdx: 잘못된 정보 입니다.');
     }
     const review = await this.reviewRepository.findOne({
       where: { idx: idx },
       relations: ['product', 'user']
     });
     if (!get(review, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('reviews.service.findOneIdx: 정보를 찾을 수 없습니다.');
     }
     return review;
   }
@@ -248,7 +248,7 @@ export class ReviewsService {
     const review = await this.findOneIdx(idx);
 
     if (review['status'] == deleteStatus) {
-      throw new NotFoundException('삭제된 후기 입니다.');
+      throw new NotFoundException('reviews.service.findOne: 삭제된 후기 입니다.');
     }
     let file_info = {};
     try {
@@ -268,7 +268,7 @@ export class ReviewsService {
     if (!commonUtils.isAdmin(user['group']['id'])) {
       // 일반 사용자인 경우 자신의 후기 글인지 체크
       if (prevReview['user']['idx'] != user['idx']) {
-        throw new UnauthorizedException('권한이 없습니다.');
+        throw new UnauthorizedException('reviews.service.update: 권한이 없습니다.');
       }
     }
 
