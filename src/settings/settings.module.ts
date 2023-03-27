@@ -10,6 +10,7 @@ import { CommonService } from 'src/common/common.service';
     TypeOrmModule.forFeature([SettingEntity]),
   ],
   controllers: [SettingsController],
-  providers: [SettingsService, CommonService]
+  providers: [SettingsService, CommonService],
+  exports: [SettingsService]
 })
 export class SettingsModule { }
