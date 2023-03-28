@@ -1,15 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDefined, IsNumber, IsOptional, Matches } from 'class-validator';
+import {
+  IsDefined,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class CreatePopupDto {
   @Type(() => Number)
   @IsNumber()
-  @ApiProperty({ description: '팝업 사용 상태 (1: 삭제, 2: 등록)' })
+  @ApiProperty({ description: '팝업 사용 상태 (1: 사용안함, 2: 사용)' })
   readonly status: number;
-  @IsDefined()
+  @IsString()
   @ApiProperty({ description: '팝업명', required: true })
   readonly title: string;
+  @IsOptional()
+  @ApiProperty({ description: '노출 페이지', required: false })
+  readonly page: string;
   @IsOptional()
   @Matches(/^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/)
   @ApiProperty({ description: '팝업 노출 시작일', required: false })
@@ -24,6 +33,7 @@ export class CreatePopupDto {
   @IsOptional()
   @ApiProperty({ description: '팝업 링크', required: false })
   readonly link: string;
+
   @ApiProperty({
     format: 'binary',
     description: '팝업 사진 (최대 1장)',

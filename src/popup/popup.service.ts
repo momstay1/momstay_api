@@ -3,14 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
-import { Pagination } from 'src/paginate';
+import { Pagination, PaginationOptions } from 'src/paginate';
 import { Repository } from 'typeorm';
 import { CreatePopupDto } from './dto/create-popup.dto';
-import { PopupFilterDto } from './dto/popup-filter.dto';
 import { UpdatePopupDto } from './dto/update-popup.dto';
 import { PopupEntity } from './entities/popup.entity';
 
-const deleteStatus = 1;
+const uncertifiedStatus = 1;
 @Injectable()
 export class PopupService {
   constructor(
@@ -23,6 +22,7 @@ export class PopupService {
     const popup_data = {
       status: get(createPopupDto, 'status'),
       title: get(createPopupDto, 'title'),
+      page: get(createPopupDto, 'page'),
       startPeriod: get(createPopupDto, 'startPeriod'),
       endPeriod: get(createPopupDto, 'endPeriod'),
       order: get(createPopupDto, 'order', 10),
@@ -43,13 +43,13 @@ export class PopupService {
     return { popup, file_info };
   }
 
-  async findAll(filterDto: PopupFilterDto) {
-    const { take, page } = filterDto;
+  async findAll(options: PaginationOptions) {
+    const { take, page } = options;
     const [results, total] = await this.popupRepository
       .createQueryBuilder('popup')
       .orderBy('createdAt', 'DESC')
       .skip(take * (page - 1) || 0)
-      .take(take)
+      .take(take || 10)
       .getManyAndCount();
 
     const data = new Pagination({
@@ -75,9 +75,7 @@ export class PopupService {
 
   async findOne(idx: number) {
     const popup = await this.findOneIdx(idx);
-    if (popup.status === deleteStatus) {
-      throw new NotFoundException('삭제된 후기 입니다.');
-    }
+
     let file_info = {};
     try {
       file_info = await this.fileService.findCategoryForeignAll(
@@ -92,37 +90,38 @@ export class PopupService {
     } catch (error) {
       console.log('후기 상세 이미지 파일 없음');
     }
+
     return { popup, file_info };
   }
 
   async update(idx: number, updatePopupDto: UpdatePopupDto, files) {
     // 팝업 수정
     const prevPopup = await this.findOneIdx(idx);
-    const popup = { ...prevPopup, ...updatePopupDto };
-    const popupRes = await this.popupRepository.save(popup);
+    const popupEntity = { ...prevPopup, ...updatePopupDto };
+    const popup = await this.popupRepository.save(popupEntity);
 
     // 유지 안하는 이전파일 제거
-    await this.fileService.removeByRequest(updatePopupDto, popupRes['idx'], [
+    await this.fileService.removeByRequest(updatePopupDto, popup['idx'], [
       'popupImg',
     ]);
     // 새 첨부파일 등록
-    await this.fileService.createByRequest(files, popupRes['idx']);
+    await this.fileService.createByRequest(files, popup['idx']);
 
     // 파일 정보 가져오기
     let file_info;
     try {
       file_info = await this.fileService.findCategory(
         ['popupImg'],
-        '' + popupRes['idx'],
+        '' + popup['idx'],
       );
     } catch (error) {
       console.log(error['response']['message']);
     }
 
-    return { popupRes, file_info };
+    return { popup, file_info };
   }
 
-  async statusUpdate(idxs: []) {
+  async delete(idxs: []) {
     if (idxs.length <= 0) {
       throw new NotFoundException('삭제할 정보가 없습니다.');
     }
@@ -130,8 +129,7 @@ export class PopupService {
     // 팝업 정보 가져오기
     await this.popupRepository
       .createQueryBuilder()
-      .update()
-      .set({ status: deleteStatus })
+      .delete()
       .where('idx IN (:idxs)', { idxs: idxs })
       .execute();
   }

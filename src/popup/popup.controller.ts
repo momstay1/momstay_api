@@ -7,28 +7,30 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { PopupService } from './popup.service';
-import { CreatePopupDto } from './dto/create-popup.dto';
-import { UpdatePopupDto } from './dto/update-popup.dto';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiCreatedResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { Auth } from 'src/common/decorator/role.decorator';
 import {
   UploadedFiles,
   UseInterceptors,
   Query,
   HttpCode,
 } from '@nestjs/common/decorators';
+import { PopupService } from './popup.service';
+import { CreatePopupDto } from './dto/create-popup.dto';
+import { UpdatePopupDto } from './dto/update-popup.dto';
+import { Auth } from 'src/common/decorator/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
-import { PopupFilterDto } from './dto/popup-filter.dto';
+import { PopupEntity } from './entities/popup.entity';
+
 @Controller('popup')
 @ApiTags('팝업 API')
 export class PopupController {
@@ -51,21 +53,14 @@ export class PopupController {
 
   @Get()
   @ApiOperation({ summary: '팝업 리스트 조회 API' })
-  @ApiQuery({
-    name: 'take',
-    description: '요청 시 가져올 데이터 수',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-  })
-  async findAll(@Query() filterDto: PopupFilterDto) {
-    return await this.popupService.findAll(filterDto);
+  async findAll(@Query('page') page: number, @Query('take') take: number) {
+    const { data } = await this.popupService.findAll({ take, page });
+    return { ...data };
   }
 
   @Get(':idx')
   @ApiOperation({ summary: '팝업 상세 조회 API' })
+  @ApiCreatedResponse({ type: PopupEntity })
   @ApiParam({ name: 'idx', description: 'popup idx' })
   async findOne(@Param('idx') idx: string) {
     return await this.popupService.findOne(+idx);
@@ -77,9 +72,9 @@ export class PopupController {
     description:
       'status, title, startPeriod, endPeriod, order, link, popupImg 만 변경 가능',
   })
-  @ApiParam({ name: 'idx', description: 'popup idx' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
+  @ApiParam({ name: 'idx', description: 'popup idx' })
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'popupImg', maxCount: 1 }], multerOptions()),
   )
@@ -107,7 +102,7 @@ export class PopupController {
     },
   })
   @HttpCode(204)
-  async statusUpdate(@Body('idxs') idxs: []): Promise<void> {
-    await this.popupService.statusUpdate(idxs);
+  async delete(@Body('idxs') idxs: []): Promise<void> {
+    await this.popupService.delete(idxs);
   }
 }
