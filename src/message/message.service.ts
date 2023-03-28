@@ -214,6 +214,45 @@ export class MessageService {
     return commonUtils.getArrayKey(message, ['sendtype', 'group'], true);
   }
 
+  async messageFindOne(code: string) {
+    const messageInfo = await this.findOneCode(code);
+
+    // 비즈엠 정보 가져오기
+    const {
+      profileKey,
+      bizmId,
+    } = await this.bizmInfo();
+
+    const http = this.http;
+    const url = bizmHost + bizmUrl.lookup + '?senderKey=' + profileKey + '&templateCode=' + messageInfo.code;
+    const headersRequest = {
+      'Content-Type': 'application/json',
+      userId: bizmId
+    };
+    const response = await firstValueFrom(
+      http.get(url, { headers: headersRequest })
+    );
+
+    const result = {};
+    if (response.data.code == 'success') {
+      const { data } = response.data;
+      if (data.inspectionStatus == 'APR') {
+        result['code'] = data.templateCode;
+        result['template'] = data.templateContent;
+      } else {
+        throw new NotFoundException(
+          'message.service.messageFindOne: '
+          + '검수상태가 승인인 템플릿 코드만 등록 가능합니다.<br>'
+          + '비즈엠>템플릿 목록>템플릿 상세 정보를 확인해주세요.'
+        );
+      }
+    } else {
+      throw new NotFoundException('message.service.messageFindOne: ' + response.data.message);
+    }
+
+    return { result };
+  }
+
   async messageHistoryFindAll(year: string, month: string) {
     const ymdate = year + '-' + month;
     const where = {
@@ -281,10 +320,23 @@ export class MessageService {
     return message;
   }
 
-  async update(idx: number, status: string) {
+  async findOneCode(code: string) {
+    if (!code) {
+      throw new NotFoundException('message.service.findOneCode: 잘못된 정보 입니다.');
+    }
+    const message = await this.messageRepository.findOne({
+      where: { code: code, sendtype: 'alimtalk' },
+    });
+    if (!get(message, 'idx', '')) {
+      throw new NotFoundException('message.service.findOneCode: 정보를 찾을 수 없습니다.');
+    }
+    return message;
+  }
+
+  async update(idx: number, status: string, tmpl: string) {
     await this.messageRepository.createQueryBuilder()
       .update()
-      .set({ status: +status })
+      .set({ status: +status, tmpl: tmpl })
       .where({ idx: idx })
       .execute();
   }

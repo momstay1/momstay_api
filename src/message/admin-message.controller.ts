@@ -37,6 +37,20 @@ export class AdminMessageController {
     return { message, messageType };
   }
 
+  @Get(':code')
+  @ApiOperation({ summary: '메시지 조회(비즈엠 템플릿 조회) API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'code',
+    description: '비즈엠 템플릿 코드 message.code'
+  })
+  async findOne(
+    @Param('code') code: string,
+  ) {
+    return await this.messageService.messageFindOne(code);
+  }
+
   @Get('test')
   @ApiOperation({ summary: '메시지 발송 테스트 API' })
   async test(
@@ -59,7 +73,7 @@ export class AdminMessageController {
   // }
 
   @Patch(':idx')
-  @ApiOperation({ summary: '메시지 상태 수정 API' })
+  @ApiOperation({ summary: '메시지 상태 및 템플릿 수정 API' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiParam({
@@ -70,14 +84,16 @@ export class AdminMessageController {
     schema: {
       properties: {
         status: { type: 'string' },
+        tmpl: { type: 'string' },
       }
     }
   })
   async update(
     @Param('idx') idx: string,
-    @Body('status') status: string
+    @Body('status') status: string,
+    @Body('tmpl') tmpl: string
   ) {
-    return await this.messageService.update(+idx, status);
+    return await this.messageService.update(+idx, status, tmpl);
   }
 
   // @Delete(':id')
