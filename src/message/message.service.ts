@@ -203,7 +203,7 @@ export class MessageService {
 
     const message = await this.messageRepository.find({
       where: qb => {
-        qb.where('status IN (:status)', { status: isArray(get(where, 'status') ? where['status'] : where['status']) })
+        qb.where('status IN (:status)', { status: isArray(get(where, 'status')) ? where['status'] : [where['status']] })
         get(where, 'group', '') && qb.andWhere('group IN (:group)', { group: get(where, 'group') })
         get(where, 'type', '') && qb.andWhere('type IN (:type)', { type: get(where, 'type') })
         get(where, 'sendtype', '') && qb.andWhere('sendtype IN (:sendtype)', { sendtype: get(where, 'sendtype') })
@@ -281,13 +281,12 @@ export class MessageService {
     return message;
   }
 
-  async update(idx: number, updateMessageDto: UpdateMessageDto) {
-    const messageInfo = await this.findOneIdx(idx);
-    const messageEntity = { ...messageInfo, ...updateMessageDto };
-
-    const message = await this.messageRepository.save(messageEntity);
-
-    return { message };
+  async update(idx: number, status: string) {
+    await this.messageRepository.createQueryBuilder()
+      .update()
+      .set({ status: +status })
+      .where({ idx: idx })
+      .execute();
   }
 
   remove(id: number) {

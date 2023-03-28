@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 
 @Controller('admin/message')
@@ -59,18 +59,25 @@ export class AdminMessageController {
   // }
 
   @Patch(':idx')
-  @ApiOperation({ summary: '메시지 수정 API' })
+  @ApiOperation({ summary: '메시지 상태 수정 API' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiParam({
     name: 'idx',
     description: '메시지 idx'
   })
+  @ApiBody({
+    schema: {
+      properties: {
+        status: { type: 'string' },
+      }
+    }
+  })
   async update(
     @Param('idx') idx: string,
-    @Body() updateMessageDto: UpdateMessageDto
+    @Body('status') status: string
   ) {
-    return await this.messageService.update(+idx, updateMessageDto);
+    return await this.messageService.update(+idx, status);
   }
 
   // @Delete(':id')
