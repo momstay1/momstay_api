@@ -333,10 +333,16 @@ export class MessageService {
     return message;
   }
 
-  async update(idx: number, status: string, tmpl: string) {
+  async update(idx: number, status?: string, tmpl?: string) {
+    if (!status && !tmpl) {
+      throw new NotFoundException('message.service.update: 수정할 정보가 없습니다.');
+    }
+    const set = {};
+    if (status) set['status'] = status;
+    if (tmpl) set['tmpl'] = tmpl;
     await this.messageRepository.createQueryBuilder()
       .update()
-      .set({ status: +status, tmpl: tmpl })
+      .set(set)
       .where({ idx: idx })
       .execute();
   }
