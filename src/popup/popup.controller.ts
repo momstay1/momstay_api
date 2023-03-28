@@ -12,6 +12,7 @@ import { CreatePopupDto } from './dto/create-popup.dto';
 import { UpdatePopupDto } from './dto/update-popup.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiConsumes,
   ApiOperation,
   ApiParam,
@@ -23,6 +24,7 @@ import {
   UploadedFiles,
   UseInterceptors,
   Query,
+  HttpCode,
 } from '@nestjs/common/decorators';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
@@ -90,13 +92,22 @@ export class PopupController {
     return await this.popupService.update(+idx, updatePopupDto, files);
   }
 
-  /**
-   * [팝업 삭제 구현]
-   * TODO Idx 파라미터 체크
-   * TODO DB에서 전달받은 Idx 데이터의 status 변경 요청 (논리 삭제)
-   */
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return await this.popupService.remove(+id);
+  @Delete()
+  @ApiOperation({ summary: '팝업 삭제 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiBody({
+    description: 'popup idx를 배열로 전달 ex) [1,2,3]',
+    schema: {
+      properties: {
+        idxs: {
+          example: [],
+        },
+      },
+    },
+  })
+  @HttpCode(204)
+  async statusUpdate(@Body('idxs') idxs: []): Promise<void> {
+    await this.popupService.statusUpdate(idxs);
   }
 }

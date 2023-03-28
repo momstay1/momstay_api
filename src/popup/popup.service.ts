@@ -122,7 +122,17 @@ export class PopupService {
     return { popupRes, file_info };
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} popup`;
+  async statusUpdate(idxs: []) {
+    if (idxs.length <= 0) {
+      throw new NotFoundException('삭제할 정보가 없습니다.');
+    }
+
+    // 팝업 정보 가져오기
+    await this.popupRepository
+      .createQueryBuilder()
+      .update()
+      .set({ status: deleteStatus })
+      .where('idx IN (:idxs)', { idxs: idxs })
+      .execute();
   }
 }
