@@ -17,6 +17,7 @@ import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { ProfileUserDto } from 'src/users/dto/profile-user.dto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { UsersService } from 'src/users/users.service';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { UsersEntity } from './entities/user.entity';
 
 @Controller('admin/users')
@@ -38,10 +39,10 @@ export class AdminUsersController {
   ], multerOptions()))
   @ApiConsumes('multipart/form-data')
   async create(
-    @Body() createUserDto: CreateUserDto,
+    @Body() createAdminUserDto: CreateAdminUserDto,
     @UploadedFiles() files: Array<Express.Multer.File>
   ) {
-    const user = await this.usersService.create(createUserDto, files);
+    const user = await this.usersService.create(createAdminUserDto, files);
     return user;
   }
 
