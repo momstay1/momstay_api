@@ -37,6 +37,10 @@ export class UserDormantService {
       .take((take || 10))
       .getManyAndCount();
 
+    for (const key in results) {
+      results[key].userInfo = JSON.parse(results[key].userInfo);
+    }
+
     const data = new Pagination({
       results,
       total,
