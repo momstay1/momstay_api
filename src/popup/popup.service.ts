@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
@@ -18,9 +22,16 @@ export class PopupService {
     private fileService: FileService,
   ) {}
   async create(createPopupDto: CreatePopupDto, files) {
+    // popup id 중복체크
+    const popupChk = await this.checkPopupIdExists(createPopupDto.id);
+    if (popupChk) {
+      throw new UnprocessableEntityException('popup.service.create: 아이디가 중복 됩니다.');
+    }
+
     // 팝업 데이터 가져오기
     const popup_data = {
       status: get(createPopupDto, 'status'),
+      id: get(createPopupDto, 'id'),
       title: get(createPopupDto, 'title'),
       page: get(createPopupDto, 'page'),
       startPeriod: get(createPopupDto, 'startPeriod'),
@@ -60,19 +71,6 @@ export class PopupService {
     return { data };
   }
 
-  async findOneIdx(idx: number) {
-    if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
-    }
-    const popup = await this.popupRepository.findOne({
-      where: { idx },
-    });
-    if (!get(popup, 'idx')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
-    }
-    return popup;
-  }
-
   async findOne(idx: number) {
     const popup = await this.findOneIdx(idx);
 
@@ -88,10 +86,75 @@ export class PopupService {
         true,
       );
     } catch (error) {
-      console.log('후기 상세 이미지 파일 없음');
+      console.log('팝업 상세 이미지 파일 없음');
     }
 
     return { popup, file_info };
+  }
+
+  async getPopup(id: string, page: string) {
+    const popup = await this.findByIdOrPage(id, page);
+    const popup_idxs = popup.map((e) => e.idx);
+
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(
+        ['popupImg'],
+        popup_idxs,
+      );
+      file_info = commonUtils.getArrayKey(
+        file_info,
+        ['file_foreign_idx', 'file_category'],
+        true,
+      );
+    } catch (error) {
+      console.log('팝업 상세 이미지 파일 없음');
+    }
+
+    return { popup, file_info };
+  }
+
+  async findOneIdx(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('popup.service.findOneIdx: 잘못된 정보 입니다.');
+    }
+    const popup = await this.popupRepository.findOne({
+      where: { idx },
+    });
+    if (!get(popup, 'idx')) {
+      throw new NotFoundException(
+        'popup.service.findOneIdx: 정보를 찾을 수 없습니다.',
+      );
+    }
+    return popup;
+  }
+
+  async findByIdOrPage(id: string, page: string) {
+    if (!id && !page) {
+      throw new NotFoundException(
+        'popup.service.findByIdOrPage: 잘못된 정보 입니다.',
+      );
+    }
+    const where = {
+      status: 2,
+    };
+    if (id) {
+      where['id'] = id;
+    }
+    if (page) {
+      where['page'] = page;
+    }
+
+    const popup = await this.popupRepository.find({
+      where: where,
+    });
+
+    if (popup.length === 0) {
+      throw new NotFoundException(
+        'popup.service.findByIdOrPage: 정보를 찾을 수 없습니다.',
+      );
+    }
+    return popup;
   }
 
   async update(idx: number, updatePopupDto: UpdatePopupDto, files) {
@@ -123,7 +186,9 @@ export class PopupService {
 
   async delete(idxs: []) {
     if (idxs.length <= 0) {
-      throw new NotFoundException('삭제할 정보가 없습니다.');
+      throw new NotFoundException(
+        'popup.service.delete: 삭제할 정보가 없습니다.',
+      );
     }
 
     // 팝업 정보 가져오기
@@ -132,5 +197,9 @@ export class PopupService {
       .delete()
       .where('idx IN (:idxs)', { idxs: idxs })
       .execute();
+  }
+
+  private async checkPopupIdExists(id: string) {
+    return await this.popupRepository.findOne({ id: id });
   }
 }

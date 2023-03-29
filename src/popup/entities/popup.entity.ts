@@ -18,6 +18,13 @@ export class PopupEntity {
   @ApiProperty({ description: '팝업 사용여부' })
   status: number;
 
+  @Column({
+    default: '',
+    comment: '팝업 아이디 (사용자단에서 팝업 호출 시 사용)',
+  })
+  @ApiProperty({ description: '팝업 id' })
+  id: string;
+
   @Column({ default: '', comment: '팝업명' })
   @ApiProperty({ description: '팝업명' })
   title: string;
