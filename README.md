@@ -48,7 +48,8 @@ master 브랜치로 이동후 develop 브랜치와 merge 후 npm run build 실�
 [master] git merge develop<br>
 [master] npm run build<br>
 [master] git add .<br>
-[master] git purh origin master<br>
+[master] git commit -m "npm run build"<br>
+[master] git push origin master<br>
 
 서버접속<br>
 su momstay_api<br>
