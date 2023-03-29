@@ -12,10 +12,10 @@ import { UsersEntity } from 'src/users/entities/user.entity';
 export class PushNotificationController {
   constructor(private readonly pushNotificationService: PushNotificationService) { }
 
-  @Post()
-  create(@Body() createPushNotificationDto: CreatePushNotificationDto) {
-    return this.pushNotificationService.create(createPushNotificationDto);
-  }
+  // @Post()
+  // create(@Body() createPushNotificationDto: CreatePushNotificationDto) {
+  //   return this.pushNotificationService.create(createPushNotificationDto);
+  // }
 
   @Get('test')
   @ApiOperation({
@@ -125,18 +125,18 @@ export class PushNotificationController {
     return { ...data };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pushNotificationService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.pushNotificationService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePushNotificationDto: UpdatePushNotificationDto) {
-    return this.pushNotificationService.update(+id, updatePushNotificationDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updatePushNotificationDto: UpdatePushNotificationDto) {
+  //   return this.pushNotificationService.update(+id, updatePushNotificationDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pushNotificationService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.pushNotificationService.remove(+id);
+  // }
 }

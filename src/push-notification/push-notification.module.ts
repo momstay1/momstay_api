@@ -5,6 +5,7 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PushHistoryEntity } from './entities/push-history.entity';
 import { UsersModule } from 'src/users/users.module';
+import { AdminPushNotificationController } from './admin-push-notification.controller';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { UsersModule } from 'src/users/users.module';
     HttpModule,
     UsersModule
   ],
-  controllers: [PushNotificationController],
+  controllers: [PushNotificationController, AdminPushNotificationController],
   providers: [PushNotificationService],
   exports: [PushNotificationService]
 })

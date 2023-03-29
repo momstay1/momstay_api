@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios/dist';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from 'src/config/config.service';
 import { CreatePushNotificationDto } from './dto/create-push-notification.dto';
 import { UpdatePushNotificationDto } from './dto/update-push-notification.dto';
@@ -18,6 +18,7 @@ import { DeviceEntity } from 'src/device/entities/device.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { commonUtils } from 'src/common/common.utils';
 import { UsersService } from 'src/users/users.service';
+import * as moment from 'moment';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
@@ -64,7 +65,7 @@ export class PushNotificationService {
       push_history_data['userIdx'] = userInfo['idx'];
     }
     const pushHistory = await this.pushHistoryRepository.create(push_history_data);
-    await this.pushHistoryRepository.save(pushHistory);
+    return await this.pushHistoryRepository.save(pushHistory);
   }
 
   private async sendFcmMessage(fcmMessage) {
@@ -103,8 +104,42 @@ export class PushNotificationService {
     return tokens.access_token;
   }
 
-  create(createPushNotificationDto: CreatePushNotificationDto) {
-    return 'This action adds a new pushNotification';
+  async create(createPushNotificationDto: CreatePushNotificationDto) {
+    if (!createPushNotificationDto.topic && !createPushNotificationDto.userIdx) {
+      throw new UnprocessableEntityException('push-notification.service.create: 처리 할 수 없습니다.');
+    }
+    const message = {
+      token: '',
+      topic: '',
+    }
+    const notifications = {
+      title: createPushNotificationDto.title,
+      body: '',
+      // data: {}
+    };
+    if (createPushNotificationDto.topic) {
+      message['topic'] = createPushNotificationDto.topic;
+    }
+    let userInfo;
+    if (createPushNotificationDto.userIdx) {
+      userInfo = await this.userService.findIdx(+createPushNotificationDto.userIdx);
+      message['token'] = userInfo.device.token;
+      message['topic'] = '';
+    }
+    if (createPushNotificationDto.content) {
+      notifications['body'] = createPushNotificationDto.content;
+    }
+    message['notification'] = notifications;
+    let response;
+    try {
+      response = await this.sendFcmMessage({ message });
+    } catch (error) {
+      response = error.response;
+    }
+
+    const pushHistory = await this.historySave(response, userInfo);
+
+    return { pushHistory };
   }
 
   async findAll(options: PaginationOptions, search: string[], order: string, userInfo?: UsersEntity) {
@@ -115,7 +150,6 @@ export class PushNotificationService {
       // 회원 정보 가져오기
       user = await this.userService.findId(get(userInfo, 'id'));
     }
-
 
     const where = commonUtils.searchSplit(search);
     const topic = ['all', 'marketing'];
@@ -153,8 +187,48 @@ export class PushNotificationService {
     return { data };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pushNotification`;
+  async adminFindAll(options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const where = commonUtils.searchSplit(search);
+    where['year'] = get(where, 'year', moment().format('YYYY'))
+    where['month'] = get(where, 'month', moment().format('MM'))
+
+    const alias = 'push';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
+    const [results, total] = await this.pushHistoryRepository.createQueryBuilder('push')
+      .where(qb => {
+        qb.where('`push`.`createdAt` >= :min_createdAt', { min_createdAt: where['year'] + '-' + where['month'] + '-01' })
+        qb.andWhere('`push`.`createdAt` <= :max_createdAt', { max_createdAt: where['year'] + '-' + where['month'] + '-31' })
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const data = new Pagination({
+      results,
+      total,
+      page,
+    });
+
+    return { data };
+  }
+
+  async findOne(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('push-notification.service.findOne: 처리 할 수 없습니다.');
+    }
+    const pushHistory = await this.pushHistoryRepository.findOne({
+      where: { idx: idx }
+    });
+    if (!get(pushHistory, 'idx', '')) {
+      throw new NotFoundException('push-notification.service.findOne: 조회된 데이터가 없습니다.');
+    }
+
+    return pushHistory;
   }
 
   update(id: number, updatePushNotificationDto: UpdatePushNotificationDto) {
