@@ -18,6 +18,7 @@ import * as zl from 'zip-lib';
 import * as fs from "fs";
 import * as sharp from "sharp";
 import * as moment from 'moment';
+import { commonUtils } from 'src/common/common.utils';
 const AWS = require('aws-sdk');
 
 const storage_url = 'https://kr.object.ncloudstorage.com';
@@ -40,6 +41,12 @@ const params = {
   MaxKeys: MAX_KEYS,
   FetchOwner: true
 };
+const watermarkCategory = [
+  'lodgingDetailImg',
+  'mealsImg',
+  'roomDetailImg',
+  'site_og'
+];
 
 // const sharp = require('sharp');
 const img_url = '/file/img/';
@@ -56,21 +63,13 @@ export class FileService {
   }
 
   async uploadImg(files: Express.Multer.File[]) {
-    console.log({ files });
-    console.log(files['img']);
-    // 파일 업로드2
+    const filesInfo = commonUtils.getArrayKey(files, ['fieldname'], true);
+    return await this.fileInfoInsert(filesInfo, 1);
+  }
 
-    // let object_name = 'sample-folder/';
-
-    // upload file
-    // await S3.putObject({
-    //   Bucket: bucket_name,
-    //   Key: 'momstay/2023-02/7f89d7fd-3552-4d83-8fff-0442653a4fc7.png',
-    //   ACL: 'public-read',
-    //   // ACL을 지우면 전체 공개되지 않습니다.
-    //   Body: fs.createReadStream('data/files/2023-02/7f89d7fd-3552-4d83-8fff-0442653a4fc7.png'),
-    //   ContentType: 'image/jpeg'
-    // }).promise();
+  async uploadTempImg(files: Express.Multer.File[]) {
+    const filesInfo = commonUtils.getArrayKey(files, ['fieldname'], true);
+    return await this.fileInfoInsert(filesInfo, 0);
   }
 
   async ckeditorUploadImg(file: Express.Multer.File) {
@@ -254,6 +253,16 @@ export class FileService {
         }
 
       }
+      if (fs.existsSync(files[key].file_watermark_name)) {
+        // 파일이 존재하면 true 그렇지 않은 경우 false 반환
+        try {
+          fs.unlinkSync(files[key].file_watermark_path);
+        } catch (error) {
+          console.log('-------------------삭제할 워터마크 파일: ' + files[key].file_watermark_name);
+          console.log('-------------------없음');
+        }
+
+      }
     }
   }
 
@@ -268,8 +277,8 @@ export class FileService {
     for (const i in files) {
       file_category.push(i); // 저장 후 조회할 파일 카테고리 정보
       for (const j in files[i]) {
-        const raw_name = files[i][j].filename.split('.')[0];
-        files_data.push({
+        const raw_name = files[i][j].filename.split('.');
+        const file_data = {
           file_category: i,
           file_foreign_idx: foreign_idx,
           file_name: files[i][j].filename,
@@ -277,10 +286,12 @@ export class FileService {
           file_path: files[i][j].destination,
           file_full_path: files[i][j].path,
           file_storage_path: storage_url + '/' + bucket_name + '/' + folder + files[i][j].filename,
+          // file_watermark_storage_path: storage_url + '/' + bucket_name + '/' + folder + watermark_name,
+          // file_watermark_path: files[i][j].destination + '/' + watermark_name,
           file_html_path: '',
-          file_html_full_path: img_url + raw_name,
+          file_html_full_path: img_url + raw_name[0],
           file_html_thumb_path: '',
-          file_raw_name: raw_name,
+          file_raw_name: raw_name[0],
           file_orig_name: files[i][j].originalname,
           file_client_name: files[i][j].originalname,
           file_ext: path.extname(files[i][j].originalname),
@@ -291,15 +302,25 @@ export class FileService {
           file_image_type: '',
           file_image_size_str: '',
           file_order: base_order * order,
-        });
+        }
         order++;
-        console.log(files[i][j].originalname);
+        // console.log(files[i][j].originalname);
+
         // 이미지 용량 및 사이즈 줄이기
         await this.sharpFile(files[i][j]);
+        if (watermarkCategory.includes(i)) {
+          const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
+          file_data['file_watermark_name'] = watermark_name;
+          file_data['file_watermark_storage_path'] = storage_url + '/' + bucket_name + '/' + folder + watermark_name;
+          file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
+          // 이미지 워터마크
+          await this.fileWatermark(file_data);
+        }
         // 스토리지 서버에 업로드
-        await this.uploadStorage(files[i][j]);
+        await this.uploadStorage(files[i][j], file_data);
         // api 서버에 파일은 제거
-        await this.deleteFile([files_data[j]]);
+        await this.deleteFile([file_data]);
+        files_data.push(file_data);
       }
 
     }
@@ -316,10 +337,8 @@ export class FileService {
   }
 
   // 스토리지 서버에 업로드
-  async uploadStorage(file) {
+  async uploadStorage(file, file_data) {
     const folder = 'momstay/' + moment().format('YYYY-MM') + '/';
-    console.log('uploadStorage', file.path);
-    console.log('uploadStorage', file.name);
     // upload file
     await S3.putObject({
       Bucket: bucket_name,
@@ -329,6 +348,18 @@ export class FileService {
       Body: fs.createReadStream(file.path),
       ContentType: file.mimetype
     }).promise();
+
+    if (get(file_data, 'file_watermark_name', '')) {
+      // watermark file upload
+      await S3.putObject({
+        Bucket: bucket_name,
+        Key: folder + file_data.file_watermark_name,
+        ACL: 'public-read',
+        // ACL을 지우면 전체 공개되지 않습니다.
+        Body: fs.createReadStream(file.destination + '/' + file_data.file_watermark_name),
+        ContentType: file.mimetype
+      }).promise();
+    }
   }
 
   isImage(type) {
@@ -367,8 +398,8 @@ export class FileService {
 
   // 이미지 용량 및 사이즈 축소
   async sharpFile(file) {
-    const fileBuffer = fs.readFileSync(file.path);
-    const image = await sharp(fileBuffer)
+    // const fileBuffer = fs.readFileSync(file.destination + '/' + filename);
+    const image = await sharp(file.path)
     const { format, width, height } = await image.metadata();
 
     if (width >= 1200) {
@@ -382,6 +413,23 @@ export class FileService {
       .toFile(file.path, (err, info) => {
         console.log(`파일 압축 info :${JSON.stringify(info, null, 2)}`);
         console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);
+      })
+      .toBuffer()
+  }
+
+  // 이미지 워터마크
+  async fileWatermark(file_data) {
+    console.log(file_data.file_full_path);
+    const image = await sharp(file_data.file_full_path)
+    const watermark = await sharp('./src/file/watermark/watermark.png').toBuffer();
+
+    const watermarked = await image
+      .composite([{
+        input: watermark,
+        gravity: 'southeast', // 워터마크 위치 오른쪽 밑
+      }])
+      .toFile(file_data.file_watermark_path, (err, info) => {
+        console.log(`워터마크된 이미지 info : ${JSON.stringify(info, null, 2)}`);
       })
       .toBuffer()
   }

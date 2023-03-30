@@ -14,13 +14,14 @@ import {
 import { FileService } from './file.service';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
-import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { ckeditorMulterOptions } from 'src/common/common.ckeditor';
 
 @Controller('file')
+@ApiTags('파일 API')
 export class FileController {
   constructor(
     private readonly fileService: FileService,
@@ -45,14 +46,31 @@ export class FileController {
   //   return res.sendFile(path.join(commonContants.ckeditor_upload_path, 'ckeditor', name));
   // }
 
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'img', maxCount: 10 },
-  ], multerOptions()))
+  @Post('upload')
+  @ApiOperation({ summary: '이미지 업로드 API' })
+  @UseInterceptors(AnyFilesInterceptor(multerOptions()))
   @ApiConsumes('multipart/form-data')
-  @Post('upload1')
-  async uploadImg1(@UploadedFiles() files: Array<Express.Multer.File>) {
+  async uploadImg(@UploadedFiles() files: Array<Express.Multer.File>) {
+    console.log(files);
     return this.fileService.uploadImg(files);
   }
+
+  @Post('upload/temp')
+  @ApiOperation({ summary: '임시 파일 업로드 API' })
+  @UseInterceptors(AnyFilesInterceptor(multerOptions()))
+  @ApiConsumes('multipart/form-data')
+  async uploadTempImg(@UploadedFiles() files: Array<Express.Multer.File>) {
+    return this.fileService.uploadTempImg(files);
+  }
+
+  // @UseInterceptors(FileFieldsInterceptor([
+  //   { name: 'img', maxCount: 10 },
+  // ], multerOptions()))
+  // @ApiConsumes('multipart/form-data')
+  // @Post('upload1')
+  // async uploadImg1(@UploadedFiles() files: Array<Express.Multer.File>) {
+  //   return this.fileService.uploadImg(files);
+  // }
 
   @Get('img/:name')
   @ApiOperation({ summary: '이미지 파일 API' })
