@@ -181,7 +181,7 @@ export class UsersService {
       where: obj,
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
+    if (!get(user, 'idx', '')) {
       throw new NotFoundException('user.service.fineOne: 존재하지 않는 회원 입니다.');
     }
     return user;
@@ -195,7 +195,7 @@ export class UsersService {
       where: { id: id },
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
+    if (!get(user, 'idx', '')) {
       throw new NotFoundException('user.service.fineId: 존재하지 않는 회원 입니다.');
     }
 
@@ -213,7 +213,7 @@ export class UsersService {
       },
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
+    if (!get(user, 'idx', '')) {
       throw new NotFoundException('user.service.fineUser: 존재하지 않는 회원 입니다.');
     }
 
@@ -228,7 +228,7 @@ export class UsersService {
       where: { idx: idx },
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
+    if (!get(user, 'idx', '')) {
       throw new NotFoundException('user.service.findIdx: 존재하지 않는 회원 입니다.');
     }
 
