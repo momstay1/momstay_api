@@ -33,11 +33,11 @@ export class PopupEntity {
   @ApiProperty({ description: '노출 페이지' })
   page: string;
 
-  @Column({ type: 'date', default: '0', nullable: true, comment: '팝업 노출 시작일' })
+  @Column({ type: 'date', default: null, nullable: true, comment: '팝업 노출 시작일' })
   @ApiProperty({ description: '팝업 노출 시작일' })
   startPeriod: Date | string;
 
-  @Column({ type: 'date', default: '0', nullable: true, comment: '팝업 노출 종료일' })
+  @Column({ type: 'date', default: null, nullable: true, comment: '팝업 노출 종료일' })
   @ApiProperty({ description: '팝업 노출 종료일' })
   endPeriod: Date | string;
 

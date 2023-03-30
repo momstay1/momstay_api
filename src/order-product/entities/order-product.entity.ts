@@ -58,9 +58,9 @@ export class OrderProductEntity {
   @Column({ type: 'text', default: '' })
   cancelReason: string;
 
-  @Column({ type: 'date', default: '0', nullable: true })
+  @Column({ type: 'date', default: null, nullable: true })
   startAt: string;
-  @Column({ type: 'date', default: '0', nullable: true })
+  @Column({ type: 'date', default: null, nullable: true })
   endAt: string;
 
   @CreateDateColumn()

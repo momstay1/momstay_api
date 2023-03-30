@@ -13,9 +13,9 @@ export class MembershipHistoryEntity {
   depositor: string;
   @Column({ default: '0', comment: '멤버십 기간 (1: 1개월, 3: 3개월 ...)' })
   month: number;
-  @Column({ type: 'date', default: '0', nullable: true, comment: '멤버십 시작일' })
+  @Column({ type: 'date', default: null, nullable: true, comment: '멤버십 시작일' })
   start: string;
-  @Column({ type: 'date', default: '0', nullable: true, comment: '멤버십 종료일' })
+  @Column({ type: 'date', default: null, nullable: true, comment: '멤버십 종료일' })
   end: string;
 
 

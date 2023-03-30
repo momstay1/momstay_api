@@ -353,7 +353,7 @@ export class UsersService {
     user.countryCode = '';
     user.other = '';
     user.phone = '';
-    user.birthday = '0000-00-00';
+    user.birthday = null;
     user.oldData = '';
     user.leaveAt = new Date();
     user.marketing = '0';
@@ -369,7 +369,7 @@ export class UsersService {
     user.language = '';
     user.countryCode = '';
     user.phone = '';
-    user.birthday = '0000-00-00';
+    user.birthday = null;
     user.other = '';
     user.oldData = '';
     user.marketing = '0';

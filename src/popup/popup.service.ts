@@ -20,7 +20,7 @@ export class PopupService {
     @InjectRepository(PopupEntity)
     private popupRepository: Repository<PopupEntity>,
     private fileService: FileService,
-  ) {}
+  ) { }
   async create(createPopupDto: CreatePopupDto, files) {
     // popup id 중복체크
     const popupChk = await this.checkPopupIdExists(createPopupDto.id);
@@ -34,8 +34,8 @@ export class PopupService {
       id: get(createPopupDto, 'id'),
       title: get(createPopupDto, 'title'),
       page: get(createPopupDto, 'page'),
-      startPeriod: get(createPopupDto, 'startPeriod'),
-      endPeriod: get(createPopupDto, 'endPeriod'),
+      startPeriod: get(createPopupDto, 'startPeriod', null),
+      endPeriod: get(createPopupDto, 'endPeriod', null),
       order: get(createPopupDto, 'order', 10),
       link: get(createPopupDto, 'link'),
     };
