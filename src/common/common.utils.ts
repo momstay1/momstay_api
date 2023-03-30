@@ -150,7 +150,7 @@ export const commonUtils = {
 
           result[_pk][_sub_pk].push(arr[key]);
         } else {
-          if (isObject(result[_pk])) result[_pk] = [];
+          if (!isArray(result[_pk])) result[_pk] = [];
 
           result[_pk].push(arr[key]);
         }
