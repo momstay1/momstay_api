@@ -48,14 +48,14 @@ export class AdminMembershipController {
   }
 
   @Patch(':idx')
-  @ApiOperation({ summary: '관리자 멤버십 승인 API' })
+  @ApiOperation({ summary: '관리자 멤버십 상태 변경 API' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
-  async membershipApproval(
+  async membershipStatusChange(
     @Param('idx') idx: string,
     @Body() updateMembershipDto: UpdateMembershipDto
   ) {
-    return await this.membershipService.membershipApproval(+idx, updateMembershipDto);
+    return await this.membershipService.membershipStatusChange(+idx, updateMembershipDto);
   }
 
   // @Patch(':id')

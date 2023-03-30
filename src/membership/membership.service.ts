@@ -150,24 +150,43 @@ export class MembershipService {
   }
 
   // 관리자 멤버십 신청 승인
-  async membershipApproval(idx: number, updateMembershipDto: UpdateMembershipDto) {
-    const membershipInfo = await this.findOneIdx(idx);
-
-    if (membershipInfo['status'] == approvalStatus) {
-      throw new NotAcceptableException('이미 처리 완료된 멤버십입니다.');
+  async membershipStatusChange(idx: number, updateMembershipDto: UpdateMembershipDto) {
+    if (!get(updateMembershipDto, ['status'], '')) {
+      throw new NotAcceptableException('membership.service.membershipStatusChange: 변경 할 상태값이 없습니다.');
     }
 
-    membershipInfo['status'] = get(updateMembershipDto, 'status', approvalStatus);
-    membershipInfo['month'] = get(updateMembershipDto, 'month', membershipInfo['month']);
-    const start = moment().format('YYYY-MM-DD');
-    const end = moment().add(membershipInfo['month'], 'months').format('YYYY-MM-DD');
-    membershipInfo['start'] = start;
-    membershipInfo['end'] = end;
+    // 멤버십 정보 가져오기
+    const membershipInfo = await this.findOneIdx(idx);
+    if (membershipInfo['status'] == updateMembershipDto['status']) {
+      throw new NotAcceptableException('membership.service.membershipStatusChange: 이미 처리된 상태 입니다.');
+    }
 
+    membershipInfo['status'] = get(updateMembershipDto, 'status');
+    membershipInfo['month'] = get(updateMembershipDto, 'month', membershipInfo['month']);
+    let membershipStatus;
+    if (updateMembershipDto['status'] == approvalStatus) {
+      // 승인 상태 변경
+      const start = moment().format('YYYY-MM-DD');
+      const end = moment().add(membershipInfo['month'], 'months').format('YYYY-MM-DD');
+      membershipInfo['start'] = start;
+      membershipInfo['end'] = end;
+
+      const membership = await this.membershipHistoryRepository.save(membershipInfo);
+
+      // 호스트의 모든 숙소 membership 상태 변경
+      membershipStatus = '1';
+      await this.productService.updateMembership(membership['user']['idx'], membershipStatus);
+    } else {
+      // 요청 상태 변경
+      membershipInfo['start'] = null;
+      membershipInfo['end'] = null;
+      membershipStatus = '0';
+    }
+
+    // 멤버십 정보 변경
     const membership = await this.membershipHistoryRepository.save(membershipInfo);
 
     // 호스트의 모든 숙소 membership 상태 변경
-    const membershipStatus = '1';
     await this.productService.updateMembership(membership['user']['idx'], membershipStatus);
 
     return { membership };
