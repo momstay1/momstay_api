@@ -31,7 +31,7 @@ export class MembershipService {
     private readonly productService: ProductService,
     private readonly excelService: ExcelService,
     private readonly settingsService: SettingsService,
-  ) {}
+  ) { }
 
   async create(
     userInfo: UsersEntity,
