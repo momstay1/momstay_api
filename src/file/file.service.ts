@@ -420,12 +420,19 @@ export class FileService {
   // 이미지 워터마크
   async fileWatermark(file_data) {
     console.log(file_data.file_full_path);
-    const image = await sharp(file_data.file_full_path)
-    const watermark = await sharp('./src/file/watermark/watermark.png').toBuffer();
+    const image = await sharp(file_data.file_full_path);
+    const { width, height } = await image.metadata();
+
+    const watermark = sharp('./src/file/watermark/watermark.png');
+    const multipleNum = width < height ? 3 : 4;
+    console.log({ multipleNum });
+    // 워터마크 이미지 리사이즈
+    watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
+    const watermarkBuffer = await watermark.toBuffer();
 
     const watermarked = await image
       .composite([{
-        input: watermark,
+        input: watermarkBuffer,
         gravity: 'southeast', // 워터마크 위치 오른쪽 밑
       }])
       .toFile(file_data.file_watermark_path, (err, info) => {
@@ -468,6 +475,24 @@ export class FileService {
     }
 
     return fileIdxs;
+  }
+
+  // 임시로 만든 기능
+  // TODO: 마이그레이션 이미지 워터마크 추가해야 할 경우 이미지 다운로드 후 워터마크 추가 후 다시 업로드
+  async fileDownload() {
+    // https://kr.object.ncloudstorage.com/momstay-storage/momstay/2023-02/00b83586-ab61-4d4a-b602-79c28da12cd8.jpg
+    const object_name = 'momstay/2023-02/00b83586-ab61-4d4a-b602-79c28da12cd8.jpg';
+    const local_file_path = './src/file/tmp/test.jpg';
+    let outStream = fs.createWriteStream(local_file_path);
+    let inStream = S3.getObject({
+      Bucket: bucket_name,
+      Key: object_name
+    }).createReadStream();
+    console.log({ inStream });
+    inStream.pipe(outStream);
+    inStream.on('end', () => {
+      console.log("Download Done");
+    });
   }
 
 }

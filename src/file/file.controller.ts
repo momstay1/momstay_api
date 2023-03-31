@@ -72,11 +72,27 @@ export class FileController {
   //   return this.fileService.uploadImg(files);
   // }
 
+  @Get()
+  async test() {
+    await this.fileService.fileDownload();
+  }
+
   @Get('img/:name')
   @ApiOperation({ summary: '이미지 파일 API' })
   async getFile(@Param('name') name: string, @Res() res) {
     const file = await this.fileService.findOneName(name);
     return res.sendFile(file.file_full_path);
+  }
+
+  @Get('downloads/select')
+  @ApiOperation({ summary: '선택 이미지 파일 다운로드 API' })
+  async selectDownloadFile(@Query('file') file: string, @Res() res) {
+    const files = await this.fileService.findIndexsZip(file.split(','));
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',
+    });
+    createReadStream(files.file_path).pipe(res);
   }
 
   @Get('download/:name')
@@ -89,17 +105,6 @@ export class FileController {
       'Content-Disposition': 'attachment; filename="' + encodeURI(file.file_orig_name) + '"',
     });
     createReadStream(file.file_full_path).pipe(res);
-  }
-
-  @Get('downloads/select')
-  @ApiOperation({ summary: '선택 이미지 파일 다운로드 API' })
-  async selectDownloadFile(@Query('file') file: string, @Res() res) {
-    const files = await this.fileService.findIndexsZip(file.split(','));
-    res.set({
-      'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',
-    });
-    createReadStream(files.file_path).pipe(res);
   }
 
   @Get('downloads/:type/:place_idx')
