@@ -5,7 +5,7 @@ import { IsNumber, IsOptional, IsString, Matches } from "class-validator";
 export class CreateReviewDto {
   @Type(() => Number)
   @IsNumber()
-  @ApiProperty({ description: '후기 상태 (1: 삭제, 2: 등록)' })
+  @ApiProperty({ description: '후기 상태 (-1: 삭제, 1: 미등록, 2: 등록)' })
   readonly status: number;
   @IsOptional()
   @ApiProperty({ description: '답글 후기의 idx (첫 후기인 경우 backend에서 처리)', required: false })

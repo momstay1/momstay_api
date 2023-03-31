@@ -13,7 +13,8 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewEntity } from './entities/review.entity';
 
-const deleteStatus = 1;
+const deleteStatus = -1;
+const unregisteredStatus = 1;
 const registrationStatus = '2';
 const depthZero = 0;
 @Injectable()
@@ -95,7 +96,7 @@ export class ReviewsService {
 
     const where = commonUtils.searchSplit(search);
 
-    where['status'] = get(where, 'status', registrationStatus);
+    where['status'] = get(where, 'status', [registrationStatus]);
 
     const alias = 'review';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -148,6 +149,52 @@ export class ReviewsService {
     return { data, file_info };
   }
 
+  async adminFindAllProduct(options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', [unregisteredStatus, registrationStatus]);
+
+    const alias = 'review';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
+    // depth 0인 후기 리스트 가져오기
+    const [results, total] = await this.reviewRepository.createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('review.product', 'product')
+      .where(qb => {
+        qb.where('`review`.`status` IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] })
+        qb.andWhere('`review`.`depth` = :depth', { depth: depthZero })
+        get(where, 'star', '') && qb.andWhere('`review`.`star` IN (:star)', { star: isArray(where['star']) ? where['star'] : [where['star']] })
+        get(where, 'name', '') && qb.andWhere('`user`.`name` = :name', { name: where['name'] })
+        get(where, 'min_createdAt', '') && qb.andWhere('`review`.`createdAt` >= :min_createdAt', { min_createdAt: where['min_createdAt'] })
+        get(where, 'max_createdAt', '') && qb.andWhere('`review`.`createdAt` <= :max_createdAt', { max_createdAt: where['max_createdAt'] })
+        // qb.andWhere('`product`.`idx` = :productIdx', { productIdx: idx })
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const review_idxs = map(results, o => o.idx);
+    let file_info = {};
+    try {
+      file_info = await this.fileService.findCategoryForeignAll(['reviewImg'], review_idxs);
+      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+    } catch (error) {
+      console.log('후기 상세 이미지 파일 없음');
+    }
+
+    const data = new Pagination({
+      results,
+      total,
+      page,
+    });
+
+    return { data, file_info };
+  }
+
   async findAllUser(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
@@ -156,7 +203,7 @@ export class ReviewsService {
 
     const where = commonUtils.searchSplit(search);
 
-    where['status'] = get(where, 'status', registrationStatus);
+    where['status'] = get(where, 'status', [registrationStatus]);
 
     const alias = 'review';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -210,6 +257,7 @@ export class ReviewsService {
   }
 
   async averageStar(review: ReviewEntity) {
+    // 등록상태 && 해당 숙소의 평점 가져오기
     const star_data = await this.reviewRepository.createQueryBuilder('review')
       .select('SUM(`review`.`star`)', 'total_star')
       .addSelect('COUNT(`review`.`idx`)', 'review_cnt')
@@ -300,13 +348,53 @@ export class ReviewsService {
     return { review, file_info };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} review`;
+  async starChange(idxs: [], star: string) {
+    if (idxs.length <= 0 || !star) {
+      throw new NotFoundException('review.service.starChange: 변경할 정보가 없습니다.');
+    }
+
+    const reivews = await this.findAllIdxs(idxs);
+    if (reivews.length <= 0) {
+      throw new NotFoundException('review.service.starChange: 변경할 정보가 없습니다.');
+    }
+
+    await this.reviewRepository.createQueryBuilder()
+      .update()
+      .set({ star: +star })
+      .where("idx IN (:idxs)", { idxs: idxs })
+      .execute()
+
+    // 숙소 평균 평점 계산
+    for (const key in reivews) {
+      await this.averageStar(reivews[key]);
+    }
   }
 
-  async statusUpdate(idxs: [], userInfo: UsersEntity) {
+  async statusChange(idxs: [], status: string) {
+    if (idxs.length <= 0 || !status) {
+      throw new NotFoundException('review.service.statusChange: 변경할 정보가 없습니다.');
+    }
+
+    const reivews = await this.findAllIdxs(idxs);
+    if (reivews.length <= 0) {
+      throw new NotFoundException('review.service.statusChange: 변경할 정보가 없습니다.');
+    }
+
+    await this.reviewRepository.createQueryBuilder()
+      .update()
+      .set({ status: +status })
+      .where("idx IN (:idxs)", { idxs: idxs })
+      .execute()
+
+    // 숙소 평균 평점 계산
+    for (const key in reivews) {
+      await this.averageStar(reivews[key]);
+    }
+  }
+
+  async remove(idxs: [], userInfo: UsersEntity) {
     if (idxs.length <= 0) {
-      throw new NotFoundException('삭제할 정보가 없습니다.');
+      throw new NotFoundException('review.service.statusUpdate: 삭제할 정보가 없습니다.');
     }
 
     // 회원 정보 가져오기
@@ -316,23 +404,14 @@ export class ReviewsService {
     if (!commonUtils.isAdmin(user['group']['id'])) {
       // 일반 사용자인 경우 후기 한개씩만 삭제 가능
       if (idxs.length > 1 || reivews.length > 1) {
-        throw new UnprocessableEntityException('삭제할 수 없습니다.');
+        throw new UnprocessableEntityException('review.service.statusUpdate: 삭제할 수 없습니다.');
       }
       // 일반 사용자인 경우 자신의 후기 글인지 체크
       if (reivews[0]['user']['idx'] != user['idx']) {
-        throw new UnauthorizedException('권한이 없습니다.');
+        throw new UnauthorizedException('review.service.statusUpdate: 권한이 없습니다.');
       }
     }
 
-    await this.reviewRepository.createQueryBuilder()
-      .update()
-      .set({ status: deleteStatus })
-      .where("idx IN (:idxs)", { idxs: idxs })
-      .execute()
-
-    // 숙소 평균 평점 계산
-    for (const key in reivews) {
-      await this.averageStar(reivews[key]);
-    }
+    await this.statusChange(idxs, '' + deleteStatus);
   }
 }

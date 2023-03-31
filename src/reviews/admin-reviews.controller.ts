@@ -10,43 +10,45 @@ import { multerOptions } from 'src/common/common.file';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
 
-@Controller('reviews')
-@ApiTags('후기 API')
-export class ReviewsController {
+@Controller('admin/reviews')
+@ApiTags('후기(관리자) API')
+export class AdminReviewsController {
   constructor(private readonly reviewsService: ReviewsService) { }
 
-  @Post()
-  @ApiOperation({ summary: '후기 등록 API' })
-  @Auth(['Any'])
-  @ApiBearerAuth()
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'reviewImg', maxCount: 10 },
-  ], multerOptions()))
-  @ApiConsumes('multipart/form-data')
-  async create(
-    @GetUser() user: UsersEntity,
-    @Body() createReviewDto: CreateReviewDto,
-    @UploadedFiles() files: Array<Express.Multer.File>
-  ) {
-    return await this.reviewsService.create(user, createReviewDto, files);
-  }
+  // @Post()
+  // @ApiOperation({ summary: '후기 등록 API' })
+  // @Auth(['Any'])
+  // @ApiBearerAuth()
+  // @UseInterceptors(FileFieldsInterceptor([
+  //   { name: 'reviewImg', maxCount: 10 },
+  // ], multerOptions()))
+  // @ApiConsumes('multipart/form-data')
+  // async create(
+  //   @GetUser() user: UsersEntity,
+  //   @Body() createReviewDto: CreateReviewDto,
+  //   @UploadedFiles() files: Array<Express.Multer.File>
+  // ) {
+  //   return await this.reviewsService.create(user, createReviewDto, files);
+  // }
 
-  @Get('/test')
-  async test() {
-    // await this.reviewsService.averageStar(7);
-  }
+  // @Get('/test')
+  // async test() {
+  //   // await this.reviewsService.averageStar(7);
+  // }
 
-  @Get('/product/:idx')
+  @Get()
   @ApiOperation({
     summary: '숙소 상세 후기 리스트 조회 API',
   })
-  @ApiParam({
-    name: "idx",
-    description: 'product idx값',
-  })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiQuery({
     name: "search",
     description: 'search=status:상태값(-1:삭제|1:미등록|2:등록, 기본값:2)<br>'
+      + 'search=star:별점<br>'
+      + 'search=name:작성자명<br>'
+      + 'search=min_createdAt:최소날짜<br>'
+      + 'search=max_createdAt:최대날짜<br>'
     ,
     required: false
   })
@@ -56,8 +58,7 @@ export class ReviewsController {
     ,
     required: false
   })
-  async findAllProduct(
-    @Param('idx') idx: number,
+  async adminFindAllProduct(
     @Query('take') take: number,
     @Query('page') page: number,
     @Query('search') search: string[],
@@ -66,7 +67,7 @@ export class ReviewsController {
     const {
       data,
       file_info
-    } = await this.reviewsService.findAllProduct(idx, { take, page }, search, order);
+    } = await this.reviewsService.adminFindAllProduct({ take, page }, search, order);
 
     return {
       ...data,
@@ -81,12 +82,72 @@ export class ReviewsController {
     return await this.reviewsService.findOne(+idx);
   }
 
+  @Patch('status')
+  @ApiOperation({
+    summary: '후기 상태 일괄 수정 API',
+    description: ''
+  })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiBody({
+    description: 'review idx를 배열로 전달 ex) [1,2,3]<br>'
+      + 'status 값 (-1: 삭제|1: 미등록|2: 등록)<br>'
+      + '삭제 api 대신 사용 가능'
+    ,
+    schema: {
+      properties: {
+        idxs: {
+          example: [],
+        },
+        status: {
+          example: '',
+        }
+      }
+    }
+  })
+  async statusChange(
+    @Body('idxs') idxs: [],
+    @Body('status') status: string,
+  ) {
+    return await this.reviewsService.statusChange(idxs, status);
+  }
+
+  @Patch('star')
+  @ApiOperation({
+    summary: '후기 평점 일괄 수정 API',
+    description: ''
+  })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiBody({
+    description: 'review idx를 배열로 전달 ex) [1,2,3]<br>'
+      + 'star 값 (0 ~ 10)<br>'
+      + '평점 5점 = 10, 평점 4점 = 8 ...'
+    ,
+    schema: {
+      properties: {
+        idxs: {
+          example: [],
+        },
+        star: {
+          example: '',
+        }
+      }
+    }
+  })
+  async starChange(
+    @Body('idxs') idxs: [],
+    @Body('star') star: string,
+  ) {
+    return await this.reviewsService.starChange(idxs, star);
+  }
+
   @Patch(':idx')
   @ApiOperation({
     summary: '후기 수정 API',
     description: 'status, star, content, reviewImg 만 변경 가능'
   })
-  @Auth(['Any'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiParam({ name: 'idx', description: 'review idx' })
   @UseInterceptors(FileFieldsInterceptor([
@@ -104,12 +165,11 @@ export class ReviewsController {
 
   @Delete()
   @ApiOperation({ summary: '후기 삭제 API' })
-  @Auth(['Any'])
+  @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiBody({
     description: 'review idx를 배열로 전달 ex) [1,2,3]<br>'
       + '관리자 계정의 경우 여러 후기 한번에 삭제 가능<br>'
-      + '일반 사용자의 경우 1개만 삭제 가능'
     ,
     schema: {
       properties: {
