@@ -36,7 +36,7 @@ import { createReadStream } from 'fs';
 @Controller('admin/reviews')
 @ApiTags('후기(관리자) API')
 export class AdminReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) { }
 
   // @Post()
   // @ApiOperation({ summary: '후기 등록 API' })
