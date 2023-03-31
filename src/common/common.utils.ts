@@ -1,14 +1,14 @@
-import { INestApplication } from "@nestjs/common";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { filter, get, isArray, isEmpty, isObject, map } from "lodash";
-import { usersConstant } from "src/users/constants";
+import {INestApplication} from '@nestjs/common';
+import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
+import {filter, get, isArray, isEmpty, isObject, map} from 'lodash';
+import {usersConstant} from 'src/users/constants';
 
 export const commonUtils = {
   getConstants: (str: string): any => {
     let constants;
     switch (str) {
       case 'user':
-        constants = usersConstant
+        constants = usersConstant;
         break;
     }
     return constants;
@@ -26,14 +26,17 @@ export const commonUtils = {
   removePrefix: (str: string): string => {
     const strArr = str.split('_');
     delete strArr[0];
-    return strArr
-      .filter(element => element != null)
-      .join('_');
+    return strArr.filter((element) => element != null).join('_');
   },
   sanitizeEntity: (array, privateElement): any[] => {
     const arr: any = {};
     for (const key in array) {
-      if (isObject(array[key]) && (!key.includes('createdAt') && !key.includes('updatedAt') && !key.includes('shooting_day'))) {
+      if (
+        isObject(array[key]) &&
+        !key.includes('createdAt') &&
+        !key.includes('updatedAt') &&
+        !key.includes('shooting_day')
+      ) {
         arr[key] = commonUtils.sanitizeEntity(array[key], privateElement);
       } else {
         if (privateElement.indexOf(key) >= 0) {
@@ -54,7 +57,11 @@ export const commonUtils = {
       .build();
 
     const document = SwaggerModule.createDocument(app, options);
-    SwaggerModule.setup('api-docs', app, document);
+    SwaggerModule.setup('api-docs', app, document, {
+      swaggerOptions: {
+        docExpansion: 'none',
+      },
+    });
   },
   searchSplit(search: string[]) {
     const where = {};
@@ -63,10 +70,10 @@ export const commonUtils = {
       map(search, (obj) => {
         if (obj) {
           const key_val = obj.split(':');
-          if (key_val[1].indexOf(",") === -1) {
+          if (key_val[1].indexOf(',') === -1) {
             where[key_val[0]] = key_val[1];
           } else {
-            where[key_val[0]] = key_val[1].split(",");
+            where[key_val[0]] = key_val[1].split(',');
           }
         }
       });
@@ -116,8 +123,9 @@ export const commonUtils = {
     return Math.random().toString().substr(2, num);
   },
   isMobile(agent: string): string {
-    const mobileStr = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|iPad/i;
-    return mobileStr.test(agent) ? "mobile" : "pc";
+    const mobileStr =
+      /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|iPad/i;
+    return mobileStr.test(agent) ? 'mobile' : 'pc';
   },
   getArrayKey(arr: any, pks: string | string[], is_push: boolean) {
     const result = {};
@@ -196,8 +204,8 @@ export const commonUtils = {
       all: 'all', // 전체 푸시 발송
       marketing: 'marketing', // 마케팅 동의한 회원만 발송
       service: 'service', // 서비스 동의한 회원만 발송
-      admin: 'admin'  // 관리자에게만 발송
-    }
+      admin: 'admin', // 관리자에게만 발송
+    };
 
     return get(data, key, '');
   },
@@ -206,5 +214,5 @@ export const commonUtils = {
   },
   isRoot(groupId: string) {
     return ['root'].includes(groupId);
-  }
+  },
 };
