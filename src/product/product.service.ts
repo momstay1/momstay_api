@@ -379,14 +379,14 @@ export class ProductService {
 
   async findOneIdx(idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('product.service.findOneIdx: 잘못된 정보 입니다.');
     }
     const product = await this.productRepository.findOne({
       where: { idx: idx },
       relations: ['productInfo', 'user', 'metro', 'college']
     });
     if (!get(product, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('product.service.findOneIdx: 정보를 찾을 수 없습니다.');
     }
     return product;
   }

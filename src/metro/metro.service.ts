@@ -49,13 +49,13 @@ export class MetroService {
 
   async findAllIdx(idxs: number[]) {
     if (idxs.length <= 0) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('metro.service.findAllIdx: 잘못된 정보 입니다.');
     }
     const metro = await this.metroRepository.find({
       where: { idx: In(idxs) }
     });
     if (metro.length <= 0) {
-      throw new NotFoundException('조회된 지하철 정보가 없습니다.');
+      throw new NotFoundException('metro.service.findAllIdx: 조회된 지하철 정보가 없습니다.');
     }
 
     return metro;
