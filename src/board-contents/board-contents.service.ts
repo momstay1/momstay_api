@@ -285,7 +285,7 @@ export class BoardContentsService {
     const boardContent = await this.updateBoardContent(bc)
 
     // 카테고리 수정
-    if (updateBoardContentDto.category.length) {
+    if (get(updateBoardContentDto, ['category', 'length']) > 0) {
       // 카테고리정보 가져오기 (bcat_idx를 키값으로 재정렬)
       const bcats = await this.bcatsService.searching({
         where: { bcat_id: In(updateBoardContentDto.category) }
