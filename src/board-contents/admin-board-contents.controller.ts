@@ -114,7 +114,7 @@ export class AdminBoardContentsController {
   @Patch(':bc_idx')
   @ApiOperation({ summary: '관리자 게시글 수정 API' })
   @ApiBearerAuth()
-  @Auth(['root'])
+  @Auth(['root', 'admin'])
   async update(
     @GetUser() user: AdminUsersEntity,
     @Param('bc_idx') bc_idx: number,
