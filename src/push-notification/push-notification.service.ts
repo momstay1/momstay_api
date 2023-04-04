@@ -340,7 +340,7 @@ export class PushNotificationService {
       await this.historySave(response, hostUser);
     }
   }
-  // 게스트 방문예약 취소시 호스트에게 push 발송
+  // 게스트 방문예약 확정시 호스트에게 push 발송
   async guestReservationConfirmationPush(hostUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(hostUser, ['device']));
     if (isApp && hostUser['device']['notification'] == notificationStatus) {

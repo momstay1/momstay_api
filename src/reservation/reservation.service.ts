@@ -267,6 +267,7 @@ export class ReservationService {
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.guestReservationConfirmationPush(user, reservation);
     }
+    // TODO: 알림톡 기능 (호스트에게 확정 알림톡, 게스트 자신에게 후기 작성 알림톡)
   }
 
   // 방문 예약 승인(호스트)
@@ -283,6 +284,8 @@ export class ReservationService {
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.hostReservationApprovalPush(user, reservation);
     }
+
+    // TODO: 알림톡 기능 (게스트에게 승인 알림톡)
   }
 
   // 방문 예약 승인(호스트)
@@ -299,6 +302,8 @@ export class ReservationService {
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.hostReservationApprovalPush(user, reservation);
     }
+
+    // TODO: 알림톡 기능 (겟트에게 거정 알림톡)
   }
 
   // 방문 예약 취소(게스트)
@@ -316,6 +321,8 @@ export class ReservationService {
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.guestReservationCancelPush(user, reservation);
     }
+
+    // TODO: 알림톡 기능 (호스트에게 취소 알림톡)
   }
 
   // 방문 예약 거절(호스트)
@@ -333,6 +340,8 @@ export class ReservationService {
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.hostReservationCancelPush(user, reservation);
     }
+
+    // TODO: 알림톡 기능 (게스트에게 거절 알림톡)
   }
 
   // 이미 처리된 상태인지 체크

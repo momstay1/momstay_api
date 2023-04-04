@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles, HttpCode } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -40,7 +40,7 @@ export class AdminProductController {
       + 'search=user_idx:회원idx(사용안함)<br>'
       + 'search=title:숙소이름<br>'
       + 'search=name:호스트이름<br>'
-      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+      + 'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
     required: false
   })
   @ApiQuery({
@@ -76,8 +76,12 @@ export class AdminProductController {
     return this.productService.update(+id, updateProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @Delete(':idx')
+  @ApiOperation({ summary: '숙소 삭제 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  async remove(@Param('idx') idx: string) {
+    await this.productService.remove(+idx);
   }
 }

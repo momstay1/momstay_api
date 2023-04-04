@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NotFoundException } from '@nestjs/common/exceptions';
+import { NotAcceptableException, NotFoundException } from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get, isArray, isEmpty, isObject, keyBy, map, sortBy, union } from 'lodash';
 import { CollegeService } from 'src/college/college.service';
@@ -14,8 +14,10 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
 import * as moment from 'moment';
+import { UsersEntity } from 'src/users/entities/user.entity';
 
 const registrationStatus = '2';
+const deleteStatus = -1;
 @Injectable()
 export class ProductService {
   constructor(
@@ -413,7 +415,27 @@ export class ProductService {
       .execute()
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async hostRemove(userIinfo, idx: number) {
+    // 회원의 숙소인이 확인
+    if (!commonUtils.isAdmin(userIinfo.group)) {
+      // 관리자가 아닌 경우
+      // 회원 정보 가져오기
+      const user = await this.userService.findId(userIinfo.id);
+      const product = await this.findOneIdx(idx);
+      if (user.idx != product.user.idx) {
+        // 방 호스트가 아닌 경우
+        throw new NotAcceptableException('product.service.hostRemove: 삭제 권한이 없습니다.');
+      }
+    }
+
+    await this.remove(idx);
+  }
+
+  async remove(idx: number) {
+    await this.productRepository.createQueryBuilder()
+      .update(ProductEntity)
+      .set({ status: deleteStatus })
+      .where(" idx = :idx", { idx: idx })
+      .execute()
   }
 }

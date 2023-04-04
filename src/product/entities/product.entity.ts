@@ -21,7 +21,7 @@ export class ProductEntity {
   @PrimaryGeneratedColumn()
   idx: number;
 
-  @Column({ default: 2, comment: '숙소 상태 (0: 미등록, 1: 미사용, 2: 사용)' })
+  @Column({ default: 2, comment: '숙소 상태 (-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)' })
   status: number;
   @Column({ default: '' })
   type: string;
