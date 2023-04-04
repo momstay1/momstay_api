@@ -13,6 +13,8 @@ import { CreatePopupDto } from './dto/create-popup.dto';
 import { UpdatePopupDto } from './dto/update-popup.dto';
 import { PopupEntity } from './entities/popup.entity';
 
+import * as moment from 'moment';
+
 const uncertifiedStatus = 1;
 @Injectable()
 export class PopupService {
@@ -20,18 +22,11 @@ export class PopupService {
     @InjectRepository(PopupEntity)
     private popupRepository: Repository<PopupEntity>,
     private fileService: FileService,
-  ) { }
+  ) {}
   async create(createPopupDto: CreatePopupDto, files) {
-    // popup id 중복체크
-    const popupChk = await this.checkPopupIdExists(createPopupDto.id);
-    if (popupChk) {
-      throw new UnprocessableEntityException('popup.service.create: 아이디가 중복 됩니다.');
-    }
-
     // 팝업 데이터 가져오기
     const popup_data = {
       status: get(createPopupDto, 'status'),
-      id: get(createPopupDto, 'id'),
       title: get(createPopupDto, 'title'),
       page: get(createPopupDto, 'page'),
       startPeriod: get(createPopupDto, 'startPeriod', null),
@@ -39,6 +34,8 @@ export class PopupService {
       order: get(createPopupDto, 'order', 10),
       link: get(createPopupDto, 'link'),
     };
+    // id 자동생성
+    popup_data['id'] = await this.popupCreateCode();
 
     // 데이터 DB 저장
     const popupEntity = await this.popupRepository.create(popup_data);
@@ -116,7 +113,9 @@ export class PopupService {
 
   async findOneIdx(idx: number) {
     if (!idx) {
-      throw new NotFoundException('popup.service.findOneIdx: 잘못된 정보 입니다.');
+      throw new NotFoundException(
+        'popup.service.findOneIdx: 잘못된 정보 입니다.',
+      );
     }
     const popup = await this.popupRepository.findOne({
       where: { idx },
@@ -197,6 +196,14 @@ export class PopupService {
       .delete()
       .where('idx IN (:idxs)', { idxs: idxs })
       .execute();
+  }
+
+  async popupCreateCode() {
+    const code =
+      moment().format('YYMMDD') + commonUtils.createCode().toUpperCase();
+    const isCode = await this.checkPopupIdExists(code);
+
+    return isCode ? this.popupCreateCode() : code;
   }
 
   private async checkPopupIdExists(id: string) {
