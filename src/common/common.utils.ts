@@ -1,7 +1,7 @@
-import {INestApplication} from '@nestjs/common';
-import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
-import {filter, get, isArray, isEmpty, isObject, map} from 'lodash';
-import {usersConstant} from 'src/users/constants';
+import { INestApplication } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { filter, get, isArray, isEmpty, isObject, map } from 'lodash';
+import { usersConstant } from 'src/users/constants';
 
 export const commonUtils = {
   getConstants: (str: string): any => {
@@ -107,7 +107,7 @@ export const commonUtils = {
     return +calcTax;
   },
   createCode(): string {
-    return Math.random().toString(36).substr(2, 11);
+    return Math.random().toString(36).substring(2, 13);
   },
   generateRandomString(num): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -120,7 +120,9 @@ export const commonUtils = {
     return result;
   },
   generateRandomNumber(num): string {
-    return Math.random().toString().substr(2, num);
+    return Math.random()
+      .toString()
+      .substring(2, num + 2);
   },
   isMobile(agent: string): string {
     const mobileStr =
