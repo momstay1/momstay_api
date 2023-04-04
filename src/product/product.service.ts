@@ -16,8 +16,10 @@ import { ProductEntity } from './entities/product.entity';
 import * as moment from 'moment';
 import { UsersEntity } from 'src/users/entities/user.entity';
 
-const registrationStatus = '2';
 const deleteStatus = -1;
+const unregisteredStatus = 0;
+const notUsedStatus = 1;
+const registrationStatus = 2;
 @Injectable()
 export class ProductService {
   constructor(
@@ -271,7 +273,7 @@ export class ProductService {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
-    where['status'] = get(where, 'status', [registrationStatus]);
+    where['status'] = get(where, 'status', [unregisteredStatus, notUsedStatus, registrationStatus]);
 
     const alias = 'product';
     let order_by = commonUtils.orderSplit(order, alias);
