@@ -6,7 +6,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Up
 export class ReservationEntity {
   @PrimaryGeneratedColumn()
   idx: number;
-  @Column({ default: 1, comment: '방문예약 상태 (1: 예약대기, 2: 예약승인, 4: 예약취소, 5: 예약거부)' })
+  @Column({ default: 1, comment: '방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)' })
   status: number;
   @Column({ type: 'date', default: null, nullable: true, comment: '방문날짜' })
   visitDate: Date | string;

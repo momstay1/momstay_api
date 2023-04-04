@@ -340,6 +340,25 @@ export class PushNotificationService {
       await this.historySave(response, hostUser);
     }
   }
+  // 게스트 방문예약 취소시 호스트에게 push 발송
+  async guestReservationConfirmationPush(hostUser: UsersEntity, reservation: ReservationEntity) {
+    const isApp = await this.isApp(get(hostUser, ['device']));
+    if (isApp && hostUser['device']['notification'] == notificationStatus) {
+      const target = {
+        token: hostUser['device']['token'],
+      }
+      const notifications = {
+        title: '방문예약 확정',
+        body:
+          reservation['productOption']['product']['title']
+          + ' '
+          + reservation['productOption']['title']
+          + ' 방문예약을 게스트가 확정했습니다.',
+      };
+      const response = await this.sendPush(target, notifications);
+      await this.historySave(response, hostUser);
+    }
+  }
   // 호스트가 방문에약 거절시 게스트에게 push 발송
   async hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));

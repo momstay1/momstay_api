@@ -12,8 +12,18 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
 
-
-const status = [1, 2, 4, 5];
+const readyStatus = 1;
+const approvalStatus = 2;
+const confirmationStatus = 3;
+const cancelStatus = 4;
+const refusalStatus = 5;
+const status = [
+  readyStatus,
+  approvalStatus,
+  confirmationStatus,
+  cancelStatus,
+  refusalStatus
+];
 @Injectable()
 export class ReservationService {
   constructor(
@@ -200,7 +210,7 @@ export class ReservationService {
 
   async findOneIdx(idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('reservation.service.findOneIdx: 잘못된 정보 입니다.');
     }
     const reservation = await this.reservationRepository.findOne({
       where: { idx: idx },
@@ -214,14 +224,14 @@ export class ReservationService {
       ]
     });
     if (!reservation.idx) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('reservation.service.findOneIdx: 정보를 찾을 수 없습니다.');
     }
     return reservation;
   }
 
   async findIdxs(idxs: number[]): Promise<Array<ReservationEntity>> {
     if (idxs.length <= 0) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('reservation.service.findIdxs: 잘못된 정보 입니다.');
     }
     const reservation = await this.reservationRepository.find({
       where: { idx: In(idxs) },
@@ -235,9 +245,44 @@ export class ReservationService {
       ]
     });
     if (reservation.length <= 0) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('reservation.service.findIdxs: 정보를 찾을 수 없습니다.');
     }
     return reservation;
+  }
+
+  // 방문 예약 확정(게스트)
+  async guestConfirmation(userInfo, idx: number) {
+    // 방문 예약 정보 가져오기
+    const reservation = await this.findOneIdx(idx);
+    if (reservation.status != approvalStatus) {
+      // 방문예약 승인 상태가 아닌 경우
+      throw new NotAcceptableException('reservation.service.guestConfirmation: 처리할 수 없습니다.');
+    }
+
+    await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
+
+    await this.changeStatus(confirmationStatus, idx);
+    // 호스트에게 방문예약 확정 push 알림 발송
+    const { user } = get(reservation, ['productOption', 'product']);
+    if (get(user, ['device', 'token'], '')) {
+      await this.pushNotiService.guestReservationConfirmationPush(user, reservation);
+    }
+  }
+
+  // 방문 예약 승인(호스트)
+  async hostApproval(userInfo, idx: number) {
+    // 방문 예약 정보 가져오기
+    const reservation = await this.findOneIdx(idx);
+    await this.processCheckStatus(reservation.status);
+
+    await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
+
+    await this.changeStatus(approvalStatus, idx);
+    // 게스트에게 방문예약 거절 push 알림 발송
+    const { user } = reservation;
+    if (get(user, ['device', 'token'], '')) {
+      await this.pushNotiService.hostReservationApprovalPush(user, reservation);
+    }
   }
 
   // 방문 예약 승인(호스트)
@@ -248,7 +293,7 @@ export class ReservationService {
 
     await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
 
-    await this.changeStatus(2, idx);
+    await this.changeStatus(approvalStatus, idx);
     // 게스트에게 방문예약 거절 push 알림 발송
     const { user } = reservation;
     if (get(user, ['device', 'token'], '')) {
@@ -264,7 +309,7 @@ export class ReservationService {
 
     await this.authCheckStatus(userInfo, reservation.user.idx);
 
-    await this.changeStatus(4, idx);
+    await this.changeStatus(cancelStatus, idx);
 
     // 호스트에게 방문예약 취소 push 알림 발송
     const { user } = get(reservation, ['productOption', 'product']);
@@ -281,7 +326,7 @@ export class ReservationService {
 
     await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
 
-    await this.changeStatus(5, idx);
+    await this.changeStatus(refusalStatus, idx);
 
     // 게스트에게 방문예약 거절 push 알림 발송
     const { user } = reservation;
@@ -292,9 +337,9 @@ export class ReservationService {
 
   // 이미 처리된 상태인지 체크
   async processCheckStatus(status) {
-    if (status != 1) {
+    if (status != readyStatus) {
       // 방문예약 대기 상태가 아닌 경우
-      throw new NotAcceptableException('이미 처리된 방문예약입니다.');
+      throw new NotAcceptableException('reservation.service.processCheckStatus: 이미 처리된 방문예약입니다.');
     }
   }
   // 상태 변경 가능한지 권한 체크
@@ -305,7 +350,7 @@ export class ReservationService {
       const user = await this.usersService.findId(id);
       if (user.idx != idx) {
         // 방 호스트가 아닌 경우
-        throw new NotAcceptableException('거부할 수 없는 방문 예약 입니다.');
+        throw new NotAcceptableException('reservation.service.authCheckStatus: 거부할 수 없는 방문 예약 입니다.');
       }
     }
   }
