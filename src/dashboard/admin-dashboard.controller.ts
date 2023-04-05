@@ -7,9 +7,9 @@ import { DashboardService } from './dashboard.service';
 import { CreateDashboardDto } from './dto/create-dashboard.dto';
 import { UpdateDashboardDto } from './dto/update-dashboard.dto';
 
-@Controller('dashboard')
+@Controller('admin/dashboard')
 @ApiTags('대시보드(관리자) API')
-export class DashboardController {
+export class AdminDashboardController {
   constructor(private readonly dashboardService: DashboardService) { }
 
   // @Post()
