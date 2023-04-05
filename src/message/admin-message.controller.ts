@@ -83,6 +83,7 @@ export class AdminMessageController {
   @ApiBody({
     schema: {
       properties: {
+        code: { type: 'string' },
         status: { type: 'string' },
         tmpl: { type: 'string' },
       }
@@ -90,10 +91,11 @@ export class AdminMessageController {
   })
   async update(
     @Param('idx') idx: string,
+    @Body('code') code: string,
     @Body('status') status: string,
     @Body('tmpl') tmpl: string
   ) {
-    return await this.messageService.update(+idx, status, tmpl);
+    return await this.messageService.update(+idx, code, status, tmpl);
   }
 
   // @Delete(':id')
