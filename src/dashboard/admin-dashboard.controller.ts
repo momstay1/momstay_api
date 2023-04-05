@@ -28,23 +28,25 @@ export class AdminDashboardController {
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiOkResponse({
-    description: 'total_cnt: 총 회원 수(게스트, 호스트 회원만 인원수 체크)<br>'
-      + 'guest_cnt: 게스트 회원 수<br>'
-      + 'host_cnt: 호스트 회원 수<br>'
-      + 'dormant_cnt: 휴면 회원 수<br>'
-      + 'new_cnt: 가입 날짜가 오늘인 회원 수<br>'
-      + 'new_host_cnt: 호스트로 변경한 날짜가 오늘인 호스트 회원 수<br>'
-      + 'new_leave_cnt: 오늘 날짜로 탈퇴한 회원 수<br>'
+    description: 'users_cnt.total_cnt: 총 회원 수(게스트, 호스트 회원만 인원수 체크)<br>'
+      + 'users_cnt.guest_cnt: 게스트 회원 수<br>'
+      + 'users_cnt.host_cnt: 호스트 회원 수<br>'
+      + 'users_cnt.dormant_cnt: 휴면 회원 수<br>'
+      + 'users_cnt.new_cnt: 가입 날짜가 오늘인 회원 수<br>'
+      + 'users_cnt.new_host_cnt: 호스트로 변경한 날짜가 오늘인 호스트 회원 수<br>'
+      + 'users_cnt.new_leave_cnt: 오늘 날짜로 탈퇴한 회원 수<br>'
     ,
     schema: {
       example: {
-        total_cnt: 'number',
-        guest_cnt: 'number',
-        host_cnt: 'number',
-        dormant_cnt: 'number',
-        new_cnt: 'number',
-        new_host_cnt: 'number',
-        new_leave_cnt: 'number',
+        users_cnt: {
+          total_cnt: 'string',
+          guest_cnt: 'string',
+          host_cnt: 'string',
+          dormant_cnt: 'string',
+          new_cnt: 'string',
+          new_host_cnt: 'string',
+          new_leave_cnt: 'string',
+        }
       }
     }
   })
@@ -62,7 +64,9 @@ export class AdminDashboardController {
     ,
     schema: {
       example: {
-        total_cnt: 'number',
+        product_cnt: {
+          total_cnt: 'string',
+        }
       }
     }
   })
@@ -84,7 +88,17 @@ export class AdminDashboardController {
     ,
     schema: {
       example: {
-        total_cnt: 'number',
+        order_cnt: {
+          payment_cnt: 'string',
+          cancel_cnt: 'string',
+          confirmed_cnt: 'string',
+        },
+        order_total_price: {
+          total_pay_price: 'string'
+        },
+        reservation_cnt: {
+          total_cnt: 'string'
+        }
       }
     }
   })
