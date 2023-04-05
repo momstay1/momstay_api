@@ -20,6 +20,9 @@ export class AdminMembershipController {
     name: "search",
     description: 'search=status:1,2<br>'
       + 'search=depositor:예금주명<br>'
+      + 'search=name:신청자명<br>'
+      + 'search=id:신청자 아이디<br>'
+      + 'search=phone:신청자 연락처<br>'
       + 'search=month:멤버십 기간(1,3,6,12)<br>'
     ,
     required: false

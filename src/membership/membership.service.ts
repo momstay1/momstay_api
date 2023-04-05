@@ -64,7 +64,7 @@ export class MembershipService {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
-    where['status'] = get(where, 'status', [1, 2, 3]);
+    where['status'] = get(where, 'status', [applicationStatus, approvalStatus, endStatus]);
 
     const alias = 'membership';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -74,7 +74,11 @@ export class MembershipService {
       .leftJoinAndSelect('membership.user', 'user')
       .where(qb => {
         qb.where('`membership`.status IN (:status)', { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] });
-        (get(where, 'depositor', '')) && qb.andWhere('`membership`.`depositor` = :depositor', { depositor: get(where, 'depositor') });
+        // (get(where, 'depositor', '')) && qb.andWhere('`membership`.`depositor` LIKE "%:depositor%"', { depositor: get(where, 'depositor') });
+        (get(where, 'depositor', '')) && qb.andWhere('`membership`.`depositor` LIKE :depositor', { depositor: '%' + get(where, 'depositor') + '%' });
+        (get(where, 'name', '')) && qb.andWhere('`user`.`name` LIKE :name', { name: '%' + get(where, 'name') + '%' });
+        (get(where, 'id', '')) && qb.andWhere('`user`.`id` LIKE :id', { id: '%' + get(where, 'id') + '%' });
+        (get(where, 'phone', '')) && qb.andWhere('`user`.`phone` LIKE :phone', { phone: '%' + get(where, 'phone') + '%' });
         (get(where, 'month', '')) && qb.andWhere('`membership`.`month` IN (:month)', { month: isArray(get(where, 'month')) ? get(where, 'month') : [get(where, 'month')] });
       })
       .orderBy(order_by)

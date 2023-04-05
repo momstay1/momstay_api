@@ -290,6 +290,7 @@ export class ProductService {
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
         (get(where, 'title', '')) && qb.andWhere('`product`.title LIKE :title', { title: '%' + get(where, 'title') + '%' });
         (get(where, 'name', '')) && qb.andWhere('`user`.name LIKE :name', { name: '%' + get(where, 'name') + '%' });
+        (get(where, 'id', '')) && qb.andWhere('`user`.id LIKE :id', { id: '%' + get(where, 'id') + '%' });
         // get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         if (get(where, 'keyword', '')) {
           qb.andWhere('(' +
