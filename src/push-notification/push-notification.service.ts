@@ -119,12 +119,13 @@ export class PushNotificationService {
     };
     if (createPushNotificationDto.topic) {
       message['topic'] = createPushNotificationDto.topic;
+      delete message['token'];
     }
     let userInfo;
     if (createPushNotificationDto.userIdx) {
       userInfo = await this.userService.findIdx(+createPushNotificationDto.userIdx);
       message['token'] = userInfo.device.token;
-      message['topic'] = '';
+      delete message['topic'];
     }
     if (createPushNotificationDto.content) {
       notifications['body'] = createPushNotificationDto.content;
