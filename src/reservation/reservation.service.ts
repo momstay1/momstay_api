@@ -383,4 +383,16 @@ export class ReservationService {
       await this.pushNotiService.adminReservationStatusChange(guestUser, hostUser, reservations[key]);
     }
   }
+
+  // 방문 예약 대시보드
+  async dashboard(month: string) {
+    const reservation_cnt = await this.reservationRepository.createQueryBuilder()
+      .select('COUNT(`idx`)', 'total_cnt')
+      .where(qb => {
+        qb.where('DATE_FORMAT(`createdAt`, "%Y-%m") = :month', { month: month })
+      })
+      .execute();
+
+    return reservation_cnt;
+  }
 }

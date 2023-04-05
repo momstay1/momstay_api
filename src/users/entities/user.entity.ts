@@ -151,4 +151,6 @@ export class UsersEntity {
   activitedAt: Date;
   @Column({ type: 'datetime', default: '0', comment: '탈퇴 처리한 날짜' })
   leaveAt: Date;
+  @Column({ type: 'datetime', default: '0', comment: '호스트로 변경된 날짜' })
+  hostAt: Date;
 }

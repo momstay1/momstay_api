@@ -238,7 +238,7 @@ export class UsersController {
     return data;
   }
 
-  // 회원 수정
+  // 회원 활동 날짜 수정
   @Patch('activity/:id')
   @ApiOperation({ summary: '회원 활동 날짜 수정 API' })
   @Auth(['Any'])

@@ -440,4 +440,12 @@ export class ProductService {
       .where(" idx = :idx", { idx: idx })
       .execute()
   }
+
+  async dashboard() {
+    const product = await this.productRepository.createQueryBuilder()
+      .select('SUM(IF(`membership` IN (1) AND `status` = 2, 1, 0))', 'total_cnt')
+      .execute();
+
+    return product;
+  }
 }

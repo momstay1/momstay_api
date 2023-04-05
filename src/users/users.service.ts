@@ -270,6 +270,10 @@ export class UsersService {
       user['certifiInfo'] = get(updateUserDto, 'certifiInfo');
 
     user['group'] = group;
+    if (user['group']['id'] == 'host') {
+      // 호스트로 변경된 경우 날짜 기록
+      user['hostAt'] = new Date(moment().format('YYYY-MM-DD HH:mm:ss'));
+    }
     if (get(updateUserDto, 'password')) {
       user['password'] = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
     }
@@ -416,6 +420,21 @@ export class UsersService {
       .execute()
   }
 
+  async dashboard() {
+    const today = moment().format('YYYY-MM-DD');
+    const user = await this.usersRepository.createQueryBuilder()
+      .select('SUM(IF(`groupidx` IN (3, 4) AND `status` = 2, 1, 0))', 'total_cnt')
+      .addSelect('SUM(IF(`groupidx` = 4 AND `status` = 2, 1, 0))', 'guest_cnt')
+      .addSelect('SUM(IF(`groupidx` = 3 AND `status` = 2, 1, 0))', 'host_cnt')
+      .addSelect('SUM(IF(`status` = 5, 1, 0))', 'dormant_cnt')
+      .addSelect('SUM(IF(Date_format(`leaveAt`, "%y-%m-%d") = "' + today + ' AND `status` = 9, 1, 0))', 'new_leave_cnt')
+      .addSelect('SUM(IF(Date_format(`hostAt`, "%y-%m-%d") = "' + today + '", 1, 0))', 'new_host_cnt')
+      .addSelect('SUM(IF(Date_format(`createdAt`, "%y-%m-%d") = "' + today + '", 1, 0))', 'new_cnt')
+      .execute();
+
+    return user;
+  }
+
   getPrivateColumn(): string[] {
     return usersConstant.privateColumn;
   }
@@ -425,6 +444,10 @@ export class UsersService {
     const addPrefixUserDto = createUserDto;
     const groupIdx = createUserDto.group ? createUserDto.group : usersConstant.default.group_idx;
     const group = await this.groupService.findOne(groupIdx);
+    if (group.id == 'host') {
+      // 호스트로 회원 가입시 호스트 날짜 기록
+      addPrefixUserDto.hostAt = new Date(moment().format('YYYY-MM-DD HH:mm:ss'));
+    }
     addPrefixUserDto.group = group;
     addPrefixUserDto.status = createUserDto.status ? +createUserDto.status : usersConstant.status.registration;
 

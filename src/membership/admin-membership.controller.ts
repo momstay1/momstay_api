@@ -8,7 +8,7 @@ import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
 
 @Controller('admin/membership')
-@ApiTags('관리자 멤버십 API')
+@ApiTags('멤버십(관리자) API')
 export class AdminMembershipController {
   constructor(private readonly membershipService: MembershipService) { }
 

@@ -29,7 +29,7 @@ import { UpdateBoardContentDto } from './dto/update-board-content.dto';
 import { BoardContentsEntity } from './entities/board-content.entity';
 
 @Controller('admin/board-contents')
-@ApiTags('관리자 게시글 API')
+@ApiTags('게시글(관리자) API')
 export class AdminBoardContentsController {
   constructor(private readonly boardContentsService: BoardContentsService) { }
 

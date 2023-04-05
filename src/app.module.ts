@@ -86,7 +86,7 @@ import { MessageModule } from './message/message.module';
     CollegeModule,
     RefreshTokenModule,
     // DefectModule,
-    // DashboardModule,
+    DashboardModule,
     SettingsModule,
     WishlistModule,
     PushNotificationModule,

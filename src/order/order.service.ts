@@ -13,11 +13,11 @@ import { OrderProductService } from 'src/order-product/order-product.service';
 import { OrderTotalService } from 'src/order-total/order-total.service';
 import { IamportService } from 'src/iamport/iamport.service';
 import { PgDataService } from 'src/pg-data/pg-data.service';
-
-import * as moment from 'moment';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { PushNotificationService } from 'src/push-notification/push-notification.service';
+
+import * as moment from 'moment';
 
 @Injectable()
 export class OrderService {
@@ -532,5 +532,19 @@ export class OrderService {
     }
 
     return response;
+  }
+
+  // 주문 대시보드
+  async dashboard(month: string) {
+    const order_cnt = await this.orderRepository.createQueryBuilder()
+      .select('SUM(IF(`status` = 2, 1, 0))', 'payment_cnt')
+      .addSelect('SUM(IF(`status` = 8, 1, 0))', 'cancel_cnt')
+      .addSelect('SUM(IF(`status` = 6, 1, 0))', 'confirmed_cnt')
+      .where(qb => {
+        qb.where('DATE_FORMAT(`createdAt`, "%Y-%m") = :month', { month: month })
+      })
+      .execute();
+
+    return order_cnt;
   }
 }
