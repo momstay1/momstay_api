@@ -335,7 +335,7 @@ export class BoardContentsService {
         qb.andWhere('`BoardContentsEntity`.`status` >= :status', { status: bcConstants.status.uncertified })
         // qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
       },
-      relations: ['user', 'board', 'bscats'],
+      relations: ['user', 'board', 'bscats', 'user.group'],
       take: take,
       skip: take * (page - 1)
     });

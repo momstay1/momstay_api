@@ -389,18 +389,25 @@ export class UsersService {
       const user_data = {
         idx: userInfo['idx'],
         status: usersConstant.status.registration,
+        type: userInfo['type'],
         activitedAt: new Date(),
         name: userInfo['name'],
         email: userInfo['email'],
         gender: userInfo['gender'],
         language: userInfo['language'],
         memo: userInfo['memo'],
+        uniqueKey: userInfo['uniqueKey'],
+        certifiInfo: userInfo['certifiInfo'],
         countryCode: userInfo['countryCode'],
         other: userInfo['other'],
         phone: userInfo['phone'],
         birthday: userInfo['birthday'],
+        oldIdx: userInfo['oldIdx'],
         oldData: userInfo['oldData'],
         marketing: userInfo['marketing'],
+        createdAt: userInfo['createdAt'],
+        leaveAt: userInfo['leaveAt'],
+        hostAt: userInfo['hostAt'],
       }
       const userEntity = await this.usersRepository.create(user_data);
       await this.usersRepository.save(userEntity);
@@ -508,14 +515,14 @@ export class UsersService {
   // }
 
   // 매일 01시 휴면 회원 처리
-  @Cron('0 0 1 * * *')
   // @Cron('*/10 * * * * *') // 테스트용 시간
+  @Cron('0 0 1 * * *')
   async dormantUser() {
     console.log('[cron] dormantUser: ', moment().format('YYYY-MM-DD HH:mm:ss'));
     const yearAgo = moment().add(-1, 'year').format('YYYY-MM-DD');
     const group = [3]; // 휴면 처리할 그룹
     const users = await this.usersRepository.createQueryBuilder('user')
-      .leftJoin('user.group', 'group')
+      .leftJoinAndSelect('user.group', 'group')
       .where(qb => {
         qb.where('group.idx IN (:group)', { group: group })
         qb.andWhere('user.status = :status', { status: usersConstant.status.registration })

@@ -190,8 +190,7 @@ export class UsersController {
   // 테스트용
   @Get('test/:id')
   async test(@Param('id') id: string) {
-    const data = await this.iamportService.getPaymentByImpUid(id);
-    // const data = await this.usersService.test(id);
+    // const data = await this.usersService.dormantRecoverytest();
     // return data;
   }
 
