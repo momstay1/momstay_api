@@ -74,13 +74,19 @@ export class AdminUsersController {
       + 'search=createdAt_lte:종료날짜<br>',
     required: false
   })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false
+  })
   async findAll(
     @GetUser() user: UsersEntity,
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]
+    @Query('search') search: string[],
+    @Query('order') order: string,
   ) {
-    const data = await this.usersService.findAll(user, { take, page }, search);
+    const data = await this.usersService.findAll(user, { take, page }, search, order);
     return { ...data };
   }
 

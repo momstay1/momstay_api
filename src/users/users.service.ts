@@ -120,7 +120,7 @@ export class UsersService {
     return { user, file_info };
   }
 
-  async findAll(user, options: PaginationOptions, search: string[]) {
+  async findAll(user, options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const status_arr: number[] = [];
@@ -130,6 +130,10 @@ export class UsersService {
       }
     }
     const where = commonUtils.searchSplit(search);
+
+    const alias = 'users';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
 
     if (!get(where, 'group', '')) {
       // 그룹 검색 없는 경우
@@ -158,6 +162,7 @@ export class UsersService {
         get(where, 'createdAt_mte', '') && qb.andWhere('`users`.`createdAt` >= :createdAt_mte', { createdAt_mte: get(where, 'createdAt_mte') + ' 00:00:00' });
         get(where, 'createdAt_lte', '') && qb.andWhere('`users`.`createdAt` <= :createdAt_lte', { createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59' });
       }))
+      .orderBy(order_by)
       .skip((take * (page - 1) || 0))
       .take((take || 10))
       .getManyAndCount();
