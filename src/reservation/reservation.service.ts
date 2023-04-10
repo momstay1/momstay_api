@@ -254,10 +254,10 @@ export class ReservationService {
   async guestConfirmation(userInfo, idx: number) {
     // 방문 예약 정보 가져오기
     const reservation = await this.findOneIdx(idx);
-    if (reservation.status != approvalStatus) {
-      // 방문예약 승인 상태가 아닌 경우
-      throw new NotAcceptableException('reservation.service.guestConfirmation: 처리할 수 없습니다.');
-    }
+    // if (reservation.status != approvalStatus) {
+    //   // 방문예약 승인 상태가 아닌 경우
+    //   throw new NotAcceptableException('reservation.service.guestConfirmation: 처리할 수 없습니다.');
+    // }
 
     await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
 
