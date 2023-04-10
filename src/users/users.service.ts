@@ -439,7 +439,7 @@ export class UsersService {
       .addSelect('SUM(IF(`groupidx` = 4 AND `status` = 2, 1, 0))', 'guest_cnt')
       .addSelect('SUM(IF(`groupidx` = 3 AND `status` = 2, 1, 0))', 'host_cnt')
       .addSelect('SUM(IF(`status` = 5, 1, 0))', 'dormant_cnt')
-      .addSelect('SUM(IF(Date_format(`leaveAt`, "%y-%m-%d") = "' + today + ' AND `status` = 9, 1, 0))', 'new_leave_cnt')
+      .addSelect('SUM(IF(Date_format(`leaveAt`, "%y-%m-%d") = "' + today + '" AND `status` = 9, 1, 0))', 'new_leave_cnt')
       .addSelect('SUM(IF(Date_format(`hostAt`, "%y-%m-%d") = "' + today + '", 1, 0))', 'new_host_cnt')
       .addSelect('SUM(IF(Date_format(`createdAt`, "%y-%m-%d") = "' + today + '", 1, 0))', 'new_cnt')
       .execute();
