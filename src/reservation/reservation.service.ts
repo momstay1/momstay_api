@@ -259,7 +259,7 @@ export class ReservationService {
     //   throw new NotAcceptableException('reservation.service.guestConfirmation: 처리할 수 없습니다.');
     // }
 
-    await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
+    await this.authCheckStatus(userInfo, reservation.user.idx);
 
     await this.changeStatus(confirmationStatus, idx);
     // 호스트에게 방문예약 확정 push 알림 발송
