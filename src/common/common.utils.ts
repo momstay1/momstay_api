@@ -217,4 +217,23 @@ export const commonUtils = {
   isRoot(groupId: string) {
     return ['root'].includes(groupId);
   },
+  langValue(lang) {
+    let result = '';
+    switch (lang) {
+      case 'eng':
+      case 'en':
+        result = 'Eng';
+        break;
+      case 'jp':
+      case 'ja':
+        result = 'Jpn';
+        break;
+      case 'ch':
+      case 'cn':
+      case 'zh-CN':
+        result = 'Chn';
+        break;
+    }
+    return result;
+  }
 };

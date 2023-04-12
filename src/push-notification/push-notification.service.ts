@@ -18,6 +18,7 @@ import { DeviceEntity } from 'src/device/entities/device.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { commonUtils } from 'src/common/common.utils';
 import { UsersService } from 'src/users/users.service';
+import { commonLanguage } from 'src/common/common.language';
 import * as moment from 'moment';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
@@ -278,13 +279,14 @@ export class PushNotificationService {
   async hostOrderCancelPush(guestUser: UsersEntity, order: OrderEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '바로결제 거절',
-        body: order['orderProduct']['productOption']['product']['title']
-          + ' ' + order['orderProduct']['productOption']['title'] + ' 결제를 호스트가 거절했습니다.',
+        title: commonLanguage['바로결제 거절'][lang],
+        body: order['orderProduct']['productOption']['product']['title' + lang]
+          + ' ' + order['orderProduct']['productOption']['title' + lang] + ' ' + commonLanguage['결제를 호스트가 거절했습니다.'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -294,13 +296,14 @@ export class PushNotificationService {
   async hostOrderApprovalPush(guestUser: UsersEntity, order: OrderEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '바로결제 승인',
-        body: order['orderProduct']['productOption']['product']['title']
-          + ' ' + order['orderProduct']['productOption']['title'] + ' 결제를 호스트가 승인했습니다.',
+        title: commonLanguage['바로결제 승인'][lang],
+        body: order['orderProduct']['productOption']['product']['title' + lang]
+          + ' ' + order['orderProduct']['productOption']['title' + lang] + ' ' + commonLanguage['결제를 호스트가 승인했습니다'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -364,15 +367,16 @@ export class PushNotificationService {
   async hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '방문예약 거절',
-        body: reservation['productOption']['product']['title']
+        title: commonLanguage['방문예약 거절'][lang],
+        body: reservation['productOption']['product']['title' + lang]
           + ' '
-          + reservation['productOption']['title']
-          + ' 방문예약을 호스트가 거절했습니다.',
+          + reservation['productOption']['title' + lang]
+          + ' ' + commonLanguage['방문예약을 호스트가 거절했습니다'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -382,15 +386,16 @@ export class PushNotificationService {
   async hostReservationApprovalPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '방문예약 승인',
+        title: commonLanguage['방문예약 승인'][lang],
         body: reservation['productOption']['product']['title']
           + ' '
           + reservation['productOption']['title']
-          + ' 방문예약을 호스트가 승인했습니다.',
+          + ' ' + commonLanguage['방문예약을 호스트가 승인했습니다'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -400,16 +405,18 @@ export class PushNotificationService {
   async adminReservationStatusChange(guestUser: UsersEntity, hostUser: UsersEntity, reservation: ReservationEntity) {
 
     const target = {};
-    const notifications = {
-      title: '방문예약 변경',
-      body: reservation['productOption']['product']['title']
-        + ' '
-        + reservation['productOption']['title']
-        + ' 방문예약을 관리자가 변경했습니다.',
-    };
 
     const guestIsApp = await this.isApp(get(guestUser, ['device']));
     if (guestIsApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
+      const notifications = {
+        title: commonLanguage['방문예약 변경'][lang],
+        body: reservation['productOption']['product']['title' + lang]
+          + ' '
+          + reservation['productOption']['title' + lang]
+          + ' '
+          + commonLanguage['방문예약을 관리자가 변경했습니다'][lang],
+      };
       target['token'] = guestUser['device']['token'];
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -418,6 +425,13 @@ export class PushNotificationService {
     const hostIsApp = await this.isApp(get(hostUser, ['device']));
     if (hostIsApp && hostUser['device']['notification'] == notificationStatus) {
       target['token'] = hostUser['device']['token'];
+      const notifications = {
+        title: '방문예약 변경',
+        body: reservation['productOption']['product']['title']
+          + ' '
+          + reservation['productOption']['title']
+          + ' 방문예약을 관리자가 변경했습니다.',
+      };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, hostUser);
     }

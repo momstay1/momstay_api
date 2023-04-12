@@ -75,11 +75,11 @@ export class OrderService {
       ord_data['idx'] = createOrderDto['idx'];
       const order = await this.orderRepository.findOne({ idx: ord_data['idx'] });
       if (order['status'] >= 1) {
-        throw new BadRequestException('이미 처리된 주문입니다.');
+        throw new BadRequestException('order.service.create: 이미 처리된 주문입니다.');
       }
       if (createOrderDto['status'] == 2 && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
         if (!get(createOrderDto, 'imp_uid', '')) {
-          throw new NotFoundException('imp_uid 정보가 없습니다.');
+          throw new NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
         }
         // 주문 검증
         const pg_data = await this.orderVerification(createOrderDto);
@@ -133,6 +133,68 @@ export class OrderService {
     } else {
       return code;
     }
+  }
+
+  // 관리자 결제 내역 리스트
+  async adminFindAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const user = await this.usersService.findId(userInfo.id);
+
+    const where = commonUtils.searchSplit(search);
+
+    where['status'] = get(where, 'status', values(commonUtils.getStatus(['order_status'])));
+
+    const alias = 'order';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+    console.log({ order_by });
+
+    const [results, total] = await this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'guestUser')
+      .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+      .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+      .leftJoinAndSelect('productOption.product', 'product')
+      .leftJoinAndSelect('product.user', 'hostUser')
+      .where(qb => {
+        qb.where('`order`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
+        get(where, 'code', '')
+          && qb.andWhere('`order`.code IN (:code)', { code: isArray(where['code']) ? where['code'] : [where['code']] });
+        get(where, 'imp_uid', '')
+          && qb.andWhere('`order`.imp_uid IN (:imp_uid)', { imp_uid: isArray(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
+        get(where, 'payment', '')
+          && qb.andWhere('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
+        get(where, 'clientName', '')
+          && qb.andWhere('`order`.clientName LIKE :clientName', { clientName: '%' + where['clientName'] + '%' });
+        get(where, 'clientId', '')
+          && qb.andWhere('`guestUser`.id LIKE :clientId', { clientId: '%' + where['clientId'] + '%' });
+        get(where, 'productTitle', '')
+          && qb.andWhere('`orderProduct`.title LIKE :productTitle', { productTitle: '%' + where['productTitle'] + '%' });
+        get(where, 'bank', '')
+          && qb.andWhere('`order`.bank IN (:bank)', { bank: isArray(where['bank']) ? where['bank'] : [where['bank']] });
+        get(where, 'account', '')
+          && qb.andWhere('`order`.account IN (:account)', { account: isArray(where['account']) ? where['account'] : [where['account']] });
+        get(where, 'depositer', '')
+          && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: isArray(where['depositer']) ? where['depositer'] : [where['depositer']] });
+        get(where, 'remitter', '')
+          && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: isArray(where['remitter']) ? where['remitter'] : [where['remitter']] });
+        get(where, 'min_paiedAt', '')
+          && qb.andWhere('`order`.paiedAt >= :min_paiedAt', { min_paiedAt: where['min_paiedAt'] });
+        get(where, 'max_paiedAt', '')
+          && qb.andWhere('`order`.paiedAt <= :max_paiedAt', { max_paiedAt: where['max_paiedAt'] });
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const data = new Pagination({
+      results,
+      total,
+      page,
+    });
+
+    return { data }
   }
 
   // 게스트 결제 내역 리스트
@@ -250,9 +312,30 @@ export class OrderService {
     return { data }
   }
 
+  async findOneIdxByAdmin(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('order.service.findOneIdxByAdmin: 잘못된 정보 입니다.');
+    }
+    const order = await this.orderRepository.findOne({
+      where: { idx: idx },
+      relations: [
+        'user',
+        'orderProduct',
+        'orderProduct.productOption',
+        'orderProduct.productOption.product',
+        'orderProduct.productOption.product.user'
+      ]
+    });
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException('order.service.findOneIdxByAdmin: 정보를 찾을 수 없습니다.');
+    }
+
+    return { order };
+  }
+
   async findOneIdxByGuest(userInfo: UsersEntity, idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('order.service.findOneIdxByGuest: 잘못된 정보 입니다.');
     }
     const user = await this.usersService.findId(userInfo['id']);
     const order = await this.orderRepository.createQueryBuilder('order')
@@ -269,7 +352,7 @@ export class OrderService {
       })
       .getOne();
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('order.service.findOneIdxByGuest: 정보를 찾을 수 없습니다.');
     }
 
     return { order };
@@ -277,7 +360,7 @@ export class OrderService {
 
   async findOneIdxByHost(userInfo: UsersEntity, idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('order.service.findOneIdxByHost: 잘못된 정보 입니다.');
     }
     const user = await this.usersService.findId(userInfo['id']);
     const order = await this.orderRepository.createQueryBuilder('order')
@@ -294,7 +377,7 @@ export class OrderService {
       })
       .getOne();
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('order.service.findOneIdxByHost: 정보를 찾을 수 없습니다.');
     }
 
     return { order };
@@ -302,7 +385,7 @@ export class OrderService {
 
   async findOneIdx(idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('order.service.findOneIdx: 잘못된 정보 입니다.');
     }
     const order = await this.orderRepository.findOne({
       where: { idx: idx },
@@ -317,7 +400,7 @@ export class OrderService {
       ]
     });
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('order.service.findOneIdx: 정보를 찾을 수 없습니다.');
     }
 
     return order;
@@ -325,7 +408,7 @@ export class OrderService {
 
   async findOneCodeByNonmember(code: string) {
     if (!code) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('order.service.findOneCodeByNonmember: 잘못된 정보 입니다.');
     }
     const order = await this.orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.user', 'guestUser')
@@ -338,7 +421,7 @@ export class OrderService {
       })
       .getOne();
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException('order.service.findOneCodeByNonmember: 정보를 찾을 수 없습니다.');
     }
     return { order };
   }
@@ -349,7 +432,7 @@ export class OrderService {
 
   async guestOrderCancel(code: string, userInfo: UsersEntity) {
     if (!code) {
-      throw new NotFoundException('취소할 정보가 없습니다.');
+      throw new NotFoundException('order.service.guestOrderCancel: 취소할 정보가 없습니다.');
     }
 
     // 게스트 정보 가져오기
@@ -368,7 +451,12 @@ export class OrderService {
       .getOne();
 
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('취소할 주문이 없습니다.');
+      throw new NotFoundException('order.service.guestOrderCancel: 취소할 주문이 없습니다.');
+    }
+    const today = moment().format('YYYY-MM-DD')
+    const ago20day = moment(order.orderProduct[0].startAt).add(-20, 'day').format('YYYY-MM-DD');
+    if (today > ago20day) {
+      throw new NotAcceptableException('order.service.guestOrderCancel: 취소할 수 없습니다.');
     }
 
     // 취소 사유
@@ -386,7 +474,7 @@ export class OrderService {
 
   async hostOrderApproval(code: string, userInfo: UsersEntity) {
     if (!code) {
-      throw new NotFoundException('변경할 정보가 없습니다.');
+      throw new NotFoundException('order.service.hostOrderApproval: 변경할 정보가 없습니다.');
     }
     // 호스트 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
@@ -404,13 +492,13 @@ export class OrderService {
       .getOne();
 
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('변경할 주문이 없습니다.');
+      throw new NotFoundException('order.service.hostOrderApproval: 변경할 주문이 없습니다.');
     }
 
     // 주문 배송중(호스트 승인) 상태 변경
     const shipping_status = commonUtils.getStatus(['order_status', 'shipping']);
     if (order['status'] == shipping_status) {
-      throw new NotAcceptableException('이미 승인 처리된 주문입니다.');
+      throw new NotAcceptableException('order.service.hostOrderApproval: 이미 승인 처리된 주문입니다.');
     }
 
     // 주문 취소 상태 변경
@@ -429,7 +517,7 @@ export class OrderService {
 
   async hostOrderCancel(code: string, userInfo: UsersEntity, updateOrderDto: UpdateOrderDto) {
     if (!code) {
-      throw new NotFoundException('변경할 정보가 없습니다.');
+      throw new NotFoundException('order.service.hostOrderCancel: 변경할 정보가 없습니다.');
     }
     // 호스트 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
@@ -447,7 +535,12 @@ export class OrderService {
       .getOne();
 
     if (!get(order, 'idx', '')) {
-      throw new NotFoundException('변경할 주문이 없습니다.');
+      throw new NotFoundException('order.service.hostOrderCancel: 변경할 주문이 없습니다.');
+    }
+    const today = moment().format('YYYY-MM-DD')
+    const ago20day = moment(order.orderProduct[0].startAt).add(-20, 'day').format('YYYY-MM-DD');
+    if (today > ago20day) {
+      throw new NotAcceptableException('order.service.hostOrderCancel: 취소할 수 없습니다.');
     }
 
     // 취소 사유
@@ -470,7 +563,7 @@ export class OrderService {
     // 취소완료 상태 (8)
     const cancel_status = commonUtils.getStatus(['order_status', 'cancellationCompleted']);
     if (order['status'] == cancel_status) {
-      throw new NotAcceptableException('이미 취소 처리된 주문입니다.');
+      throw new NotAcceptableException('order.service.cancelProcess: 이미 취소 처리된 주문입니다.');
     }
 
     // 취소 금액 계산
@@ -528,7 +621,7 @@ export class OrderService {
 
     if (!result['status']) {
       await this.iamportService.paymentCancel(createOrderDto['imp_uid'], response['amount'], result['message']);
-      throw new NotAcceptableException(result['message']);
+      throw new NotAcceptableException('order.service.orderVerification: ' + result['message']);
     }
 
     return response;

@@ -11,6 +11,7 @@ import { OrderTotalModule } from 'src/order-total/order-total.module';
 import { IamportService } from 'src/iamport/iamport.service';
 import { PgDataModule } from 'src/pg-data/pg-data.module';
 import { PushNotificationModule } from 'src/push-notification/push-notification.module';
+import { AdminOrderController } from './admin-order.controller';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { PushNotificationModule } from 'src/push-notification/push-notification.
     UsersModule,
     PushNotificationModule
   ],
-  controllers: [OrderController],
+  controllers: [OrderController, AdminOrderController],
   providers: [OrderService, IamportService],
   exports: [OrderService]
 })
