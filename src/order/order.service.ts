@@ -543,7 +543,8 @@ export class OrderService {
     const today = moment().format('YYYY-MM-DD')
     const ago20day = moment(order.orderProduct[0].startAt).add(-20, 'day').format('YYYY-MM-DD');
     if (today > ago20day) {
-      throw new NotAcceptableException('order.service.hostOrderCancel: 취소할 수 없습니다.');
+      const site = await this.settingsService.findOne('site_tel');
+      throw new NotAcceptableException('order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' + site.set_value + ')에 문의해주세요.');
     }
 
     // 취소 사유
