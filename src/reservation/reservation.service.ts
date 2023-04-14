@@ -16,6 +16,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
 import { ExcelService } from 'src/excel/excel.service';
+import { EmailService } from 'src/email/email.service';
 
 const readyStatus = 1;
 const approvalStatus = 2;
@@ -39,6 +40,7 @@ export class ReservationService {
     private readonly fileService: FileService,
     private readonly pushNotiService: PushNotificationService,
     private readonly excelSerivce: ExcelService,
+    private readonly emailService: EmailService,
   ) { }
 
   async create(userInfo, createReservationDto: CreateReservationDto) {
@@ -92,6 +94,24 @@ export class ReservationService {
     if (get(hostUser, ['device', 'token'], '')) {
       await this.pushNotiService.guestReservationPush(hostUser, po);
     }
+
+    // 방문예약 신청 (호스트에게 메일 발송)
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'reservation', group: 'host', code: 'request', lang: 'ko' },
+      {
+        po_title: po.title,
+        product_title: po.product.title,
+        guest_name: user.name,
+        occupancy_date: reservation.occupancyAt,
+        eviction_date: reservation.evictionAt,
+        visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+        phone: user.countryCode + ' ' + user.phone
+      }
+    );
+    if (mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+    }
+
     return { reservation };
   }
 
@@ -310,6 +330,22 @@ export class ReservationService {
       );
     }
     // TODO: 알림톡 기능 (호스트에게 확정 알림톡, 게스트 자신에게 후기 작성 알림톡)
+    // 방문예약 확정 메일 발송(호스트에게 발송)
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'reservation', group: 'host', code: 'guest_complete', lang: 'ko' },
+      {
+        po_title: reservation.productOption.title,
+        product_title: reservation.productOption.product.title,
+        visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+        guest_name: user.name,
+        occupancy_date: reservation.occupancyAt,
+        eviction_date: reservation.evictionAt,
+        phone: user.countryCode + ' ' + user.phone
+      }
+    );
+    if (mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(reservation.productOption.product.user.email, mail.title, email_tmpl);
+    }
   }
 
   // 방문 예약 승인(호스트)
@@ -331,9 +367,28 @@ export class ReservationService {
     }
 
     // TODO: 알림톡 기능 (게스트에게 승인 알림톡)
+    // 방문예약 승인 (게스트에게 발송)
+    const lang = commonUtils.langValue(
+      reservation.user.language == 'ko' ? reservation.user.language : 'en'
+    );
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'reservation', group: 'guest', code: 'host_complete', lang: reservation.user.language },
+      {
+        po_title: reservation.productOption['title' + lang],
+        product_title: reservation.productOption.product['title' + lang],
+        visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+        guest_name: user.name,
+        occupancy_date: reservation.occupancyAt,
+        eviction_date: reservation.evictionAt,
+        phone: user.countryCode + ' ' + user.phone
+      }
+    );
+    if (mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(reservation.user.email, mail.title, email_tmpl);
+    }
   }
 
-  // 방문 예약 승인(호스트)
+  // 방문 예약 승인(호스트) (제거 예정)
   async update(userInfo, idx: number) {
     // 방문 예약 정보 가져오기
     const reservation = await this.findOneIdx(idx);
@@ -350,8 +405,6 @@ export class ReservationService {
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.hostReservationApprovalPush(user, reservation);
     }
-
-    // TODO: 알림톡 기능 (겟트에게 거정 알림톡)
   }
 
   // 방문 예약 취소(게스트)
@@ -371,6 +424,22 @@ export class ReservationService {
     }
 
     // TODO: 알림톡 기능 (호스트에게 취소 알림톡)
+    // 방문예약 취소 메일 발송 (호스트에게 발송)
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'reservation', group: 'host', code: 'guest_cancel', lang: 'ko' },
+      {
+        po_title: reservation.productOption.title,
+        product_title: reservation.productOption.product.title,
+        visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+        guest_name: user.name,
+        occupancy_date: reservation.occupancyAt,
+        eviction_date: reservation.evictionAt,
+        phone: user.countryCode + ' ' + user.phone
+      }
+    );
+    if (mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(reservation.productOption.product.user.email, mail.title, email_tmpl);
+    }
   }
 
   // 방문 예약 거절(호스트)
@@ -393,6 +462,25 @@ export class ReservationService {
     }
 
     // TODO: 알림톡 기능 (게스트에게 거절 알림톡)
+    // TODO: 방문예약 거절 메일 발송 (게스트에게 발송)
+    const lang = commonUtils.langValue(
+      reservation.user.language == 'ko' ? reservation.user.language : 'en'
+    );
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'reservation', group: 'guest', code: 'host_cancel', lang: reservation.user.language },
+      {
+        po_title: reservation.productOption['title' + lang],
+        product_title: reservation.productOption.product['title' + lang],
+        visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+        guest_name: user.name,
+        occupancy_date: reservation.occupancyAt,
+        eviction_date: reservation.evictionAt,
+        phone: user.countryCode + ' ' + user.phone
+      }
+    );
+    if (mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(reservation.user.email, mail.title, email_tmpl);
+    }
   }
 
   // 이미 처리된 상태인지 체크
@@ -433,6 +521,13 @@ export class ReservationService {
     const reservations = await this.findIdxs(idxs);
     await this.changeStatus(status, idxs);
 
+    // const code = {
+    //   '2': 'admin_complete',
+    //   '3': 'admin_complete',
+    //   '4': 'admin_cancel',
+    //   '5': 'admin_cancel'
+    // };
+
     for (const key in reservations) {
       const guestUser = reservations[key].user;
       const hostUser = reservations[key].productOption.product.user;
@@ -441,6 +536,48 @@ export class ReservationService {
         hostUser,
         reservations[key],
       );
+      await this.pushNotiService.adminReservationStatusChange(guestUser, hostUser, reservations[key]);
+
+      // if (get(code, [status], '')) {
+      //   // 관리자 상태 변경에 따른 메일 발송
+      //   // (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)
+      //   // 게스트에게 발송
+      //   const lang = commonUtils.langValue(
+      //     reservations[key].user.language == 'ko' ? reservations[key].user.language : 'en'
+      //   );
+      //   const guest = await this.emailService.mailSettings(
+      //     { type: 'reservation', group: 'guest', code: code[status], lang: reservations[key].user.language },
+      //     {
+      //       po_title: reservations[key].productOption['title' + lang],
+      //       product_title: reservations[key].productOption.product['title' + lang],
+      //       visit_date: reservations[key].visitDate + ' ' + reservations[key].visitTime,
+      //       guest_name: reservations[key].user.name,
+      //       occupancy_date: reservations[key].occupancyAt,
+      //       eviction_date: reservations[key].evictionAt,
+      //       phone: reservations[key].user.countryCode + ' ' + reservations[key].user.phone
+      //     }
+      //   );
+      //   if (guest.mail != '' && guest.email_tmpl != '') {
+      //     await this.emailService.sendMail(reservations[key].user.email, guest.mail.title, guest.email_tmpl);
+      //   }
+
+      //   // 호스트에게 발송
+      //   const host = await this.emailService.mailSettings(
+      //     { type: 'reservation', group: 'host', code: code[status], lang: reservations[key].user.language },
+      //     {
+      //       po_title: reservations[key].productOption['title' + lang],
+      //       product_title: reservations[key].productOption.product['title' + lang],
+      //       visit_date: reservations[key].visitDate + ' ' + reservations[key].visitTime,
+      //       guest_name: reservations[key].user.name,
+      //       occupancy_date: reservations[key].occupancyAt,
+      //       eviction_date: reservations[key].evictionAt,
+      //       phone: reservations[key].user.countryCode + ' ' + reservations[key].user.phone
+      //     }
+      //   );
+      //   if (host.mail != '' && host.email_tmpl != '') {
+      //     await this.emailService.sendMail(reservations[key].user.email, host.mail.title, host.email_tmpl);
+      //   }
+      // }
     }
   }
 

@@ -28,6 +28,16 @@ export class AdminEmailController {
     return { message };
   }
 
+  @Get('test')
+  async test() {
+
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'reservation', group: 'host', code: 'request', lang: 'ko' },
+      {}
+    );
+    await this.emailService.sendMail('shjeon2500@naver.com', mail.title, email_tmpl);
+  }
+
   @Patch(':idx')
   @ApiOperation({ summary: '메일 상태 수정 API' })
   @Auth(['root', 'admin'])

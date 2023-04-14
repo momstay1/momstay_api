@@ -307,14 +307,16 @@ export class FileService {
         // console.log(files[i][j].originalname);
 
         // 이미지 용량 및 사이즈 줄이기
-        await this.sharpFile(files[i][j]);
-        if (watermarkCategory.includes(i)) {
-          const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
-          file_data['file_watermark_name'] = watermark_name;
-          file_data['file_watermark_storage_path'] = storage_url + '/' + bucket_name + '/' + folder + watermark_name;
-          file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
-          // 이미지 워터마크
-          await this.fileWatermark(file_data);
+        if (file_data.file_is_img) {
+          await this.sharpFile(files[i][j]);
+          if (watermarkCategory.includes(i)) {
+            const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
+            file_data['file_watermark_name'] = watermark_name;
+            file_data['file_watermark_storage_path'] = storage_url + '/' + bucket_name + '/' + folder + watermark_name;
+            file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
+            // 이미지 워터마크
+            await this.fileWatermark(file_data);
+          }
         }
         // 스토리지 서버에 업로드
         await this.uploadStorage(files[i][j], file_data);

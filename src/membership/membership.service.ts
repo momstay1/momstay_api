@@ -72,6 +72,8 @@ export class MembershipService {
       membershipHistoryEntity,
     );
 
+    // TODO: 멤버십 신청 완료 메일 (관리자, 호스트)
+
     return { membership };
   }
 
@@ -260,6 +262,8 @@ export class MembershipService {
       membership['user']['idx'],
       membershipStatus,
     );
+
+    // TODO: 멤버십 등록 완료(호스트)
 
     return { membership };
   }

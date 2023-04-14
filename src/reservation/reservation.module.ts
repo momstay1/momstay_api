@@ -9,6 +9,7 @@ import { FileModule } from 'src/file/file.module';
 import { PushNotificationModule } from 'src/push-notification/push-notification.module';
 import { AdminReservationController } from './admin-reservation.controller';
 import { ExcelService } from 'src/excel/excel.service';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { ExcelService } from 'src/excel/excel.service';
     ProductOptionModule,
     UsersModule,
     FileModule,
-    PushNotificationModule
+    PushNotificationModule,
+    EmailModule
     // ProductModule,
   ],
   controllers: [ReservationController, AdminReservationController],

@@ -19,6 +19,8 @@ export class EmailEntity {
   group: string;
   @Column({ length: 255 })
   code: string;
+  @Column({ length: 255, default: '', comment: '언어' })
+  language: string;
   @Column({ length: 255, default: '', comment: '메일 제목' })
   title: string;
   @Column({ length: 255, default: '', comment: '메일 설명' })
