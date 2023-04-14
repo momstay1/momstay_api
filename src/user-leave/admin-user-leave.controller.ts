@@ -25,6 +25,7 @@ export class AdminUserLeaveController {
     name: "search",
     description: 'search=id:탈퇴회원 id<br>'
       + 'search=name:이름<br>'
+      + 'search=group:그룹idx<br>'
     ,
     required: false
   })

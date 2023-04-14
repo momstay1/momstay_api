@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { UsersEntity } from 'src/users/entities/user.entity';
@@ -44,8 +44,10 @@ export class UserLeaveService {
 
     const [results, total] = await this.userLeaveRepository.createQueryBuilder('users_leave')
       .leftJoin('users', 'users', '`users`.id = `users_leave`.id')
+      .leftJoinAndSelect('users.group', 'group')
       .where(qb => {
         qb.where('`users`.`status` = :status', { status: usersConstant.status.leave })
+        get(where, 'group', '') && qb.andWhere('`users`.groupIdx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
         get(where, 'id', '') && qb.andWhere('`users_leave`.`id` LIKE :id', { id: '%' + where['id'] + '%' })
         get(where, 'name', '') && qb.andWhere('`users_leave`.`userInfo` LIKE :name', { name: '%' + where['name'] + '%' })
       })

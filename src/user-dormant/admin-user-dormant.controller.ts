@@ -28,6 +28,7 @@ export class AdminUserDormantController {
       + 'search=email:휴면회원 이메일<br>'
       + 'search=phone:휴면회원 연락처<br>'
       + 'search=language:가입언어<br>'
+      + 'search=group:그룹idx<br>'
     ,
     required: false
   })
