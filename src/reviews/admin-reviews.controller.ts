@@ -47,6 +47,8 @@ export class AdminReviewsController {
     description: 'search=status:상태값(-1:삭제|1:미등록|2:등록, 기본값:2)<br>'
       + 'search=star:별점<br>'
       + 'search=name:작성자명<br>'
+      + 'search=id:작성자id<br>'
+      + 'search=title:숙소 이름<br>'
       + 'search=min_createdAt:최소날짜<br>'
       + 'search=max_createdAt:최대날짜<br>'
     ,

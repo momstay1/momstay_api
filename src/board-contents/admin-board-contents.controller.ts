@@ -84,6 +84,15 @@ export class AdminBoardContentsController {
   @Get(':bd_idx')
   @ApiOperation({ summary: '관리자 게시글 리스트 API' })
   @ApiCreatedResponse({ type: BoardContentsEntity })
+  @ApiQuery({
+    name: "search",
+    description: ''
+      + 'search=status:상태검색 (0: 삭제, 1:미등록 2: 등록, 3:답변대기, 4: 답변완료<br>'
+      + 'search=name:작성자명<br>'
+      + 'search=id:작성자 id<br>'
+    ,
+    required: false
+  })
   @ApiQuery({ name: "category", required: false })
   @ApiQuery({ name: "order", required: false })
   async findCategoryAll(
@@ -91,12 +100,13 @@ export class AdminBoardContentsController {
     @Query('category') category: string,
     @Query('take') take: number,
     @Query('page') page: number,
+    @Query('search') search: string[],
     @Query('order') order: string,
   ) {
     const {
       bc,
       bcats
-    } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
+    } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, search, order);
     // const data = map(results, (obj) => {
     //   return this.sanitizeBoardContent(obj);
     // });

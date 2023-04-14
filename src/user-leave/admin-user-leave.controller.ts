@@ -24,6 +24,7 @@ export class AdminUserLeaveController {
   @ApiQuery({
     name: "search",
     description: 'search=id:탈퇴회원 id<br>'
+      + 'search=name:이름<br>'
     ,
     required: false
   })

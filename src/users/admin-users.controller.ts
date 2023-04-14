@@ -70,6 +70,7 @@ export class AdminUsersController {
       + 'search=email:이메일<br>'
       + 'search=phone:연락처<br>'
       + 'search=birthday:생일<br>'
+      + 'search=language:가입언어<br>'
       + 'search=createdAt_mte:시작날짜<br>'
       + 'search=createdAt_lte:종료날짜<br>',
     required: false

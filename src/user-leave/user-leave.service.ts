@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateUserLeaveDto } from './dto/create-user-leave.dto';
 import { UpdateUserLeaveDto } from './dto/update-user-leave.dto';
 import { UserLeaveEntity } from './entities/user-leave.entity';
+import { usersConstant } from 'src/users/constants';
 
 @Injectable()
 export class UserLeaveService {
@@ -42,8 +43,11 @@ export class UserLeaveService {
     order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
 
     const [results, total] = await this.userLeaveRepository.createQueryBuilder('users_leave')
+      .leftJoin('users', 'users', '`users`.id = `users_leave`.id')
       .where(qb => {
-        get(where, 'id', '') && qb.where('`users_leave`.`id` = :id', { id: where['id'] })
+        qb.where('`users`.`status` = :status', { status: usersConstant.status.leave })
+        get(where, 'id', '') && qb.andWhere('`users_leave`.`id` LIKE :id', { id: '%' + where['id'] + '%' })
+        get(where, 'name', '') && qb.andWhere('`users_leave`.`userInfo` LIKE :name', { name: '%' + where['name'] + '%' })
       })
       .orderBy(order_by)
       .skip((take * (page - 1) || 0))

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { UsersEntity } from 'src/users/entities/user.entity';
@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDormantDto } from './dto/create-user-dormant.dto';
 import { UpdateUserDormantDto } from './dto/update-user-dormant.dto';
 import { UserDormantEntity } from './entities/user-dormant.entity';
+import { usersConstant } from 'src/users/constants';
 
 @Injectable()
 export class UserDormantService {
@@ -29,8 +30,14 @@ export class UserDormantService {
     order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
 
     const [results, total] = await this.userDormantRepository.createQueryBuilder('users_dormant')
+      .leftJoin('users', 'users', '`users`.id = `users_dormant`.id')
       .where(qb => {
-        get(where, 'id', '') && qb.where('`users_dormant`.`id` = :id', { id: where['id'] })
+        qb.where('`users`.`status` = :status', { status: usersConstant.status.dormant })
+        get(where, 'id', '') && qb.andWhere('`users_dormant`.`id` LIKE :id', { id: '%' + where['id'] + '%' })
+        get(where, 'name', '') && qb.andWhere('`users`.`name` LIKE :name', { name: '%' + where['name'] + '%' })
+        get(where, 'email', '') && qb.andWhere('`users`.`email` LIKE :email', { email: '%' + where['email'] + '%' })
+        get(where, 'phone', '') && qb.andWhere('`users`.`phone` LIKE :phone', { phone: '%' + where['phone'] + '%' })
+        get(where, 'language', '') && qb.andWhere('`users`.`language` IN (:language)', { language: isArray(where['language']) ? where['language'] : [where['language']] })
       })
       .orderBy(order_by)
       .skip((take * (page - 1) || 0))

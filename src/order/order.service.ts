@@ -167,7 +167,7 @@ export class OrderService {
         get(where, 'payment', '')
           && qb.andWhere('`order`.payment IN (:payment)', { payment: isArray(where['payment']) ? where['payment'] : [where['payment']] });
         get(where, 'clientName', '')
-          && qb.andWhere('`order`.clientName LIKE :clientName', { clientName: '%' + where['clientName'] + '%' });
+          && qb.andWhere('`guestUser`.name LIKE :name', { name: '%' + where['clientName'] + '%' });
         get(where, 'clientId', '')
           && qb.andWhere('`guestUser`.id LIKE :clientId', { clientId: '%' + where['clientId'] + '%' });
         get(where, 'productTitle', '')

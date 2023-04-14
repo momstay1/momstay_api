@@ -11,7 +11,7 @@ import { BoardContentsEntity } from './entities/board-content.entity';
 import { bcConstants } from './constants';
 import { commonUtils } from 'src/common/common.utils';
 import { Pagination, PaginationOptions } from 'src/paginate';
-import { get, isArray, keyBy } from 'lodash';
+import { get, isArray, keyBy, values } from 'lodash';
 import { GroupsService } from 'src/groups/groups.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 
@@ -315,30 +315,37 @@ export class BoardContentsService {
   *******************/
 
   // 관리자용 게시글 리스트 가져오기
-  async adminFindCategoryAll(bd_idx, category: string, options: PaginationOptions, order) {
+  async adminFindCategoryAll(bd_idx, category: string, options: PaginationOptions, search: string[], order) {
     const { take, page } = options;
 
     const bcats = await this.bcatsService.searching({
       where: { bcat_id: In([category]) }
     });
 
-    const order_by = commonUtils.orderSplit(order, '');
-    order_by['createdAt'] = get(order_by, ['createdAt'], 'DESC');
+    const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', values(bcConstants.status));
+    console.log({ where });
 
-    const [results, total] = await this.bcRepository.findAndCount({
-      order: order_by,
-      where: (qb) => {
-        qb.where('`BoardContentsEntity__board`.`idx` = :bd_idx', { bd_idx: bd_idx })
-        if (get(bcats, [0, 'bcat_idx'])) {
-          qb.andWhere('`BoardContentsEntity__bscats`.`bscat_idx` = :bcat_idx', { bcat_idx: bcats[0].bcat_idx })
-        }
-        qb.andWhere('`BoardContentsEntity`.`status` >= :status', { status: bcConstants.status.uncertified })
-        // qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', { type: this.getNoneNoticeType() })
-      },
-      relations: ['user', 'board', 'bscats', 'user.group'],
-      take: take,
-      skip: take * (page - 1)
-    });
+    const alias = 'bc';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+    console.log({ order_by });
+
+    const [results, total] = await this.bcRepository.createQueryBuilder('bc')
+      .leftJoinAndSelect('bc.user', 'user')
+      .leftJoinAndSelect('bc.board', 'board')
+      .leftJoinAndSelect('bc.bscats', 'bscats')
+      .leftJoinAndSelect('user.group', 'group')
+      .where(qb => {
+        qb.where('`board`.idx = :bd_idx', { bd_idx: bd_idx })
+        qb.andWhere('`bc`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] })
+        get(where, 'name', '') && qb.andWhere('`user`.name LIKE :name', { name: '%' + where['name'] + '%' });
+        get(where, 'id', '') && qb.andWhere('`user`.id LIKE :id', { id: '%' + where['id'] + '%' });
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
 
     return {
       bcats: bcats,

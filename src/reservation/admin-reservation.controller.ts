@@ -35,7 +35,8 @@ export class AdminReservationController {
     description: 'search=status:1,2,4,5<br>방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)<br>'
       + 'search=po_title:방 이름<br>'
       + 'search=name:예약자명<br>'
-      + 'search=email:예약지 이메일<br>'
+      + 'search=email:예약자 이메일<br>'
+      + 'search=id:예약자 아이디<br>'
       + 'search=min_visit_date:예약일<br>'
       + 'search=max_visit_date:예약일<br>'
     ,

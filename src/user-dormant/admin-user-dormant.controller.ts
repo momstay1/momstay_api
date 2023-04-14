@@ -24,6 +24,10 @@ export class AdminUserDormantController {
   @ApiQuery({
     name: "search",
     description: 'search=id:휴면회원 id<br>'
+      + 'search=name:휴면회원 이름<br>'
+      + 'search=email:휴면회원 이메일<br>'
+      + 'search=phone:휴면회원 연락처<br>'
+      + 'search=language:가입언어<br>'
     ,
     required: false
   })

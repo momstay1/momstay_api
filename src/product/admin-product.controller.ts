@@ -41,6 +41,7 @@ export class AdminProductController {
       + 'search=title:숙소이름<br>'
       + 'search=name:호스트이름<br>'
       + 'search=id:호스트아이디<br>'
+      + 'search=type:숙소 구분<br>'
       + 'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
     required: false
   })

@@ -138,13 +138,12 @@ export class UsersService {
     if (!get(where, 'group', '')) {
       // 그룹 검색 없는 경우
       const groups = commonUtils.getArrayKey(await this.groupService.findAll(), ['id'], false);
-      console.log(map(groups, o => console.log(o['idx'])));
       where['group'] = map(
         commonUtils.getArrayKey(groups, ['id'], false),
         o => {
           if (o['idx'] >= groups[user.group].idx) return o['idx'];
         }
-      )
+      ).filter((v, i) => !!v)
     }
 
     const [results, total] = await this.usersRepository.createQueryBuilder('users')
@@ -153,7 +152,7 @@ export class UsersService {
       .where(new Brackets(qb => {
         qb.where('users.status IN (:user_status)', { user_status: status_arr });
         get(where, 'group', '') && qb.andWhere('`users`.groupIdx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
-        get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: isArray(get(where, 'language')) ? get(where, 'language') : [get(where, 'language')] })
+        get(where, 'language', '') && qb.andWhere('`users`.language IN (:language)', { language: isArray(get(where, 'language')) ? get(where, 'language') : [get(where, 'language')] })
         get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
         get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
         get(where, 'email', '') && qb.andWhere('`users`.email LIKE :email', { email: '%' + get(where, 'email') + '%' })
@@ -372,12 +371,12 @@ export class UsersService {
   async dormant(user: UsersEntity) {
     const userDormant = await this.userDormantService.dormantUser(user);
     user.status = usersConstant.status.dormant;
-    user.name = '';
-    user.email = '';
+    // user.name = '';
+    // user.email = '';
     user.gender = '';
-    user.language = '';
+    // user.language = '';
     user.countryCode = '';
-    user.phone = '';
+    // user.phone = '';
     user.birthday = null;
     user.other = '';
     user.oldData = '';

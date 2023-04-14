@@ -38,12 +38,15 @@ export class ProductOptionController {
   @ApiQuery({
     name: "search",
     description: "search=membership:(0:무료|1:유료)<br>"
-      + "search=title:string<br>"
-      + "search=addr1:string<br>"
-      + "search=addr2:string<br>"
-      + "search=metro:string<br>"
-      + "search=college:string<br>"
+      + "search=title:숙소이름<br>"
+      + "search=addr1:주소1<br>"
+      + "search=addr2:주소2<br>"
+      + "search=metro:지하철<br>"
+      + "search=college:대학교<br>"
       + "search=product_idx:숙소idx<br>"
+      + "search=po_title:방 이름<br>"
+      + "search=name:호스트이름<br>"
+      + "search=id:호스트아이디<br>"
       + "search=status:상태값(0:미등록|1:미사용|2:사용)<br>",
     required: false
   })
