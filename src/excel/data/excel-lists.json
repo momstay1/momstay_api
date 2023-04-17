@@ -18,47 +18,7 @@
       "convertTo": "user_language_text"
     }
   ],
-  "hostOrder": [
-    { "order": 700, "title": "주문 번호", "column": "code", "width": 200 },
-    {
-      "itemsTable": "orderProduct",
-      "items": [
-        {
-          "order": 600,
-          "title": "방 이름",
-          "column": "title",
-          "width": 100
-        },
-        {
-          "order": 500,
-          "title": "주문자 이름",
-          "column": "user.name",
-          "width": 100
-        },
-        {
-          "order": 400,
-          "title": "주문자 이메일",
-          "column": "user.email",
-          "width": 100
-        },
-        {
-          "order": 300,
-          "title": "결제 상태",
-          "column": "status",
-          "width": 100,
-          "convertTo": "order_product_status_text"
-        },
-        {
-          "order": 200,
-          "title": "결제 금액",
-          "column": "payPrice",
-          "width": 100
-        },
-        { "order": 100, "title": "주문일", "column": "createdAt", "width": 200 }
-      ]
-    }
-  ],
-  "guestOrder": [
+  "order": [
     { "order": 700, "title": "주문 번호", "column": "code", "width": 200 },
     {
       "itemsTable": "orderProduct",

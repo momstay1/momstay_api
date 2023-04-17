@@ -928,41 +928,22 @@ export class OrderService {
     return order_cnt;
   }
 
-  // 호스트 주문 목록 엑셀 다운로드
-  async hostExcelDownload(
+  // 게스트 주문 목록 엑셀 생성
+  async createExcel(
     userInfo: UsersEntity,
     options: PaginationOptions,
     search: string[],
     order: string,
   ) {
-    const {data} = await this.hostFindAll(userInfo, options, search, order);
+    const {data} = await this.adminFindAll(userInfo, options, search, order);
     if (!data) {
       throw new NotFoundException(
         'order.service.excel: 다운로드할 데이터가 없습니다.',
       );
     }
 
-    return this.excelService.downloadExcel(data, {
-      type: 'hostOrder',
-    });
-  }
-
-  // 게스트 주문 목록 엑셀 다운로드
-  async guestExcelDownload(
-    userInfo: UsersEntity,
-    options: PaginationOptions,
-    search: string[],
-    order: string,
-  ) {
-    const {data} = await this.guestFindAll(userInfo, options, search, order);
-    if (!data) {
-      throw new NotFoundException(
-        'order.service.excel: 다운로드할 데이터가 없습니다.',
-      );
-    }
-
-    return this.excelService.downloadExcel(data, {
-      type: 'guestOrder',
+    return this.excelService.createExcel(data, {
+      type: 'order',
     });
   }
 }
