@@ -50,6 +50,7 @@ import { BlockModule } from './block/block.module';
 import { ReportCumulativeModule } from './report-cumulative/report-cumulative.module';
 import { PopupModule } from './popup/popup.module';
 import { MessageModule } from './message/message.module';
+import { ExcelModule } from './excel/excel.module';
 
 @Module({
   imports: [
@@ -107,7 +108,8 @@ import { MessageModule } from './message/message.module';
     BlockModule,
     ReportCumulativeModule,
     PopupModule,
-    MessageModule
+    MessageModule,
+    ExcelModule
   ],
   providers: [CommonService, IamportService],
 })
