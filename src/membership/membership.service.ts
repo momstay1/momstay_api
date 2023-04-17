@@ -299,7 +299,8 @@ export class MembershipService {
     }
   }
 
-  async excelDownload(
+  // 멤버십 신청 목록 엑셀 생성
+  async createExcel(
     options: PaginationOptions,
     search: string[],
     order: string,
@@ -311,7 +312,7 @@ export class MembershipService {
       );
     }
 
-    return this.excelService.downloadExcel(data, {
+    return this.excelService.createExcel(data, {
       type: 'membership',
     });
   }

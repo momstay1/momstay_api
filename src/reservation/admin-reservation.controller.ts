@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Res,
 } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -21,6 +22,7 @@ import {
 import { Auth } from 'src/common/decorator/role.decorator';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
+import { createReadStream } from 'fs';
 
 @Controller('admin/reservation')
 @ApiTags('방문 예약(관리자) API')
@@ -46,16 +48,16 @@ export class AdminReservationController {
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiQuery({
-    name: "search",
-    description: 'search=status:1,2,4,5<br>방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)<br>'
-      + 'search=po_title:방 이름<br>'
-      + 'search=name:예약자명<br>'
-      + 'search=email:예약자 이메일<br>'
-      + 'search=id:예약자 아이디<br>'
-      + 'search=min_visit_date:예약일<br>'
-      + 'search=max_visit_date:예약일<br>'
-    ,
-    required: false
+    name: 'search',
+    description:
+      'search=status:1,2,4,5<br>방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)<br>' +
+      'search=po_title:방 이름<br>' +
+      'search=name:예약자명<br>' +
+      'search=email:예약자 이메일<br>' +
+      'search=id:예약자 아이디<br>' +
+      'search=min_visit_date:예약일<br>' +
+      'search=max_visit_date:예약일<br>',
+    required: false,
   })
   @ApiQuery({
     name: 'order',
@@ -153,7 +155,7 @@ export class AdminReservationController {
   //   return await this.reservationService.hostCancel(user, +idx);
   // }
 
-  @Get('/excel')
+  @Get('excel')
   @ApiOperation({ summary: '방문 예약 리스트 (관리자) 엑셀 다운로드 API' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
@@ -179,13 +181,21 @@ export class AdminReservationController {
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
+    @Res() res,
   ) {
-    const data = await this.reservationService.excelDownload(
+    // 엑셀 생성
+    const excel_file = await this.reservationService.createExcel(
       user,
       { take, page },
       search,
       order,
     );
-    return { ...data };
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 }

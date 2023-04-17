@@ -392,12 +392,33 @@ export class ProductService {
       .leftJoinAndSelect('product.metro', 'metro')
       .leftJoinAndSelect('product.college', 'college')
       .where((qb) => {
-        qb.where('`product`.status IN (:status)', { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] });
-        get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
-        (get(where, 'title', '')) && qb.andWhere('`product`.title LIKE :title', { title: '%' + get(where, 'title') + '%' });
-        (get(where, 'type', '')) && qb.andWhere('`product`.type IN (:type)', { type: isArray(get(where, 'type')) ? get(where, 'type') : [get(where, 'type')] });
-        (get(where, 'name', '')) && qb.andWhere('`user`.name LIKE :name', { name: '%' + get(where, 'name') + '%' });
-        (get(where, 'id', '')) && qb.andWhere('`user`.id LIKE :id', { id: '%' + get(where, 'id') + '%' });
+        qb.where('`product`.status IN (:status)', {
+          status: isArray(get(where, 'status'))
+            ? get(where, 'status')
+            : [get(where, 'status')],
+        });
+        get(where, 'membership', '') &&
+          qb.andWhere('`product`.`membership` = :membership', {
+            membership: get(where, 'membership'),
+          });
+        get(where, 'title', '') &&
+          qb.andWhere('`product`.title LIKE :title', {
+            title: '%' + get(where, 'title') + '%',
+          });
+        get(where, 'type', '') &&
+          qb.andWhere('`product`.type IN (:type)', {
+            type: isArray(get(where, 'type'))
+              ? get(where, 'type')
+              : [get(where, 'type')],
+          });
+        get(where, 'name', '') &&
+          qb.andWhere('`user`.name LIKE :name', {
+            name: '%' + get(where, 'name') + '%',
+          });
+        get(where, 'id', '') &&
+          qb.andWhere('`user`.id LIKE :id', {
+            id: '%' + get(where, 'id') + '%',
+          });
         // get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         if (get(where, 'keyword', '')) {
           qb.andWhere(
@@ -580,7 +601,8 @@ export class ProductService {
     return product;
   }
 
-  async excelDownload(
+  // 숙소 목록 엑셀 생성
+  async createExcel(
     options: PaginationOptions,
     search: string[],
     order: string,
@@ -592,7 +614,7 @@ export class ProductService {
       );
     }
 
-    return this.excelService.downloadExcel(data, {
+    return this.excelService.createExcel(data, {
       type: 'product',
     });
   }

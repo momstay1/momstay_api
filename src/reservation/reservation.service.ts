@@ -488,7 +488,8 @@ export class ReservationService {
     return reservation_cnt;
   }
 
-  async excelDownload(
+  // 방문 예약 목록 엑셀 생성
+  async createExcel(
     userInfo,
     options: PaginationOptions,
     search: string[],
@@ -501,7 +502,7 @@ export class ReservationService {
       );
     }
 
-    return this.excelSerivce.downloadExcel(reservation['data'], {
+    return this.excelSerivce.createExcel(reservation['data'], {
       type: 'reservation',
     });
   }

@@ -4,25 +4,25 @@ import {
   UnprocessableEntityException,
   NotAcceptableException,
 } from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {compact, filter, get, isArray, isEmpty, map} from 'lodash';
-import {Pagination, PaginationOptions} from 'src/paginate';
-import {Brackets, In, MoreThanOrEqual, Repository} from 'typeorm';
-import {commonBcrypt} from 'src/common/common.bcrypt';
-import {commonUtils} from 'src/common/common.utils';
-import {EmailService} from 'src/email/email.service';
-import {FileService} from 'src/file/file.service';
-import {GroupsService} from 'src/groups/groups.service';
-import {UserSnsService} from 'src/user-sns/user-sns.service';
-import {DeviceService} from 'src/device/device.service';
-import {usersConstant} from './constants';
-import {CreateUserDto} from './dto/create-user.dto';
-import {UpdateUserDto} from './dto/update-user.dto';
-import {UsersEntity} from './entities/user.entity';
-import {Cron} from '@nestjs/schedule';
-import {UserLeaveService} from 'src/user-leave/user-leave.service';
-import {UserDormantService} from 'src/user-dormant/user-dormant.service';
-import {ExcelService} from 'src/excel/excel.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { compact, filter, get, isArray, isEmpty, map } from 'lodash';
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { Brackets, In, MoreThanOrEqual, Repository } from 'typeorm';
+import { commonBcrypt } from 'src/common/common.bcrypt';
+import { commonUtils } from 'src/common/common.utils';
+import { EmailService } from 'src/email/email.service';
+import { FileService } from 'src/file/file.service';
+import { GroupsService } from 'src/groups/groups.service';
+import { UserSnsService } from 'src/user-sns/user-sns.service';
+import { DeviceService } from 'src/device/device.service';
+import { usersConstant } from './constants';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersEntity } from './entities/user.entity';
+import { Cron } from '@nestjs/schedule';
+import { UserLeaveService } from 'src/user-leave/user-leave.service';
+import { UserDormantService } from 'src/user-dormant/user-dormant.service';
+import { ExcelService } from 'src/excel/excel.service';
 
 import * as moment from 'moment';
 
@@ -45,13 +45,13 @@ export class UsersService {
     try {
       throw new NotAcceptableException('123123123');
     } catch (error) {
-      console.log({error});
+      console.log({ error });
     }
     return id;
   }
 
   async email(email: string, type: string) {
-    const result = {status: true, message: '', type};
+    const result = { status: true, message: '', type };
     try {
       await this.findId(email);
       if (type == 'pw') {
@@ -91,7 +91,7 @@ export class UsersService {
       }
     }
 
-    return {result};
+    return { result };
   }
 
   async emailChk(email: string, code: string) {
@@ -133,7 +133,7 @@ export class UsersService {
         save_user['idx'],
       );
     }
-    return {user, file_info};
+    return { user, file_info };
   }
 
   async findAll(
@@ -142,7 +142,7 @@ export class UsersService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const status_arr: number[] = [];
     for (const key in usersConstant.status) {
@@ -181,7 +181,9 @@ export class UsersService {
       .leftJoinAndSelect('users.group', 'group')
       .where(
         new Brackets((qb) => {
-          qb.where('users.status IN (:user_status)', {user_status: status_arr});
+          qb.where('users.status IN (:user_status)', {
+            user_status: status_arr,
+          });
           get(where, 'group', '') &&
             qb.andWhere('`users`.groupIdx IN (:group)', {
               group: isArray(get(where, 'group'))
@@ -238,7 +240,7 @@ export class UsersService {
 
   async count() {
     return await this.usersRepository.count({
-      where: {user_status: usersConstant.status.registration},
+      where: { user_status: usersConstant.status.registration },
     });
   }
 
@@ -267,7 +269,7 @@ export class UsersService {
       );
     }
     const user = await this.usersRepository.findOne({
-      where: {id: id},
+      where: { id: id },
       relations: ['group', 'userSns', 'device', 'block'],
     });
     if (!get(user, 'idx', '')) {
@@ -287,8 +289,8 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: (qb) => {
-        qb.where('`email` = :email', {email: id});
-        qb.orWhere('`UsersEntity`.`id` = :id', {id: id});
+        qb.where('`email` = :email', { email: id });
+        qb.orWhere('`UsersEntity`.`id` = :id', { id: id });
       },
       relations: ['group', 'userSns', 'device', 'block'],
     });
@@ -308,7 +310,7 @@ export class UsersService {
       );
     }
     const user = await this.usersRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: ['group', 'userSns', 'device', 'block'],
     });
     if (!get(user, 'idx', '')) {
@@ -380,7 +382,7 @@ export class UsersService {
         user_data['idx'],
       );
     }
-    return {user: user_data, file_info};
+    return { user: user_data, file_info };
   }
 
   // 단말기 회원정보 수정
@@ -394,7 +396,7 @@ export class UsersService {
       deviceInfo['user']['idx'] != user['idx']
     ) {
       // 회원에 연동된 단말기 정보 제거
-      const {user} = deviceInfo;
+      const { user } = deviceInfo;
       console.log(deviceInfo['user']);
       user['device'] = null;
       await this.usersRepository.save(user);
@@ -406,7 +408,7 @@ export class UsersService {
 
     await this.usersRepository.save(user);
 
-    return {user};
+    return { user };
   }
 
   async chpw(id: string, password: string) {
@@ -485,7 +487,7 @@ export class UsersService {
     const dormantUser = await this.userDormantService.findOneId(id);
     if (get(dormantUser, 'idx', '')) {
       dormantUser.userInfo = JSON.parse(dormantUser.userInfo);
-      const {userInfo} = dormantUser;
+      const { userInfo } = dormantUser;
       const user_data = {
         idx: userInfo['idx'],
         status: usersConstant.status.registration,
@@ -523,8 +525,8 @@ export class UsersService {
     await this.usersRepository
       .createQueryBuilder()
       .update(UsersEntity)
-      .set({status: Number(usersConstant.status.delete)})
-      .where(' id IN (:ids)', {ids: ids})
+      .set({ status: Number(usersConstant.status.delete) })
+      .where(' id IN (:ids)', { ids: ids })
       .execute();
   }
 
@@ -580,13 +582,13 @@ export class UsersService {
       ? +createUserDto.status
       : usersConstant.status.registration;
 
-    const user = await this.usersRepository.create({...addPrefixUserDto});
+    const user = await this.usersRepository.create({ ...addPrefixUserDto });
     return await this.usersRepository.save(user);
   }
 
   //회원 존재 여부 체크
   private async checkUserExists(id: string) {
-    return await this.usersRepository.findOne({id: id});
+    return await this.usersRepository.findOne({ id: id });
   }
 
   /******************** cron ********************/
@@ -606,8 +608,8 @@ export class UsersService {
     await this.usersRepository
       .createQueryBuilder()
       .update(UsersEntity)
-      .set({id: '', uniqueKey: '', certifiInfo: ''})
-      .where(' status = :status', {status: usersConstant.status.leave})
+      .set({ id: '', uniqueKey: '', certifiInfo: '' })
+      .where(' status = :status', { status: usersConstant.status.leave })
       .execute();
   }
 
@@ -651,11 +653,13 @@ export class UsersService {
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.group', 'group')
       .where((qb) => {
-        qb.where('group.idx IN (:group)', {group: group});
+        qb.where('group.idx IN (:group)', { group: group });
         qb.andWhere('user.status = :status', {
           status: usersConstant.status.registration,
         });
-        qb.andWhere('user.activitedAt < :activitedAt', {activitedAt: yearAgo});
+        qb.andWhere('user.activitedAt < :activitedAt', {
+          activitedAt: yearAgo,
+        });
       })
       .getMany();
     console.log('휴면 회원 숫자: ', users.length);
@@ -667,8 +671,8 @@ export class UsersService {
     }
   }
 
-  // 회원 목록 엑셀 다운로드
-  async excelDownload(
+  // 회원 목록 엑셀 생성
+  async createExcel(
     user,
     options: PaginationOptions,
     search: string[],
@@ -681,7 +685,7 @@ export class UsersService {
       );
     }
 
-    return this.excelService.downloadExcel(users, {
+    return this.excelService.createExcel(users, {
       type: 'member',
     });
   }

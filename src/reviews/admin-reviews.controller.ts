@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -30,6 +31,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
+import { createReadStream } from 'fs';
 
 @Controller('admin/reviews')
 @ApiTags('후기(관리자) API')
@@ -64,16 +66,16 @@ export class AdminReviewsController {
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiQuery({
-    name: "search",
-    description: 'search=status:상태값(-1:삭제|1:미등록|2:등록, 기본값:2)<br>'
-      + 'search=star:별점<br>'
-      + 'search=name:작성자명<br>'
-      + 'search=id:작성자id<br>'
-      + 'search=title:숙소 이름<br>'
-      + 'search=min_createdAt:최소날짜<br>'
-      + 'search=max_createdAt:최대날짜<br>'
-    ,
-    required: false
+    name: 'search',
+    description:
+      'search=status:상태값(-1:삭제|1:미등록|2:등록, 기본값:2)<br>' +
+      'search=star:별점<br>' +
+      'search=name:작성자명<br>' +
+      'search=id:작성자id<br>' +
+      'search=title:숙소 이름<br>' +
+      'search=min_createdAt:최소날짜<br>' +
+      'search=max_createdAt:최대날짜<br>',
+    required: false,
   })
   @ApiQuery({
     name: 'order',
@@ -124,14 +126,21 @@ export class AdminReviewsController {
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
+    @Res() res,
   ) {
-    const data = await this.reviewsService.excelDownload(
+    // 엑셀 생성
+    const excel_file = await this.reviewsService.createExcel(
       { take, page },
       search,
       order,
     );
-
-    return { ...data };
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':idx')

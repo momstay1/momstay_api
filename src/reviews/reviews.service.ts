@@ -551,7 +551,8 @@ export class ReviewsService {
     await this.statusChange(idxs, '' + deleteStatus);
   }
 
-  async excelDownload(
+  // 리뷰 목록 엑셀 생성
+  async createExcel(
     options: PaginationOptions,
     search: string[],
     order: string,
@@ -563,7 +564,7 @@ export class ReviewsService {
       );
     }
 
-    return this.excelService.downloadExcel(reviews['data'], {
+    return this.excelService.createExcel(reviews['data'], {
       type: 'review',
     });
   }

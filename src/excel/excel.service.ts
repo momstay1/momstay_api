@@ -11,9 +11,9 @@ import { commonUtils } from 'src/common/common.utils';
 
 @Injectable()
 export class ExcelService {
-  async downloadExcel(arrayData, options) {
+  async createExcel(arrayData, options) {
     const { type } = options;
-    const excelName = `${type}_${moment().format('YYYYMMDDHHmmss')}.xlsx`;
+    const file_name = `${type}_${moment().format('YYYYMMDDHHmmss')}.xlsx`;
     let useExcelItems = false;
 
     const datas = arrayData.results;
@@ -101,11 +101,11 @@ export class ExcelService {
       worksheet['!merges'] = mergeOptions;
     }
 
-    const filePath = path.join(commonContants.defect_excel_path, excelName);
+    const file_path = path.join(commonContants.defect_excel_path, file_name);
     XLSX.utils.book_append_sheet(workbook, worksheet, type);
-    XLSX.writeFile(workbook, filePath);
+    XLSX.writeFile(workbook, file_path);
 
-    return { excelName, filePath };
+    return { file_name, file_path };
   }
 
   // order 값이 클수록 우선순위 높음

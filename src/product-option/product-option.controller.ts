@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Res,
 } from '@nestjs/common';
 import { ProductOptionService } from './product-option.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
@@ -22,6 +23,7 @@ import { UploadedFiles, UseInterceptors } from '@nestjs/common/decorators';
 import { multerOptions } from 'src/common/common.file';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Auth } from 'src/common/decorator/role.decorator';
+import { createReadStream } from 'fs';
 
 @Controller('product-option')
 @ApiTags('방 API')
@@ -57,19 +59,20 @@ export class ProductOptionController {
     //   + 'search=keyword:메인검색<br>'
   })
   @ApiQuery({
-    name: "search",
-    description: "search=membership:(0:무료|1:유료)<br>"
-      + "search=title:숙소이름<br>"
-      + "search=addr1:주소1<br>"
-      + "search=addr2:주소2<br>"
-      + "search=metro:지하철<br>"
-      + "search=college:대학교<br>"
-      + "search=product_idx:숙소idx<br>"
-      + "search=po_title:방 이름<br>"
-      + "search=name:호스트이름<br>"
-      + "search=id:호스트아이디<br>"
-      + "search=status:상태값(0:미등록|1:미사용|2:사용)<br>",
-    required: false
+    name: 'search',
+    description:
+      'search=membership:(0:무료|1:유료)<br>' +
+      'search=title:숙소이름<br>' +
+      'search=addr1:주소1<br>' +
+      'search=addr2:주소2<br>' +
+      'search=metro:지하철<br>' +
+      'search=college:대학교<br>' +
+      'search=product_idx:숙소idx<br>' +
+      'search=po_title:방 이름<br>' +
+      'search=name:호스트이름<br>' +
+      'search=id:호스트아이디<br>' +
+      'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+    required: false,
   })
   @ApiQuery({
     name: 'order',
@@ -123,13 +126,21 @@ export class ProductOptionController {
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
+    @Res() res,
   ) {
-    const data = await this.productOptionService.excelDownload(
+    // 엑셀 생성
+    const excel_file = await this.productOptionService.createExcel(
       { take, page },
       search,
       order,
     );
-    return { ...data };
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':idx')

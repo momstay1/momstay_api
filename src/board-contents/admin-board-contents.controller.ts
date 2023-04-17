@@ -1,4 +1,13 @@
-import {Controller, Get, Post, Body, Patch, Param, Query} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Query,
+  Res,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -8,17 +17,18 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import {get, map} from 'lodash';
-import {AdminUsersEntity} from 'src/admin-users/entities/admin-user.entity';
-import {GetUser} from 'src/auth/getuser.decorator';
-import {commonUtils} from 'src/common/common.utils';
-import {Auth} from 'src/common/decorator/role.decorator';
-import {ResponseErrorDto} from 'src/error/dto/response-error.dto';
-import {UsersEntity} from 'src/users/entities/user.entity';
-import {BoardContentsService} from './board-contents.service';
-import {CreateBoardContentDto} from './dto/create-board-content.dto';
-import {UpdateBoardContentDto} from './dto/update-board-content.dto';
-import {BoardContentsEntity} from './entities/board-content.entity';
+import { get, map } from 'lodash';
+import { AdminUsersEntity } from 'src/admin-users/entities/admin-user.entity';
+import { GetUser } from 'src/auth/getuser.decorator';
+import { commonUtils } from 'src/common/common.utils';
+import { Auth } from 'src/common/decorator/role.decorator';
+import { ResponseErrorDto } from 'src/error/dto/response-error.dto';
+import { UsersEntity } from 'src/users/entities/user.entity';
+import { BoardContentsService } from './board-contents.service';
+import { CreateBoardContentDto } from './dto/create-board-content.dto';
+import { UpdateBoardContentDto } from './dto/update-board-content.dto';
+import { BoardContentsEntity } from './entities/board-content.entity';
+import { createReadStream } from 'fs';
 
 @Controller('admin/board-contents')
 @ApiTags('게시글(관리자) API')
@@ -33,9 +43,9 @@ export class AdminBoardContentsController {
   };
 
   @Post()
-  @ApiOperation({summary: '관리자 게시글 생성 API'})
-  @ApiCreatedResponse({type: CreateBoardContentDto})
-  @ApiUnprocessableEntityResponse({type: ResponseErrorDto})
+  @ApiOperation({ summary: '관리자 게시글 생성 API' })
+  @ApiCreatedResponse({ type: CreateBoardContentDto })
+  @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['Any'])
   async create(
@@ -46,15 +56,15 @@ export class AdminBoardContentsController {
   }
 
   @Post('status-change')
-  @ApiOperation({summary: '관리자 게시글 상태 일괄 변경 API'})
-  @ApiUnprocessableEntityResponse({type: ResponseErrorDto})
+  @ApiOperation({ summary: '관리자 게시글 상태 일괄 변경 API' })
+  @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['root', 'admin'])
   @ApiBody({
     schema: {
       properties: {
-        status: {type: 'string'},
-        bc_idxs: {example: []},
+        status: { type: 'string' },
+        bc_idxs: { example: [] },
       },
     },
   })
@@ -63,15 +73,15 @@ export class AdminBoardContentsController {
   }
 
   @Post('type-change')
-  @ApiOperation({summary: '관리자 게시글 타입 일괄 변경 API'})
-  @ApiUnprocessableEntityResponse({type: ResponseErrorDto})
+  @ApiOperation({ summary: '관리자 게시글 타입 일괄 변경 API' })
+  @ApiUnprocessableEntityResponse({ type: ResponseErrorDto })
   @ApiBearerAuth()
   @Auth(['root', 'admin'])
   @ApiBody({
     schema: {
       properties: {
-        type: {type: 'string'},
-        bc_idxs: {example: []},
+        type: { type: 'string' },
+        bc_idxs: { example: [] },
       },
     },
   })
@@ -80,8 +90,8 @@ export class AdminBoardContentsController {
   }
 
   @Get('/:bd_idx')
-  @ApiOperation({summary: '관리자 게시글 리스트 API'})
-  @ApiCreatedResponse({type: BoardContentsEntity})
+  @ApiOperation({ summary: '관리자 게시글 리스트 API' })
+  @ApiCreatedResponse({ type: BoardContentsEntity })
   @ApiQuery({
     name: 'search',
     description:
@@ -91,8 +101,8 @@ export class AdminBoardContentsController {
       'search=id:작성자 id<br>',
     required: false,
   })
-  @ApiQuery({name: 'category', required: false})
-  @ApiQuery({name: 'order', required: false})
+  @ApiQuery({ name: 'category', required: false })
+  @ApiQuery({ name: 'order', required: false })
   async findCategoryAll(
     @Param('bd_idx') bd_idx: string,
     @Query('category') category: string,
@@ -101,22 +111,22 @@ export class AdminBoardContentsController {
     @Query('search') search: string[],
     @Query('order') order: string,
   ) {
-    const {bc, bcats} = await this.boardContentsService.adminFindCategoryAll(
+    const { bc, bcats } = await this.boardContentsService.adminFindCategoryAll(
       bd_idx,
       category,
-      {take, page},
+      { take, page },
       search,
       order,
     );
     // const data = map(results, (obj) => {
     //   return this.sanitizeBoardContent(obj);
     // });
-    return {bcats, ...bc};
+    return { bcats, ...bc };
   }
 
   @Get(':bd_idx/excel')
-  @ApiOperation({summary: '관리자 게시글 리스트 엑셀 다운로드 API'})
-  @ApiCreatedResponse({type: BoardContentsEntity})
+  @ApiOperation({ summary: '관리자 게시글 리스트 엑셀 다운로드 API' })
+  @ApiCreatedResponse({ type: BoardContentsEntity })
   @ApiQuery({
     name: 'search',
     description:
@@ -126,8 +136,8 @@ export class AdminBoardContentsController {
       'search=id:작성자 id<br>',
     required: false,
   })
-  @ApiQuery({name: 'category', required: false})
-  @ApiQuery({name: 'order', required: false})
+  @ApiQuery({ name: 'category', required: false })
+  @ApiQuery({ name: 'order', required: false })
   async excelDownload(
     @Param('bd_idx') bd_idx: string,
     @Query('category') category: string,
@@ -135,20 +145,27 @@ export class AdminBoardContentsController {
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
+    @Res() res,
   ) {
-    const data = await this.boardContentsService.excelDownload(
+    const excel_file = await this.boardContentsService.createExcel(
       bd_idx,
       category,
-      {take, page},
+      { take, page },
       search,
       order,
     );
-    return {...data};
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':bd_idx/:bc_idx')
-  @ApiOperation({summary: '관리자 게시글 상세 API'})
-  @ApiCreatedResponse({type: BoardContentsEntity})
+  @ApiOperation({ summary: '관리자 게시글 상세 API' })
+  @ApiCreatedResponse({ type: BoardContentsEntity })
   async findOne(
     @Param('bd_idx') bd_idx: number,
     @Param('bc_idx') bc_idx: number,
@@ -158,7 +175,7 @@ export class AdminBoardContentsController {
   }
 
   @Patch(':bc_idx')
-  @ApiOperation({summary: '관리자 게시글 수정 API'})
+  @ApiOperation({ summary: '관리자 게시글 수정 API' })
   @ApiBearerAuth()
   @Auth(['root', 'admin'])
   async update(

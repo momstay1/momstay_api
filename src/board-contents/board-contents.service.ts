@@ -4,22 +4,22 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {BoardCategoriesService} from 'src/board-categories/board-categories.service';
-import {BoardSelectedCategoriesService} from 'src/board-selected-categories/board-selected-categories.service';
-import {BoardsService} from 'src/boards/boards.service';
-import {UsersService} from 'src/users/users.service';
-import {ExcelService} from 'src/excel/excel.service';
-import {In, Repository} from 'typeorm';
-import {CreateBoardContentDto} from './dto/create-board-content.dto';
-import {UpdateBoardContentDto} from './dto/update-board-content.dto';
-import {BoardContentsEntity} from './entities/board-content.entity';
-import {bcConstants} from './constants';
-import {commonUtils} from 'src/common/common.utils';
-import {Pagination, PaginationOptions} from 'src/paginate';
-import {get, isArray, keyBy, values} from 'lodash';
-import {GroupsService} from 'src/groups/groups.service';
-import {commonBcrypt} from 'src/common/common.bcrypt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BoardCategoriesService } from 'src/board-categories/board-categories.service';
+import { BoardSelectedCategoriesService } from 'src/board-selected-categories/board-selected-categories.service';
+import { BoardsService } from 'src/boards/boards.service';
+import { UsersService } from 'src/users/users.service';
+import { ExcelService } from 'src/excel/excel.service';
+import { In, Repository } from 'typeorm';
+import { CreateBoardContentDto } from './dto/create-board-content.dto';
+import { UpdateBoardContentDto } from './dto/update-board-content.dto';
+import { BoardContentsEntity } from './entities/board-content.entity';
+import { bcConstants } from './constants';
+import { commonUtils } from 'src/common/common.utils';
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { get, isArray, keyBy, values } from 'lodash';
+import { GroupsService } from 'src/groups/groups.service';
+import { commonBcrypt } from 'src/common/common.bcrypt';
 
 @Injectable()
 export class BoardContentsService {
@@ -41,7 +41,7 @@ export class BoardContentsService {
   // 게시글 생성
   async create(userInfo, bc: CreateBoardContentDto) {
     // 게시판 정보 가져오기
-    const board = await this.boardsService.findBoard({idx: bc.bd_idx});
+    const board = await this.boardsService.findBoard({ idx: bc.bd_idx });
     const write_auth = board.write_auth.split('|');
 
     // 회원정보 가져오기
@@ -64,7 +64,7 @@ export class BoardContentsService {
     if (bc.category.length) {
       // 카테고리정보 가져오기
       const bcats = await this.bcatsService.searching({
-        where: {bcat_id: In(bc.category)},
+        where: { bcat_id: In(bc.category) },
       });
       // 셀렉트 카테고리 저장하기
       boardContent.bscats = [];
@@ -79,12 +79,12 @@ export class BoardContentsService {
 
   // 게시글 상태 일괄 변경 (수정, 삭제)
   async statusChange(statusChange) {
-    console.log({statusChange});
+    console.log({ statusChange });
     await this.bcRepository
       .createQueryBuilder()
       .update(BoardContentsEntity)
-      .set({status: Number(statusChange.status)})
-      .where(' idx IN (:bc_idx)', {bc_idx: statusChange.bc_idxs})
+      .set({ status: Number(statusChange.status) })
+      .where(' idx IN (:bc_idx)', { bc_idx: statusChange.bc_idxs })
       .execute();
   }
 
@@ -107,12 +107,12 @@ export class BoardContentsService {
 
   // 게시글 상태 일괄 변경 (수정, 삭제)
   async typeChange(typeChange) {
-    console.log({typeChange});
+    console.log({ typeChange });
     await this.bcRepository
       .createQueryBuilder()
       .update(BoardContentsEntity)
-      .set({type: Number(typeChange.type)})
-      .where(' idx IN (:bc_idx)', {bc_idx: typeChange.bc_idxs})
+      .set({ type: Number(typeChange.type) })
+      .where(' idx IN (:bc_idx)', { bc_idx: typeChange.bc_idxs })
       .execute();
   }
 
@@ -124,7 +124,7 @@ export class BoardContentsService {
     order,
     search: string[],
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     // 리스트 권한 체크
     // // 게시판 정보 가져오기
@@ -136,7 +136,7 @@ export class BoardContentsService {
     // }
 
     const bcats = await this.bcatsService.searching({
-      where: {bcat_id: In([category])},
+      where: { bcat_id: In([category]) },
     });
 
     const where = commonUtils.searchSplit(search);
@@ -193,12 +193,12 @@ export class BoardContentsService {
     order,
     userInfo,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
     const bcats = await this.bcatsService.searching({
-      where: {bcat_id: In([category])},
+      where: { bcat_id: In([category]) },
     });
 
     const order_by = commonUtils.orderSplit(order, '');
@@ -246,10 +246,10 @@ export class BoardContentsService {
   // 공지사항 게시글 리스트 가져오기
   async findNoticeCategoryAll(bd_idx: string, category: string) {
     const bcats = await this.bcatsService.searching({
-      where: {bcat_id: In([category])},
+      where: { bcat_id: In([category]) },
     });
     return await this.bcRepository.find({
-      order: {createdAt: 'DESC'},
+      order: { createdAt: 'DESC' },
       where: (qb) => {
         qb.where('`BoardContentsEntity__board`.`idx` = :bc_bd_idx', {
           bc_bd_idx: bd_idx,
@@ -285,7 +285,7 @@ export class BoardContentsService {
 
   async findIndex(idx: number) {
     const bc = await this.bcRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: ['user', 'board', 'bscats'],
     });
     if (!bc) {
@@ -296,7 +296,7 @@ export class BoardContentsService {
 
   async findBdBcIndex(bcIdx: number) {
     const bc = await this.bcRepository.findOne({
-      where: {idx: bcIdx},
+      where: { idx: bcIdx },
       relations: ['user', 'board', 'bscats'],
     });
     if (!bc) {
@@ -350,7 +350,7 @@ export class BoardContentsService {
     if (get(updateBoardContentDto, ['category', 'length']) > 0) {
       // 카테고리정보 가져오기 (bcat_idx를 키값으로 재정렬)
       const bcats = await this.bcatsService.searching({
-        where: {bcat_id: In(updateBoardContentDto.category)},
+        where: { bcat_id: In(updateBoardContentDto.category) },
       });
       boardContent.bscats = await this.bscatsChange(bcats, boardContent);
     }
@@ -363,8 +363,8 @@ export class BoardContentsService {
     await this.bcRepository
       .createQueryBuilder()
       .update(BoardContentsEntity)
-      .set({count: ++bc_count})
-      .where(' idx IN (:bc_idx)', {bc_idx: [bc_idx]})
+      .set({ count: ++bc_count })
+      .where(' idx IN (:bc_idx)', { bc_idx: [bc_idx] })
       .execute();
 
     return bc_count;
@@ -384,15 +384,15 @@ export class BoardContentsService {
     search: string[],
     order,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const bcats = await this.bcatsService.searching({
-      where: {bcat_id: In([category])},
+      where: { bcat_id: In([category]) },
     });
 
     const where = commonUtils.searchSplit(search);
     where['status'] = get(where, 'status', values(bcConstants.status));
-    console.log({where});
+    console.log({ where });
 
     const alias = 'bc';
     let order_by = commonUtils.orderSplit(order, alias);
@@ -401,7 +401,7 @@ export class BoardContentsService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.bcRepository
       .createQueryBuilder('bc')
@@ -410,7 +410,7 @@ export class BoardContentsService {
       .leftJoinAndSelect('bc.bscats', 'bscats')
       .leftJoinAndSelect('user.group', 'group')
       .where((qb) => {
-        qb.where('`board`.idx = :bd_idx', {bd_idx: bd_idx});
+        qb.where('`board`.idx = :bd_idx', { bd_idx: bd_idx });
         qb.andWhere('`bc`.status IN (:status)', {
           status: isArray(where['status'])
             ? where['status']
@@ -421,7 +421,7 @@ export class BoardContentsService {
             name: '%' + where['name'] + '%',
           });
         get(where, 'id', '') &&
-          qb.andWhere('`user`.id LIKE :id', {id: '%' + where['id'] + '%'});
+          qb.andWhere('`user`.id LIKE :id', { id: '%' + where['id'] + '%' });
       })
       .orderBy(order_by)
       .skip(take * (page - 1) || 0)
@@ -530,8 +530,8 @@ export class BoardContentsService {
   // 비회원 글수정
   // 비회원 글삭제
 
-  // 관리자용 게시글 리스트 엑셀 다운로드
-  async excelDownload(
+  // 관리자용 게시글 리스트 엑셀 생성
+  async createExcel(
     bd_idx,
     category: string,
     options: PaginationOptions,
@@ -550,7 +550,7 @@ export class BoardContentsService {
         'board-contents.service.excel: 다운로드할 데이터가 없습니다.',
       );
     }
-    return this.excelService.downloadExcel(boardContents['bc'], {
+    return this.excelService.createExcel(boardContents['bc'], {
       type: `board_${bd_idx}`,
     });
   }

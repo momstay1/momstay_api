@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Res,
 } from '@nestjs/common';
 import { MembershipService } from './membership.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
@@ -20,6 +21,7 @@ import {
 import { Auth } from 'src/common/decorator/role.decorator';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
+import { createReadStream } from 'fs';
 
 @Controller('admin/membership')
 @ApiTags('멤버십(관리자) API')
@@ -85,13 +87,21 @@ export class AdminMembershipController {
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
+    @Res() res,
   ) {
-    const data = await this.membershipService.excelDownload(
+    // 엑셀 생성
+    const excel_file = await this.membershipService.createExcel(
       { take, page },
       search,
       order,
     );
-    return { ...data };
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':idx')

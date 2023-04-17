@@ -312,7 +312,8 @@ export class ProductOptionService {
     return `This action removes a #${id} productOption`;
   }
 
-  async excelDownload(
+  // 방 목록 엑셀 생성
+  async createExcel(
     options: PaginationOptions,
     search: string[],
     order: string,
@@ -323,7 +324,7 @@ export class ProductOptionService {
         'product-option.service.excel: 다운로드할 데이터가 없습니다.',
       );
     }
-    return this.excelService.downloadExcel(data, {
+    return this.excelService.createExcel(data, {
       type: 'product_option',
     });
   }

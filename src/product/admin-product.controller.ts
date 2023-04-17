@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   HttpCode,
+  Res,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -24,6 +25,7 @@ import {
 import { Auth } from 'src/common/decorator/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
+import { createReadStream } from 'fs';
 
 @Controller('admin/product')
 @ApiTags('숙소(관리자) API')
@@ -52,16 +54,17 @@ export class AdminProductController {
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
   @ApiQuery({
-    name: "search",
-    description: 'search=membership:(0|1)<br>'
-      + 'search=keyword:메인검색<br>'
-      + 'search=user_idx:회원idx(사용안함)<br>'
-      + 'search=title:숙소이름<br>'
-      + 'search=name:호스트이름<br>'
-      + 'search=id:호스트아이디<br>'
-      + 'search=type:숙소 구분<br>'
-      + 'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
-    required: false
+    name: 'search',
+    description:
+      'search=membership:(0|1)<br>' +
+      'search=keyword:메인검색<br>' +
+      'search=user_idx:회원idx(사용안함)<br>' +
+      'search=title:숙소이름<br>' +
+      'search=name:호스트이름<br>' +
+      'search=id:호스트아이디<br>' +
+      'search=type:숙소 구분<br>' +
+      'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
+    required: false,
   })
   @ApiQuery({
     name: 'order',
@@ -86,7 +89,7 @@ export class AdminProductController {
   }
 
   // 숙소 리스트 엑셀 다운로드
-  @Get('/excel')
+  @Get('excel')
   @ApiOperation({ summary: '숙소 리스트 엑셀 다운로드 API' })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
@@ -112,15 +115,21 @@ export class AdminProductController {
     @Query('page') page: number,
     @Query('search') search: string[],
     @Query('order') order: string,
+    @Res() res,
   ) {
-    const data = await this.productService.excelDownload(
+    // 엑셀 생성
+    const excel_file = await this.productService.createExcel(
       { take, page },
       search,
       order,
     );
-    return {
-      ...data,
-    };
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':idx')
