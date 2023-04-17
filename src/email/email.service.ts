@@ -33,18 +33,32 @@ export class EmailService {
   async sendMail(to: string, subject: string, html: string) {
     const configService = new ConfigService(process.env);
     const emailConfig = configService.getEmailConfig();
+    const smtp = await this.settingsService.find('smtp');
+    let transporter;
+    let from_email;
+    if (get(smtp, ['smtp_service', 'set_value'], '') != '') {
+      from_email = smtp.smtp_user.set_value;
+      transporter = nodeMailer.createTransport({
+        service: smtp.smtp_service.set_value,
+        auth: {
+          user: smtp.smtp_user.set_value,
+          pass: smtp.smtp_pass.set_value
+        }
+      });
+    } else {
+      from_email = emailConfig.email;
+      const auth = {
+        auth: {
+          api_key: emailConfig.api_key,
+          domain: emailConfig.domain
+        }
+      };
+      transporter = nodeMailer.createTransport(mg(auth));
+    }
 
-    const auth = {
-      auth: {
-        api_key: emailConfig.api_key,
-        domain: emailConfig.domain
-      }
-    };
-
-    const transporter = nodeMailer.createTransport(mg(auth));
 
     const mail_option = {
-      from: emailConfig.email,
+      from: from_email,
       to: to,
       subject: subject,
       html: html,
@@ -84,6 +98,7 @@ export class EmailService {
     const replace_txt = {
       url: '#{사이트URL}',
       site_title: '#{회사명}',
+      site_email: '#{관리자 이메일}',
       product_title: '#{숙소이름}',
       po_title: '#{방이름}',
       guest_name: '#{방문자명}',
@@ -91,6 +106,13 @@ export class EmailService {
       occupancy_date: '#{입주날짜}',
       eviction_date: '#{퇴거날짜}',
       phone: '#{연락처}',
+      user_name: '#{회원이름}',
+      user_id: '#{회원아이디}',
+      dormant_date: '#{전환 예정일}',
+      membership_month: '#{멤버십개월}',
+      membership_price: '#{멤버십금액}',
+      membership_bank: '#{은행명}',
+      membership_account: '#{계좌번호}',
       // link: '#{링크}',
       // logo: '#{로고 이미지 변수}',
     };
@@ -108,7 +130,8 @@ export class EmailService {
     const site = await this.settingsService.find('site');
     const info = {
       url: url,
-      site_title: get(site, ['site_' + lang + '_title', 'set_value'], site['site_title']),
+      site_title: get(site, ['site_' + lang + '_title', 'set_value'], site.site_title.set_value),
+      site_email: get(site, ['site_' + lang + '_email', 'set_value'], site.site_email.set_value),
       ...sendInfo
     }
     return info;

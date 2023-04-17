@@ -448,6 +448,7 @@ export class UsersService {
 
   async leave(id: string, reason: string) {
     const user = await this.findId(id);
+    const { language, name, email } = user;
     const userLeave = await this.userLeaveService.leaveUser(user, reason);
     user.status = usersConstant.status.leave;
     // user.id = '';
@@ -467,6 +468,15 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     // TODO: 회원 탈퇴 완료 메일 발송 (게스트)
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'user', group: 'guest', code: 'leave', lang: language },
+      {
+        user_name: name,
+      }
+    );
+    if (email != '' && mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(email, mail.title, email_tmpl);
+    }
   }
 
   async dormant(user: UsersEntity) {
@@ -531,6 +541,18 @@ export class UsersService {
       .set({ status: Number(usersConstant.status.delete) })
       .where(' id IN (:ids)', { ids: ids })
       .execute();
+  }
+
+  async signupMail(userInfo: UsersEntity) {
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'user', group: 'guest', code: 'signup', lang: userInfo.language },
+      {
+        user_name: userInfo.name,
+      }
+    );
+    if (get(userInfo, 'email', '') && mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(userInfo.email, mail.title, email_tmpl);
+    }
   }
 
   async dashboard() {
@@ -632,15 +654,20 @@ export class UsersService {
     console.log('휴면 회원 안내 숫자: ', users.length);
     if (users.length > 0) {
       // 휴면 회원 안내
+      const after_one_month = moment().add(1, 'month').format('YYYY-MM-DD')
       for (const key in users) {
-        // TODO: 휴면 회원 안내 메일 (게스트)
-        this.emailService.sendMail(
-          users[key].email,
-          'momstay - Guidelines for Conversion of Dormant Members',
-          `Accounts that have not logged in or used the service for more than a year <br>
-          will be converted to dormant accounts, and personal information will be destroyed or stored and managed separately for safe personal information management.
-          `
+        // 휴면 회원 안내 메일 (게스트)
+        const { mail, email_tmpl } = await this.emailService.mailSettings(
+          { type: 'user', group: 'guest', code: 'dormant', lang: users[key].language },
+          {
+            user_name: users[key].name,
+            user_id: users[key].id,
+            dormant_date: after_one_month
+          }
         );
+        if (get(users[key], 'email', '') && mail != '' && email_tmpl != '') {
+          await this.emailService.sendMail(users[key].email, mail.title, email_tmpl);
+        }
       }
     }
   }

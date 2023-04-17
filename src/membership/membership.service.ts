@@ -18,6 +18,7 @@ import { ProductService } from 'src/product/product.service';
 import { ExcelService } from 'src/excel/excel.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { Cron } from '@nestjs/schedule';
+import { EmailService } from 'src/email/email.service';
 
 const applicationStatus = 1;
 const approvalStatus = 2;
@@ -30,6 +31,7 @@ export class MembershipService {
     private readonly userService: UsersService,
     private readonly productService: ProductService,
     private readonly excelService: ExcelService,
+    private readonly emailService: EmailService,
     private readonly settingsService: SettingsService,
   ) { }
 
@@ -72,7 +74,35 @@ export class MembershipService {
       membershipHistoryEntity,
     );
 
-    // TODO: 멤버십 신청 완료 메일 (관리자, 호스트)
+    // 멤버십 신청 완료 메일 (관리자, 호스트)
+    if (user.email != '') {
+      // 호스트 메일 발송
+      const membershipInfo = await this.settingsService.find('membership');
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'user', group: 'host', code: 'membership', lang: user.language },
+        {
+          membership_month: membership.month,
+          membership_price: get(membershipInfo, ['membership_price_discount_' + membership.month, 'set_value'], 0),
+          membership_bank: get(membershipInfo, ['membership_bank', 'set_value'], ''),
+          membership_account: get(membershipInfo, ['membership_account', 'set_value'], ''),
+        }
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(user.email, mail.title, email_tmpl);
+      }
+    }
+
+    const site = await this.settingsService.find('site');
+    if (get(site, ['site_ko_email', 'set_value'], '')) {
+      // 관리자 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'user', group: 'admin', code: 'membership', lang: user.language },
+        {}
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(user.email, mail.title, email_tmpl);
+      }
+    }
 
     return { membership };
   }
@@ -263,7 +293,17 @@ export class MembershipService {
       membershipStatus,
     );
 
-    // TODO: 멤버십 등록 완료(호스트)
+    // 멤버십 등록 완료(호스트)
+    if (membership.user.email != '' && membership.status == approvalStatus) {
+      // 호스트 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'user', group: 'host', code: 'membership_complete', lang: membership.user.language },
+        {}
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(membership.user.email, mail.title, email_tmpl);
+      }
+    }
 
     return { membership };
   }
