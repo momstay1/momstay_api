@@ -7,16 +7,17 @@ import { ProductModule } from 'src/product/product.module';
 import { UsersModule } from 'src/users/users.module';
 import { FileModule } from 'src/file/file.module';
 import { AdminReviewsController } from './admin-reviews.controller';
+import { ExcelService } from 'src/excel/excel.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ReviewEntity]),
     ProductModule,
     UsersModule,
-    FileModule
+    FileModule,
   ],
   controllers: [ReviewsController, AdminReviewsController],
-  providers: [ReviewsService],
-  exports: [ReviewsService]
+  providers: [ReviewsService, ExcelService],
+  exports: [ReviewsService],
 })
-export class ReviewsModule { }
+export class ReviewsModule {}

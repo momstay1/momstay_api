@@ -201,6 +201,93 @@ export const commonUtils = {
       exchangeRequest: 11,
       exchangeComplete: 12,
     };
+    // order 상태 텍스트
+    data['order_status_text'] = {
+      1: '결제대기',
+      2: '결제완료',
+      3: '배송준비',
+      4: '배송중(호스트 승인)',
+      6: '구매확정(입주 확정)',
+    };
+    // order product 상태 텍스트
+    data['order_product_status_text'] = {
+      1: '결제대기',
+      2: '결제완료',
+      3: '배송준비',
+      4: '배송중(호스트 승인)',
+      6: '구매확정(입주 확정)',
+    };
+    // user 상태 텍스트
+    data['user_status_text'] = {
+      0: '회원 삭제',
+      1: '회원 미인증',
+      2: '회원 등록',
+      5: '회원 휴면',
+      9: '회원 탈퇴',
+    };
+    // user 가입 언어 텍스트
+    data['user_language_text'] = {
+      ko: '한국어',
+      en: '영어',
+      'zh-CN': '중국어',
+    };
+    // board contents 상태 텍스트
+    data['board_status_text'] = {
+      0: '삭제',
+      1: '미등록',
+      2: '등록',
+      3: '답변대기',
+      4: '답변완료',
+    };
+    // 방문 예약 상태 텍스트
+    data['reservation_status_text'] = {
+      1: '예약대기',
+      2: '예약승인',
+      3: '예약확정',
+      4: '예약취소',
+      5: '예약거부',
+    };
+    // 후기 등록 텍스트
+    data['review_status_text'] = {
+      1: '미등록',
+      2: '등록',
+    };
+    // 멤버쉽 상태 텍스트
+    data['membership_status_text'] = {
+      1: '신청',
+      2: '승인',
+      3: '종료',
+    };
+    // 숙소 타입 텍스트
+    data['product_type_text'] = {
+      1: '하숙집',
+      2: '쉐어하우스',
+      3: '게스트하우스',
+      4: '홈스테이',
+    };
+    // 숙소 게시 상태 텍스트
+    data['product_status_text'] = {
+      0: '미등록',
+      1: '미사용',
+      2: '사용',
+    };
+    // 숙소 멤버쉽 이용상태 텍스트
+    data['product_membership_text'] = {
+      0: '-',
+      1: '이용',
+    };
+    // 방 게시 상태 텍스트
+    data['product_option_status_text'] = {
+      0: '미등록',
+      1: '미사용',
+      2: '사용',
+    };
+    // 방 투숙 상태 텍스트
+    data['product_option_stayStatus_text'] = {
+      1: '공실',
+      2: '만실',
+    };
+
     // 앱 푸시 구독(topic) 타입
     data['app_topic'] = {
       all: 'all', // 전체 푸시 발송

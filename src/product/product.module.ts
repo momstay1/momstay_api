@@ -9,6 +9,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AdminProductController } from './admin-product.controller';
 import { MetroModule } from 'src/metro/metro.module';
 import { CollegeModule } from 'src/college/college.module';
+import { ExcelService } from 'src/excel/excel.service';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { CollegeModule } from 'src/college/college.module';
     CollegeModule,
   ],
   controllers: [ProductController, AdminProductController],
-  providers: [ProductService],
+  providers: [ProductService, ExcelService],
   exports: [ProductService]
 })
 export class ProductModule { }

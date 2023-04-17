@@ -1,18 +1,19 @@
-import { Module } from '@nestjs/common';
-import { OrderService } from './order.service';
-import { OrderController } from './order.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { OrderEntity } from './entities/order.entity';
-import { ProductModule } from 'src/product/product.module';
-import { ProductOptionModule } from 'src/product-option/product-option.module';
-import { UsersModule } from 'src/users/users.module';
-import { OrderProductModule } from 'src/order-product/order-product.module';
-import { OrderTotalModule } from 'src/order-total/order-total.module';
-import { IamportService } from 'src/iamport/iamport.service';
-import { PgDataModule } from 'src/pg-data/pg-data.module';
-import { PushNotificationModule } from 'src/push-notification/push-notification.module';
-import { AdminOrderController } from './admin-order.controller';
-import { SettingsModule } from 'src/settings/settings.module';
+import {Module} from '@nestjs/common';
+import {OrderService} from './order.service';
+import {OrderController} from './order.controller';
+import {TypeOrmModule} from '@nestjs/typeorm';
+import {OrderEntity} from './entities/order.entity';
+import {ProductModule} from 'src/product/product.module';
+import {ProductOptionModule} from 'src/product-option/product-option.module';
+import {UsersModule} from 'src/users/users.module';
+import {OrderProductModule} from 'src/order-product/order-product.module';
+import {OrderTotalModule} from 'src/order-total/order-total.module';
+import {IamportService} from 'src/iamport/iamport.service';
+import {PgDataModule} from 'src/pg-data/pg-data.module';
+import {PushNotificationModule} from 'src/push-notification/push-notification.module';
+import {AdminOrderController} from './admin-order.controller';
+import {SettingsModule} from 'src/settings/settings.module';
+import {ExcelService} from 'src/excel/excel.service';
 
 @Module({
   imports: [
@@ -25,10 +26,10 @@ import { SettingsModule } from 'src/settings/settings.module';
     PgDataModule,
     UsersModule,
     PushNotificationModule,
-    SettingsModule
+    SettingsModule,
   ],
   controllers: [OrderController, AdminOrderController],
-  providers: [OrderService, IamportService],
-  exports: [OrderService]
+  providers: [OrderService, IamportService, ExcelService],
+  exports: [OrderService],
 })
-export class OrderModule { }
+export class OrderModule {}

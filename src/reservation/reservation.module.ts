@@ -8,6 +8,7 @@ import { UsersModule } from 'src/users/users.module';
 import { FileModule } from 'src/file/file.module';
 import { PushNotificationModule } from 'src/push-notification/push-notification.module';
 import { AdminReservationController } from './admin-reservation.controller';
+import { ExcelService } from 'src/excel/excel.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { AdminReservationController } from './admin-reservation.controller';
     // ProductModule,
   ],
   controllers: [ReservationController, AdminReservationController],
-  providers: [ReservationService],
+  providers: [ReservationService, ExcelService],
   exports: [ReservationService]
 })
 export class ReservationModule { }

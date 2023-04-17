@@ -1,8 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
@@ -10,7 +25,7 @@ import { UsersEntity } from 'src/users/entities/user.entity';
 @Controller('admin/reservation')
 @ApiTags('방문 예약(관리자) API')
 export class AdminReservationController {
-  constructor(private readonly reservationService: ReservationService) { }
+  constructor(private readonly reservationService: ReservationService) {}
 
   // @Post()
   // @ApiOperation({
@@ -43,10 +58,9 @@ export class AdminReservationController {
     required: false
   })
   @ApiQuery({
-    name: "order",
-    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
-    ,
-    required: false
+    name: 'order',
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false,
   })
   async findAll(
     @GetUser() user: UsersEntity,
@@ -55,13 +69,15 @@ export class AdminReservationController {
     @Query('search') search: string[],
     @Query('order') order: string,
   ) {
-    const {
-      data,
-      file_info
-    } = await this.reservationService.findAll(user, { take, page }, search, order);
+    const { data, file_info } = await this.reservationService.findAll(
+      user,
+      { take, page },
+      search,
+      order,
+    );
     return {
       ...data,
-      file_info
+      file_info,
     };
   }
 
@@ -95,8 +111,9 @@ export class AdminReservationController {
   @Patch()
   @ApiOperation({
     summary: '방문 예약 상태 변경(관리자) API',
-    description: 'status: 상태값<br>idxs: 방문예약 idx 배열<br>'
-      + '방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)'
+    description:
+      'status: 상태값<br>idxs: 방문예약 idx 배열<br>' +
+      '방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)',
   })
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
@@ -104,9 +121,9 @@ export class AdminReservationController {
     schema: {
       properties: {
         status: { type: 'string' },
-        idxs: { example: [] }
-      }
-    }
+        idxs: { example: [] },
+      },
+    },
   })
   async adminStatusChange(
     @Body('status') status: string,
@@ -135,4 +152,40 @@ export class AdminReservationController {
   // ) {
   //   return await this.reservationService.hostCancel(user, +idx);
   // }
+
+  @Get('/excel')
+  @ApiOperation({ summary: '방문 예약 리스트 (관리자) 엑셀 다운로드 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'search',
+    description:
+      'search=status:1,2,4,5<br>방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)<br>' +
+      'search=po_title:방 이름<br>' +
+      'search=name:예약자명<br>' +
+      'search=email:예약지 이메일<br>' +
+      'search=min_visit_date:예약일<br>' +
+      'search=max_visit_date:예약일<br>',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'order',
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false,
+  })
+  async excelDownload(
+    @GetUser() user: UsersEntity,
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string,
+  ) {
+    const data = await this.reservationService.excelDownload(
+      user,
+      { take, page },
+      search,
+      order,
+    );
+    return { ...data };
+  }
 }
