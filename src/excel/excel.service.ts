@@ -12,8 +12,8 @@ import { commonUtils } from 'src/common/common.utils';
 @Injectable()
 export class ExcelService {
   async downloadExcel(arrayData, options) {
-    const { type, filename } = options;
-    const excelName = `${filename}_${moment().format('YYYYMMDDHHmmss')}.xlsx`;
+    const { type } = options;
+    const excelName = `${type}_${moment().format('YYYYMMDDHHmmss')}.xlsx`;
     let useExcelItems = false;
 
     const datas = arrayData.results;
@@ -102,12 +102,13 @@ export class ExcelService {
     }
 
     const filePath = path.join(commonContants.defect_excel_path, excelName);
-    XLSX.utils.book_append_sheet(workbook, worksheet, excelName);
+    XLSX.utils.book_append_sheet(workbook, worksheet, type);
     XLSX.writeFile(workbook, filePath);
 
     return { excelName, filePath };
   }
 
+  // order 값이 클수록 우선순위 높음
   private compareOrder(a, b) {
     if (a.order === b.order) return 0;
     if (a.order > b.order) return -1;
@@ -199,10 +200,22 @@ export class ExcelService {
       default:
         return createExcelData(excelColumns, excelConvertTo);
     }
+    /**
+     * items를 제외한 Excel에 들어갈 데이터 생성
+     * @param excelColumns
+     * @param excelConvertTo
+     * @returns
+     */
     function createExcelData(excelColumns, excelConvertTo) {
       return Array.from(datas).map((data) => {
         return excelColumns.map((col, colIndex) => {
-          let result = data[col] ?? '';
+          let result;
+          if (col.includes('.')) {
+            result = getExcelDataFromEntity(data, col);
+          } else {
+            result = data[col] ?? '';
+          }
+
           if (result) {
             // 치환할 데이터가 있을 경우
             if (excelConvertTo[colIndex]) {
@@ -214,6 +227,58 @@ export class ExcelService {
           return result;
         });
       });
+    }
+
+    /**
+     * 다른 entity에서 데이터를 뽑아야하거나, data custom이 필요할 경우
+     * @param data
+     * @param col
+     * @returns
+     */
+    function getExcelDataFromEntity(data, col) {
+      let splitCol = col.split('.');
+      if (splitCol[0] === 'custom') {
+        return excelDataCustom();
+      }
+
+      return splitCol.reduce((acc, cur, index) => {
+        if (index === 0) {
+          acc = data[cur] ?? '';
+        } else {
+          acc = acc[cur] ?? '';
+        }
+        return acc;
+      }, '');
+
+      function excelDataCustom() {
+        switch (splitCol[1]) {
+          case 'visitDateTime': // 예약일 + 예약시간
+            return `${data['visitDate']} ${data['visitTime']}`;
+          case 'monthPrice': // 월별 요금: 최소요금 ~ 최대금액
+            const { minPrice, maxPrice } = getMinMaxPrice(
+              data['productOption'],
+            );
+            return `${minPrice} ~ ${maxPrice} 원`;
+          case 'priceAddUnit': // 가격 + 금액 단위
+            return `${data['price']}원`;
+          case 'reviewStar': //
+            return `${data['star'] / 2}점`;
+        }
+      }
+      function getMinMaxPrice(array) {
+        let minPrice = 0;
+        let maxPrice = 0;
+        array.map((obj) => {
+          if (minPrice === 0) minPrice = obj.priceMonth;
+          if (maxPrice === 0) maxPrice = obj.priceMonth;
+
+          // 최소요금 찾기
+          if (minPrice > obj.priceMonth) minPrice = obj.priceMonth;
+          // 최대요금 찾기
+          if (maxPrice < obj.priceMonth) maxPrice = obj.priceMonth;
+        });
+        return { minPrice, maxPrice };
+      }
     }
   }
 
@@ -230,6 +295,11 @@ export class ExcelService {
         return createExcelItemsData(excelItemsInfo);
     }
 
+    /**
+     * ExcelItems에 들어갈 data 생성
+     * @param excelItemsInfo
+     * @returns
+     */
     function createExcelItemsData(excelItemsInfo) {
       const tableName = excelItemsInfo.key;
       const excelItemsConvertTo = excelItemsInfo.convertTo;
@@ -245,7 +315,12 @@ export class ExcelService {
 
         itemsExcelData = data[tableName].map((itemData) => {
           return excelItemsInfo.columns.map((col, colIndex) => {
-            let result = itemData[col] ?? '';
+            let result = '';
+            if (col.includes('.')) {
+              result = getExcelItemsDataFromEntity(data, col);
+            } else {
+              result = itemData[col] ?? '';
+            }
             if (result) {
               if (excelItemsConvertTo[colIndex]) {
                 result = commonUtils.getStatus(excelItemsConvertTo[colIndex])[
@@ -265,8 +340,43 @@ export class ExcelService {
         return result;
       });
     }
+    /**
+     * data의 다른 entity에서 값을 찾아야하거나, custom이 필요한 ExcelItems 데이터들
+     * @param data
+     * @param col
+     * @returns
+     */
+    function getExcelItemsDataFromEntity(data, col) {
+      let splitCol = col.split('.');
+      if (splitCol[0] === 'custom') {
+        return excelItemsDataCustom();
+      }
+
+      return splitCol.reduce((acc, cur, index) => {
+        if (index === 0) {
+          acc = data[cur] ?? '';
+        } else {
+          acc = acc[cur] ?? '';
+        }
+        return acc;
+      }, '');
+
+      function excelItemsDataCustom() {
+        switch (splitCol[1]) {
+          default:
+            return '';
+        }
+      }
+    }
   }
 
+  /**
+   * 엑셀 시트에서 병합해서 보여주기 위해, excelData와 excelItemsData 합치기
+   * @param excelData
+   * @param excelItemsData
+   * @param insertIndex
+   * @returns
+   */
   private mergeExcelData(excelData, excelItemsData, insertIndex) {
     return excelItemsData.reduce((result, itemsData, index) => {
       itemsData.map((item) => {
@@ -295,13 +405,13 @@ export class ExcelService {
 
     switch (type) {
       case 'order':
+        return [];
+      default:
         return createMergeOptions(
           mergeStartIndex,
           mergeLastIndex,
           totalColumnLength,
         );
-      default:
-        return [];
     }
 
     /**
