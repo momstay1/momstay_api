@@ -51,7 +51,7 @@
         {
           "order": 200,
           "title": "결제 금액",
-          "column": "payPrice",
+          "column": "custom.orderPayPrice",
           "width": 100
         },
         { "order": 100, "title": "주문일", "column": "createdAt", "width": 200 }
@@ -72,9 +72,20 @@
       "width": 200
     },
     { "order": 500, "title": "입금자명", "column": "depositor", "width": 100 },
-    { "order": 400, "title": "선택 요금", "column": "", "width": 100 },
+    {
+      "order": 400,
+      "title": "선택 요금",
+      "column": "custom.mebershipSelectedPrice",
+      "width": 100
+    },
     { "order": 300, "title": "연락처", "column": "user.phone", "width": 100 },
-    { "order": 200, "title": "확인 상태", "column": "status", "width": 100 },
+    {
+      "order": 200,
+      "title": "확인 상태",
+      "column": "status",
+      "width": 100,
+      "convertTo": "membership_status_text"
+    },
     { "order": 100, "title": "등록일", "column": "createdAt", "width": 100 }
   ],
   "board_5": [
@@ -89,7 +100,7 @@
     {
       "order": 200,
       "title": "작성자 권한",
-      "column": "group.name",
+      "column": "user.group.name",
       "width": 100
     },
     {
@@ -102,34 +113,40 @@
   ],
   "reservation": [
     {
-      "order": 500,
+      "order": 600,
       "title": "방이름",
       "column": "productOption.product.title",
       "width": 200
     },
     {
-      "order": 400,
+      "order": 500,
       "title": "예약자 이름",
       "column": "user.name",
       "width": 100
     },
     {
-      "order": 300,
+      "order": 400,
       "title": "예약자 이메일",
       "column": "user.id",
       "width": 100
     },
     {
-      "order": 200,
+      "order": 300,
       "title": "예약 상태",
       "column": "status",
       "width": 100,
       "convertTo": "reservation_status_text"
     },
     {
-      "order": 100,
+      "order": 200,
       "title": "예약일",
-      "column": "custom.visitDateTime",
+      "column": "visitDate",
+      "width": 200
+    },
+    {
+      "order": 100,
+      "title": "예약시간",
+      "column": "visitTime",
       "width": 200
     }
   ],
@@ -194,7 +211,7 @@
       "title": "멤버십 이용 상태",
       "column": "membership",
       "width": 100,
-      "covertTo": "product_membership_text"
+      "convertTo": "product_membership_text"
     },
     {
       "order": 100,

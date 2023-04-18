@@ -12,7 +12,7 @@ import { commonUtils } from 'src/common/common.utils';
 @Injectable()
 export class ExcelService {
   async createExcel(arrayData, options) {
-    const { type } = options;
+    const { type, settingsData } = options;
     const file_name = `${type}_${moment().format('YYYYMMDDHHmmss')}.xlsx`;
     let useExcelItems = false;
 
@@ -44,6 +44,7 @@ export class ExcelService {
       type,
       excelColumns,
       excelConvertTo,
+      settingsData,
     });
 
     // 아이템 관련 설정 정보
@@ -57,6 +58,7 @@ export class ExcelService {
       const excelItemsData = this.excelItemsDataFactory(datas, {
         type,
         excelItemsInfo,
+        settingsData,
       });
 
       // 엑셀 데이터, 엑셀 아이템 데이터 합치기
@@ -195,10 +197,10 @@ export class ExcelService {
    * @returns {Array}
    */
   private excelDataFactory(datas, options) {
-    const { type, excelColumns, excelConvertTo } = options;
+    const { type, excelColumns, excelConvertTo, settingsData } = options;
     switch (type) {
       default:
-        return createExcelData(excelColumns, excelConvertTo);
+        return createExcelData(excelColumns, excelConvertTo, settingsData);
     }
     /**
      * items를 제외한 Excel에 들어갈 데이터 생성
@@ -206,17 +208,17 @@ export class ExcelService {
      * @param excelConvertTo
      * @returns
      */
-    function createExcelData(excelColumns, excelConvertTo) {
+    function createExcelData(excelColumns, excelConvertTo, settingsData) {
       return Array.from(datas).map((data) => {
         return excelColumns.map((col, colIndex) => {
           let result;
           if (col.includes('.')) {
-            result = getExcelDataFromEntity(data, col);
+            result = getExcelDataFromEntity(data, col, settingsData);
           } else {
             result = data[col] ?? '';
           }
 
-          if (result) {
+          if (result !== '') {
             // 치환할 데이터가 있을 경우
             if (excelConvertTo[colIndex]) {
               result = commonUtils.getStatus([excelConvertTo[colIndex]])[
@@ -235,7 +237,7 @@ export class ExcelService {
      * @param col
      * @returns
      */
-    function getExcelDataFromEntity(data, col) {
+    function getExcelDataFromEntity(data, col, settingsData) {
       let splitCol = col.split('.');
       if (splitCol[0] === 'custom') {
         return excelDataCustom();
@@ -251,17 +253,28 @@ export class ExcelService {
       }, '');
 
       function excelDataCustom() {
-        switch (splitCol[1]) {
-          case 'visitDateTime': // 예약일 + 예약시간
-            return `${data['visitDate']} ${data['visitTime']}`;
+        let customCol = splitCol[1];
+        switch (customCol) {
           case 'monthPrice': // 월별 요금: 최소요금 ~ 최대금액
             const { minPrice, maxPrice } = getMinMaxPrice(
               data['productOption'],
             );
-            return `${minPrice} ~ ${maxPrice} 원`;
+            const formatMinPrice = commonUtils.formatPrice(minPrice);
+            const formatMaxPrice = commonUtils.formatPrice(maxPrice);
+            return `${formatMinPrice} ~ ${formatMaxPrice} 원`;
           case 'priceAddUnit': // 가격 + 금액 단위
-            return `${data['price']}원`;
-          case 'reviewStar': //
+            const formatPriceMonth = commonUtils.formatPrice(
+              data['priceMonth'],
+            );
+            return `${formatPriceMonth}원`;
+          case 'mebershipSelectedPrice': // 멤버십 선택요금
+            const selectedPrice = getMembershipPrice(
+              data['month'],
+              settingsData,
+            );
+            const formatSelectedPrice = commonUtils.formatPrice(selectedPrice);
+            return `${formatSelectedPrice}원 (${data['month']}개월)`;
+          case 'reviewStar': // 후기 점수
             return `${data['star'] / 2}점`;
         }
       }
@@ -279,6 +292,11 @@ export class ExcelService {
         });
         return { minPrice, maxPrice };
       }
+      function getMembershipPrice(month, settingsData) {
+        return (
+          settingsData[`membership_price_discount_${month}`].set_value ?? 0
+        );
+      }
     }
   }
 
@@ -289,10 +307,10 @@ export class ExcelService {
    * @returns
    */
   private excelItemsDataFactory(datas, options) {
-    const { type, excelItemsInfo } = options;
+    const { type, excelItemsInfo, settingsData } = options;
     switch (type) {
       default:
-        return createExcelItemsData(excelItemsInfo);
+        return createExcelItemsData(excelItemsInfo, settingsData);
     }
 
     /**
@@ -300,7 +318,7 @@ export class ExcelService {
      * @param excelItemsInfo
      * @returns
      */
-    function createExcelItemsData(excelItemsInfo) {
+    function createExcelItemsData(excelItemsInfo, settingsData) {
       const tableName = excelItemsInfo.key;
       const excelItemsConvertTo = excelItemsInfo.convertTo;
       // 엑셀 데이터
@@ -317,7 +335,12 @@ export class ExcelService {
           return excelItemsInfo.columns.map((col, colIndex) => {
             let result = '';
             if (col.includes('.')) {
-              result = getExcelItemsDataFromEntity(data, col);
+              result = getExcelItemsDataFromEntity(
+                data,
+                itemData,
+                col,
+                settingsData,
+              );
             } else {
               result = itemData[col] ?? '';
             }
@@ -346,7 +369,7 @@ export class ExcelService {
      * @param col
      * @returns
      */
-    function getExcelItemsDataFromEntity(data, col) {
+    function getExcelItemsDataFromEntity(data, itemData, col, settingsData) {
       let splitCol = col.split('.');
       if (splitCol[0] === 'custom') {
         return excelItemsDataCustom();
@@ -362,9 +385,13 @@ export class ExcelService {
       }, '');
 
       function excelItemsDataCustom() {
-        switch (splitCol[1]) {
-          default:
-            return '';
+        let customCol = splitCol[1];
+        switch (customCol) {
+          case 'orderPayPrice': // 가격 + 금액 단위
+            const formatPayPrice = commonUtils.formatPrice(
+              itemData['payPrice'],
+            );
+            return `${formatPayPrice}원`;
         }
       }
     }

@@ -229,6 +229,7 @@ export const commonUtils = {
     data['user_language_text'] = {
       ko: '한국어',
       en: '영어',
+      jp: '일본어',
       'zh-CN': '중국어',
     };
     // board contents 상태 텍스트
@@ -252,13 +253,13 @@ export const commonUtils = {
       1: '미등록',
       2: '등록',
     };
-    // 멤버쉽 상태 텍스트
+    // 멤버십 상태 텍스트
     data['membership_status_text'] = {
       1: '신청',
       2: '승인',
       3: '종료',
     };
-    // 숙소 타입 텍스트
+    // 숙소 유형 텍스트
     data['product_type_text'] = {
       1: '하숙집',
       2: '쉐어하우스',
@@ -271,7 +272,7 @@ export const commonUtils = {
       1: '미사용',
       2: '사용',
     };
-    // 숙소 멤버쉽 이용상태 텍스트
+    // 숙소 멤버십 이용상태 텍스트
     data['product_membership_text'] = {
       0: '-',
       1: '이용',

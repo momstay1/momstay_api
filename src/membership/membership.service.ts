@@ -16,6 +16,7 @@ import { Pagination, PaginationOptions } from 'src/paginate';
 import { commonUtils } from 'src/common/common.utils';
 import { ProductService } from 'src/product/product.service';
 import { ExcelService } from 'src/excel/excel.service';
+import { SettingsService } from 'src/settings/settings.service';
 import { Cron } from '@nestjs/schedule';
 
 const applicationStatus = 1;
@@ -29,6 +30,7 @@ export class MembershipService {
     private readonly userService: UsersService,
     private readonly productService: ProductService,
     private readonly excelService: ExcelService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async create(
@@ -311,9 +313,14 @@ export class MembershipService {
         'membership.service.excel: 다운로드할 데이터가 없습니다.',
       );
     }
+    // settings 테이블에서 멤버십 기간별 금액 가져오기
+    const membership_price = await this.settingsService.find(
+      'membership_price',
+    );
 
     return this.excelService.createExcel(data, {
       type: 'membership',
+      settingsData: membership_price,
     });
   }
 }
