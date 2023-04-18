@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios/dist';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from 'src/config/config.service';
 import { CreatePushNotificationDto } from './dto/create-push-notification.dto';
 import { UpdatePushNotificationDto } from './dto/update-push-notification.dto';
@@ -18,6 +18,8 @@ import { DeviceEntity } from 'src/device/entities/device.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { commonUtils } from 'src/common/common.utils';
 import { UsersService } from 'src/users/users.service';
+import { commonLanguage } from 'src/common/common.language';
+import * as moment from 'moment';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
@@ -64,7 +66,7 @@ export class PushNotificationService {
       push_history_data['userIdx'] = userInfo['idx'];
     }
     const pushHistory = await this.pushHistoryRepository.create(push_history_data);
-    await this.pushHistoryRepository.save(pushHistory);
+    return await this.pushHistoryRepository.save(pushHistory);
   }
 
   private async sendFcmMessage(fcmMessage) {
@@ -103,8 +105,43 @@ export class PushNotificationService {
     return tokens.access_token;
   }
 
-  create(createPushNotificationDto: CreatePushNotificationDto) {
-    return 'This action adds a new pushNotification';
+  async create(createPushNotificationDto: CreatePushNotificationDto) {
+    if (!createPushNotificationDto.topic && !createPushNotificationDto.userIdx) {
+      throw new UnprocessableEntityException('push-notification.service.create: 처리 할 수 없습니다.');
+    }
+    const message = {
+      token: '',
+      topic: '',
+    }
+    const notifications = {
+      title: createPushNotificationDto.title,
+      body: '',
+      // data: {}
+    };
+    if (createPushNotificationDto.topic) {
+      message['topic'] = createPushNotificationDto.topic;
+      delete message['token'];
+    }
+    let userInfo;
+    if (createPushNotificationDto.userIdx) {
+      userInfo = await this.userService.findIdx(+createPushNotificationDto.userIdx);
+      message['token'] = userInfo.device.token;
+      delete message['topic'];
+    }
+    if (createPushNotificationDto.content) {
+      notifications['body'] = createPushNotificationDto.content;
+    }
+    message['notification'] = notifications;
+    let response;
+    try {
+      response = await this.sendFcmMessage({ message });
+    } catch (error) {
+      response = error.response;
+    }
+
+    const pushHistory = await this.historySave(response, userInfo);
+
+    return { pushHistory };
   }
 
   async findAll(options: PaginationOptions, search: string[], order: string, userInfo?: UsersEntity) {
@@ -115,7 +152,6 @@ export class PushNotificationService {
       // 회원 정보 가져오기
       user = await this.userService.findId(get(userInfo, 'id'));
     }
-
 
     const where = commonUtils.searchSplit(search);
     const topic = ['all', 'marketing'];
@@ -153,8 +189,48 @@ export class PushNotificationService {
     return { data };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pushNotification`;
+  async adminFindAll(options: PaginationOptions, search: string[], order: string) {
+    const { take, page } = options;
+
+    const where = commonUtils.searchSplit(search);
+    where['year'] = get(where, 'year', moment().format('YYYY'))
+    where['month'] = get(where, 'month', moment().format('MM'))
+
+    const alias = 'push';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
+
+    const [results, total] = await this.pushHistoryRepository.createQueryBuilder('push')
+      .where(qb => {
+        qb.where('`push`.`createdAt` >= :min_createdAt', { min_createdAt: where['year'] + '-' + where['month'] + '-01' })
+        qb.andWhere('`push`.`createdAt` <= :max_createdAt', { max_createdAt: where['year'] + '-' + where['month'] + '-31' })
+      })
+      .orderBy(order_by)
+      .skip((take * (page - 1) || 0))
+      .take((take || 10))
+      .getManyAndCount();
+
+    const data = new Pagination({
+      results,
+      total,
+      page,
+    });
+
+    return { data };
+  }
+
+  async findOne(idx: number) {
+    if (!idx) {
+      throw new NotFoundException('push-notification.service.findOne: 처리 할 수 없습니다.');
+    }
+    const pushHistory = await this.pushHistoryRepository.findOne({
+      where: { idx: idx }
+    });
+    if (!get(pushHistory, 'idx', '')) {
+      throw new NotFoundException('push-notification.service.findOne: 조회된 데이터가 없습니다.');
+    }
+
+    return pushHistory;
   }
 
   update(id: number, updatePushNotificationDto: UpdatePushNotificationDto) {
@@ -203,13 +279,14 @@ export class PushNotificationService {
   async hostOrderCancelPush(guestUser: UsersEntity, order: OrderEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '바로결제 거절',
-        body: order['orderProduct']['productOption']['product']['title']
-          + ' ' + order['orderProduct']['productOption']['title'] + ' 결제를 호스트가 거절했습니다.',
+        title: commonLanguage['바로결제 거절'][lang],
+        body: order['orderProduct']['productOption']['product']['title' + lang]
+          + ' ' + order['orderProduct']['productOption']['title' + lang] + ' ' + commonLanguage['결제를 호스트가 거절했습니다.'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -219,13 +296,14 @@ export class PushNotificationService {
   async hostOrderApprovalPush(guestUser: UsersEntity, order: OrderEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '바로결제 승인',
-        body: order['orderProduct']['productOption']['product']['title']
-          + ' ' + order['orderProduct']['productOption']['title'] + ' 결제를 호스트가 승인했습니다.',
+        title: commonLanguage['바로결제 승인'][lang],
+        body: order['orderProduct']['productOption']['product']['title' + lang]
+          + ' ' + order['orderProduct']['productOption']['title' + lang] + ' ' + commonLanguage['결제를 호스트가 승인했습니다'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -266,19 +344,39 @@ export class PushNotificationService {
       await this.historySave(response, hostUser);
     }
   }
+  // 게스트 방문예약 확정시 호스트에게 push 발송
+  async guestReservationConfirmationPush(hostUser: UsersEntity, reservation: ReservationEntity) {
+    const isApp = await this.isApp(get(hostUser, ['device']));
+    if (isApp && hostUser['device']['notification'] == notificationStatus) {
+      const target = {
+        token: hostUser['device']['token'],
+      }
+      const notifications = {
+        title: '방문예약 확정',
+        body:
+          reservation['productOption']['product']['title']
+          + ' '
+          + reservation['productOption']['title']
+          + ' 방문예약을 게스트가 확정했습니다.',
+      };
+      const response = await this.sendPush(target, notifications);
+      await this.historySave(response, hostUser);
+    }
+  }
   // 호스트가 방문에약 거절시 게스트에게 push 발송
   async hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '방문예약 거절',
-        body: reservation['productOption']['product']['title']
+        title: commonLanguage['방문예약 거절'][lang],
+        body: reservation['productOption']['product']['title' + lang]
           + ' '
-          + reservation['productOption']['title']
-          + ' 방문예약을 호스트가 거절했습니다.',
+          + reservation['productOption']['title' + lang]
+          + ' ' + commonLanguage['방문예약을 호스트가 거절했습니다'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
@@ -288,18 +386,54 @@ export class PushNotificationService {
   async hostReservationApprovalPush(guestUser: UsersEntity, reservation: ReservationEntity) {
     const isApp = await this.isApp(get(guestUser, ['device']));
     if (isApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
       const target = {
         token: guestUser['device']['token'],
       }
       const notifications = {
-        title: '방문예약 승인',
+        title: commonLanguage['방문예약 승인'][lang],
         body: reservation['productOption']['product']['title']
           + ' '
           + reservation['productOption']['title']
-          + ' 방문예약을 호스트가 승인했습니다.',
+          + ' ' + commonLanguage['방문예약을 호스트가 승인했습니다'][lang],
       };
       const response = await this.sendPush(target, notifications);
       await this.historySave(response, guestUser);
+    }
+  }
+  // 관리자가 방문예약 일괄 상태 변경시 호스트 게스트에게 push 발송
+  async adminReservationStatusChange(guestUser: UsersEntity, hostUser: UsersEntity, reservation: ReservationEntity) {
+
+    const target = {};
+
+    const guestIsApp = await this.isApp(get(guestUser, ['device']));
+    if (guestIsApp && guestUser['device']['notification'] == notificationStatus) {
+      const lang = commonUtils.langValue(guestUser.language);
+      const notifications = {
+        title: commonLanguage['방문예약 변경'][lang],
+        body: reservation['productOption']['product']['title' + lang]
+          + ' '
+          + reservation['productOption']['title' + lang]
+          + ' '
+          + commonLanguage['방문예약을 관리자가 변경했습니다'][lang],
+      };
+      target['token'] = guestUser['device']['token'];
+      const response = await this.sendPush(target, notifications);
+      await this.historySave(response, guestUser);
+    }
+
+    const hostIsApp = await this.isApp(get(hostUser, ['device']));
+    if (hostIsApp && hostUser['device']['notification'] == notificationStatus) {
+      target['token'] = hostUser['device']['token'];
+      const notifications = {
+        title: '방문예약 변경',
+        body: reservation['productOption']['product']['title']
+          + ' '
+          + reservation['productOption']['title']
+          + ' 방문예약을 관리자가 변경했습니다.',
+      };
+      const response = await this.sendPush(target, notifications);
+      await this.historySave(response, hostUser);
     }
   }
 }

@@ -11,6 +11,7 @@ import { NoticeContentsController } from './notice-contents.controller';
 import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { AdminBoardContentsController } from './admin-board-contents.controller';
+import { ExcelService } from 'src/excel/excel.service';
 
 @Module({
   imports: [
@@ -20,10 +21,14 @@ import { AdminBoardContentsController } from './admin-board-contents.controller'
     BoardSelectedCategoriesModule,
     BoardCategoriesModule,
     AdminUsersModule,
-    GroupsModule
+    GroupsModule,
   ],
-  controllers: [BoardContentsController, AdminBoardContentsController, NoticeContentsController],
-  providers: [BoardContentsService],
-  exports: [BoardContentsService]
+  controllers: [
+    BoardContentsController,
+    AdminBoardContentsController,
+    NoticeContentsController,
+  ],
+  providers: [BoardContentsService, ExcelService],
+  exports: [BoardContentsService],
 })
-export class BoardContentsModule { }
+export class BoardContentsModule {}

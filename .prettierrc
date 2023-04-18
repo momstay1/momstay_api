@@ -9,7 +9,7 @@
   "jsxSingleQuote": false,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "bracketSpacing": false,
+  "bracketSpacing": true,
   "jsxBracketSameLine": false,
   "requirePragma": false,
   "insertPragma": false,

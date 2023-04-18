@@ -9,10 +9,15 @@ import { Repository } from 'typeorm';
 import { EmailTmplEntity } from './entities/email-tmpl.entity';
 import { EmailCodeEntity } from './entities/email-code.entity';
 import { commonUtils } from 'src/common/common.utils';
+import { get, isArray } from 'lodash';
+import { EmailEntity } from './entities/email.entity';
 
+const uncertifiedStatus = 1;
+const registrationStatus = 2;
 @Injectable()
 export class EmailService {
   constructor(
+    @InjectRepository(EmailEntity) private emailRepository: Repository<EmailEntity>,
     @InjectRepository(EmailHistoryEntity) private emailHistoryRepository: Repository<EmailHistoryEntity>,
     @InjectRepository(EmailTmplEntity) private emailTmplRepository: Repository<EmailTmplEntity>,
     @InjectRepository(EmailCodeEntity) private emailCodeRepository: Repository<EmailCodeEntity>,
@@ -55,13 +60,13 @@ export class EmailService {
 
   async findEmailCode(code: string, email: string): Promise<EmailCodeEntity | undefined> {
     if (!email || !code) {
-      throw new NotFoundException('잘못된 정보입니다.');
+      throw new NotFoundException('email.service.findEmailCode: 잘못된 정보입니다.');
     }
     const email_code = await this.emailCodeRepository.findOne({
       where: { code: code, email: email, status: 0 },
     });
     if (!email_code) {
-      throw new NotFoundException('잘못된 정보입니다.');
+      throw new NotFoundException('email.service.findEmailCode: 잘못된 정보입니다.');
     }
 
     return email_code;
@@ -69,21 +74,35 @@ export class EmailService {
 
   async findCode(code: string): Promise<EmailCodeEntity | undefined> {
     if (!code) {
-      throw new NotFoundException('잘못된 정보입니다.');
+      throw new NotFoundException('email.service.findCode: 잘못된 정보입니다.');
     }
     const email_code = await this.emailCodeRepository.findOne({
       where: { code: code, status: 0 },
     });
     if (!email_code) {
-      throw new NotFoundException('잘못된 정보입니다.');
+      throw new NotFoundException('email.service.findCode: 잘못된 정보입니다.');
     }
 
     return email_code;
   }
 
+  async findOneIdxByEmail(idx: number): Promise<EmailEntity | undefined> {
+    if (!idx) {
+      throw new NotFoundException('email.service.findOneIdxByEmail: 잘못된 정보입니다.');
+    }
+    const email = await this.emailRepository.findOne({
+      where: { idx: idx },
+    });
+    if (!get(email, 'idx', '')) {
+      throw new NotFoundException('email.service.findOneIdxByEmail: 조회된 정보가 없습니다.');
+    }
+
+    return email;
+  }
+
   async authCode(code: string, email: string) {
     if (!code || !email) {
-      throw new NotFoundException('잘못된 정보입니다.');
+      throw new NotFoundException('email.service.authCode: 잘못된 정보입니다.');
     }
     await this.emailCodeRepository.createQueryBuilder()
       .update()
@@ -92,9 +111,25 @@ export class EmailService {
       .execute();
   }
 
+  async emailFindAll(search: string[]) {
+    const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', [uncertifiedStatus, registrationStatus]);
+    console.log({ where });
+    const email = await this.emailRepository.find({
+      where: qb => {
+        qb.where('status IN (:status)', { status: isArray(get(where, 'status')) ? where['status'] : [where['status']] })
+        get(where, 'group', '') && qb.andWhere('group IN (:group)', { group: get(where, 'group') })
+        get(where, 'type', '') && qb.andWhere('type IN (:type)', { type: get(where, 'type') })
+        get(where, 'code', '') && qb.andWhere('code IN (:code)', { code: get(where, 'code') })
+      }
+    });
+
+    return commonUtils.getArrayKey(email, ['type', 'code', 'group'], true);
+  }
+
   async createCode(email: string, cnt: number): Promise<string> {
     if (!email) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('email.service.createCode: 잘못된 정보 입니다.');
     }
     if (cnt < 1) {
       await this.emailCodeRepository.createQueryBuilder()
@@ -116,5 +151,13 @@ export class EmailService {
       await this.emailCodeRepository.save(email_code);
     }
     return code;
+  }
+
+  async update(idx: number, status: string) {
+    await this.emailRepository.createQueryBuilder()
+      .update()
+      .set({ status: +status })
+      .where({ idx: idx })
+      .execute();
   }
 }

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DashboardController } from './dashboard.controller';
+import { DashboardController } from './admin-dashboard.controller';
 import { DashboardService } from './dashboard.service';
 
 describe('DashboardController', () => {

@@ -72,8 +72,30 @@ export class ReservationController {
     return await this.reservationService.findOne(+idx);
   }
 
-  @Patch(':idx')
+  @Patch('guest/:idx')
+  @ApiOperation({ summary: '방문 예약 확정(게스트) API' })
+  @Auth(['Any'])
+  @ApiBearerAuth()
+  async guestConfirmation(
+    @GetUser() user: UsersEntity,
+    @Param('idx') idx: string,
+  ) {
+    return await this.reservationService.guestConfirmation(user, +idx);
+  }
+
+  @Patch('host/:idx')
   @ApiOperation({ summary: '방문 예약 승인(호스트) API' })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  async hostApproval(
+    @GetUser() user: UsersEntity,
+    @Param('idx') idx: string,
+  ) {
+    return await this.reservationService.hostApproval(user, +idx);
+  }
+
+  @Patch(':idx')
+  @ApiOperation({ summary: '방문 예약 승인(호스트) API (제거 예정)' })
   @Auth(['root', 'admin', 'host'])
   @ApiBearerAuth()
   async update(

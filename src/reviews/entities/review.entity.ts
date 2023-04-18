@@ -7,7 +7,7 @@ export class ReviewEntity {
   @PrimaryGeneratedColumn()
   idx: number;
 
-  @Column({ default: 2, comment: '상태 (1: 삭제, 2: 등록)' })
+  @Column({ default: 2, comment: '상태 (-1: 삭제, 1: 미등록, 2: 등록)' })
   status: number;
   @Column({ default: 0, comment: '부모 댓글 idx' })
   group: number;
@@ -21,9 +21,9 @@ export class ReviewEntity {
   contents: string;
   @Column({ default: '', comment: '권한 관련 정보 (사용 X)' })
   author: string;
-  @Column({ type:'date', default: '0', comment: '입주일' })
+  @Column({ type: 'date', default: '0', comment: '입주일' })
   start: string;
-  @Column({ type:'date',default: '0', comment: '퇴거일' })
+  @Column({ type: 'date', default: '0', comment: '퇴거일' })
   end: string;
 
   @CreateDateColumn()

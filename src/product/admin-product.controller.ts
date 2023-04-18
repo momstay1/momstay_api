@@ -1,16 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseInterceptors,
+  UploadedFiles,
+  HttpCode,
+  Res,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
+import { createReadStream } from 'fs';
 
 @Controller('admin/product')
-@ApiTags('관리자 숙소 API')
+@ApiTags('숙소(관리자) API')
 export class AdminProductController {
-  constructor(private readonly productService: ProductService) { }
+  constructor(private readonly productService: ProductService) {}
 
   // @Post()
   // @ApiOperation({summary: '숙소 등록 API'})
@@ -31,32 +51,85 @@ export class AdminProductController {
   // 숙소 리스트 조회
   @Get()
   @ApiOperation({ summary: '숙소 리스트 조회 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiQuery({
-    name: "search",
-    description: 'search=membership:(0|1)<br>'
-      + 'search=keyword:메인검색<br>'
-      + 'search=user_idx:회원idx<br>'
-      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
-    required: false
+    name: 'search',
+    description:
+      'search=membership:(0|1)<br>' +
+      'search=keyword:메인검색<br>' +
+      'search=user_idx:회원idx(사용안함)<br>' +
+      'search=title:숙소이름<br>' +
+      'search=name:호스트이름<br>' +
+      'search=id:호스트아이디<br>' +
+      'search=type:숙소 구분<br>' +
+      'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'order',
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false,
   })
   async adminFindAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]) {
-    const {
-      data: {
-        results,
-        total,
-        pageTotal
-      },
-      file_info
-    } = await this.productService.adminFindAll({ take, page }, search);
+    @Query('search') search: string[],
+    @Query('order') order: string,
+  ) {
+    const { data, file_info } = await this.productService.adminFindAll(
+      { take, page },
+      search,
+      order,
+    );
     return {
-      results,
-      total,
-      pageTotal,
-      file_info
+      ...data,
+      file_info,
     };
+  }
+
+  // 숙소 리스트 엑셀 다운로드
+  @Get('excel')
+  @ApiOperation({ summary: '숙소 리스트 엑셀 다운로드 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'search',
+    description:
+      'search=membership:(0|1)<br>' +
+      'search=keyword:메인검색<br>' +
+      'search=user_idx:회원idx(사용안함)<br>' +
+      'search=title:숙소이름<br>' +
+      'search=name:호스트이름<br>' +
+      'search=id:호스트아이디<br>' +
+      'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'order',
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+    required: false,
+  })
+  async excelDownload(
+    @Query('take') take: number,
+    @Query('page') page: number,
+    @Query('search') search: string[],
+    @Query('order') order: string,
+    @Res() res,
+  ) {
+    // 엑셀 생성
+    const excel_file = await this.productService.createExcel(
+      { take, page },
+      search,
+      order,
+    );
+    // 엑셀 다운로드
+    res.set({
+      'Content-Type': 'application/json',
+      'Content-Disposition':
+        'attachment; filename="' + excel_file.file_name + '"',
+    });
+    createReadStream(excel_file.file_path).pipe(res);
   }
 
   @Get(':idx')
@@ -70,8 +143,12 @@ export class AdminProductController {
     return this.productService.update(+id, updateProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @Delete(':idx')
+  @ApiOperation({ summary: '숙소 삭제 API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  async remove(@Param('idx') idx: string) {
+    await this.productService.remove(+idx);
   }
 }

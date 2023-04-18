@@ -17,16 +17,22 @@ export class FileEntity {
   file_path: string;
   @Column({ default: '' })
   file_full_path: string;
-  @Column({ default: '' })
+  @Column({ default: '', comment: '이미지 스토리지 서버 경로' })
   file_storage_path: string;
+  @Column({ default: '', comment: '워터마크 추가된 이미지 스토리지 서버 경로' })
+  file_watermark_storage_path: string;
+  @Column({ default: '', comment: '워터마크 추가된 이미지 경로' })
+  file_watermark_path: string;
   @Column({ default: '' })
   file_html_path: string;
   @Column({ default: '' })
   file_html_full_path: string;
   @Column({ default: '' })
   file_html_thumb_path: string;
-  @Column({ default: '' })
+  @Column({ default: '', comment: '랜덤 처리된 이미지 이름' })
   file_raw_name: string;
+  @Column({ default: '', comment: '워터마크 추가된 이미지 이름' })
+  file_watermark_name: string;
   @Column({ default: '' })
   file_orig_name: string;
   @Column({ default: '' })

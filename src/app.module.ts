@@ -48,6 +48,9 @@ import { BannerModule } from './banner/banner.module';
 import { BannerItemModule } from './banner-item/banner-item.module';
 import { BlockModule } from './block/block.module';
 import { ReportCumulativeModule } from './report-cumulative/report-cumulative.module';
+import { PopupModule } from './popup/popup.module';
+import { MessageModule } from './message/message.module';
+import { ExcelModule } from './excel/excel.module';
 
 @Module({
   imports: [
@@ -84,7 +87,7 @@ import { ReportCumulativeModule } from './report-cumulative/report-cumulative.mo
     CollegeModule,
     RefreshTokenModule,
     // DefectModule,
-    // DashboardModule,
+    DashboardModule,
     SettingsModule,
     WishlistModule,
     PushNotificationModule,
@@ -104,6 +107,9 @@ import { ReportCumulativeModule } from './report-cumulative/report-cumulative.mo
     BannerItemModule,
     BlockModule,
     ReportCumulativeModule,
+    PopupModule,
+    MessageModule,
+    ExcelModule
   ],
   providers: [CommonService, IamportService],
 })

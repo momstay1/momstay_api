@@ -46,7 +46,7 @@ export class ReviewsController {
   })
   @ApiQuery({
     name: "search",
-    description: 'search=status:상태값(1:삭제|2:등록, 기본값:2)<br>'
+    description: 'search=status:상태값(-1:삭제|1:미등록|2:등록, 기본값:2)<br>'
     ,
     required: false
   })
@@ -86,9 +86,9 @@ export class ReviewsController {
     summary: '후기 수정 API',
     description: 'status, star, content, reviewImg 만 변경 가능'
   })
-  @ApiParam({ name: 'idx', description: 'review idx' })
   @Auth(['Any'])
   @ApiBearerAuth()
+  @ApiParam({ name: 'idx', description: 'review idx' })
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'reviewImg', maxCount: 10 },
   ], multerOptions()))
@@ -120,10 +120,10 @@ export class ReviewsController {
     }
   })
   @HttpCode(204)
-  async statusUpdate(
+  async remove(
     @GetUser() user: UsersEntity,
     @Body('idxs') idxs: []
   ) {
-    await this.reviewsService.statusUpdate(idxs, user);
+    await this.reviewsService.remove(idxs, user);
   }
 }

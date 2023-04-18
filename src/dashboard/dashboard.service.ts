@@ -1,14 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { AdminUsersService } from 'src/admin-users/admin-users.service';
+import { OrderService } from 'src/order/order.service';
+import { ProductService } from 'src/product/product.service';
+import { ReservationService } from 'src/reservation/reservation.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateDashboardDto } from './dto/create-dashboard.dto';
 import { UpdateDashboardDto } from './dto/update-dashboard.dto';
+
+import * as moment from 'moment';
+import { OrderTotalService } from 'src/order-total/order-total.service';
 
 @Injectable()
 export class DashboardService {
   constructor(
     private readonly adminService: AdminUsersService,
     private readonly usersService: UsersService,
+    private readonly productService: ProductService,
+    private readonly orderService: OrderService,
+    private readonly orderTotalService: OrderTotalService,
+    private readonly reservationService: ReservationService,
   ) { }
 
   create(createDashboardDto: CreateDashboardDto) {
@@ -31,14 +41,24 @@ export class DashboardService {
     return `This action removes a #${id} dashboard`;
   }
 
-  async usersCount(user) {
-    // const admin_cnt = await this.adminService.count(user);
-    const users_cnt = await this.usersService.count();
+  async getUsersDashboard() {
+    const users_cnt = await this.usersService.dashboard();
 
-    return {
-      total_cnt: users_cnt,
-      // admin_cnt,
-      users_cnt,
-    };
+    return { users_cnt };
+  }
+
+  async getProductDashboard() {
+    const product_cnt = await this.productService.dashboard();
+
+    return { product_cnt };
+  }
+
+  async getOrderDashboard() {
+    const month = moment().format('YYYY-MM');
+    const order_cnt = await this.orderService.dashboard(month);
+    const order_total_price = await this.orderTotalService.dashboard(month);
+    const reservation_cnt = await this.reservationService.dashboard(month);
+
+    return { order_cnt, order_total_price, reservation_cnt };
   }
 }

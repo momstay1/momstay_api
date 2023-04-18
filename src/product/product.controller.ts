@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFiles, HttpCode } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -6,6 +6,8 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@ne
 import { Auth } from 'src/common/decorator/role.decorator';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/common/common.file';
+import { GetUser } from 'src/auth/getuser.decorator';
+import { UsersEntity } from 'src/users/entities/user.entity';
 
 @Controller('product')
 @ApiTags('숙소 API')
@@ -45,22 +47,29 @@ export class ProductController {
     description: 'search=membership:(0|1)<br>'
       + 'search=keyword:메인검색<br>'
       + 'search=user_idx:회원idx<br>'
-      + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
+      + 'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>'
       + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
       + 'search=min_priceMonth:월 최소 가격<br>'
       + 'search=max_priceMonth:월 최대 가격<br>'
       + 'search=product_info:편의시설 idx(2,3,4)<br>',
     required: false
   })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
+  })
   async findAll(
     @Query('take') take: number,
     @Query('page') page: number,
-    @Query('search') search: string[]
+    @Query('search') search: string[],
+    @Query('order') order: string
   ) {
     const {
       data,
       file_info
-    } = await this.productService.findAll({ take, page }, search);
+    } = await this.productService.findAll({ take, page }, search, order);
     // await this.productService.findAll({ take, page }, search);
     return {
       ...data,
@@ -79,8 +88,15 @@ export class ProductController {
     return this.productService.update(+id, updateProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @Delete(':idx')
+  @ApiOperation({ summary: '숙소 삭제 API' })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  remove(
+    @GetUser() user,
+    @Param('idx') idx: string
+  ) {
+    return this.productService.hostRemove(user, +idx);
   }
 }

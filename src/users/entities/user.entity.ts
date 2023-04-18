@@ -74,7 +74,7 @@ export class UsersEntity {
   @Column({ length: 255, default: '' })
   phone: string;
 
-  @Column({ type: 'date', default: '0' })
+  @Column({ type: 'date', default: null, nullable: true })
   birthday: Date | string;
 
   @Column({ length: 255, default: '' })
@@ -147,6 +147,10 @@ export class UsersEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'datetime', default: '0' })
+  @Column({ type: 'date', default: null, nullable: true, comment: '마지막 활동 날짜' })
+  activitedAt: Date;
+  @Column({ type: 'datetime', default: '0', comment: '탈퇴 처리한 날짜' })
   leaveAt: Date;
+  @Column({ type: 'datetime', default: '0', comment: '호스트로 변경된 날짜' })
+  hostAt: Date;
 }

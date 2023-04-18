@@ -1,7 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { NotFoundException } from '@nestjs/common/exceptions';
+import {
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get, isArray, isEmpty, isObject, keyBy, map, sortBy, union } from 'lodash';
+import {
+  get,
+  isArray,
+  isEmpty,
+  isObject,
+  keyBy,
+  map,
+  sortBy,
+  union,
+} from 'lodash';
 import { CollegeService } from 'src/college/college.service';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
@@ -14,17 +26,25 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
 import * as moment from 'moment';
+import { UsersEntity } from 'src/users/entities/user.entity';
+import { ExcelService } from 'src/excel/excel.service';
 
+const deleteStatus = -1;
+const unregisteredStatus = 0;
+const notUsedStatus = 1;
+const registrationStatus = 2;
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectRepository(ProductEntity) private productRepository: Repository<ProductEntity>,
+    @InjectRepository(ProductEntity)
+    private productRepository: Repository<ProductEntity>,
     private readonly fileService: FileService,
     private readonly productInfoService: ProductInfoService,
     private readonly userService: UsersService,
     private readonly metroService: MetroService,
     private readonly collegeService: CollegeService,
-  ) { }
+    private readonly excelService: ExcelService,
+  ) {}
 
   async test(id) {
     const code = await this.productCreateCode();
@@ -37,10 +57,10 @@ export class ProductService {
     let productInfo;
     let product_info_idxs;
     if (get(createProductDto, 'productInfoIdx', '')) {
-      const productInfoIdx = get(createProductDto, 'productInfoIdx').split(",");
+      const productInfoIdx = get(createProductDto, 'productInfoIdx').split(',');
       productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
       // 필터 검색시 쿼리가 복잡해짐에 따라 간단한 검색 쿼리 사용을 위함
-      product_info_idxs = sortBy(map(productInfoIdx, o => +o));
+      product_info_idxs = sortBy(map(productInfoIdx, (o) => +o));
     }
 
     // 숙소 정보 가져오기
@@ -62,7 +82,10 @@ export class ProductService {
     let college = [];
     if (get(createProductDto, 'metro', '')) {
       try {
-        const metro_idxs = map(get(createProductDto, 'metro').split(','), o => +o);
+        const metro_idxs = map(
+          get(createProductDto, 'metro').split(','),
+          (o) => +o,
+        );
         metro = await this.metroService.findAllIdx(metro_idxs);
       } catch (error) {
         console.log({ error });
@@ -71,7 +94,10 @@ export class ProductService {
 
     if (get(createProductDto, 'college', '')) {
       try {
-        const college_idxs = map(get(createProductDto, 'college').split(','), o => +o);
+        const college_idxs = map(
+          get(createProductDto, 'college').split(','),
+          (o) => +o,
+        );
         college = await this.collegeService.findAllIdx(college_idxs);
       } catch (error) {
         console.log({ error });
@@ -86,7 +112,7 @@ export class ProductService {
       college: college,
       user: user,
       productInfo: productInfo,
-      productInfoIdxs: ''
+      productInfoIdxs: '',
     };
 
     if (prd) {
@@ -96,33 +122,60 @@ export class ProductService {
       product_data['order'] = '10';
       product_data['code'] = await this.productCreateCode();
     }
-    if (get(createProductDto, 'idx', '')) product_data['idx'] = +get(createProductDto, 'idx');
-    if (get(createProductDto, 'status', 0)) product_data['status'] = +get(createProductDto, 'status');
-    if (get(createProductDto, 'type', '')) product_data['type'] = get(createProductDto, 'type');
-    if (get(createProductDto, 'membership', '')) product_data['membership'] = get(createProductDto, 'membership');
-    if (get(createProductDto, 'hostBusiness', '')) product_data['hostBusiness'] = get(createProductDto, 'hostBusiness');
-    if (get(createProductDto, 'title', '')) product_data['title'] = get(createProductDto, 'title');
-    if (get(createProductDto, 'titleEng', '')) product_data['titleEng'] = get(createProductDto, 'titleEng');
-    if (get(createProductDto, 'titleJpn', '')) product_data['titleJpn'] = get(createProductDto, 'titleJpn');
-    if (get(createProductDto, 'titleChn', '')) product_data['titleChn'] = get(createProductDto, 'titleChn');
-    if (get(createProductDto, 'postCode', '')) product_data['postCode'] = get(createProductDto, 'postCode');
-    if (get(createProductDto, 'addr1', '')) product_data['addr1'] = get(createProductDto, 'addr1');
-    if (get(createProductDto, 'addr1Eng', '')) product_data['addr1Eng'] = get(createProductDto, 'addr1Eng');
-    if (get(createProductDto, 'addr1Jpn', '')) product_data['addr1Jpn'] = get(createProductDto, 'addr1Jpn');
-    if (get(createProductDto, 'addr1Chn', '')) product_data['addr1Chn'] = get(createProductDto, 'addr1Chn');
-    if (get(createProductDto, 'addr2', '')) product_data['addr2'] = get(createProductDto, 'addr2');
-    if (get(createProductDto, 'addr2Eng', '')) product_data['addr2Eng'] = get(createProductDto, 'addr2Eng');
-    if (get(createProductDto, 'addr2Jpn', '')) product_data['addr2Jpn'] = get(createProductDto, 'addr2Jpn');
-    if (get(createProductDto, 'addr2Chn', '')) product_data['addr2Chn'] = get(createProductDto, 'addr2Chn');
-    if (get(createProductDto, 'language', '')) product_data['language'] = get(createProductDto, 'language');
-    if (get(createProductDto, 'lat', '')) product_data['lat'] = get(createProductDto, 'lat');
-    if (get(createProductDto, 'lng', '')) product_data['lng'] = get(createProductDto, 'lng');
-    if (get(createProductDto, 'detailsKor', '')) product_data['detailsKor'] = get(createProductDto, 'detailsKor');
-    if (get(createProductDto, 'detailsEng', '')) product_data['detailsEng'] = get(createProductDto, 'detailsEng');
-    if (get(createProductDto, 'detailsJpn', '')) product_data['detailsJpn'] = get(createProductDto, 'detailsJpn');
-    if (get(createProductDto, 'detailsChn', '')) product_data['detailsChn'] = get(createProductDto, 'detailsChn');
-    if (get(createProductDto, 'status', '')) product_data['status'] = +get(createProductDto, 'status');
-    if (get(createProductDto, 'status', '')) product_data['status'] = +get(createProductDto, 'status');
+    if (get(createProductDto, 'idx', ''))
+      product_data['idx'] = +get(createProductDto, 'idx');
+    if (get(createProductDto, 'status', 0))
+      product_data['status'] = +get(createProductDto, 'status');
+    if (get(createProductDto, 'type', ''))
+      product_data['type'] = get(createProductDto, 'type');
+    if (get(createProductDto, 'membership', ''))
+      product_data['membership'] = get(createProductDto, 'membership');
+    if (get(createProductDto, 'hostBusiness', ''))
+      product_data['hostBusiness'] = get(createProductDto, 'hostBusiness');
+    if (get(createProductDto, 'title', ''))
+      product_data['title'] = get(createProductDto, 'title');
+    if (get(createProductDto, 'titleEng', ''))
+      product_data['titleEng'] = get(createProductDto, 'titleEng');
+    if (get(createProductDto, 'titleJpn', ''))
+      product_data['titleJpn'] = get(createProductDto, 'titleJpn');
+    if (get(createProductDto, 'titleChn', ''))
+      product_data['titleChn'] = get(createProductDto, 'titleChn');
+    if (get(createProductDto, 'postCode', ''))
+      product_data['postCode'] = get(createProductDto, 'postCode');
+    if (get(createProductDto, 'addr1', ''))
+      product_data['addr1'] = get(createProductDto, 'addr1');
+    if (get(createProductDto, 'addr1Eng', ''))
+      product_data['addr1Eng'] = get(createProductDto, 'addr1Eng');
+    if (get(createProductDto, 'addr1Jpn', ''))
+      product_data['addr1Jpn'] = get(createProductDto, 'addr1Jpn');
+    if (get(createProductDto, 'addr1Chn', ''))
+      product_data['addr1Chn'] = get(createProductDto, 'addr1Chn');
+    if (get(createProductDto, 'addr2', ''))
+      product_data['addr2'] = get(createProductDto, 'addr2');
+    if (get(createProductDto, 'addr2Eng', ''))
+      product_data['addr2Eng'] = get(createProductDto, 'addr2Eng');
+    if (get(createProductDto, 'addr2Jpn', ''))
+      product_data['addr2Jpn'] = get(createProductDto, 'addr2Jpn');
+    if (get(createProductDto, 'addr2Chn', ''))
+      product_data['addr2Chn'] = get(createProductDto, 'addr2Chn');
+    if (get(createProductDto, 'language', ''))
+      product_data['language'] = get(createProductDto, 'language');
+    if (get(createProductDto, 'lat', ''))
+      product_data['lat'] = get(createProductDto, 'lat');
+    if (get(createProductDto, 'lng', ''))
+      product_data['lng'] = get(createProductDto, 'lng');
+    if (get(createProductDto, 'detailsKor', ''))
+      product_data['detailsKor'] = get(createProductDto, 'detailsKor');
+    if (get(createProductDto, 'detailsEng', ''))
+      product_data['detailsEng'] = get(createProductDto, 'detailsEng');
+    if (get(createProductDto, 'detailsJpn', ''))
+      product_data['detailsJpn'] = get(createProductDto, 'detailsJpn');
+    if (get(createProductDto, 'detailsChn', ''))
+      product_data['detailsChn'] = get(createProductDto, 'detailsChn');
+    if (get(createProductDto, 'status', ''))
+      product_data['status'] = +get(createProductDto, 'status');
+    if (get(createProductDto, 'status', ''))
+      product_data['status'] = +get(createProductDto, 'status');
 
     if (product_info_idxs && isArray(product_info_idxs)) {
       product_data['productInfoIdxs'] = product_info_idxs.join(',');
@@ -139,13 +192,18 @@ export class ProductService {
       console.log({ fileIdx });
       try {
         const productFileIdxs = map(
-          await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']),
-          (o) => "" + o.file_idx
+          await this.fileService.findCategory(
+            ['lodgingDetailImg', 'mealsImg'],
+            '' + product['idx'],
+          ),
+          (o) => '' + o.file_idx,
         );
         console.log({ productFileIdxs });
-        fileIdxs = fileIdx.split(",");
+        fileIdxs = fileIdx.split(',');
         console.log({ fileIdxs });
-        const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+        const delFileIdxs = productFileIdxs.filter(
+          (o) => !fileIdxs.includes(o),
+        );
         console.log({ delFileIdxs });
         if (delFileIdxs.length > 0) {
           await this.fileService.removes(delFileIdxs);
@@ -158,29 +216,41 @@ export class ProductService {
     // 새 첨부파일 등록
     let new_file;
     if (!isEmpty(files)) {
-      console.log('-----------------------새 첨부파일 등록-----------------------');
+      console.log(
+        '-----------------------새 첨부파일 등록-----------------------',
+      );
       console.log({ files });
       new_file = await this.fileService.fileInfoInsert(files, product['idx']);
       console.log({ new_file });
-      fileIdxs = union(fileIdxs, ...map(new_file[product['idx']], (obj) => map(obj, o => "" + o.file_idx)));
+      fileIdxs = union(
+        fileIdxs,
+        ...map(new_file[product['idx']], (obj) =>
+          map(obj, (o) => '' + o.file_idx),
+        ),
+      );
       console.log({ fileIdxs });
     }
 
     let file_info;
-    console.log('-----------------------파일 정보 가져오기-----------------------');
+    console.log(
+      '-----------------------파일 정보 가져오기-----------------------',
+    );
     console.log({ fileIdxs });
     if (fileIdxs.length > 0) {
       file_info = await this.fileService.findIndexs(fileIdxs);
       console.log({ file_info });
     }
 
-    return { product, file_info }
+    return { product, file_info };
   }
 
   async productCreateCode() {
-    const code = commonUtils.generateRandomString(8).toUpperCase() + '-' + commonUtils.generateRandomNumber(4);
+    const code =
+      commonUtils.generateRandomString(8).toUpperCase() +
+      '-' +
+      commonUtils.generateRandomNumber(4);
     const isCode = await this.productRepository.findOne({
-      where: { code: code }
+      where: { code: code },
     });
 
     if (isCode) {
@@ -190,65 +260,97 @@ export class ProductService {
     }
   }
 
-  async findAll(options: PaginationOptions, search: string[]) {
+  async findAll(options: PaginationOptions, search: string[], order: string) {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
+    where['status'] = get(where, 'status', [registrationStatus]);
 
     if (get(where, 'product_info', '')) {
-      const product_info = sortBy(map(get(where, 'product_info'), o => +o));
+      const product_info = sortBy(map(get(where, 'product_info'), (o) => +o));
       where['product_info'] = product_info.join('%');
     }
 
-    where['status'] = get(where, 'status', '2');
-    console.log({ where });
-    const [results, total] = await this.productRepository.createQueryBuilder('product')
+    const alias = 'product';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(
+      order_by,
+      alias + '.createdAt',
+      'DESC',
+    );
+
+    const [results, total] = await this.productRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
       .leftJoinAndSelect('product.metro', 'metro')
       .leftJoinAndSelect('product.college', 'college')
       .where((qb) => {
-        qb.where('`product`.status IN (:status)', { status: isArray(get(where, 'status')) ? get(where, 'status') : [get(where, 'status')] });
-        (get(where, 'membership', '')) && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
-        (get(where, 'user_idx', '')) && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
-        (get(where, 'stayStatus', '')) && qb.andWhere('`product_option`.`stayStatus` = :stayStatus', { stayStatus: get(where, 'stayStatus') });
-        (get(where, 'min_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', { min_priceMonth: +get(where, 'min_priceMonth') });
-        (get(where, 'max_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', { max_priceMonth: +get(where, 'max_priceMonth') });
-        (get(where, 'product_info', '')) && qb.andWhere('`product`.productInfoIdxs LIKE :product_info', { product_info: '%' + get(where, 'product_info') + '%' });
+        qb.where('`product`.status IN (:status)', {
+          status: isArray(get(where, 'status'))
+            ? get(where, 'status')
+            : [get(where, 'status')],
+        });
+        get(where, 'membership', '') &&
+          qb.andWhere('`product`.`membership` = :membership', {
+            membership: get(where, 'membership'),
+          });
+        get(where, 'user_idx', '') &&
+          qb.andWhere('`product`.`userIdx` = :user_idx', {
+            user_idx: get(where, 'user_idx'),
+          });
+        get(where, 'stayStatus', '') &&
+          qb.andWhere('`product_option`.`stayStatus` = :stayStatus', {
+            stayStatus: get(where, 'stayStatus'),
+          });
+        get(where, 'min_priceMonth', '') &&
+          qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', {
+            min_priceMonth: +get(where, 'min_priceMonth'),
+          });
+        get(where, 'max_priceMonth', '') &&
+          qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', {
+            max_priceMonth: +get(where, 'max_priceMonth'),
+          });
+        get(where, 'product_info', '') &&
+          qb.andWhere('`product`.productInfoIdxs LIKE :product_info', {
+            product_info: '%' + get(where, 'product_info') + '%',
+          });
         if (get(where, 'keyword', '')) {
-          qb.andWhere('(' +
-            '`product`.`title` LIKE :keyword' +
-            ' OR `product`.`titleEng` LIKE :keyword' +
-            ' OR `product`.`titleJpn` LIKE :keyword' +
-            ' OR `product`.`titleChn` LIKE :keyword' +
-            ' OR `product`.`addr1` LIKE :keyword' +
-            ' OR `product`.`addr2` LIKE :keyword' +
-            ' OR `product`.`addr1Eng` LIKE :keyword' +
-            ' OR `product`.`addr2Eng` LIKE :keyword' +
-            ' OR `product`.`addr1Jpn` LIKE :keyword' +
-            ' OR `product`.`addr2Jpn` LIKE :keyword' +
-            ' OR `product`.`addr1Chn` LIKE :keyword' +
-            ' OR `product`.`addr2Chn` LIKE :keyword' +
-            ' OR `metro`.`stationKor` LIKE :keyword' +
-            ' OR `college`.`nameKor` LIKE :keyword' +
-            ' OR `metro`.`stationEng` LIKE :keyword' +
-            ' OR `college`.`nameEng` LIKE :keyword' +
-            ' OR `metro`.`stationJpn` LIKE :keyword' +
-            ' OR `college`.`nameJpn` LIKE :keyword' +
-            ' OR `metro`.`stationChn` LIKE :keyword' +
-            ' OR `college`.`nameChn` LIKE :keyword' +
-            ')',
+          qb.andWhere(
+            '(' +
+              '`product`.`title` LIKE :keyword' +
+              ' OR `product`.`titleEng` LIKE :keyword' +
+              ' OR `product`.`titleJpn` LIKE :keyword' +
+              ' OR `product`.`titleChn` LIKE :keyword' +
+              ' OR `product`.`addr1` LIKE :keyword' +
+              ' OR `product`.`addr2` LIKE :keyword' +
+              ' OR `product`.`addr1Eng` LIKE :keyword' +
+              ' OR `product`.`addr2Eng` LIKE :keyword' +
+              ' OR `product`.`addr1Jpn` LIKE :keyword' +
+              ' OR `product`.`addr2Jpn` LIKE :keyword' +
+              ' OR `product`.`addr1Chn` LIKE :keyword' +
+              ' OR `product`.`addr2Chn` LIKE :keyword' +
+              ' OR `metro`.`stationKor` LIKE :keyword' +
+              ' OR `college`.`nameKor` LIKE :keyword' +
+              ' OR `metro`.`stationEng` LIKE :keyword' +
+              ' OR `college`.`nameEng` LIKE :keyword' +
+              ' OR `metro`.`stationJpn` LIKE :keyword' +
+              ' OR `college`.`nameJpn` LIKE :keyword' +
+              ' OR `metro`.`stationChn` LIKE :keyword' +
+              ' OR `college`.`nameChn` LIKE :keyword' +
+              ')',
             {
               keyword: '%' + get(where, 'keyword') + '%',
-            }
+            },
           );
         }
       })
-      .skip((take * (page - 1) || 0))
-      .take((take || 10))
+      .orderBy(order_by)
+      .skip(take * (page - 1) || 0)
+      .take(take || 10)
       .getManyAndCount();
 
-    const product_idxs = map(results, o => o.idx);
+    const product_idxs = map(results, (o) => o.idx);
     let file_info = await this.getFileInfo(product_idxs);
 
     const data = new Pagination({
@@ -257,48 +359,94 @@ export class ProductService {
       page,
     });
 
-    return { data, file_info }
+    return { data, file_info };
   }
 
-  async adminFindAll(options: PaginationOptions, search: string[]) {
+  async adminFindAll(
+    options: PaginationOptions,
+    search: string[],
+    order: string,
+  ) {
     const { take, page } = options;
 
     const where = commonUtils.searchSplit(search);
-    const [results, total] = await this.productRepository.createQueryBuilder('product')
+    where['status'] = get(where, 'status', [
+      unregisteredStatus,
+      notUsedStatus,
+      registrationStatus,
+    ]);
+
+    const alias = 'product';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(
+      order_by,
+      alias + '.createdAt',
+      'DESC',
+    );
+
+    const [results, total] = await this.productRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
       .leftJoinAndSelect('product.user', 'user')
       .leftJoinAndSelect('product.metro', 'metro')
       .leftJoinAndSelect('product.college', 'college')
       .where((qb) => {
-        qb.where('`product`.status IN (:status)', { status: get(where, 'status', ['2']) });
-        get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'membership') });
-        get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
+        qb.where('`product`.status IN (:status)', {
+          status: isArray(get(where, 'status'))
+            ? get(where, 'status')
+            : [get(where, 'status')],
+        });
+        get(where, 'membership', '') &&
+          qb.andWhere('`product`.`membership` = :membership', {
+            membership: get(where, 'membership'),
+          });
+        get(where, 'title', '') &&
+          qb.andWhere('`product`.title LIKE :title', {
+            title: '%' + get(where, 'title') + '%',
+          });
+        get(where, 'type', '') &&
+          qb.andWhere('`product`.type IN (:type)', {
+            type: isArray(get(where, 'type'))
+              ? get(where, 'type')
+              : [get(where, 'type')],
+          });
+        get(where, 'name', '') &&
+          qb.andWhere('`user`.name LIKE :name', {
+            name: '%' + get(where, 'name') + '%',
+          });
+        get(where, 'id', '') &&
+          qb.andWhere('`user`.id LIKE :id', {
+            id: '%' + get(where, 'id') + '%',
+          });
+        // get(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: get(where, 'user_idx') });
         if (get(where, 'keyword', '')) {
-          qb.andWhere('(' +
-            '`product`.`title` LIKE :keyword' +
-            ' OR `product`.`addr1` LIKE :keyword' +
-            ' OR `product`.`addr2` LIKE :keyword' +
-            ' OR `metro`.`stationKor` LIKE :keyword' +
-            ' OR `college`.`nameKor` LIKE :keyword' +
-            ' OR `metro`.`stationEng` LIKE :keyword' +
-            ' OR `college`.`nameEng` LIKE :keyword' +
-            ' OR `metro`.`stationJpn` LIKE :keyword' +
-            ' OR `college`.`nameJpn` LIKE :keyword' +
-            ' OR `metro`.`stationChn` LIKE :keyword' +
-            ' OR `college`.`nameChn` LIKE :keyword' +
-            ')',
+          qb.andWhere(
+            '(' +
+              '`product`.`title` LIKE :keyword' +
+              ' OR `product`.`addr1` LIKE :keyword' +
+              ' OR `product`.`addr2` LIKE :keyword' +
+              ' OR `metro`.`stationKor` LIKE :keyword' +
+              ' OR `college`.`nameKor` LIKE :keyword' +
+              ' OR `metro`.`stationEng` LIKE :keyword' +
+              ' OR `college`.`nameEng` LIKE :keyword' +
+              ' OR `metro`.`stationJpn` LIKE :keyword' +
+              ' OR `college`.`nameJpn` LIKE :keyword' +
+              ' OR `metro`.`stationChn` LIKE :keyword' +
+              ' OR `college`.`nameChn` LIKE :keyword' +
+              ')',
             {
               keyword: '%' + get(where, 'keyword') + '%',
-            }
+            },
           );
         }
       })
-      .skip((take * (page - 1) || 0))
-      .take((take || 10))
+      .orderBy(order_by)
+      .skip(take * (page - 1) || 0)
+      .take(take || 10)
       .getManyAndCount();
 
-    const product_idxs = map(results, o => o.idx);
+    const product_idxs = map(results, (o) => o.idx);
     let file_info = await this.getFileInfo(product_idxs);
 
     const data = new Pagination({
@@ -307,11 +455,12 @@ export class ProductService {
       page,
     });
 
-    return { data, file_info }
+    return { data, file_info };
   }
 
   async findIdxAll(idx: number[]) {
-    const product = await this.productRepository.createQueryBuilder('product')
+    const product = await this.productRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
       .where((qb) => {
@@ -319,11 +468,12 @@ export class ProductService {
       })
       .getMany();
 
-    return product
+    return product;
   }
 
   async findAllUser(userIdx: number) {
-    const products = await this.productRepository.createQueryBuilder('product')
+    const products = await this.productRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.productOption', 'product_option')
       .leftJoinAndSelect('product.productInfo', 'product_info')
       .leftJoinAndSelect('product.user', 'user')
@@ -355,8 +505,15 @@ export class ProductService {
   async getFileInfo(idxs: number[]) {
     let file_info = {};
     try {
-      file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], idxs);
-      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+      file_info = await this.fileService.findCategoryForeignAll(
+        ['lodgingDetailImg', 'mealsImg'],
+        idxs,
+      );
+      file_info = commonUtils.getArrayKey(
+        file_info,
+        ['file_foreign_idx', 'file_category'],
+        true,
+      );
     } catch (error) {
       console.log('숙소 상세 이미지 파일 없음');
     }
@@ -365,14 +522,18 @@ export class ProductService {
 
   async findOneIdx(idx: number) {
     if (!idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException(
+        'product.service.findOneIdx: 잘못된 정보 입니다.',
+      );
     }
     const product = await this.productRepository.findOne({
       where: { idx: idx },
-      relations: ['productInfo', 'user', 'metro', 'college']
+      relations: ['productInfo', 'user', 'metro', 'college'],
     });
     if (!get(product, 'idx', '')) {
-      throw new NotFoundException('정보를 찾을 수 없습니다.');
+      throw new NotFoundException(
+        'product.service.findOneIdx: 정보를 찾을 수 없습니다.',
+      );
     }
     return product;
   }
@@ -382,24 +543,79 @@ export class ProductService {
   }
 
   async updateAverageStar(idx: number, { star, reviewCount }) {
-    await this.productRepository.createQueryBuilder()
+    await this.productRepository
+      .createQueryBuilder()
       .update(ProductEntity)
       .set({ star, reviewCount })
-      .where(" idx = :idx", { idx: idx })
-      .execute()
+      .where(' idx = :idx', { idx: idx })
+      .execute();
   }
 
   async updateMembership(userIdx: number, membershipStatus: string) {
     const products = await this.findAllUser(userIdx);
-    const productIdxs = map(products, o => o['idx']);
-    await this.productRepository.createQueryBuilder()
+    const productIdxs = map(products, (o) => o['idx']);
+    await this.productRepository
+      .createQueryBuilder()
       .update(ProductEntity)
       .set({ membership: membershipStatus })
-      .where(" idx IN (:idx)", { idx: productIdxs })
-      .execute()
+      .where(' idx IN (:idx)', { idx: productIdxs })
+      .execute();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async hostRemove(userIinfo, idx: number) {
+    // 회원의 숙소인이 확인
+    if (!commonUtils.isAdmin(userIinfo.group)) {
+      // 관리자가 아닌 경우
+      // 회원 정보 가져오기
+      const user = await this.userService.findId(userIinfo.id);
+      const product = await this.findOneIdx(idx);
+      if (user.idx != product.user.idx) {
+        // 방 호스트가 아닌 경우
+        throw new NotAcceptableException(
+          'product.service.hostRemove: 삭제 권한이 없습니다.',
+        );
+      }
+    }
+
+    await this.remove(idx);
+  }
+
+  async remove(idx: number) {
+    await this.productRepository
+      .createQueryBuilder()
+      .update(ProductEntity)
+      .set({ status: deleteStatus })
+      .where(' idx = :idx', { idx: idx })
+      .execute();
+  }
+
+  async dashboard() {
+    const product = await this.productRepository
+      .createQueryBuilder()
+      .select(
+        'SUM(IF(`membership` IN (1) AND `status` = 2, 1, 0))',
+        'total_cnt',
+      )
+      .execute();
+
+    return product;
+  }
+
+  // 숙소 목록 엑셀 생성
+  async createExcel(
+    options: PaginationOptions,
+    search: string[],
+    order: string,
+  ) {
+    const { data } = await this.adminFindAll(options, search, order);
+    if (!data) {
+      throw new NotFoundException(
+        'product.service.excel: 다운로드할 데이터가 없습니다.',
+      );
+    }
+
+    return this.excelService.createExcel(data, {
+      type: 'product',
+    });
   }
 }

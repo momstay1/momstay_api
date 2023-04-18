@@ -15,6 +15,9 @@ import { EmailModule } from 'src/email/email.module';
 import { RefreshTokenModule } from 'src/refresh-token/refresh-token.module';
 import { IamportService } from 'src/iamport/iamport.service';
 import { DeviceModule } from 'src/device/device.module';
+import { UserLeaveModule } from 'src/user-leave/user-leave.module';
+import { UserDormantModule } from 'src/user-dormant/user-dormant.module';
+import { ExcelService } from 'src/excel/excel.service';
 
 @Module({
   imports: [
@@ -27,10 +30,12 @@ import { DeviceModule } from 'src/device/device.module';
     LoginModule,
     RefreshTokenModule,
     DeviceModule,
+    UserLeaveModule,
+    UserDormantModule,
     // forwardRef(() => FileModule),
   ],
   controllers: [UsersController, AdminUsersController],
-  providers: [UsersService, CommonService, IamportService],
+  providers: [UsersService, CommonService, IamportService, ExcelService],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

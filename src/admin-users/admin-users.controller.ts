@@ -17,8 +17,8 @@ import { UsersService } from 'src/users/users.service';
 import { AdminUsersService } from './admin-users.service';
 import { AdminUsersEntity } from './entities/admin-user.entity';
 
-@Controller('admin-users')
-@ApiTags('관리자 유저 API')
+@Controller('admin-userss')
+// @ApiTags('관리자 유저 API')
 export class AdminUsersController {
   // constructor(
   //   private authService: AuthService,

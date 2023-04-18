@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, UnprocessableEntityException, NotAcceptableException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+  NotAcceptableException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compact, filter, get, isArray, isEmpty, map } from 'lodash';
 import { Pagination, PaginationOptions } from 'src/paginate';
@@ -15,19 +20,26 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersEntity } from './entities/user.entity';
 import { Cron } from '@nestjs/schedule';
+import { UserLeaveService } from 'src/user-leave/user-leave.service';
+import { UserDormantService } from 'src/user-dormant/user-dormant.service';
+import { ExcelService } from 'src/excel/excel.service';
 
-import * as moment from "moment";
+import * as moment from 'moment';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UsersEntity) private usersRepository: Repository<UsersEntity>,
+    @InjectRepository(UsersEntity)
+    private usersRepository: Repository<UsersEntity>,
     private readonly groupService: GroupsService,
     private readonly userSnsService: UserSnsService,
     private readonly fileService: FileService,
     private readonly emailService: EmailService,
     private readonly deviceService: DeviceService,
-  ) { }
+    private readonly userLeaveService: UserLeaveService,
+    private readonly userDormantService: UserDormantService,
+    private readonly excelService: ExcelService,
+  ) {}
 
   async test(id) {
     try {
@@ -51,7 +63,7 @@ export class UsersService {
           'momstay - Email Authentication',
           `Please enter your email verification code below.
           <br><br>
-          Email authentication code : ${code.toUpperCase()}`
+          Email authentication code : ${code.toUpperCase()}`,
         );
         result['message'] = '인증 코드 메일 발송 완료';
       } else {
@@ -69,7 +81,7 @@ export class UsersService {
           'momstay - Email Authentication',
           `Please enter the email authentication code below to register as a member.
           <br><br>
-          Email authentication code : ${code.toUpperCase()}`
+          Email authentication code : ${code.toUpperCase()}`,
         );
         result['message'] = '인증 코드 메일 발송 완료';
       } else {
@@ -86,7 +98,9 @@ export class UsersService {
     const email_code = await this.emailService.findEmailCode(code, email);
 
     const date = moment().add(-10, 'm').format('YYYY-MM-DD HH:mm:ss');
-    const create_date = moment(email_code.createdAt).format('YYYY-MM-DD HH:mm:ss');
+    const create_date = moment(email_code.createdAt).format(
+      'YYYY-MM-DD HH:mm:ss',
+    );
     if (create_date < date) {
       throw new NotAcceptableException('Authentication timeout.');
     }
@@ -105,18 +119,29 @@ export class UsersService {
     const save_user = await this.saveUser(createUserDto);
 
     if (get(createUserDto, 'snsInfo', '')) {
-      await this.userSnsService.saveUserSns(get(createUserDto, 'snsInfo'), save_user);
+      await this.userSnsService.saveUserSns(
+        get(createUserDto, 'snsInfo'),
+        save_user,
+      );
     }
 
     const user = await this.findIdx(save_user['idx']);
     let file_info;
     if (!isEmpty(files)) {
-      file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
+      file_info = await this.fileService.fileInfoInsert(
+        files,
+        save_user['idx'],
+      );
     }
     return { user, file_info };
   }
 
-  async findAll(user, options: PaginationOptions, search: string[]) {
+  async findAll(
+    user,
+    options: PaginationOptions,
+    search: string[],
+    order: string,
+  ) {
     const { take, page } = options;
 
     const status_arr: number[] = [];
@@ -127,72 +152,130 @@ export class UsersService {
     }
     const where = commonUtils.searchSplit(search);
 
+    const alias = 'users';
+    let order_by = commonUtils.orderSplit(order, alias);
+    order_by[alias + '.createdAt'] = get(
+      order_by,
+      alias + '.createdAt',
+      'DESC',
+    );
+
     if (!get(where, 'group', '')) {
       // 그룹 검색 없는 경우
-      const groups = commonUtils.getArrayKey(await this.groupService.findAll(), ['id'], false);
-      console.log(map(groups, o => console.log(o['idx'])));
+      const groups = commonUtils.getArrayKey(
+        await this.groupService.findAll(),
+        ['id'],
+        false,
+      );
       where['group'] = map(
         commonUtils.getArrayKey(groups, ['id'], false),
-        o => {
+        (o) => {
           if (o['idx'] >= groups[user.group].idx) return o['idx'];
-        }
-      )
+        },
+      ).filter((v, i) => !!v);
     }
 
-    const [results, total] = await this.usersRepository.createQueryBuilder('users')
+    const [results, total] = await this.usersRepository
+      .createQueryBuilder('users')
       .leftJoinAndSelect('users.userSns', 'userSns')
       .leftJoinAndSelect('users.group', 'group')
-      .where(new Brackets(qb => {
-        qb.where('users.status IN (:user_status)', { user_status: status_arr });
-        get(where, 'group', '') && qb.andWhere('`users`.groupIdx IN (:group)', { group: isArray(get(where, 'group')) ? get(where, 'group') : [get(where, 'group')] })
-        get(where, 'language', '') && qb.andWhere('`language`.idx IN (:language)', { language: isArray(get(where, 'language')) ? get(where, 'language') : [get(where, 'language')] })
-        get(where, 'id', '') && qb.andWhere('`users`.id LIKE :id', { id: '%' + get(where, 'id') + '%' })
-        get(where, 'name', '') && qb.andWhere('`users`.name LIKE :name', { name: '%' + get(where, 'name') + '%' })
-        get(where, 'email', '') && qb.andWhere('`users`.email LIKE :email', { email: '%' + get(where, 'email') + '%' })
-        get(where, 'phone', '') && qb.andWhere('`users`.phone LIKE :phone', { phone: '%' + get(where, 'phone') + '%' })
-        get(where, 'birthday', '') && qb.andWhere('`users`.birthday LIKE :birthday', { birthday: '%' + get(where, 'birthday') + '%' })
-        get(where, 'createdAt_mte', '') && qb.andWhere('`users`.`createdAt` >= :createdAt_mte', { createdAt_mte: get(where, 'createdAt_mte') + ' 00:00:00' });
-        get(where, 'createdAt_lte', '') && qb.andWhere('`users`.`createdAt` <= :createdAt_lte', { createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59' });
-      }))
-      .skip((take * (page - 1) || 0))
-      .take((take || 10))
+      .where(
+        new Brackets((qb) => {
+          qb.where('users.status IN (:user_status)', {
+            user_status: status_arr,
+          });
+          get(where, 'group', '') &&
+            qb.andWhere('`users`.groupIdx IN (:group)', {
+              group: isArray(get(where, 'group'))
+                ? get(where, 'group')
+                : [get(where, 'group')],
+            });
+          get(where, 'language', '') &&
+            qb.andWhere('`users`.language IN (:language)', {
+              language: isArray(get(where, 'language'))
+                ? get(where, 'language')
+                : [get(where, 'language')],
+            });
+          get(where, 'id', '') &&
+            qb.andWhere('`users`.id LIKE :id', {
+              id: '%' + get(where, 'id') + '%',
+            });
+          get(where, 'name', '') &&
+            qb.andWhere('`users`.name LIKE :name', {
+              name: '%' + get(where, 'name') + '%',
+            });
+          get(where, 'email', '') &&
+            qb.andWhere('`users`.email LIKE :email', {
+              email: '%' + get(where, 'email') + '%',
+            });
+          get(where, 'phone', '') &&
+            qb.andWhere('`users`.phone LIKE :phone', {
+              phone: '%' + get(where, 'phone') + '%',
+            });
+          get(where, 'birthday', '') &&
+            qb.andWhere('`users`.birthday LIKE :birthday', {
+              birthday: '%' + get(where, 'birthday') + '%',
+            });
+          get(where, 'createdAt_mte', '') &&
+            qb.andWhere('`users`.`createdAt` >= :createdAt_mte', {
+              createdAt_mte: get(where, 'createdAt_mte') + ' 00:00:00',
+            });
+          get(where, 'createdAt_lte', '') &&
+            qb.andWhere('`users`.`createdAt` <= :createdAt_lte', {
+              createdAt_lte: get(where, 'createdAt_lte') + ' 23:59:59',
+            });
+        }),
+      )
+      .orderBy(order_by)
+      .skip(take * (page - 1) || 0)
+      .take(take || 10)
       .getManyAndCount();
 
     return new Pagination({
       results,
       total,
       page,
-    })
+    });
   }
 
   async count() {
-    return await this.usersRepository.count({ where: { user_status: usersConstant.status.registration } });
+    return await this.usersRepository.count({
+      where: { user_status: usersConstant.status.registration },
+    });
   }
 
   async findOne(obj: object): Promise<UsersEntity | undefined> {
     if (isEmpty(obj)) {
-      throw new NotFoundException('user.service.fineOne: 조회할 정보가 없습니다.');
+      throw new NotFoundException(
+        'user.service.fineOne: 조회할 정보가 없습니다.',
+      );
     }
     const user = await this.usersRepository.findOne({
       where: obj,
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
-      throw new NotFoundException('user.service.fineOne: 존재하지 않는 회원 입니다.');
+    if (!get(user, 'idx', '')) {
+      throw new NotFoundException(
+        'user.service.fineOne: 존재하지 않는 회원 입니다.',
+      );
     }
     return user;
   }
 
   async findId(id: string): Promise<UsersEntity | undefined> {
     if (!id) {
-      throw new NotFoundException('user.service.fineId: 조회할 정보가 없습니다.');
+      throw new NotFoundException(
+        'user.service.fineId: 조회할 정보가 없습니다.',
+      );
     }
     const user = await this.usersRepository.findOne({
       where: { id: id },
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
-      throw new NotFoundException('user.service.fineId: 존재하지 않는 회원 입니다.');
+    if (!get(user, 'idx', '')) {
+      throw new NotFoundException(
+        'user.service.fineId: 존재하지 않는 회원 입니다.',
+      );
     }
 
     return user;
@@ -200,17 +283,21 @@ export class UsersService {
 
   async fineUser(id: string): Promise<UsersEntity | undefined> {
     if (!id) {
-      throw new NotFoundException('user.service.fineUser: 조회할 정보가 없습니다.');
+      throw new NotFoundException(
+        'user.service.fineUser: 조회할 정보가 없습니다.',
+      );
     }
     const user = await this.usersRepository.findOne({
       where: (qb) => {
-        qb.where('`email` = :email', { email: id })
-        qb.orWhere('`UsersEntity`.`id` = :id', { id: id })
+        qb.where('`email` = :email', { email: id });
+        qb.orWhere('`UsersEntity`.`id` = :id', { id: id });
       },
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
-      throw new NotFoundException('user.service.fineUser: 존재하지 않는 회원 입니다.');
+    if (!get(user, 'idx', '')) {
+      throw new NotFoundException(
+        'user.service.fineUser: 존재하지 않는 회원 입니다.',
+      );
     }
 
     return user;
@@ -218,14 +305,18 @@ export class UsersService {
 
   async findIdx(idx: number): Promise<UsersEntity | undefined> {
     if (!idx) {
-      throw new NotFoundException('user.service.findIdx: 조회할 정보가 없습니다.');
+      throw new NotFoundException(
+        'user.service.findIdx: 조회할 정보가 없습니다.',
+      );
     }
     const user = await this.usersRepository.findOne({
       where: { idx: idx },
       relations: ['group', 'userSns', 'device', 'block'],
     });
-    if (!user) {
-      throw new NotFoundException('user.service.findIdx: 존재하지 않는 회원 입니다.');
+    if (!get(user, 'idx', '')) {
+      throw new NotFoundException(
+        'user.service.findIdx: 존재하지 않는 회원 입니다.',
+      );
     }
 
     return user;
@@ -233,13 +324,14 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, files) {
     const user = await this.findId(id);
-    const groupIdxs = updateUserDto['group'] ? updateUserDto['group'] : usersConstant['default']['group_idx'];
+    const groupIdxs = updateUserDto['group']
+      ? updateUserDto['group']
+      : usersConstant['default']['group_idx'];
     const group = await this.groupService.findOne(groupIdxs);
 
     if (get(updateUserDto, 'status', ''))
       user['status'] = +get(updateUserDto, 'status');
-    if (get(updateUserDto, 'id', ''))
-      user['id'] = get(updateUserDto, 'id');
+    if (get(updateUserDto, 'id', '')) user['id'] = get(updateUserDto, 'id');
     if (get(updateUserDto, 'name', ''))
       user['name'] = get(updateUserDto, 'name');
     if (get(updateUserDto, 'email', ''))
@@ -261,24 +353,36 @@ export class UsersService {
     if (get(updateUserDto, 'marketing', ''))
       user['marketing'] = get(updateUserDto, 'marketing');
     if (get(updateUserDto, 'uniqueKey', ''))
-      user['marketing'] = get(updateUserDto, 'uniqueKey');
+      user['uniqueKey'] = get(updateUserDto, 'uniqueKey');
     if (get(updateUserDto, 'certifiInfo', ''))
-      user['marketing'] = get(updateUserDto, 'certifiInfo');
+      user['certifiInfo'] = get(updateUserDto, 'certifiInfo');
 
     user['group'] = group;
+    if (user['group']['id'] == 'host') {
+      // 호스트로 변경된 경우 날짜 기록
+      user['hostAt'] = new Date(moment().format('YYYY-MM-DD HH:mm:ss'));
+    }
     if (get(updateUserDto, 'password')) {
-      user['password'] = await commonBcrypt.setBcryptPassword(get(updateUserDto, 'password'));
+      user['password'] = await commonBcrypt.setBcryptPassword(
+        get(updateUserDto, 'password'),
+      );
     }
     const user_data = await this.usersRepository.save(user);
 
     let file_info;
     if (!isEmpty(files)) {
-      const file = await this.fileService.findCategory(['profile'], "" + user_data['idx']);
-      const file_idxs = map(file, o => "" + o.file_idx);
+      const file = await this.fileService.findCategory(
+        ['profile'],
+        '' + user_data['idx'],
+      );
+      const file_idxs = map(file, (o) => '' + o.file_idx);
       await this.fileService.removes(file_idxs);
-      file_info = await this.fileService.fileInfoInsert(files, user_data['idx']);
+      file_info = await this.fileService.fileInfoInsert(
+        files,
+        user_data['idx'],
+      );
     }
-    return { user: user_data, file_info }
+    return { user: user_data, file_info };
   }
 
   // 단말기 회원정보 수정
@@ -287,7 +391,10 @@ export class UsersService {
 
     const user = await this.findId(userInfo.id);
     // 단말기에 연동된 회원과 로그인한 회원이 다른 경우
-    if (get(deviceInfo, ['user', 'idx'], '') && deviceInfo['user']['idx'] != user['idx']) {
+    if (
+      get(deviceInfo, ['user', 'idx'], '') &&
+      deviceInfo['user']['idx'] != user['idx']
+    ) {
       // 회원에 연동된 단말기 정보 제거
       const { user } = deviceInfo;
       console.log(deviceInfo['user']);
@@ -314,7 +421,10 @@ export class UsersService {
   async rspw(userdata, prevpassword: string, password: string) {
     const user = await this.findId(userdata.id);
 
-    let isHashValid = await commonBcrypt.isHashValid(prevpassword, user.password);
+    let isHashValid = await commonBcrypt.isHashValid(
+      prevpassword,
+      user.password,
+    );
     if (!isHashValid) {
       throw new NotAcceptableException('현재 비밀번호와 일치하지 않습니다.');
     }
@@ -328,34 +438,126 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async leave(id: string) {
+  async lastActivity(id: string) {
     const user = await this.findId(id);
+    user['activitedAt'] = new Date();
+
+    await this.usersRepository.save(user);
+  }
+
+  async leave(id: string, reason: string) {
+    const user = await this.findId(id);
+    const userLeave = await this.userLeaveService.leaveUser(user, reason);
     user.status = usersConstant.status.leave;
-    user.id = '';
+    // user.id = '';
     user.password = '';
     user.prevPassword = '';
     user.name = '';
     user.email = '';
     user.gender = '';
-    user.phone = '';
-    user.birthday = '0000-00-00';
+    user.language = '';
+    user.countryCode = '';
     user.other = '';
+    user.phone = '';
+    user.birthday = null;
     user.oldData = '';
-    user.oldData = '';
-    user.leaveAt = new Date(moment().format('YYYY-MM-DD'));
+    user.leaveAt = new Date();
     user.marketing = '0';
     await this.usersRepository.save(user);
+  }
+
+  async dormant(user: UsersEntity) {
+    const userDormant = await this.userDormantService.dormantUser(user);
+    user.status = usersConstant.status.dormant;
+    // user.name = '';
+    // user.email = '';
+    user.gender = '';
+    // user.language = '';
+    user.countryCode = '';
+    // user.phone = '';
+    user.birthday = null;
+    user.other = '';
+    user.oldData = '';
+    user.marketing = '0';
+    await this.usersRepository.save(user);
+  }
+
+  async dormantRecovery(id: string) {
+    // const user = await this.findId(id);
+    const dormantUser = await this.userDormantService.findOneId(id);
+    if (get(dormantUser, 'idx', '')) {
+      dormantUser.userInfo = JSON.parse(dormantUser.userInfo);
+      const { userInfo } = dormantUser;
+      const user_data = {
+        idx: userInfo['idx'],
+        status: usersConstant.status.registration,
+        type: userInfo['type'],
+        activitedAt: new Date(),
+        name: userInfo['name'],
+        email: userInfo['email'],
+        gender: userInfo['gender'],
+        language: userInfo['language'],
+        memo: userInfo['memo'],
+        uniqueKey: userInfo['uniqueKey'],
+        certifiInfo: userInfo['certifiInfo'],
+        countryCode: userInfo['countryCode'],
+        other: userInfo['other'],
+        phone: userInfo['phone'],
+        birthday: userInfo['birthday'],
+        oldIdx: userInfo['oldIdx'],
+        oldData: userInfo['oldData'],
+        marketing: userInfo['marketing'],
+        createdAt: userInfo['createdAt'],
+        leaveAt: userInfo['leaveAt'],
+        hostAt: userInfo['hostAt'],
+      };
+      const userEntity = await this.usersRepository.create(user_data);
+      await this.usersRepository.save(userEntity);
+
+      await this.userDormantService.remove(dormantUser.idx);
+    }
   }
 
   async removes(ids) {
     if (ids.length <= 0) {
       throw new NotFoundException('삭제할 정보가 없습니다.');
     }
-    await this.usersRepository.createQueryBuilder()
+    await this.usersRepository
+      .createQueryBuilder()
       .update(UsersEntity)
       .set({ status: Number(usersConstant.status.delete) })
-      .where(" id IN (:ids)", { ids: ids })
-      .execute()
+      .where(' id IN (:ids)', { ids: ids })
+      .execute();
+  }
+
+  async dashboard() {
+    const today = moment().format('YYYY-MM-DD');
+    const user = await this.usersRepository
+      .createQueryBuilder()
+      .select(
+        'SUM(IF(`groupidx` IN (3, 4) AND `status` = 2, 1, 0))',
+        'total_cnt',
+      )
+      .addSelect('SUM(IF(`groupidx` = 4 AND `status` = 2, 1, 0))', 'guest_cnt')
+      .addSelect('SUM(IF(`groupidx` = 3 AND `status` = 2, 1, 0))', 'host_cnt')
+      .addSelect('SUM(IF(`status` = 5, 1, 0))', 'dormant_cnt')
+      .addSelect(
+        'SUM(IF(Date_format(`leaveAt`, "%y-%m-%d") = "' +
+          today +
+          '" AND `status` = 9, 1, 0))',
+        'new_leave_cnt',
+      )
+      .addSelect(
+        'SUM(IF(Date_format(`hostAt`, "%y-%m-%d") = "' + today + '", 1, 0))',
+        'new_host_cnt',
+      )
+      .addSelect(
+        'SUM(IF(Date_format(`createdAt`, "%y-%m-%d") = "' + today + '", 1, 0))',
+        'new_cnt',
+      )
+      .execute();
+
+    return user;
   }
 
   getPrivateColumn(): string[] {
@@ -365,10 +567,20 @@ export class UsersService {
   //회원 정보 저장
   private async saveUser(createUserDto): Promise<any> {
     const addPrefixUserDto = createUserDto;
-    const groupIdx = createUserDto.group ? createUserDto.group : usersConstant.default.group_idx;
+    const groupIdx = createUserDto.group
+      ? createUserDto.group
+      : usersConstant.default.group_idx;
     const group = await this.groupService.findOne(groupIdx);
+    if (group.id == 'host') {
+      // 호스트로 회원 가입시 호스트 날짜 기록
+      addPrefixUserDto.hostAt = new Date(
+        moment().format('YYYY-MM-DD HH:mm:ss'),
+      );
+    }
     addPrefixUserDto.group = group;
-    addPrefixUserDto.status = createUserDto.status ? +createUserDto.status : usersConstant.status.registration;
+    addPrefixUserDto.status = createUserDto.status
+      ? +createUserDto.status
+      : usersConstant.status.registration;
 
     const user = await this.usersRepository.create({ ...addPrefixUserDto });
     return await this.usersRepository.save(user);
@@ -389,13 +601,92 @@ export class UsersService {
   // 탈퇴 회원 다음날 01시 uniquekey 제거
   @Cron('0 0 1 * * *')
   async deleteUniqueKey() {
-    console.log('[cron] deleteUniqueKey: ', moment().format('YYYY-MM-DD HH:mm:ss'));
-    await this.usersRepository.createQueryBuilder()
+    console.log(
+      '[cron] deleteUniqueKey: ',
+      moment().format('YYYY-MM-DD HH:mm:ss'),
+    );
+    await this.usersRepository
+      .createQueryBuilder()
       .update(UsersEntity)
-      .set({ uniqueKey: '', certifiInfo: '' })
-      .where(" status = :status", { status: usersConstant.status.leave })
-      .execute()
+      .set({ id: '', uniqueKey: '', certifiInfo: '' })
+      .where(' status = :status', { status: usersConstant.status.leave })
+      .execute();
   }
 
+  // 매일 01시 휴면 회원 안내
+  // @Cron('0 0 1 * * *')
+  // async dormantNotice() {
+  //   console.log('[cron] dormantNotice: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+  //   const yearAgo = moment().add(-11, 'month').format('YYYY-MM-DD');
+  //   const group = [3]; // 휴면 안내할 그룹
+  //   const users = await this.usersRepository.createQueryBuilder('user')
+  //     .where(qb => {
+  //       qb.where('group.idx IN (:group)', { group: group })
+  //       qb.andWhere('user.status = :status', { status: usersConstant.status.registration })
+  //       qb.andWhere('user.activitedAt < :activitedAt', { activitedAt: yearAgo })
+  //     })
+  //     .getMany();
+  //   console.log('휴면 회원 안내 숫자: ', users.length);
+  //   if (users.length > 0) {
+  //     // 휴면 회원 안내
+  //     for (const key in users) {
+  //       this.emailService.snedMail(
+  //         1,
+  //         users[key].email,
+  //         'momstay - Guidelines for Conversion of Dormant Members',
+  //         `Accounts that have not logged in or used the service for more than a year <br>
+  //         will be converted to dormant accounts, and personal information will be destroyed or stored and managed separately for safe personal information management.
+  //         `
+  //       );
+  //     }
+  //   }
+  // }
 
+  // 매일 01시 휴면 회원 처리
+  // @Cron('*/10 * * * * *') // 테스트용 시간
+  @Cron('0 0 1 * * *')
+  async dormantUser() {
+    console.log('[cron] dormantUser: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+    const yearAgo = moment().add(-1, 'year').format('YYYY-MM-DD');
+    const group = [3]; // 휴면 처리할 그룹
+    const users = await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.group', 'group')
+      .where((qb) => {
+        qb.where('group.idx IN (:group)', { group: group });
+        qb.andWhere('user.status = :status', {
+          status: usersConstant.status.registration,
+        });
+        qb.andWhere('user.activitedAt < :activitedAt', {
+          activitedAt: yearAgo,
+        });
+      })
+      .getMany();
+    console.log('휴면 회원 숫자: ', users.length);
+    if (users.length > 0) {
+      // 휴면 회원 처리
+      for (const key in users) {
+        await this.dormant(users[key]);
+      }
+    }
+  }
+
+  // 회원 목록 엑셀 생성
+  async createExcel(
+    user,
+    options: PaginationOptions,
+    search: string[],
+    order: string,
+  ) {
+    const users = await this.findAll(user, options, search, order);
+    if (!users) {
+      throw new NotFoundException(
+        'users.service.excel: 다운로드할 데이터가 없습니다.',
+      );
+    }
+
+    return this.excelService.createExcel(users, {
+      type: 'member',
+    });
+  }
 }
