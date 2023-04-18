@@ -4,27 +4,27 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {get, isArray, isEmpty, map, reduce, values} from 'lodash';
-import {Repository} from 'typeorm';
-import {CreateOrderDto} from './dto/create-order.dto';
-import {UpdateOrderDto} from './dto/update-order.dto';
-import {OrderEntity} from './entities/order.entity';
-import {commonUtils} from 'src/common/common.utils';
-import {ProductService} from 'src/product/product.service';
-import {ProductOptionService} from 'src/product-option/product-option.service';
-import {UsersService} from 'src/users/users.service';
-import {OrderProductService} from 'src/order-product/order-product.service';
-import {OrderTotalService} from 'src/order-total/order-total.service';
-import {IamportService} from 'src/iamport/iamport.service';
-import {PgDataService} from 'src/pg-data/pg-data.service';
-import {ExcelService} from 'src/excel/excel.service';
-import {Pagination, PaginationOptions} from 'src/paginate';
-import {UsersEntity} from 'src/users/entities/user.entity';
-import {PushNotificationService} from 'src/push-notification/push-notification.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { get, isArray, isEmpty, map, reduce, values } from 'lodash';
+import { Repository } from 'typeorm';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrderEntity } from './entities/order.entity';
+import { commonUtils } from 'src/common/common.utils';
+import { ProductService } from 'src/product/product.service';
+import { ProductOptionService } from 'src/product-option/product-option.service';
+import { UsersService } from 'src/users/users.service';
+import { OrderProductService } from 'src/order-product/order-product.service';
+import { OrderTotalService } from 'src/order-total/order-total.service';
+import { IamportService } from 'src/iamport/iamport.service';
+import { PgDataService } from 'src/pg-data/pg-data.service';
+import { ExcelService } from 'src/excel/excel.service';
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { UsersEntity } from 'src/users/entities/user.entity';
+import { PushNotificationService } from 'src/push-notification/push-notification.service';
 
 import * as moment from 'moment';
-import {SettingsService} from 'src/settings/settings.service';
+import { SettingsService } from 'src/settings/settings.service';
 
 @Injectable()
 export class OrderService {
@@ -42,7 +42,7 @@ export class OrderService {
     private readonly pushNotiService: PushNotificationService,
     private readonly settingsService: SettingsService,
     private readonly excelService: ExcelService,
-  ) {}
+  ) { }
 
   async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
     const ord_data = {};
@@ -155,7 +155,7 @@ export class OrderService {
 
     // 주문 상품 설정 기능 작업중
     // 추후 주문 상품을 배열로 전달 (한 주문에 여러 주문 상품을 처리하는 경우에 작업 필요)
-    const {orderProduct, priceInfo} =
+    const { orderProduct, priceInfo } =
       await this.orderProductService.createOrderProduct(
         order,
         po,
@@ -166,19 +166,21 @@ export class OrderService {
     await this.ordertotalService.orderTotalCreate(order, orderProduct);
 
     // 호스트에게 push 알림 발송
-    const {user} = get(po, ['product']);
+    const { user } = get(po, ['product']);
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.guestOrderPush(user, po);
     }
 
-    return {order, orderProduct, po, priceInfo};
+    // 바로결제 메일 발송 (관리자, 호스트, 게스트)
+
+    return { order, orderProduct, po, priceInfo };
   }
 
   async ordCreateCode() {
     const code =
       moment().format('YYMMDD') + commonUtils.createCode().toUpperCase();
     const isCode = await this.orderRepository.findOne({
-      where: {code: code},
+      where: { code: code },
     });
 
     if (isCode) {
@@ -195,7 +197,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
@@ -214,7 +216,7 @@ export class OrderService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository
       .createQueryBuilder('order')
@@ -299,7 +301,7 @@ export class OrderService {
       page,
     });
 
-    return {data};
+    return { data };
   }
 
   // 게스트 결제 내역 리스트
@@ -309,7 +311,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
@@ -328,7 +330,7 @@ export class OrderService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository
       .createQueryBuilder('order')
@@ -389,7 +391,7 @@ export class OrderService {
           });
         if (['host', 'guest'].includes(user['group']['id'])) {
           // 자신의 주문 내역만 확인 가능
-          qb.andWhere('`guestUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -403,7 +405,7 @@ export class OrderService {
       page,
     });
 
-    return {data};
+    return { data };
   }
 
   // 호스트 결제 내역 리스트
@@ -413,7 +415,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
@@ -432,7 +434,7 @@ export class OrderService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository
       .createQueryBuilder('order')
@@ -492,7 +494,7 @@ export class OrderService {
               : [where['remitter']],
           });
         if (user['group']['id'] == 'host') {
-          qb.andWhere('`hostUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -506,7 +508,7 @@ export class OrderService {
       page,
     });
 
-    return {data};
+    return { data };
   }
 
   async findOneIdxByAdmin(idx: number) {
@@ -516,7 +518,7 @@ export class OrderService {
       );
     }
     const order = await this.orderRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: [
         'user',
         'orderProduct',
@@ -531,7 +533,7 @@ export class OrderService {
       );
     }
 
-    return {order};
+    return { order };
   }
 
   async findOneIdxByGuest(userInfo: UsersEntity, idx: number) {
@@ -549,9 +551,9 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'hostUser')
       .where((qb) => {
-        qb.where('`order`.idx = :idx', {idx: idx});
+        qb.where('`order`.idx = :idx', { idx: idx });
         if (!['root', 'admin'].includes(user['group']['id'])) {
-          qb.andWhere('`guestUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .getOne();
@@ -561,7 +563,7 @@ export class OrderService {
       );
     }
 
-    return {order};
+    return { order };
   }
 
   async findOneIdxByHost(userInfo: UsersEntity, idx: number) {
@@ -579,9 +581,9 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'hostUser')
       .where((qb) => {
-        qb.where('`order`.idx = :idx', {idx: idx});
+        qb.where('`order`.idx = :idx', { idx: idx });
         if (!['root', 'admin'].includes(user['group']['id'])) {
-          qb.andWhere('`hostUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .getOne();
@@ -591,7 +593,7 @@ export class OrderService {
       );
     }
 
-    return {order};
+    return { order };
   }
 
   async findOneIdx(idx: number) {
@@ -601,7 +603,7 @@ export class OrderService {
       );
     }
     const order = await this.orderRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: [
         'user',
         'user.device',
@@ -635,7 +637,7 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'hostUser')
       .where((qb) => {
-        qb.where('`order`.code = :code', {code: code});
+        qb.where('`order`.code = :code', { code: code });
       })
       .getOne();
     if (!get(order, 'idx', '')) {
@@ -643,7 +645,7 @@ export class OrderService {
         'order.service.findOneCodeByNonmember: 정보를 찾을 수 없습니다.',
       );
     }
-    return {order};
+    return { order };
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
@@ -668,8 +670,8 @@ export class OrderService {
       .leftJoinAndSelect('orderProduct.productOption', 'productOption')
       .leftJoinAndSelect('productOption.product', 'product')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', {userIdx: user['idx']});
-        qb.andWhere('`order`.code = :code', {code: code});
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -686,8 +688,8 @@ export class OrderService {
       const site = await this.settingsService.findOne('site_tel');
       throw new NotAcceptableException(
         'order.service.guestOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
-          site.set_value +
-          ')에 문의해주세요.',
+        site.set_value +
+        ')에 문의해주세요.',
       );
     }
 
@@ -723,8 +725,8 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', {userIdx: user['idx']});
-        qb.andWhere('`order`.code = :code', {code: code});
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -777,8 +779,8 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', {userIdx: user['idx']});
-        qb.andWhere('`order`.code = :code', {code: code});
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -795,8 +797,8 @@ export class OrderService {
       const site = await this.settingsService.findOne('site_tel');
       throw new NotAcceptableException(
         'order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
-          site.set_value +
-          ')에 문의해주세요.',
+        site.set_value +
+        ')에 문의해주세요.',
       );
     }
 
@@ -865,8 +867,8 @@ export class OrderService {
     await this.orderRepository
       .createQueryBuilder()
       .update(OrderEntity)
-      .set({status: status})
-      .where(' idx = :idx', {idx: idx})
+      .set({ status: status })
+      .where(' idx = :idx', { idx: idx })
       .execute();
   }
 
@@ -886,10 +888,10 @@ export class OrderService {
 
   // 주문 검증
   async orderVerification(createOrderDto: CreateOrderDto) {
-    const {response} = await this.iamportService.getPaymentByImpUid(
+    const { response } = await this.iamportService.getPaymentByImpUid(
       createOrderDto['imp_uid'],
     );
-    const result = {status: true, message: ''};
+    const result = { status: true, message: '' };
 
     // 결제 금액과 DB에 저장될 금액이 동일한지 체크
     if (response['amount'] != createOrderDto['price']) {
@@ -935,7 +937,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {data} = await this.adminFindAll(userInfo, options, search, order);
+    const { data } = await this.adminFindAll(userInfo, options, search, order);
     if (!data) {
       throw new NotFoundException(
         'order.service.excel: 다운로드할 데이터가 없습니다.',
