@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateProductDto {
   @IsOptional()
@@ -8,19 +8,33 @@ export class CreateProductDto {
   readonly idx: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '숙소 상태 <br>(-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)', required: false })
+  @ApiProperty({
+    description: '숙소 상태 <br>(-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)',
+    required: false,
+  })
   readonly status: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '숙소 유형', required: false })
+  @ApiProperty({
+    description:
+      '숙소 유형 <br>(1: 하숙집, 2: 쉐어하우스, 3: 게스트하우스, 4: 홈스테이)',
+    required: false,
+  })
   readonly type: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '멤버쉽 유무(0: 미사용, 1: 사용)', default: 0, required: false })
+  @ApiProperty({
+    description: '멤버쉽 유무(0: 미사용, 1: 사용)',
+    default: 0,
+    required: false,
+  })
   readonly membership: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '사업자 구분 <br>(1: 개인사업자, 2: 법인사업자, 3: 개인)', required: false })
+  @ApiProperty({
+    description: '사업자 구분 <br>(1: 개인사업자, 2: 법인사업자, 3: 개인)',
+    required: false,
+  })
   readonly hostBusiness: string;
   @IsOptional()
   @IsString()
@@ -76,7 +90,13 @@ export class CreateProductDto {
   readonly addr2Chn: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '호스트 사용 언어 <br>(KR: 한국어, EN: 영어, JP: 일어, CH: 중국어)', example: "KR,EN", default: "KR", required: false })
+  @ApiProperty({
+    description:
+      '호스트 사용 언어 <br>(KR: 한국어, EN: 영어, JP: 일어, CH: 중국어)',
+    example: 'KR,EN',
+    default: 'KR',
+    required: false,
+  })
   readonly language: string;
   @IsOptional()
   @IsString()
@@ -115,17 +135,27 @@ export class CreateProductDto {
   readonly userIdx: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '유지될 파일 idx <br> (ex> 33,34)', required: false })
+  @ApiProperty({
+    description: '유지될 파일 idx <br> (ex> 33,34)',
+    required: false,
+  })
   readonly filesIdx: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '생활 및 편의 <br> (ex> 33,34)', required: false })
+  @ApiProperty({
+    description: '생활 및 편의 <br> (ex> 33,34)',
+    required: false,
+  })
   readonly productInfoIdx: string;
 
   @IsOptional()
   @ApiProperty({ format: 'binary', description: '대표 사진', required: false })
   readonly lodgingDetailImg: string[];
   @IsOptional()
-  @ApiProperty({ format: 'binary', description: '식사 서비스 사진', required: false })
+  @ApiProperty({
+    format: 'binary',
+    description: '식사 서비스 사진',
+    required: false,
+  })
   readonly mealsImg: string[];
 }

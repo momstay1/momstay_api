@@ -1,9 +1,9 @@
-import { CollegeEntity } from "src/college/entities/college.entity";
-import { MetroEntity } from "src/metro/entities/metro.entity";
-import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
-import { ProductOptionEntity } from "src/product-option/entities/product-option.entity";
-import { ReviewEntity } from "src/reviews/entities/review.entity";
-import { UsersEntity } from "src/users/entities/user.entity";
+import { CollegeEntity } from 'src/college/entities/college.entity';
+import { MetroEntity } from 'src/metro/entities/metro.entity';
+import { ProductInfoEntity } from 'src/product-info/entities/product-info.entity';
+import { ProductOptionEntity } from 'src/product-option/entities/product-option.entity';
+import { ReviewEntity } from 'src/reviews/entities/review.entity';
+import { UsersEntity } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -13,17 +13,24 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('product')
 export class ProductEntity {
   @PrimaryGeneratedColumn()
   idx: number;
 
-  @Column({ default: 2, comment: '숙소 상태 (-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)' })
+  @Column({
+    default: 2,
+    comment: '숙소 상태 (-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)',
+  })
   status: number;
-  @Column({ default: '' })
+  @Column({
+    default: '',
+    comment:
+      '숙소 유형 (1: 하숙집, 2: 쉐어하우스, 3: 게스트하우스, 4: 홈스테이)',
+  })
   type: string;
   @Column({ default: '' })
   code: string;
@@ -64,9 +71,9 @@ export class ProductEntity {
   @Column({ default: '' })
   addr2Chn: string;
   @Column({ default: '' })
-  lat: string;            // 위도
+  lat: string; // 위도
   @Column({ default: '' })
-  lng: string;            // 경도
+  lng: string; // 경도
   @Column({ default: '' })
   language: string;
   @Column({ type: 'text', default: '' })
@@ -77,13 +84,19 @@ export class ProductEntity {
   detailsJpn: string;
   @Column({ type: 'text', default: '' })
   detailsChn: string;
-  @Column({ default: 0, })
+  @Column({ default: 0 })
   oldIdx: number;
   @Column({ type: 'text', default: '' })
   oldData: string;
   @Column({ default: '', comment: '편의 시설 검색 쉽게 하기 위한 column' })
   productInfoIdxs: string;
-  @Column({ type: "decimal", default: 0.0, precision: 10, scale: 1, comment: '평균 평점' })
+  @Column({
+    type: 'decimal',
+    default: 0.0,
+    precision: 10,
+    scale: 1,
+    comment: '평균 평점',
+  })
   star: number;
   @Column({ default: 0, comment: '리뷰 개수' })
   reviewCount: number;
@@ -95,7 +108,7 @@ export class ProductEntity {
 
   @ManyToOne(() => UsersEntity, (user) => user.product, {
     onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION'
+    onUpdate: 'NO ACTION',
   })
   user: UsersEntity;
 
