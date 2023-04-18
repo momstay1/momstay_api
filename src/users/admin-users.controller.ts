@@ -182,17 +182,6 @@ export class AdminUsersController {
   }
 
   // 회원 정보 가져오기
-  @Get(':idx')
-  @Auth(['root', 'admin'])
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '회원 아이디 조회(index) API' })
-  @ApiOkResponse({ type: ProfileUserDto })
-  async findIdx(@Param('idx') idx: string) {
-    const data = await this.usersService.findIdx(+idx);
-    return data;
-  }
-
-  // 회원 정보 가져오기
   @Get(':id')
   @Auth(['root', 'admin'])
   @ApiBearerAuth()
