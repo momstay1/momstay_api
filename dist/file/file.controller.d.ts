@@ -8,10 +8,12 @@ export declare class FileController {
     constructor(fileService: FileService);
     create(createFileDto: CreateFileDto): string;
     ckeditorUploadImg(file: Express.Multer.File): Promise<any>;
-    uploadImg1(files: Array<Express.Multer.File>): Promise<void>;
+    uploadImg(files: Array<Express.Multer.File>): Promise<{}>;
+    uploadTempImg(files: Array<Express.Multer.File>): Promise<{}>;
+    test(): Promise<void>;
     getFile(name: string, res: any): Promise<any>;
-    downloadFile(name: string, res: any): Promise<void>;
     selectDownloadFile(file: string, res: any): Promise<void>;
+    downloadFile(name: string, res: any): Promise<void>;
     downloadsFile(type: string, place_idx: string, res: any): Promise<void>;
     getFileInfo(category: string, idx: string): Promise<import("lodash").Dictionary<import("./entities/file.entity").FileEntity>>;
     update(id: string, updateFileDto: UpdateFileDto): string;

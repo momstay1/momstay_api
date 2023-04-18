@@ -20,23 +20,23 @@ __decorate([
     __metadata("design:type", Number)
 ], ReservationEntity.prototype, "idx", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1, comment: '방문예약 상태 (1: 예약대기, 2: 예약승인, 4: 예약취소, 5: 예약거부)' }),
+    (0, typeorm_1.Column)({ default: 1, comment: '방문예약 상태 (1: 예약대기, 2: 예약승인, 3: 예약확정, 4: 예약취소, 5: 예약거부)' }),
     __metadata("design:type", Number)
 ], ReservationEntity.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0', comment: '방문날짜' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true, comment: '방문날짜' }),
     __metadata("design:type", Object)
 ], ReservationEntity.prototype, "visitDate", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'time', default: '0', comment: '방문시간' }),
+    (0, typeorm_1.Column)({ type: 'time', default: null, nullable: true, comment: '방문시간' }),
     __metadata("design:type", Object)
 ], ReservationEntity.prototype, "visitTime", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0', comment: '입주날짜' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true, comment: '입주날짜' }),
     __metadata("design:type", Object)
 ], ReservationEntity.prototype, "occupancyAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0', comment: '퇴거날짜' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true, comment: '퇴거날짜' }),
     __metadata("design:type", Object)
 ], ReservationEntity.prototype, "evictionAt", void 0);
 __decorate([

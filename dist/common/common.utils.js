@@ -27,14 +27,15 @@ exports.commonUtils = {
     removePrefix: (str) => {
         const strArr = str.split('_');
         delete strArr[0];
-        return strArr
-            .filter(element => element != null)
-            .join('_');
+        return strArr.filter((element) => element != null).join('_');
     },
     sanitizeEntity: (array, privateElement) => {
         const arr = {};
         for (const key in array) {
-            if ((0, lodash_1.isObject)(array[key]) && (!key.includes('createdAt') && !key.includes('updatedAt') && !key.includes('shooting_day'))) {
+            if ((0, lodash_1.isObject)(array[key]) &&
+                !key.includes('createdAt') &&
+                !key.includes('updatedAt') &&
+                !key.includes('shooting_day')) {
                 arr[key] = exports.commonUtils.sanitizeEntity(array[key], privateElement);
             }
             else {
@@ -56,7 +57,11 @@ exports.commonUtils = {
             .addBearerAuth()
             .build();
         const document = swagger_1.SwaggerModule.createDocument(app, options);
-        swagger_1.SwaggerModule.setup('api-docs', app, document);
+        swagger_1.SwaggerModule.setup('api-docs', app, document, {
+            swaggerOptions: {
+                docExpansion: 'none',
+            },
+        });
     },
     searchSplit(search) {
         const where = {};
@@ -65,11 +70,11 @@ exports.commonUtils = {
             (0, lodash_1.map)(search, (obj) => {
                 if (obj) {
                     const key_val = obj.split(':');
-                    if (key_val[1].indexOf(",") === -1) {
+                    if (key_val[1].indexOf(',') === -1) {
                         where[key_val[0]] = key_val[1];
                     }
                     else {
-                        where[key_val[0]] = key_val[1].split(",");
+                        where[key_val[0]] = key_val[1].split(',');
                     }
                 }
             });
@@ -99,7 +104,7 @@ exports.commonUtils = {
         return +calcTax;
     },
     createCode() {
-        return Math.random().toString(36).substr(2, 11);
+        return Math.random().toString(36).substring(2, 13);
     },
     generateRandomString(num) {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -111,11 +116,13 @@ exports.commonUtils = {
         return result;
     },
     generateRandomNumber(num) {
-        return Math.random().toString().substr(2, num);
+        return Math.random()
+            .toString()
+            .substring(2, num + 2);
     },
     isMobile(agent) {
         const mobileStr = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|iPad/i;
-        return mobileStr.test(agent) ? "mobile" : "pc";
+        return mobileStr.test(agent) ? 'mobile' : 'pc';
     },
     getArrayKey(arr, pks, is_push) {
         const result = {};
@@ -146,7 +153,7 @@ exports.commonUtils = {
                     result[_pk][_sub_pk].push(arr[key]);
                 }
                 else {
-                    if ((0, lodash_1.isObject)(result[_pk]))
+                    if (!(0, lodash_1.isArray)(result[_pk]))
                         result[_pk] = [];
                     result[_pk].push(arr[key]);
                 }
@@ -186,11 +193,85 @@ exports.commonUtils = {
             exchangeRequest: 11,
             exchangeComplete: 12,
         };
+        data['order_status_text'] = {
+            1: '결제대기',
+            2: '결제완료',
+            3: '배송준비',
+            4: '배송중(호스트 승인)',
+            6: '구매확정(입주 확정)',
+        };
+        data['order_product_status_text'] = {
+            1: '결제대기',
+            2: '결제완료',
+            3: '배송준비',
+            4: '배송중(호스트 승인)',
+            6: '구매확정(입주 확정)',
+        };
+        data['user_status_text'] = {
+            0: '회원 삭제',
+            1: '회원 미인증',
+            2: '회원 등록',
+            5: '회원 휴면',
+            9: '회원 탈퇴',
+        };
+        data['user_language_text'] = {
+            ko: '한국어',
+            en: '영어',
+            jp: '일본어',
+            'zh-CN': '중국어',
+        };
+        data['board_status_text'] = {
+            0: '삭제',
+            1: '미등록',
+            2: '등록',
+            3: '답변대기',
+            4: '답변완료',
+        };
+        data['reservation_status_text'] = {
+            1: '예약대기',
+            2: '예약승인',
+            3: '예약확정',
+            4: '예약취소',
+            5: '예약거부',
+        };
+        data['review_status_text'] = {
+            1: '미등록',
+            2: '등록',
+        };
+        data['membership_status_text'] = {
+            1: '신청',
+            2: '승인',
+            3: '종료',
+        };
+        data['product_type_text'] = {
+            1: '하숙집',
+            2: '쉐어하우스',
+            3: '게스트하우스',
+            4: '홈스테이',
+        };
+        data['product_status_text'] = {
+            0: '미등록',
+            1: '미사용',
+            2: '사용',
+        };
+        data['product_membership_text'] = {
+            0: '-',
+            1: '이용',
+        };
+        data['product_option_status_text'] = {
+            0: '미등록',
+            1: '미사용',
+            2: '사용',
+        };
+        data['product_option_stayStatus_text'] = {
+            1: '공실',
+            2: '만실',
+        };
         data['app_topic'] = {
             all: 'all',
             marketing: 'marketing',
             service: 'service',
-            admin: 'admin'
+            admin: 'admin',
         };
         return (0, lodash_1.get)(data, key, '');
     },
@@ -199,6 +280,28 @@ exports.commonUtils = {
     },
     isRoot(groupId) {
         return ['root'].includes(groupId);
-    }
+    },
+    langValue(lang) {
+        let result = '';
+        switch (lang) {
+            case 'eng':
+            case 'en':
+                result = 'Eng';
+                break;
+            case 'jp':
+            case 'ja':
+                result = 'Jpn';
+                break;
+            case 'ch':
+            case 'cn':
+            case 'zh-CN':
+                result = 'Chn';
+                break;
+        }
+        return result;
+    },
+    formatPrice(price) {
+        return new Intl.NumberFormat().format(price);
+    },
 };
 //# sourceMappingURL=common.utils.js.map

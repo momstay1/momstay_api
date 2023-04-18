@@ -10,12 +10,19 @@ exports.UserLeaveModule = void 0;
 const common_1 = require("@nestjs/common");
 const user_leave_service_1 = require("./user-leave.service");
 const user_leave_controller_1 = require("./user-leave.controller");
+const typeorm_1 = require("@nestjs/typeorm");
+const user_leave_entity_1 = require("./entities/user-leave.entity");
+const admin_user_leave_controller_1 = require("./admin-user-leave.controller");
 let UserLeaveModule = class UserLeaveModule {
 };
 UserLeaveModule = __decorate([
     (0, common_1.Module)({
-        controllers: [user_leave_controller_1.UserLeaveController],
-        providers: [user_leave_service_1.UserLeaveService]
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([user_leave_entity_1.UserLeaveEntity])
+        ],
+        controllers: [user_leave_controller_1.UserLeaveController, admin_user_leave_controller_1.AdminUserLeaveController],
+        providers: [user_leave_service_1.UserLeaveService],
+        exports: [user_leave_service_1.UserLeaveService]
     })
 ], UserLeaveModule);
 exports.UserLeaveModule = UserLeaveModule;

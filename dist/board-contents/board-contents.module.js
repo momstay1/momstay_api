@@ -20,6 +20,7 @@ const notice_contents_controller_1 = require("./notice-contents.controller");
 const admin_users_module_1 = require("../admin-users/admin-users.module");
 const groups_module_1 = require("../groups/groups.module");
 const admin_board_contents_controller_1 = require("./admin-board-contents.controller");
+const excel_service_1 = require("../excel/excel.service");
 let BoardContentsModule = class BoardContentsModule {
 };
 BoardContentsModule = __decorate([
@@ -31,11 +32,15 @@ BoardContentsModule = __decorate([
             board_selected_categories_module_1.BoardSelectedCategoriesModule,
             board_categories_module_1.BoardCategoriesModule,
             admin_users_module_1.AdminUsersModule,
-            groups_module_1.GroupsModule
+            groups_module_1.GroupsModule,
         ],
-        controllers: [board_contents_controller_1.BoardContentsController, admin_board_contents_controller_1.AdminBoardContentsController, notice_contents_controller_1.NoticeContentsController],
-        providers: [board_contents_service_1.BoardContentsService],
-        exports: [board_contents_service_1.BoardContentsService]
+        controllers: [
+            board_contents_controller_1.BoardContentsController,
+            admin_board_contents_controller_1.AdminBoardContentsController,
+            notice_contents_controller_1.NoticeContentsController,
+        ],
+        providers: [board_contents_service_1.BoardContentsService, excel_service_1.ExcelService],
+        exports: [board_contents_service_1.BoardContentsService],
     })
 ], BoardContentsModule);
 exports.BoardContentsModule = BoardContentsModule;

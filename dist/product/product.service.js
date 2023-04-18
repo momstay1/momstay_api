@@ -26,14 +26,20 @@ const product_info_service_1 = require("../product-info/product-info.service");
 const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const product_entity_1 = require("./entities/product.entity");
+const excel_service_1 = require("../excel/excel.service");
+const deleteStatus = -1;
+const unregisteredStatus = 0;
+const notUsedStatus = 1;
+const registrationStatus = 2;
 let ProductService = class ProductService {
-    constructor(productRepository, fileService, productInfoService, userService, metroService, collegeService) {
+    constructor(productRepository, fileService, productInfoService, userService, metroService, collegeService, excelService) {
         this.productRepository = productRepository;
         this.fileService = fileService;
         this.productInfoService = productInfoService;
         this.userService = userService;
         this.metroService = metroService;
         this.collegeService = collegeService;
+        this.excelService = excelService;
     }
     async test(id) {
         const code = await this.productCreateCode();
@@ -44,9 +50,9 @@ let ProductService = class ProductService {
         let productInfo;
         let product_info_idxs;
         if ((0, lodash_1.get)(createProductDto, 'productInfoIdx', '')) {
-            const productInfoIdx = (0, lodash_1.get)(createProductDto, 'productInfoIdx').split(",");
+            const productInfoIdx = (0, lodash_1.get)(createProductDto, 'productInfoIdx').split(',');
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
-            product_info_idxs = (0, lodash_1.sortBy)((0, lodash_1.map)(productInfoIdx, o => +o));
+            product_info_idxs = (0, lodash_1.sortBy)((0, lodash_1.map)(productInfoIdx, (o) => +o));
         }
         let prd;
         if ((0, lodash_1.get)(createProductDto, 'idx', '')) {
@@ -63,7 +69,7 @@ let ProductService = class ProductService {
         let college = [];
         if ((0, lodash_1.get)(createProductDto, 'metro', '')) {
             try {
-                const metro_idxs = (0, lodash_1.map)((0, lodash_1.get)(createProductDto, 'metro').split(','), o => +o);
+                const metro_idxs = (0, lodash_1.map)((0, lodash_1.get)(createProductDto, 'metro').split(','), (o) => +o);
                 metro = await this.metroService.findAllIdx(metro_idxs);
             }
             catch (error) {
@@ -72,7 +78,7 @@ let ProductService = class ProductService {
         }
         if ((0, lodash_1.get)(createProductDto, 'college', '')) {
             try {
-                const college_idxs = (0, lodash_1.map)((0, lodash_1.get)(createProductDto, 'college').split(','), o => +o);
+                const college_idxs = (0, lodash_1.map)((0, lodash_1.get)(createProductDto, 'college').split(','), (o) => +o);
                 college = await this.collegeService.findAllIdx(college_idxs);
             }
             catch (error) {
@@ -86,7 +92,7 @@ let ProductService = class ProductService {
             college: college,
             user: user,
             productInfo: productInfo,
-            productInfoIdxs: ''
+            productInfoIdxs: '',
         };
         if (prd) {
             product_data['order'] = prd['order'];
@@ -161,11 +167,11 @@ let ProductService = class ProductService {
             console.log('-----------------------파일 제거-----------------------');
             console.log({ fileIdx });
             try {
-                const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["lodgingDetailImg", "mealsImg"], "" + product['idx']), (o) => "" + o.file_idx);
+                const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(['lodgingDetailImg', 'mealsImg'], '' + product['idx']), (o) => '' + o.file_idx);
                 console.log({ productFileIdxs });
-                fileIdxs = fileIdx.split(",");
+                fileIdxs = fileIdx.split(',');
                 console.log({ fileIdxs });
-                const delFileIdxs = productFileIdxs.filter(o => !fileIdxs.includes(o));
+                const delFileIdxs = productFileIdxs.filter((o) => !fileIdxs.includes(o));
                 console.log({ delFileIdxs });
                 if (delFileIdxs.length > 0) {
                     await this.fileService.removes(delFileIdxs);
@@ -181,7 +187,7 @@ let ProductService = class ProductService {
             console.log({ files });
             new_file = await this.fileService.fileInfoInsert(files, product['idx']);
             console.log({ new_file });
-            fileIdxs = (0, lodash_1.union)(fileIdxs, ...(0, lodash_1.map)(new_file[product['idx']], (obj) => (0, lodash_1.map)(obj, o => "" + o.file_idx)));
+            fileIdxs = (0, lodash_1.union)(fileIdxs, ...(0, lodash_1.map)(new_file[product['idx']], (obj) => (0, lodash_1.map)(obj, (o) => '' + o.file_idx)));
             console.log({ fileIdxs });
         }
         let file_info;
@@ -194,9 +200,11 @@ let ProductService = class ProductService {
         return { product, file_info };
     }
     async productCreateCode() {
-        const code = common_utils_1.commonUtils.generateRandomString(8).toUpperCase() + '-' + common_utils_1.commonUtils.generateRandomNumber(4);
+        const code = common_utils_1.commonUtils.generateRandomString(8).toUpperCase() +
+            '-' +
+            common_utils_1.commonUtils.generateRandomNumber(4);
         const isCode = await this.productRepository.findOne({
-            where: { code: code }
+            where: { code: code },
         });
         if (isCode) {
             this.productCreateCode();
@@ -205,28 +213,53 @@ let ProductService = class ProductService {
             return code;
         }
     }
-    async findAll(options, search) {
+    async findAll(options, search, order) {
         const { take, page } = options;
         const where = common_utils_1.commonUtils.searchSplit(search);
+        where['status'] = (0, lodash_1.get)(where, 'status', [registrationStatus]);
         if ((0, lodash_1.get)(where, 'product_info', '')) {
-            const product_info = (0, lodash_1.sortBy)((0, lodash_1.map)((0, lodash_1.get)(where, 'product_info'), o => +o));
+            const product_info = (0, lodash_1.sortBy)((0, lodash_1.map)((0, lodash_1.get)(where, 'product_info'), (o) => +o));
             where['product_info'] = product_info.join('%');
         }
-        where['status'] = (0, lodash_1.get)(where, 'status', '2');
-        console.log({ where });
-        const [results, total] = await this.productRepository.createQueryBuilder('product')
+        const alias = 'product';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
+        const [results, total] = await this.productRepository
+            .createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
             .leftJoinAndSelect('product.productInfo', 'product_info')
             .leftJoinAndSelect('product.metro', 'metro')
             .leftJoinAndSelect('product.college', 'college')
             .where((qb) => {
-            qb.where('`product`.status IN (:status)', { status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'status')) ? (0, lodash_1.get)(where, 'status') : [(0, lodash_1.get)(where, 'status')] });
-            ((0, lodash_1.get)(where, 'membership', '')) && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
-            ((0, lodash_1.get)(where, 'user_idx', '')) && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
-            ((0, lodash_1.get)(where, 'stayStatus', '')) && qb.andWhere('`product_option`.`stayStatus` = :stayStatus', { stayStatus: (0, lodash_1.get)(where, 'stayStatus') });
-            ((0, lodash_1.get)(where, 'min_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', { min_priceMonth: +(0, lodash_1.get)(where, 'min_priceMonth') });
-            ((0, lodash_1.get)(where, 'max_priceMonth', '')) && qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', { max_priceMonth: +(0, lodash_1.get)(where, 'max_priceMonth') });
-            ((0, lodash_1.get)(where, 'product_info', '')) && qb.andWhere('`product`.productInfoIdxs LIKE :product_info', { product_info: '%' + (0, lodash_1.get)(where, 'product_info') + '%' });
+            qb.where('`product`.status IN (:status)', {
+                status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'status'))
+                    ? (0, lodash_1.get)(where, 'status')
+                    : [(0, lodash_1.get)(where, 'status')],
+            });
+            (0, lodash_1.get)(where, 'membership', '') &&
+                qb.andWhere('`product`.`membership` = :membership', {
+                    membership: (0, lodash_1.get)(where, 'membership'),
+                });
+            (0, lodash_1.get)(where, 'user_idx', '') &&
+                qb.andWhere('`product`.`userIdx` = :user_idx', {
+                    user_idx: (0, lodash_1.get)(where, 'user_idx'),
+                });
+            (0, lodash_1.get)(where, 'stayStatus', '') &&
+                qb.andWhere('`product_option`.`stayStatus` = :stayStatus', {
+                    stayStatus: (0, lodash_1.get)(where, 'stayStatus'),
+                });
+            (0, lodash_1.get)(where, 'min_priceMonth', '') &&
+                qb.andWhere('`product_option`.`priceMonth` >= :min_priceMonth', {
+                    min_priceMonth: +(0, lodash_1.get)(where, 'min_priceMonth'),
+                });
+            (0, lodash_1.get)(where, 'max_priceMonth', '') &&
+                qb.andWhere('`product_option`.`priceMonth` <= :max_priceMonth', {
+                    max_priceMonth: +(0, lodash_1.get)(where, 'max_priceMonth'),
+                });
+            (0, lodash_1.get)(where, 'product_info', '') &&
+                qb.andWhere('`product`.productInfoIdxs LIKE :product_info', {
+                    product_info: '%' + (0, lodash_1.get)(where, 'product_info') + '%',
+                });
             if ((0, lodash_1.get)(where, 'keyword', '')) {
                 qb.andWhere('(' +
                     '`product`.`title` LIKE :keyword' +
@@ -254,10 +287,11 @@ let ProductService = class ProductService {
                 });
             }
         })
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .orderBy(order_by)
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
-        const product_idxs = (0, lodash_1.map)(results, o => o.idx);
+        const product_idxs = (0, lodash_1.map)(results, (o) => o.idx);
         let file_info = await this.getFileInfo(product_idxs);
         const data = new paginate_1.Pagination({
             results,
@@ -266,19 +300,52 @@ let ProductService = class ProductService {
         });
         return { data, file_info };
     }
-    async adminFindAll(options, search) {
+    async adminFindAll(options, search, order) {
         const { take, page } = options;
         const where = common_utils_1.commonUtils.searchSplit(search);
-        const [results, total] = await this.productRepository.createQueryBuilder('product')
+        where['status'] = (0, lodash_1.get)(where, 'status', [
+            unregisteredStatus,
+            notUsedStatus,
+            registrationStatus,
+        ]);
+        const alias = 'product';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
+        const [results, total] = await this.productRepository
+            .createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
             .leftJoinAndSelect('product.productInfo', 'product_info')
             .leftJoinAndSelect('product.user', 'user')
             .leftJoinAndSelect('product.metro', 'metro')
             .leftJoinAndSelect('product.college', 'college')
             .where((qb) => {
-            qb.where('`product`.status IN (:status)', { status: (0, lodash_1.get)(where, 'status', ['2']) });
-            (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'membership') });
-            (0, lodash_1.get)(where, 'user_idx', '') && qb.andWhere('`product`.`userIdx` = :user_idx', { user_idx: (0, lodash_1.get)(where, 'user_idx') });
+            qb.where('`product`.status IN (:status)', {
+                status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'status'))
+                    ? (0, lodash_1.get)(where, 'status')
+                    : [(0, lodash_1.get)(where, 'status')],
+            });
+            (0, lodash_1.get)(where, 'membership', '') &&
+                qb.andWhere('`product`.`membership` = :membership', {
+                    membership: (0, lodash_1.get)(where, 'membership'),
+                });
+            (0, lodash_1.get)(where, 'title', '') &&
+                qb.andWhere('`product`.title LIKE :title', {
+                    title: '%' + (0, lodash_1.get)(where, 'title') + '%',
+                });
+            (0, lodash_1.get)(where, 'type', '') &&
+                qb.andWhere('`product`.type IN (:type)', {
+                    type: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'type'))
+                        ? (0, lodash_1.get)(where, 'type')
+                        : [(0, lodash_1.get)(where, 'type')],
+                });
+            (0, lodash_1.get)(where, 'name', '') &&
+                qb.andWhere('`user`.name LIKE :name', {
+                    name: '%' + (0, lodash_1.get)(where, 'name') + '%',
+                });
+            (0, lodash_1.get)(where, 'id', '') &&
+                qb.andWhere('`user`.id LIKE :id', {
+                    id: '%' + (0, lodash_1.get)(where, 'id') + '%',
+                });
             if ((0, lodash_1.get)(where, 'keyword', '')) {
                 qb.andWhere('(' +
                     '`product`.`title` LIKE :keyword' +
@@ -297,10 +364,11 @@ let ProductService = class ProductService {
                 });
             }
         })
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .orderBy(order_by)
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
-        const product_idxs = (0, lodash_1.map)(results, o => o.idx);
+        const product_idxs = (0, lodash_1.map)(results, (o) => o.idx);
         let file_info = await this.getFileInfo(product_idxs);
         const data = new paginate_1.Pagination({
             results,
@@ -310,7 +378,8 @@ let ProductService = class ProductService {
         return { data, file_info };
     }
     async findIdxAll(idx) {
-        const product = await this.productRepository.createQueryBuilder('product')
+        const product = await this.productRepository
+            .createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
             .leftJoinAndSelect('product.productInfo', 'product_info')
             .where((qb) => {
@@ -320,7 +389,8 @@ let ProductService = class ProductService {
         return product;
     }
     async findAllUser(userIdx) {
-        const products = await this.productRepository.createQueryBuilder('product')
+        const products = await this.productRepository
+            .createQueryBuilder('product')
             .leftJoinAndSelect('product.productOption', 'product_option')
             .leftJoinAndSelect('product.productInfo', 'product_info')
             .leftJoinAndSelect('product.user', 'user')
@@ -355,14 +425,14 @@ let ProductService = class ProductService {
     }
     async findOneIdx(idx) {
         if (!idx) {
-            throw new exceptions_1.NotFoundException('잘못된 정보 입니다.');
+            throw new exceptions_1.NotFoundException('product.service.findOneIdx: 잘못된 정보 입니다.');
         }
         const product = await this.productRepository.findOne({
             where: { idx: idx },
-            relations: ['productInfo', 'user', 'metro', 'college']
+            relations: ['productInfo', 'user', 'metro', 'college'],
         });
         if (!(0, lodash_1.get)(product, 'idx', '')) {
-            throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new exceptions_1.NotFoundException('product.service.findOneIdx: 정보를 찾을 수 없습니다.');
         }
         return product;
     }
@@ -370,23 +440,56 @@ let ProductService = class ProductService {
         return `This action updates a #${id} product`;
     }
     async updateAverageStar(idx, { star, reviewCount }) {
-        await this.productRepository.createQueryBuilder()
+        await this.productRepository
+            .createQueryBuilder()
             .update(product_entity_1.ProductEntity)
             .set({ star, reviewCount })
-            .where(" idx = :idx", { idx: idx })
+            .where(' idx = :idx', { idx: idx })
             .execute();
     }
     async updateMembership(userIdx, membershipStatus) {
         const products = await this.findAllUser(userIdx);
-        const productIdxs = (0, lodash_1.map)(products, o => o['idx']);
-        await this.productRepository.createQueryBuilder()
+        const productIdxs = (0, lodash_1.map)(products, (o) => o['idx']);
+        await this.productRepository
+            .createQueryBuilder()
             .update(product_entity_1.ProductEntity)
             .set({ membership: membershipStatus })
-            .where(" idx IN (:idx)", { idx: productIdxs })
+            .where(' idx IN (:idx)', { idx: productIdxs })
             .execute();
     }
-    remove(id) {
-        return `This action removes a #${id} product`;
+    async hostRemove(userIinfo, idx) {
+        if (!common_utils_1.commonUtils.isAdmin(userIinfo.group)) {
+            const user = await this.userService.findId(userIinfo.id);
+            const product = await this.findOneIdx(idx);
+            if (user.idx != product.user.idx) {
+                throw new exceptions_1.NotAcceptableException('product.service.hostRemove: 삭제 권한이 없습니다.');
+            }
+        }
+        await this.remove(idx);
+    }
+    async remove(idx) {
+        await this.productRepository
+            .createQueryBuilder()
+            .update(product_entity_1.ProductEntity)
+            .set({ status: deleteStatus })
+            .where(' idx = :idx', { idx: idx })
+            .execute();
+    }
+    async dashboard() {
+        const product = await this.productRepository
+            .createQueryBuilder()
+            .select('SUM(IF(`membership` IN (1) AND `status` = 2, 1, 0))', 'total_cnt')
+            .execute();
+        return product;
+    }
+    async createExcel(options, search, order) {
+        const { data } = await this.adminFindAll(options, search, order);
+        if (!data) {
+            throw new exceptions_1.NotFoundException('product.service.excel: 다운로드할 데이터가 없습니다.');
+        }
+        return this.excelService.createExcel(data, {
+            type: 'product',
+        });
     }
 };
 ProductService = __decorate([
@@ -397,7 +500,8 @@ ProductService = __decorate([
         product_info_service_1.ProductInfoService,
         users_service_1.UsersService,
         metro_service_1.MetroService,
-        college_service_1.CollegeService])
+        college_service_1.CollegeService,
+        excel_service_1.ExcelService])
 ], ProductService);
 exports.ProductService = ProductService;
 //# sourceMappingURL=product.service.js.map

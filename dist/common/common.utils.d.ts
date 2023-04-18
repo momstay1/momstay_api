@@ -1,4 +1,4 @@
-import { INestApplication } from "@nestjs/common";
+import { INestApplication } from '@nestjs/common';
 export declare const commonUtils: {
     getConstants: (str: string) => any;
     getPrefix: (str: string) => string;
@@ -18,4 +18,6 @@ export declare const commonUtils: {
     getStatus(key: string | string[]): any;
     isAdmin(groupId: string): boolean;
     isRoot(groupId: string): boolean;
+    langValue(lang: any): string;
+    formatPrice(price: any): string;
 };

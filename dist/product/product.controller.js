@@ -21,6 +21,7 @@ const swagger_1 = require("@nestjs/swagger");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const platform_express_1 = require("@nestjs/platform-express");
 const common_file_1 = require("../common/common.file");
+const getuser_decorator_1 = require("../auth/getuser.decorator");
 let ProductController = class ProductController {
     constructor(productService) {
         this.productService = productService;
@@ -32,8 +33,8 @@ let ProductController = class ProductController {
     async create(createProductDto, files) {
         return await this.productService.create(createProductDto, files);
     }
-    async findAll(take, page, search) {
-        const { data, file_info } = await this.productService.findAll({ take, page }, search);
+    async findAll(take, page, search, order) {
+        const { data, file_info } = await this.productService.findAll({ take, page }, search, order);
         return Object.assign(Object.assign({}, data), { file_info });
     }
     async findOne(idx) {
@@ -42,8 +43,8 @@ let ProductController = class ProductController {
     update(id, updateProductDto) {
         return this.productService.update(+id, updateProductDto);
     }
-    remove(id) {
-        return this.productService.remove(+id);
+    remove(user, idx) {
+        return this.productService.hostRemove(user, +idx);
     }
 };
 __decorate([
@@ -80,18 +81,24 @@ __decorate([
         description: 'search=membership:(0|1)<br>'
             + 'search=keyword:메인검색<br>'
             + 'search=user_idx:회원idx<br>'
-            + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>'
+            + 'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>'
             + 'search=stayStatus:상태값(1:공실|2:만실)<br>'
             + 'search=min_priceMonth:월 최소 가격<br>'
             + 'search=max_priceMonth:월 최대 가격<br>'
             + 'search=product_info:편의시설 idx(2,3,4)<br>',
         required: false
     }),
+    (0, swagger_1.ApiQuery)({
+        name: "order",
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false
+    }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
     __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, Array]),
+    __metadata("design:paramtypes", [Number, Number, Array, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findAll", null);
 __decorate([
@@ -111,10 +118,15 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProductController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(':idx'),
+    (0, swagger_1.ApiOperation)({ summary: '숙소 삭제 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('idx')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ProductController.prototype, "remove", null);
 ProductController = __decorate([

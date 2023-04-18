@@ -97,11 +97,11 @@ __decorate([
     __metadata("design:type", String)
 ], OrderProductEntity.prototype, "cancelReason", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true }),
     __metadata("design:type", String)
 ], OrderProductEntity.prototype, "startAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true }),
     __metadata("design:type", String)
 ], OrderProductEntity.prototype, "endAt", void 0);
 __decorate([

@@ -7,12 +7,14 @@ import { Repository } from 'typeorm';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ReviewEntity } from './entities/review.entity';
+import { ExcelService } from 'src/excel/excel.service';
 export declare class ReviewsService {
     private reviewRepository;
     private readonly productService;
     private readonly userService;
     private readonly fileService;
-    constructor(reviewRepository: Repository<ReviewEntity>, productService: ProductService, userService: UsersService, fileService: FileService);
+    private readonly excelService;
+    constructor(reviewRepository: Repository<ReviewEntity>, productService: ProductService, userService: UsersService, fileService: FileService, excelService: ExcelService);
     create(userInfo: UsersEntity, createReviewDto: CreateReviewDto, files: any): Promise<{
         review: ReviewEntity;
         file_info: any;
@@ -20,6 +22,10 @@ export declare class ReviewsService {
     findAll(): string;
     findAllIdxs(idxs: []): Promise<ReviewEntity[]>;
     findAllProduct(idx: number, options: PaginationOptions, search: string[], order: string): Promise<{
+        data: Pagination<ReviewEntity>;
+        file_info: {};
+    }>;
+    adminFindAllProduct(options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<ReviewEntity>;
         file_info: {};
     }>;
@@ -37,6 +43,11 @@ export declare class ReviewsService {
         review: ReviewEntity;
         file_info: any;
     }>;
-    remove(id: number): string;
-    statusUpdate(idxs: [], userInfo: UsersEntity): Promise<void>;
+    starChange(idxs: [], star: string): Promise<void>;
+    statusChange(idxs: [], status: string): Promise<void>;
+    remove(idxs: [], userInfo: UsersEntity): Promise<void>;
+    createExcel(options: PaginationOptions, search: string[], order: string): Promise<{
+        file_name: string;
+        file_path: string;
+    }>;
 }

@@ -24,28 +24,41 @@ const common_file_1 = require("../common/common.file");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const response_err_dto_1 = require("../error/dto/response-err.dto");
 const response_error_dto_1 = require("../error/dto/response-error.dto");
-const create_user_dto_1 = require("./dto/create-user.dto");
 const delete_user_dto_1 = require("./dto/delete-user.dto");
 const login_user_dto_1 = require("./dto/login-user.dto");
 const profile_user_dto_1 = require("./dto/profile-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const users_service_1 = require("./users.service");
+const create_admin_user_dto_1 = require("./dto/create-admin-user.dto");
 const user_entity_1 = require("./entities/user.entity");
+const fs_1 = require("fs");
 let AdminUsersController = class AdminUsersController {
     constructor(authService, usersService) {
         this.authService = authService;
         this.usersService = usersService;
     }
-    async create(createUserDto, files) {
-        const user = await this.usersService.create(createUserDto, files);
+    async create(createAdminUserDto, files) {
+        const user = await this.usersService.create(createAdminUserDto, files);
         return user;
     }
     async login(user) {
         return this.authService.login(user, ['root', 'admin']);
     }
-    async findAll(user, take, page, search) {
-        const data = await this.usersService.findAll(user, { take, page }, search);
+    async findAll(user, take, page, search, order) {
+        const data = await this.usersService.findAll(user, { take, page }, search, order);
         return Object.assign({}, data);
+    }
+    async excelDownload(user, take, page, search, order, res) {
+        const excel_file = await this.usersService.createExcel(user, { take, page }, search, order);
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="' + excel_file.file_name + '"',
+        });
+        (0, fs_1.createReadStream)(excel_file.file_path).pipe(res);
+    }
+    async findIdx(idx) {
+        const data = await this.usersService.findIdx(+idx);
+        return data;
     }
     async findId(id) {
         const data = await this.usersService.findId(id);
@@ -65,14 +78,12 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_생성 API' }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({ type: response_error_dto_1.ResponseErrorDto }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
-        { name: 'profile', maxCount: 1 },
-    ], (0, common_file_1.multerOptions)())),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'profile', maxCount: 1 }], (0, common_file_1.multerOptions)())),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto,
+    __metadata("design:paramtypes", [create_admin_user_dto_1.CreateAdminUserDto,
         Array]),
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "create", null);
@@ -91,32 +102,83 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원 리스트 API' }),
     (0, swagger_1.ApiQuery)({
-        name: "search",
-        description: 'search=group:그룹인덱스1,그룹인덱스2<br>'
-            + 'search=id:아이디<br>'
-            + 'search=name:이름<br>'
-            + 'search=email:이메일<br>'
-            + 'search=phone:연락처<br>'
-            + 'search=birthday:생일<br>'
-            + 'search=createdAt_mte:시작날짜<br>'
-            + 'search=createdAt_lte:종료날짜<br>',
-        required: false
+        name: 'search',
+        description: 'search=group:그룹인덱스1,그룹인덱스2<br>' +
+            'search=id:아이디<br>' +
+            'search=name:이름<br>' +
+            'search=email:이메일<br>' +
+            'search=phone:연락처<br>' +
+            'search=birthday:생일<br>' +
+            'search=language:가입언어<br>' +
+            'search=createdAt_mte:시작날짜<br>' +
+            'search=createdAt_lte:종료날짜<br>',
+        required: false,
     }),
-    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({
+        name: 'order',
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false,
+    }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('page')),
     __param(3, (0, common_1.Query)('search')),
+    __param(4, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number, Array]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number, Array, String]),
     __metadata("design:returntype", Promise)
 ], AdminUsersController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('excel'),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '관리자_엑셀 다운로드 API' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'search',
+        description: 'search=group:그룹인덱스1,그룹인덱스2<br>' +
+            'search=id:아이디<br>' +
+            'search=name:이름<br>' +
+            'search=email:이메일<br>' +
+            'search=phone:연락처<br>' +
+            'search=birthday:생일<br>' +
+            'search=createdAt_mte:시작날짜<br>' +
+            'search=createdAt_lte:종료날짜<br>',
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'order',
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false,
+    }),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Query)('take')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('search')),
+    __param(4, (0, common_1.Query)('order')),
+    __param(5, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number, Array, String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminUsersController.prototype, "excelDownload", null);
+__decorate([
+    (0, common_1.Get)(':idx'),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '회원 아이디 조회(index) API' }),
+    (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
+    __param(0, (0, common_1.Param)('idx')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminUsersController.prototype, "findIdx", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, role_decorator_1.Auth)(['root', 'admin']),
-    (0, swagger_1.ApiOperation)({ summary: '회원 아이디 조회 API' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: '회원 아이디 조회(아이디) API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -126,12 +188,11 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보수정 API' }),
     (0, swagger_1.ApiOkResponse)({ type: profile_user_dto_1.ProfileUserDto }),
     (0, swagger_1.ApiBody)({ type: update_user_dto_1.UpdateUserDto }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
-        { name: 'profile', maxCount: 1 },
-    ], (0, common_file_1.multerOptions)())),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'profile', maxCount: 1 }], (0, common_file_1.multerOptions)())),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -144,6 +205,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(),
     (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: '관리자_회원정보삭제 API' }),
     (0, swagger_1.ApiBody)({ type: delete_user_dto_1.DeleteUserDto }),
     (0, common_1.HttpCode)(204),
@@ -154,7 +216,7 @@ __decorate([
 ], AdminUsersController.prototype, "remove", null);
 AdminUsersController = __decorate([
     (0, common_1.Controller)('admin/users'),
-    (0, swagger_1.ApiTags)('관리자 유저 API'),
+    (0, swagger_1.ApiTags)('유저(관리자) API'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         users_service_1.UsersService])
 ], AdminUsersController);

@@ -21,6 +21,7 @@ const boards_module_1 = require("./boards/boards.module");
 const board_contents_module_1 = require("./board-contents/board-contents.module");
 const groups_module_1 = require("./groups/groups.module");
 const file_module_1 = require("./file/file.module");
+const dashboard_module_1 = require("./dashboard/dashboard.module");
 const settings_module_1 = require("./settings/settings.module");
 const user_sns_module_1 = require("./user-sns/user-sns.module");
 const login_module_1 = require("./login/login.module");
@@ -53,6 +54,9 @@ const banner_module_1 = require("./banner/banner.module");
 const banner_item_module_1 = require("./banner-item/banner-item.module");
 const block_module_1 = require("./block/block.module");
 const report_cumulative_module_1 = require("./report-cumulative/report-cumulative.module");
+const popup_module_1 = require("./popup/popup.module");
+const message_module_1 = require("./message/message.module");
+const excel_module_1 = require("./excel/excel.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('/**');
@@ -91,6 +95,7 @@ AppModule = __decorate([
             metro_module_1.MetroModule,
             college_module_1.CollegeModule,
             refresh_token_module_1.RefreshTokenModule,
+            dashboard_module_1.DashboardModule,
             settings_module_1.SettingsModule,
             wishlist_module_1.WishlistModule,
             push_notification_module_1.PushNotificationModule,
@@ -110,6 +115,9 @@ AppModule = __decorate([
             banner_item_module_1.BannerItemModule,
             block_module_1.BlockModule,
             report_cumulative_module_1.ReportCumulativeModule,
+            popup_module_1.PopupModule,
+            message_module_1.MessageModule,
+            excel_module_1.ExcelModule
         ],
         providers: [common_service_1.CommonService, iamport_service_1.IamportService],
     })

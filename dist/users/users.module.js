@@ -23,6 +23,9 @@ const email_module_1 = require("../email/email.module");
 const refresh_token_module_1 = require("../refresh-token/refresh-token.module");
 const iamport_service_1 = require("../iamport/iamport.service");
 const device_module_1 = require("../device/device.module");
+const user_leave_module_1 = require("../user-leave/user-leave.module");
+const user_dormant_module_1 = require("../user-dormant/user-dormant.module");
+const excel_service_1 = require("../excel/excel.service");
 let UsersModule = class UsersModule {
 };
 UsersModule = __decorate([
@@ -37,9 +40,11 @@ UsersModule = __decorate([
             login_module_1.LoginModule,
             refresh_token_module_1.RefreshTokenModule,
             device_module_1.DeviceModule,
+            user_leave_module_1.UserLeaveModule,
+            user_dormant_module_1.UserDormantModule,
         ],
         controllers: [users_controller_1.UsersController, admin_users_controller_1.AdminUsersController],
-        providers: [users_service_1.UsersService, common_service_1.CommonService, iamport_service_1.IamportService],
+        providers: [users_service_1.UsersService, common_service_1.CommonService, iamport_service_1.IamportService, excel_service_1.ExcelService],
         exports: [users_service_1.UsersService],
     })
 ], UsersModule);

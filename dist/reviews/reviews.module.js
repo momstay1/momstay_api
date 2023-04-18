@@ -15,6 +15,8 @@ const typeorm_1 = require("@nestjs/typeorm");
 const product_module_1 = require("../product/product.module");
 const users_module_1 = require("../users/users.module");
 const file_module_1 = require("../file/file.module");
+const admin_reviews_controller_1 = require("./admin-reviews.controller");
+const excel_service_1 = require("../excel/excel.service");
 let ReviewsModule = class ReviewsModule {
 };
 ReviewsModule = __decorate([
@@ -23,11 +25,11 @@ ReviewsModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([review_entity_1.ReviewEntity]),
             product_module_1.ProductModule,
             users_module_1.UsersModule,
-            file_module_1.FileModule
+            file_module_1.FileModule,
         ],
-        controllers: [reviews_controller_1.ReviewsController],
-        providers: [reviews_service_1.ReviewsService],
-        exports: [reviews_service_1.ReviewsService]
+        controllers: [reviews_controller_1.ReviewsController, admin_reviews_controller_1.AdminReviewsController],
+        providers: [reviews_service_1.ReviewsService, excel_service_1.ExcelService],
+        exports: [reviews_service_1.ReviewsService],
     })
 ], ReviewsModule);
 exports.ReviewsModule = ReviewsModule;

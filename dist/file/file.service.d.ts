@@ -8,7 +8,8 @@ export declare class FileService {
     private fileRepository;
     constructor(fileRepository: Repository<FileEntity>);
     create(createFileDto: CreateFileDto): string;
-    uploadImg(files: Express.Multer.File[]): Promise<void>;
+    uploadImg(files: Express.Multer.File[]): Promise<{}>;
+    uploadTempImg(files: Express.Multer.File[]): Promise<{}>;
     ckeditorUploadImg(file: Express.Multer.File): Promise<any>;
     findAll(): string;
     findOneName(name: string): Promise<FileEntity>;
@@ -28,10 +29,12 @@ export declare class FileService {
     deleteStorageFile(files: any): Promise<void>;
     deleteFile(files: any): Promise<void>;
     fileInfoInsert(files: any, foreign_idx: any): Promise<{}>;
-    uploadStorage(file: any): Promise<void>;
+    uploadStorage(file: any, file_data: any): Promise<void>;
     isImage(type: any): 0 | 1;
     private imageZip;
     sharpFile(file: any): Promise<void>;
+    fileWatermark(file_data: any): Promise<void>;
     removeByRequest(dto: any, idx: number, category: string[]): Promise<any[]>;
     createByRequest(files: any, idx: number): Promise<any[]>;
+    fileDownload(): Promise<void>;
 }

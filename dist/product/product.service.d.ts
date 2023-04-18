@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
+import { ExcelService } from 'src/excel/excel.service';
 export declare class ProductService {
     private productRepository;
     private readonly fileService;
@@ -15,18 +16,19 @@ export declare class ProductService {
     private readonly userService;
     private readonly metroService;
     private readonly collegeService;
-    constructor(productRepository: Repository<ProductEntity>, fileService: FileService, productInfoService: ProductInfoService, userService: UsersService, metroService: MetroService, collegeService: CollegeService);
+    private readonly excelService;
+    constructor(productRepository: Repository<ProductEntity>, fileService: FileService, productInfoService: ProductInfoService, userService: UsersService, metroService: MetroService, collegeService: CollegeService, excelService: ExcelService);
     test(id: any): Promise<string>;
     create(createProductDto: CreateProductDto, files: any): Promise<{
         product: ProductEntity;
         file_info: any;
     }>;
     productCreateCode(): Promise<string>;
-    findAll(options: PaginationOptions, search: string[]): Promise<{
+    findAll(options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<ProductEntity>;
         file_info: {};
     }>;
-    adminFindAll(options: PaginationOptions, search: string[]): Promise<{
+    adminFindAll(options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<ProductEntity>;
         file_info: {};
     }>;
@@ -48,5 +50,11 @@ export declare class ProductService {
         reviewCount: any;
     }): Promise<void>;
     updateMembership(userIdx: number, membershipStatus: string): Promise<void>;
-    remove(id: number): string;
+    hostRemove(userIinfo: any, idx: number): Promise<void>;
+    remove(idx: number): Promise<void>;
+    dashboard(): Promise<any>;
+    createExcel(options: PaginationOptions, search: string[], order: string): Promise<{
+        file_name: string;
+        file_path: string;
+    }>;
 }

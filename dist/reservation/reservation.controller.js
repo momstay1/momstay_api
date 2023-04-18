@@ -38,6 +38,12 @@ let ReservationController = class ReservationController {
     async findOne(idx) {
         return await this.reservationService.findOne(+idx);
     }
+    async guestConfirmation(user, idx) {
+        return await this.reservationService.guestConfirmation(user, +idx);
+    }
+    async hostApproval(user, idx) {
+        return await this.reservationService.hostApproval(user, +idx);
+    }
     async update(user, idx) {
         return await this.reservationService.update(user, +idx);
     }
@@ -98,8 +104,30 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ReservationController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)(':idx'),
+    (0, common_1.Patch)('guest/:idx'),
+    (0, swagger_1.ApiOperation)({ summary: '방문 예약 확정(게스트) API' }),
+    (0, role_decorator_1.Auth)(['Any']),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('idx')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String]),
+    __metadata("design:returntype", Promise)
+], ReservationController.prototype, "guestConfirmation", null);
+__decorate([
+    (0, common_1.Patch)('host/:idx'),
     (0, swagger_1.ApiOperation)({ summary: '방문 예약 승인(호스트) API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
+    (0, swagger_1.ApiBearerAuth)(),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('idx')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, String]),
+    __metadata("design:returntype", Promise)
+], ReservationController.prototype, "hostApproval", null);
+__decorate([
+    (0, common_1.Patch)(':idx'),
+    (0, swagger_1.ApiOperation)({ summary: '방문 예약 승인(호스트) API (제거 예정)' }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, getuser_decorator_1.GetUser)()),

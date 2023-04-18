@@ -16,14 +16,19 @@ export declare class PushNotificationService {
     private readonly userService;
     constructor(pushHistoryRepository: Repository<PushHistoryEntity>, http: HttpService, userService: UsersService);
     sendPush(target: any, notification: any): Promise<any>;
-    historySave(response: any, userInfo?: UsersEntity): Promise<void>;
+    historySave(response: any, userInfo?: UsersEntity): Promise<PushHistoryEntity>;
     private sendFcmMessage;
     private getAccessToken;
-    create(createPushNotificationDto: CreatePushNotificationDto): string;
+    create(createPushNotificationDto: CreatePushNotificationDto): Promise<{
+        pushHistory: PushHistoryEntity;
+    }>;
     findAll(options: PaginationOptions, search: string[], order: string, userInfo?: UsersEntity): Promise<{
         data: Pagination<PushHistoryEntity>;
     }>;
-    findOne(id: number): string;
+    adminFindAll(options: PaginationOptions, search: string[], order: string): Promise<{
+        data: Pagination<PushHistoryEntity>;
+    }>;
+    findOne(idx: number): Promise<PushHistoryEntity>;
     update(id: number, updatePushNotificationDto: UpdatePushNotificationDto): string;
     remove(id: number): string;
     isApp(device: DeviceEntity): Promise<boolean>;
@@ -33,6 +38,8 @@ export declare class PushNotificationService {
     hostOrderApprovalPush(guestUser: UsersEntity, order: OrderEntity): Promise<void>;
     guestReservationPush(hostUser: UsersEntity, po: ProductOptionEntity): Promise<void>;
     guestReservationCancelPush(hostUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
+    guestReservationConfirmationPush(hostUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
     hostReservationCancelPush(guestUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
     hostReservationApprovalPush(guestUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
+    adminReservationStatusChange(guestUser: UsersEntity, hostUser: UsersEntity, reservation: ReservationEntity): Promise<void>;
 }

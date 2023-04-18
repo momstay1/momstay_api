@@ -32,12 +32,27 @@ let FileController = class FileController {
     async ckeditorUploadImg(file) {
         return await this.fileService.ckeditorUploadImg(file);
     }
-    async uploadImg1(files) {
+    async uploadImg(files) {
+        console.log(files);
         return this.fileService.uploadImg(files);
+    }
+    async uploadTempImg(files) {
+        return this.fileService.uploadTempImg(files);
+    }
+    async test() {
+        await this.fileService.fileDownload();
     }
     async getFile(name, res) {
         const file = await this.fileService.findOneName(name);
         return res.sendFile(file.file_full_path);
+    }
+    async selectDownloadFile(file, res) {
+        const files = await this.fileService.findIndexsZip(file.split(','));
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',
+        });
+        (0, fs_1.createReadStream)(files.file_path).pipe(res);
     }
     async downloadFile(name, res) {
         console.log({ name });
@@ -47,14 +62,6 @@ let FileController = class FileController {
             'Content-Disposition': 'attachment; filename="' + encodeURI(file.file_orig_name) + '"',
         });
         (0, fs_1.createReadStream)(file.file_full_path).pipe(res);
-    }
-    async selectDownloadFile(file, res) {
-        const files = await this.fileService.findIndexsZip(file.split(','));
-        res.set({
-            'Content-Type': 'application/json',
-            'Content-Disposition': 'attachment; filename="' + encodeURI(files.file_name) + '"',
-        });
-        (0, fs_1.createReadStream)(files.file_path).pipe(res);
     }
     async downloadsFile(type, place_idx, res) {
     }
@@ -84,16 +91,31 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "ckeditorUploadImg", null);
 __decorate([
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
-        { name: 'img', maxCount: 10 },
-    ], (0, common_file_1.multerOptions)())),
+    (0, common_1.Post)('upload'),
+    (0, swagger_1.ApiOperation)({ summary: '이미지 업로드 API' }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.AnyFilesInterceptor)((0, common_file_1.multerOptions)())),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, common_1.Post)('upload1'),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
-], FileController.prototype, "uploadImg1", null);
+], FileController.prototype, "uploadImg", null);
+__decorate([
+    (0, common_1.Post)('upload/temp'),
+    (0, swagger_1.ApiOperation)({ summary: '임시 파일 업로드 API' }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.AnyFilesInterceptor)((0, common_file_1.multerOptions)())),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    __param(0, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "uploadTempImg", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "test", null);
 __decorate([
     (0, common_1.Get)('img/:name'),
     (0, swagger_1.ApiOperation)({ summary: '이미지 파일 API' }),
@@ -104,15 +126,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "getFile", null);
 __decorate([
-    (0, common_1.Get)('download/:name'),
-    (0, swagger_1.ApiOperation)({ summary: '이미지 파일 다운로드 API' }),
-    __param(0, (0, common_1.Param)('name')),
-    __param(1, (0, common_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], FileController.prototype, "downloadFile", null);
-__decorate([
     (0, common_1.Get)('downloads/select'),
     (0, swagger_1.ApiOperation)({ summary: '선택 이미지 파일 다운로드 API' }),
     __param(0, (0, common_1.Query)('file')),
@@ -121,6 +134,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "selectDownloadFile", null);
+__decorate([
+    (0, common_1.Get)('download/:name'),
+    (0, swagger_1.ApiOperation)({ summary: '이미지 파일 다운로드 API' }),
+    __param(0, (0, common_1.Param)('name')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "downloadFile", null);
 __decorate([
     (0, common_1.Get)('downloads/:type/:place_idx'),
     (0, swagger_1.ApiOperation)({ summary: '현장이미지 파일 전체 다운로드 API' }),
@@ -161,6 +183,7 @@ __decorate([
 ], FileController.prototype, "remove", null);
 FileController = __decorate([
     (0, common_1.Controller)('file'),
+    (0, swagger_1.ApiTags)('파일 API'),
     __metadata("design:paramtypes", [file_service_1.FileService])
 ], FileController);
 exports.FileController = FileController;

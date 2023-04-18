@@ -79,6 +79,17 @@ let OrderTotalService = class OrderTotalService {
     remove(id) {
         return `This action removes a #${id} orderTotal`;
     }
+    async dashboard(month) {
+        const orderTotal_cnt = await this.orderTotalRepository.createQueryBuilder('orderTotal')
+            .select('SUM(orderTotal.`payPrice`)', 'total_pay_price')
+            .leftJoin('order', 'order', '`orderTotal`.orderIdx = `order`.`idx`')
+            .where(qb => {
+            qb.where('DATE_FORMAT(orderTotal.`createdAt`, "%Y-%m") = :month', { month: month });
+            qb.andWhere('order.status IN (:status)', { status: [2, 3, 4, 6] });
+        })
+            .execute();
+        return orderTotal_cnt;
+    }
 };
 OrderTotalService = __decorate([
     (0, common_1.Injectable)(),

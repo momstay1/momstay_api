@@ -18,6 +18,7 @@ const users_module_1 = require("../users/users.module");
 const admin_product_controller_1 = require("./admin-product.controller");
 const metro_module_1 = require("../metro/metro.module");
 const college_module_1 = require("../college/college.module");
+const excel_service_1 = require("../excel/excel.service");
 let ProductModule = class ProductModule {
 };
 ProductModule = __decorate([
@@ -31,7 +32,7 @@ ProductModule = __decorate([
             college_module_1.CollegeModule,
         ],
         controllers: [product_controller_1.ProductController, admin_product_controller_1.AdminProductController],
-        providers: [product_service_1.ProductService],
+        providers: [product_service_1.ProductService, excel_service_1.ExcelService],
         exports: [product_service_1.ProductService]
     })
 ], ProductModule);

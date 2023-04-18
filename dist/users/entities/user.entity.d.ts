@@ -40,5 +40,7 @@ export declare class UsersEntity {
     group: GroupsEntity;
     createdAt: Date;
     updatedAt: Date;
+    activitedAt: Date;
     leaveAt: Date;
+    hostAt: Date;
 }

@@ -25,6 +25,7 @@ const board_contents_service_1 = require("./board-contents.service");
 const create_board_content_dto_1 = require("./dto/create-board-content.dto");
 const update_board_content_dto_1 = require("./dto/update-board-content.dto");
 const board_content_entity_1 = require("./entities/board-content.entity");
+const fs_1 = require("fs");
 let AdminBoardContentsController = class AdminBoardContentsController {
     constructor(boardContentsService) {
         this.boardContentsService = boardContentsService;
@@ -41,9 +42,17 @@ let AdminBoardContentsController = class AdminBoardContentsController {
     async typeChange(statusChange) {
         await this.boardContentsService.typeChange(statusChange);
     }
-    async findCategoryAll(bd_idx, category, take, page, order) {
-        const { bc, bcats } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, order);
+    async findCategoryAll(bd_idx, category, take, page, search, order) {
+        const { bc, bcats } = await this.boardContentsService.adminFindCategoryAll(bd_idx, category, { take, page }, search, order);
         return Object.assign({ bcats }, bc);
+    }
+    async excelDownload(bd_idx, category, take, page, search, order, res) {
+        const excel_file = await this.boardContentsService.createExcel(bd_idx, category, { take, page }, search, order);
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="' + excel_file.file_name + '"',
+        });
+        (0, fs_1.createReadStream)(excel_file.file_path).pipe(res);
     }
     async findOne(bd_idx, bc_idx) {
         const bc = await this.boardContentsService.findBdBcIndex(bc_idx);
@@ -64,7 +73,8 @@ __decorate([
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UsersEntity, create_board_content_dto_1.CreateBoardContentDto]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity,
+        create_board_content_dto_1.CreateBoardContentDto]),
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "create", null);
 __decorate([
@@ -77,9 +87,9 @@ __decorate([
         schema: {
             properties: {
                 status: { type: 'string' },
-                bc_idxs: { example: [] }
-            }
-        }
+                bc_idxs: { example: [] },
+            },
+        },
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -96,9 +106,9 @@ __decorate([
         schema: {
             properties: {
                 type: { type: 'string' },
-                bc_idxs: { example: [] }
-            }
-        }
+                bc_idxs: { example: [] },
+            },
+        },
     }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -106,20 +116,54 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "typeChange", null);
 __decorate([
-    (0, common_1.Get)(':bd_idx'),
+    (0, common_1.Get)('/:bd_idx'),
     (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 리스트 API' }),
     (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
-    (0, swagger_1.ApiQuery)({ name: "category", required: false }),
-    (0, swagger_1.ApiQuery)({ name: "order", required: false }),
+    (0, swagger_1.ApiQuery)({
+        name: 'search',
+        description: '' +
+            'search=status:상태검색 (0: 삭제, 1:미등록 2: 등록, 3:답변대기, 4: 답변완료<br>' +
+            'search=name:작성자명<br>' +
+            'search=id:작성자 id<br>',
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'category', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'order', required: false }),
     __param(0, (0, common_1.Param)('bd_idx')),
     __param(1, (0, common_1.Query)('category')),
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('page')),
-    __param(4, (0, common_1.Query)('order')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number, String]),
+    __metadata("design:paramtypes", [String, String, Number, Number, Array, String]),
     __metadata("design:returntype", Promise)
 ], AdminBoardContentsController.prototype, "findCategoryAll", null);
+__decorate([
+    (0, common_1.Get)(':bd_idx/excel'),
+    (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 리스트 엑셀 다운로드 API' }),
+    (0, swagger_1.ApiCreatedResponse)({ type: board_content_entity_1.BoardContentsEntity }),
+    (0, swagger_1.ApiQuery)({
+        name: 'search',
+        description: '' +
+            'search=status:상태검색 (0: 삭제, 1:미등록 2: 등록, 3:답변대기, 4: 답변완료<br>' +
+            'search=name:작성자명<br>' +
+            'search=id:작성자 id<br>',
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'category', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'order', required: false }),
+    __param(0, (0, common_1.Param)('bd_idx')),
+    __param(1, (0, common_1.Query)('category')),
+    __param(2, (0, common_1.Query)('take')),
+    __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('order')),
+    __param(6, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Number, Number, Array, String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminBoardContentsController.prototype, "excelDownload", null);
 __decorate([
     (0, common_1.Get)(':bd_idx/:bc_idx'),
     (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 상세 API' }),
@@ -134,7 +178,7 @@ __decorate([
     (0, common_1.Patch)(':bc_idx'),
     (0, swagger_1.ApiOperation)({ summary: '관리자 게시글 수정 API' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, role_decorator_1.Auth)(['root']),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Param)('bc_idx')),
     __param(2, (0, common_1.Body)()),
@@ -144,7 +188,7 @@ __decorate([
 ], AdminBoardContentsController.prototype, "update", null);
 AdminBoardContentsController = __decorate([
     (0, common_1.Controller)('admin/board-contents'),
-    (0, swagger_1.ApiTags)('관리자 게시글 API'),
+    (0, swagger_1.ApiTags)('게시글(관리자) API'),
     __metadata("design:paramtypes", [board_contents_service_1.BoardContentsService])
 ], AdminBoardContentsController);
 exports.AdminBoardContentsController = AdminBoardContentsController;

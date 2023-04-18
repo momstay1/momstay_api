@@ -9,10 +9,11 @@ export declare class AdminMembershipController {
         total: number;
         page: number;
     }>;
+    excelDownload(take: number, page: number, search: string[], order: string, res: any): Promise<void>;
     findOne(idx: string): Promise<{
         membership: import("./entities/membership-history.entity").MembershipHistoryEntity;
     }>;
-    membershipApproval(idx: string, updateMembershipDto: UpdateMembershipDto): Promise<{
+    membershipStatusChange(idx: string, updateMembershipDto: UpdateMembershipDto): Promise<{
         membership: import("./entities/membership-history.entity").MembershipHistoryEntity;
     }>;
     remove(id: string): string;

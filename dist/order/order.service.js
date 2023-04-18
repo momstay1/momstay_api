@@ -26,11 +26,13 @@ const order_product_service_1 = require("../order-product/order-product.service"
 const order_total_service_1 = require("../order-total/order-total.service");
 const iamport_service_1 = require("../iamport/iamport.service");
 const pg_data_service_1 = require("../pg-data/pg-data.service");
-const moment = require("moment");
+const excel_service_1 = require("../excel/excel.service");
 const paginate_1 = require("../paginate");
 const push_notification_service_1 = require("../push-notification/push-notification.service");
+const moment = require("moment");
+const settings_service_1 = require("../settings/settings.service");
 let OrderService = class OrderService {
-    constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService) {
+    constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService, settingsService, excelService) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.usersService = usersService;
@@ -41,6 +43,8 @@ let OrderService = class OrderService {
         this.iamportService = iamportService;
         this.pgDataService = pgDataService;
         this.pushNotiService = pushNotiService;
+        this.settingsService = settingsService;
+        this.excelService = excelService;
     }
     async create(userInfo, createOrderDto, req) {
         const ord_data = {};
@@ -103,13 +107,16 @@ let OrderService = class OrderService {
         }
         else {
             ord_data['idx'] = createOrderDto['idx'];
-            const order = await this.orderRepository.findOne({ idx: ord_data['idx'] });
+            const order = await this.orderRepository.findOne({
+                idx: ord_data['idx'],
+            });
             if (order['status'] >= 1) {
-                throw new common_1.BadRequestException('이미 처리된 주문입니다.');
+                throw new common_1.BadRequestException('order.service.create: 이미 처리된 주문입니다.');
             }
-            if (createOrderDto['status'] == 2 && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
+            if (createOrderDto['status'] == 2 &&
+                ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
                 if (!(0, lodash_1.get)(createOrderDto, 'imp_uid', '')) {
-                    throw new common_1.NotFoundException('imp_uid 정보가 없습니다.');
+                    throw new common_1.NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
                 }
                 const pg_data = await this.orderVerification(createOrderDto);
                 await this.pgDataService.create(order['code'], pg_data);
@@ -132,7 +139,7 @@ let OrderService = class OrderService {
     async ordCreateCode() {
         const code = moment().format('YYMMDD') + common_utils_1.commonUtils.createCode().toUpperCase();
         const isCode = await this.orderRepository.findOne({
-            where: { code: code }
+            where: { code: code },
         });
         if (isCode) {
             this.ordCreateCode();
@@ -140,6 +147,98 @@ let OrderService = class OrderService {
         else {
             return code;
         }
+    }
+    async adminFindAll(userInfo, options, search, order) {
+        const { take, page } = options;
+        const user = await this.usersService.findId(userInfo.id);
+        const where = common_utils_1.commonUtils.searchSplit(search);
+        where['status'] = (0, lodash_1.get)(where, 'status', (0, lodash_1.values)(common_utils_1.commonUtils.getStatus(['order_status'])));
+        const alias = 'order';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
+        console.log({ order_by });
+        const [results, total] = await this.orderRepository
+            .createQueryBuilder('order')
+            .leftJoinAndSelect('order.user', 'guestUser')
+            .leftJoinAndSelect('order.orderProduct', 'orderProduct')
+            .leftJoinAndSelect('orderProduct.productOption', 'productOption')
+            .leftJoinAndSelect('productOption.product', 'product')
+            .leftJoinAndSelect('product.user', 'hostUser')
+            .where((qb) => {
+            qb.where('`order`.status IN (:status)', {
+                status: (0, lodash_1.isArray)(where['status'])
+                    ? where['status']
+                    : [where['status']],
+            });
+            (0, lodash_1.get)(where, 'code', '') &&
+                qb.andWhere('`order`.code IN (:code)', {
+                    code: (0, lodash_1.isArray)(where['code']) ? where['code'] : [where['code']],
+                });
+            (0, lodash_1.get)(where, 'imp_uid', '') &&
+                qb.andWhere('`order`.imp_uid IN (:imp_uid)', {
+                    imp_uid: (0, lodash_1.isArray)(where['imp_uid'])
+                        ? where['imp_uid']
+                        : [where['imp_uid']],
+                });
+            (0, lodash_1.get)(where, 'payment', '') &&
+                qb.andWhere('`order`.payment IN (:payment)', {
+                    payment: (0, lodash_1.isArray)(where['payment'])
+                        ? where['payment']
+                        : [where['payment']],
+                });
+            (0, lodash_1.get)(where, 'clientName', '') &&
+                qb.andWhere('`guestUser`.name LIKE :name', {
+                    name: '%' + where['clientName'] + '%',
+                });
+            (0, lodash_1.get)(where, 'clientId', '') &&
+                qb.andWhere('`guestUser`.id LIKE :clientId', {
+                    clientId: '%' + where['clientId'] + '%',
+                });
+            (0, lodash_1.get)(where, 'productTitle', '') &&
+                qb.andWhere('`orderProduct`.title LIKE :productTitle', {
+                    productTitle: '%' + where['productTitle'] + '%',
+                });
+            (0, lodash_1.get)(where, 'bank', '') &&
+                qb.andWhere('`order`.bank IN (:bank)', {
+                    bank: (0, lodash_1.isArray)(where['bank']) ? where['bank'] : [where['bank']],
+                });
+            (0, lodash_1.get)(where, 'account', '') &&
+                qb.andWhere('`order`.account IN (:account)', {
+                    account: (0, lodash_1.isArray)(where['account'])
+                        ? where['account']
+                        : [where['account']],
+                });
+            (0, lodash_1.get)(where, 'depositer', '') &&
+                qb.andWhere('`order`.depositer IN (:depositer)', {
+                    depositer: (0, lodash_1.isArray)(where['depositer'])
+                        ? where['depositer']
+                        : [where['depositer']],
+                });
+            (0, lodash_1.get)(where, 'remitter', '') &&
+                qb.andWhere('`order`.remitter IN (:remitter)', {
+                    remitter: (0, lodash_1.isArray)(where['remitter'])
+                        ? where['remitter']
+                        : [where['remitter']],
+                });
+            (0, lodash_1.get)(where, 'min_paiedAt', '') &&
+                qb.andWhere('`order`.paiedAt >= :min_paiedAt', {
+                    min_paiedAt: where['min_paiedAt'],
+                });
+            (0, lodash_1.get)(where, 'max_paiedAt', '') &&
+                qb.andWhere('`order`.paiedAt <= :max_paiedAt', {
+                    max_paiedAt: where['max_paiedAt'],
+                });
+        })
+            .orderBy(order_by)
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
+            .getManyAndCount();
+        const data = new paginate_1.Pagination({
+            results,
+            total,
+            page,
+        });
+        return { data };
     }
     async guestFindAll(userInfo, options, search, order) {
         const { take, page } = options;
@@ -150,37 +249,70 @@ let OrderService = class OrderService {
         let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
         order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
         console.log({ order_by });
-        const [results, total] = await this.orderRepository.createQueryBuilder('order')
+        const [results, total] = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.user', 'guestUser')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'hostUser')
-            .where(qb => {
-            qb.where('`order`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
-            (0, lodash_1.get)(where, 'code', '')
-                && qb.andWhere('`order`.code IN (:code)', { code: (0, lodash_1.isArray)(where['code']) ? where['code'] : [where['code']] });
-            (0, lodash_1.get)(where, 'imp_uid', '')
-                && qb.andWhere('`order`.imp_uid IN (:imp_uid)', { imp_uid: (0, lodash_1.isArray)(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
-            (0, lodash_1.get)(where, 'payment', '')
-                && qb.andWhere('`order`.payment IN (:payment)', { payment: (0, lodash_1.isArray)(where['payment']) ? where['payment'] : [where['payment']] });
-            (0, lodash_1.get)(where, 'clientName', '')
-                && qb.andWhere('`order`.clientName IN (:clientName)', { clientName: (0, lodash_1.isArray)(where['clientName']) ? where['clientName'] : [where['clientName']] });
-            (0, lodash_1.get)(where, 'bank', '')
-                && qb.andWhere('`order`.bank IN (:bank)', { bank: (0, lodash_1.isArray)(where['bank']) ? where['bank'] : [where['bank']] });
-            (0, lodash_1.get)(where, 'account', '')
-                && qb.andWhere('`order`.account IN (:account)', { account: (0, lodash_1.isArray)(where['account']) ? where['account'] : [where['account']] });
-            (0, lodash_1.get)(where, 'depositer', '')
-                && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: (0, lodash_1.isArray)(where['depositer']) ? where['depositer'] : [where['depositer']] });
-            (0, lodash_1.get)(where, 'remitter', '')
-                && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: (0, lodash_1.isArray)(where['remitter']) ? where['remitter'] : [where['remitter']] });
+            .where((qb) => {
+            qb.where('`order`.status IN (:status)', {
+                status: (0, lodash_1.isArray)(where['status'])
+                    ? where['status']
+                    : [where['status']],
+            });
+            (0, lodash_1.get)(where, 'code', '') &&
+                qb.andWhere('`order`.code IN (:code)', {
+                    code: (0, lodash_1.isArray)(where['code']) ? where['code'] : [where['code']],
+                });
+            (0, lodash_1.get)(where, 'imp_uid', '') &&
+                qb.andWhere('`order`.imp_uid IN (:imp_uid)', {
+                    imp_uid: (0, lodash_1.isArray)(where['imp_uid'])
+                        ? where['imp_uid']
+                        : [where['imp_uid']],
+                });
+            (0, lodash_1.get)(where, 'payment', '') &&
+                qb.andWhere('`order`.payment IN (:payment)', {
+                    payment: (0, lodash_1.isArray)(where['payment'])
+                        ? where['payment']
+                        : [where['payment']],
+                });
+            (0, lodash_1.get)(where, 'clientName', '') &&
+                qb.andWhere('`order`.clientName IN (:clientName)', {
+                    clientName: (0, lodash_1.isArray)(where['clientName'])
+                        ? where['clientName']
+                        : [where['clientName']],
+                });
+            (0, lodash_1.get)(where, 'bank', '') &&
+                qb.andWhere('`order`.bank IN (:bank)', {
+                    bank: (0, lodash_1.isArray)(where['bank']) ? where['bank'] : [where['bank']],
+                });
+            (0, lodash_1.get)(where, 'account', '') &&
+                qb.andWhere('`order`.account IN (:account)', {
+                    account: (0, lodash_1.isArray)(where['account'])
+                        ? where['account']
+                        : [where['account']],
+                });
+            (0, lodash_1.get)(where, 'depositer', '') &&
+                qb.andWhere('`order`.depositer IN (:depositer)', {
+                    depositer: (0, lodash_1.isArray)(where['depositer'])
+                        ? where['depositer']
+                        : [where['depositer']],
+                });
+            (0, lodash_1.get)(where, 'remitter', '') &&
+                qb.andWhere('`order`.remitter IN (:remitter)', {
+                    remitter: (0, lodash_1.isArray)(where['remitter'])
+                        ? where['remitter']
+                        : [where['remitter']],
+                });
             if (['host', 'guest'].includes(user['group']['id'])) {
                 qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
             }
         })
             .orderBy(order_by)
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
         const data = new paginate_1.Pagination({
             results,
@@ -198,37 +330,70 @@ let OrderService = class OrderService {
         let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
         order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
         console.log({ order_by });
-        const [results, total] = await this.orderRepository.createQueryBuilder('order')
+        const [results, total] = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.user', 'guestUser')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'hostUser')
-            .where(qb => {
-            qb.where('`order`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
-            (0, lodash_1.get)(where, 'code', '')
-                && qb.andWhere('`order`.code IN (:code)', { code: (0, lodash_1.isArray)(where['code']) ? where['code'] : [where['code']] });
-            (0, lodash_1.get)(where, 'imp_uid', '')
-                && qb.andWhere('`order`.imp_uid IN (:imp_uid)', { imp_uid: (0, lodash_1.isArray)(where['imp_uid']) ? where['imp_uid'] : [where['imp_uid']] });
-            (0, lodash_1.get)(where, 'payment', '')
-                && qb.andWhere('`order`.payment IN (:payment)', { payment: (0, lodash_1.isArray)(where['payment']) ? where['payment'] : [where['payment']] });
-            (0, lodash_1.get)(where, 'clientName', '')
-                && qb.andWhere('`order`.clientName IN (:clientName)', { clientName: (0, lodash_1.isArray)(where['clientName']) ? where['clientName'] : [where['clientName']] });
-            (0, lodash_1.get)(where, 'bank', '')
-                && qb.andWhere('`order`.bank IN (:bank)', { bank: (0, lodash_1.isArray)(where['bank']) ? where['bank'] : [where['bank']] });
-            (0, lodash_1.get)(where, 'account', '')
-                && qb.andWhere('`order`.account IN (:account)', { account: (0, lodash_1.isArray)(where['account']) ? where['account'] : [where['account']] });
-            (0, lodash_1.get)(where, 'depositer', '')
-                && qb.andWhere('`order`.depositer IN (:depositer)', { depositer: (0, lodash_1.isArray)(where['depositer']) ? where['depositer'] : [where['depositer']] });
-            (0, lodash_1.get)(where, 'remitter', '')
-                && qb.andWhere('`order`.remitter IN (:remitter)', { remitter: (0, lodash_1.isArray)(where['remitter']) ? where['remitter'] : [where['remitter']] });
+            .where((qb) => {
+            qb.where('`order`.status IN (:status)', {
+                status: (0, lodash_1.isArray)(where['status'])
+                    ? where['status']
+                    : [where['status']],
+            });
+            (0, lodash_1.get)(where, 'code', '') &&
+                qb.andWhere('`order`.code IN (:code)', {
+                    code: (0, lodash_1.isArray)(where['code']) ? where['code'] : [where['code']],
+                });
+            (0, lodash_1.get)(where, 'imp_uid', '') &&
+                qb.andWhere('`order`.imp_uid IN (:imp_uid)', {
+                    imp_uid: (0, lodash_1.isArray)(where['imp_uid'])
+                        ? where['imp_uid']
+                        : [where['imp_uid']],
+                });
+            (0, lodash_1.get)(where, 'payment', '') &&
+                qb.andWhere('`order`.payment IN (:payment)', {
+                    payment: (0, lodash_1.isArray)(where['payment'])
+                        ? where['payment']
+                        : [where['payment']],
+                });
+            (0, lodash_1.get)(where, 'clientName', '') &&
+                qb.andWhere('`order`.clientName IN (:clientName)', {
+                    clientName: (0, lodash_1.isArray)(where['clientName'])
+                        ? where['clientName']
+                        : [where['clientName']],
+                });
+            (0, lodash_1.get)(where, 'bank', '') &&
+                qb.andWhere('`order`.bank IN (:bank)', {
+                    bank: (0, lodash_1.isArray)(where['bank']) ? where['bank'] : [where['bank']],
+                });
+            (0, lodash_1.get)(where, 'account', '') &&
+                qb.andWhere('`order`.account IN (:account)', {
+                    account: (0, lodash_1.isArray)(where['account'])
+                        ? where['account']
+                        : [where['account']],
+                });
+            (0, lodash_1.get)(where, 'depositer', '') &&
+                qb.andWhere('`order`.depositer IN (:depositer)', {
+                    depositer: (0, lodash_1.isArray)(where['depositer'])
+                        ? where['depositer']
+                        : [where['depositer']],
+                });
+            (0, lodash_1.get)(where, 'remitter', '') &&
+                qb.andWhere('`order`.remitter IN (:remitter)', {
+                    remitter: (0, lodash_1.isArray)(where['remitter'])
+                        ? where['remitter']
+                        : [where['remitter']],
+                });
             if (user['group']['id'] == 'host') {
                 qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
             }
         })
             .orderBy(order_by)
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
         const data = new paginate_1.Pagination({
             results,
@@ -237,18 +402,38 @@ let OrderService = class OrderService {
         });
         return { data };
     }
+    async findOneIdxByAdmin(idx) {
+        if (!idx) {
+            throw new common_1.NotFoundException('order.service.findOneIdxByAdmin: 잘못된 정보 입니다.');
+        }
+        const order = await this.orderRepository.findOne({
+            where: { idx: idx },
+            relations: [
+                'user',
+                'orderProduct',
+                'orderProduct.productOption',
+                'orderProduct.productOption.product',
+                'orderProduct.productOption.product.user',
+            ],
+        });
+        if (!(0, lodash_1.get)(order, 'idx', '')) {
+            throw new common_1.NotFoundException('order.service.findOneIdxByAdmin: 정보를 찾을 수 없습니다.');
+        }
+        return { order };
+    }
     async findOneIdxByGuest(userInfo, idx) {
         if (!idx) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('order.service.findOneIdxByGuest: 잘못된 정보 입니다.');
         }
         const user = await this.usersService.findId(userInfo['id']);
-        const order = await this.orderRepository.createQueryBuilder('order')
+        const order = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.user', 'guestUser')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'hostUser')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`order`.idx = :idx', { idx: idx });
             if (!['root', 'admin'].includes(user['group']['id'])) {
                 qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
@@ -256,22 +441,23 @@ let OrderService = class OrderService {
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('order.service.findOneIdxByGuest: 정보를 찾을 수 없습니다.');
         }
         return { order };
     }
     async findOneIdxByHost(userInfo, idx) {
         if (!idx) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('order.service.findOneIdxByHost: 잘못된 정보 입니다.');
         }
         const user = await this.usersService.findId(userInfo['id']);
-        const order = await this.orderRepository.createQueryBuilder('order')
+        const order = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.user', 'guestUser')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'hostUser')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`order`.idx = :idx', { idx: idx });
             if (!['root', 'admin'].includes(user['group']['id'])) {
                 qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
@@ -279,13 +465,13 @@ let OrderService = class OrderService {
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('order.service.findOneIdxByHost: 정보를 찾을 수 없습니다.');
         }
         return { order };
     }
     async findOneIdx(idx) {
         if (!idx) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('order.service.findOneIdx: 잘못된 정보 입니다.');
         }
         const order = await this.orderRepository.findOne({
             where: { idx: idx },
@@ -296,30 +482,31 @@ let OrderService = class OrderService {
                 'orderProduct.productOption',
                 'orderProduct.productOption.product',
                 'orderProduct.productOption.product.user',
-                'orderProduct.productOption.product.user.device'
-            ]
+                'orderProduct.productOption.product.user.device',
+            ],
         });
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('order.service.findOneIdx: 정보를 찾을 수 없습니다.');
         }
         return order;
     }
     async findOneCodeByNonmember(code) {
         if (!code) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('order.service.findOneCodeByNonmember: 잘못된 정보 입니다.');
         }
-        const order = await this.orderRepository.createQueryBuilder('order')
+        const order = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.user', 'guestUser')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'hostUser')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`order`.code = :code', { code: code });
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('order.service.findOneCodeByNonmember: 정보를 찾을 수 없습니다.');
         }
         return { order };
     }
@@ -328,21 +515,32 @@ let OrderService = class OrderService {
     }
     async guestOrderCancel(code, userInfo) {
         if (!code) {
-            throw new common_1.NotFoundException('취소할 정보가 없습니다.');
+            throw new common_1.NotFoundException('order.service.guestOrderCancel: 취소할 정보가 없습니다.');
         }
         const user = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
-        const order = await this.orderRepository.createQueryBuilder('order')
+        const order = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.user', 'user')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
             qb.andWhere('`order`.code = :code', { code: code });
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('취소할 주문이 없습니다.');
+            throw new common_1.NotFoundException('order.service.guestOrderCancel: 취소할 주문이 없습니다.');
+        }
+        const today = moment().format('YYYY-MM-DD');
+        const ago20day = moment(order.orderProduct[0].startAt)
+            .add(-20, 'day')
+            .format('YYYY-MM-DD');
+        if (today > ago20day) {
+            const site = await this.settingsService.findOne('site_tel');
+            throw new common_1.NotAcceptableException('order.service.guestOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
+                site.set_value +
+                ')에 문의해주세요.');
         }
         const cancelReason = '게스트 취소';
         await this.cancelProcess(order, cancelReason);
@@ -354,25 +552,26 @@ let OrderService = class OrderService {
     }
     async hostOrderApproval(code, userInfo) {
         if (!code) {
-            throw new common_1.NotFoundException('변경할 정보가 없습니다.');
+            throw new common_1.NotFoundException('order.service.hostOrderApproval: 변경할 정보가 없습니다.');
         }
         const user = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
-        const order = await this.orderRepository.createQueryBuilder('order')
+        const order = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'user')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
             qb.andWhere('`order`.code = :code', { code: code });
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('변경할 주문이 없습니다.');
+            throw new common_1.NotFoundException('order.service.hostOrderApproval: 변경할 주문이 없습니다.');
         }
         const shipping_status = common_utils_1.commonUtils.getStatus(['order_status', 'shipping']);
         if (order['status'] == shipping_status) {
-            throw new common_1.NotAcceptableException('이미 승인 처리된 주문입니다.');
+            throw new common_1.NotAcceptableException('order.service.hostOrderApproval: 이미 승인 처리된 주문입니다.');
         }
         await this.statusChange(order['idx'], shipping_status);
         await this.orderProductService.statusChange(order['idx'], shipping_status);
@@ -384,21 +583,32 @@ let OrderService = class OrderService {
     }
     async hostOrderCancel(code, userInfo, updateOrderDto) {
         if (!code) {
-            throw new common_1.NotFoundException('변경할 정보가 없습니다.');
+            throw new common_1.NotFoundException('order.service.hostOrderCancel: 변경할 정보가 없습니다.');
         }
         const user = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
-        const order = await this.orderRepository.createQueryBuilder('order')
+        const order = await this.orderRepository
+            .createQueryBuilder('order')
             .leftJoinAndSelect('order.orderProduct', 'orderProduct')
             .leftJoinAndSelect('orderProduct.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'user')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
             qb.andWhere('`order`.code = :code', { code: code });
         })
             .getOne();
         if (!(0, lodash_1.get)(order, 'idx', '')) {
-            throw new common_1.NotFoundException('변경할 주문이 없습니다.');
+            throw new common_1.NotFoundException('order.service.hostOrderCancel: 변경할 주문이 없습니다.');
+        }
+        const today = moment().format('YYYY-MM-DD');
+        const ago20day = moment(order.orderProduct[0].startAt)
+            .add(-20, 'day')
+            .format('YYYY-MM-DD');
+        if (today > ago20day) {
+            const site = await this.settingsService.findOne('site_tel');
+            throw new common_1.NotAcceptableException('order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
+                site.set_value +
+                ')에 문의해주세요.');
         }
         const cancelReason = '호스트 취소(' + (0, lodash_1.get)(updateOrderDto, 'cancelReason', '') + ')';
         await this.cancelProcess(order, cancelReason);
@@ -409,12 +619,15 @@ let OrderService = class OrderService {
         }
     }
     async cancelProcess(order, cancelReason) {
-        const cancel_status = common_utils_1.commonUtils.getStatus(['order_status', 'cancellationCompleted']);
+        const cancel_status = common_utils_1.commonUtils.getStatus([
+            'order_status',
+            'cancellationCompleted',
+        ]);
         if (order['status'] == cancel_status) {
-            throw new common_1.NotAcceptableException('이미 취소 처리된 주문입니다.');
+            throw new common_1.NotAcceptableException('order.service.cancelProcess: 이미 취소 처리된 주문입니다.');
         }
         const cancelPrice = (0, lodash_1.reduce)(order.orderProduct, (o, o1) => {
-            return o + (+o1['payPrice']);
+            return o + +o1['payPrice'];
         }, 0);
         if (order['imp_uid']) {
             await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
@@ -425,10 +638,11 @@ let OrderService = class OrderService {
         await this.ordertotalService.priceChange(order['idx'], cancelPrice);
     }
     async statusChange(idx, status) {
-        await this.orderRepository.createQueryBuilder()
+        await this.orderRepository
+            .createQueryBuilder()
             .update(order_entity_1.OrderEntity)
             .set({ status: status })
-            .where(" idx = :idx", { idx: idx })
+            .where(' idx = :idx', { idx: idx })
             .execute();
     }
     async test(order_idx, price) {
@@ -445,9 +659,32 @@ let OrderService = class OrderService {
         }
         if (!result['status']) {
             await this.iamportService.paymentCancel(createOrderDto['imp_uid'], response['amount'], result['message']);
-            throw new common_1.NotAcceptableException(result['message']);
+            throw new common_1.NotAcceptableException('order.service.orderVerification: ' + result['message']);
         }
         return response;
+    }
+    async dashboard(month) {
+        const order_cnt = await this.orderRepository
+            .createQueryBuilder()
+            .select('SUM(IF(`status` = 2, 1, 0))', 'payment_cnt')
+            .addSelect('SUM(IF(`status` = 8, 1, 0))', 'cancel_cnt')
+            .addSelect('SUM(IF(`status` = 6, 1, 0))', 'confirmed_cnt')
+            .where((qb) => {
+            qb.where('DATE_FORMAT(`createdAt`, "%Y-%m") = :month', {
+                month: month,
+            });
+        })
+            .execute();
+        return order_cnt;
+    }
+    async createExcel(userInfo, options, search, order) {
+        const { data } = await this.adminFindAll(userInfo, options, search, order);
+        if (!data) {
+            throw new common_1.NotFoundException('order.service.excel: 다운로드할 데이터가 없습니다.');
+        }
+        return this.excelService.createExcel(data, {
+            type: 'order',
+        });
     }
 };
 OrderService = __decorate([
@@ -462,7 +699,9 @@ OrderService = __decorate([
         order_total_service_1.OrderTotalService,
         iamport_service_1.IamportService,
         pg_data_service_1.PgDataService,
-        push_notification_service_1.PushNotificationService])
+        push_notification_service_1.PushNotificationService,
+        settings_service_1.SettingsService,
+        excel_service_1.ExcelService])
 ], OrderService);
 exports.OrderService = OrderService;
 //# sourceMappingURL=order.service.js.map

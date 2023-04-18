@@ -37,9 +37,13 @@ let AuthService = class AuthService {
         this.userSnsService = userSnsService;
     }
     async validateUser(id, password) {
-        const user = await this.userService.fineUser(id);
+        let user = await this.userService.fineUser(id);
+        if (user.status == constants_1.usersConstant.status.dormant) {
+            await this.userService.dormantRecovery(user.id);
+            user = await this.userService.fineUser(id);
+        }
         if (user.status != constants_1.usersConstant.status.registration) {
-            throw new common_1.NotFoundException('존재하지 않는 아이디 입니다.');
+            throw new common_1.NotFoundException('auth.service.validateUser: 존재하지 않는 아이디 입니다.');
         }
         const isHashValid = await common_bcrypt_1.commonBcrypt.isHashValid(password, user.password);
         const isSha1HashValid = await common_bcrypt_1.commonBcrypt.isSha1HashValid(password, user.prevPassword);
@@ -52,7 +56,7 @@ let AuthService = class AuthService {
             return result;
         }
         else {
-            throw new common_1.NotAcceptableException('비밀번호가 틀립니다.');
+            throw new common_1.NotAcceptableException('auth.service.validateUser: 비밀번호가 틀립니다.');
         }
         return null;
     }

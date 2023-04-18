@@ -33,19 +33,19 @@ let ProductInfoService = class ProductInfoService {
             where: where
         });
         if (productInfo.length <= 0) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('productInfo.service.findAll: 정보를 찾을 수 없습니다.');
         }
         return productInfo;
     }
     async findAllIdxs(idxs) {
         if (idxs.length <= 0) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('productInfo.service.findAllIdxs: 잘못된 정보 입니다.');
         }
         const productInfo = await this.productInfoRepository.find({
             where: { idx: (0, typeorm_2.In)(idxs) }
         });
         if (productInfo.length <= 0) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('productInfo.service.findAllIdxs: 정보를 찾을 수 없습니다.');
         }
         return productInfo;
     }

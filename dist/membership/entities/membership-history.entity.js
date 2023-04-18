@@ -31,11 +31,11 @@ __decorate([
     __metadata("design:type", Number)
 ], MembershipHistoryEntity.prototype, "month", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0', comment: '멤버십 시작일' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true, comment: '멤버십 시작일' }),
     __metadata("design:type", String)
 ], MembershipHistoryEntity.prototype, "start", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0', comment: '멤버십 종료일' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true, comment: '멤버십 종료일' }),
     __metadata("design:type", String)
 ], MembershipHistoryEntity.prototype, "end", void 0);
 __decorate([

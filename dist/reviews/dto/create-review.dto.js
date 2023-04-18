@@ -18,7 +18,7 @@ class CreateReviewDto {
 __decorate([
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
-    (0, swagger_1.ApiProperty)({ description: '후기 상태 (1: 삭제, 2: 등록)' }),
+    (0, swagger_1.ApiProperty)({ description: '후기 상태 (-1: 삭제, 1: 미등록, 2: 등록)' }),
     __metadata("design:type", Number)
 ], CreateReviewDto.prototype, "status", void 0);
 __decorate([

@@ -13,14 +13,21 @@ const email_service_1 = require("./email.service");
 const email_code_entity_1 = require("./entities/email-code.entity");
 const email_history_entity_1 = require("./entities/email-history.entity");
 const email_tmpl_entity_1 = require("./entities/email-tmpl.entity");
+const admin_email_controller_1 = require("./admin-email.controller");
+const email_entity_1 = require("./entities/email.entity");
 let EmailModule = class EmailModule {
 };
 EmailModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([email_tmpl_entity_1.EmailTmplEntity, email_history_entity_1.EmailHistoryEntity, email_code_entity_1.EmailCodeEntity]),
+            typeorm_1.TypeOrmModule.forFeature([
+                email_entity_1.EmailEntity,
+                email_tmpl_entity_1.EmailTmplEntity,
+                email_history_entity_1.EmailHistoryEntity,
+                email_code_entity_1.EmailCodeEntity
+            ]),
         ],
-        controllers: [],
+        controllers: [admin_email_controller_1.AdminEmailController],
         providers: [email_service_1.EmailService],
         exports: [email_service_1.EmailService],
     })

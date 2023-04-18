@@ -15,4 +15,5 @@ export declare class OrderTotalService {
     findOneOrderIdx(orderIdx: number): Promise<OrderTotalEntity>;
     update(id: number, updateOrderTotalDto: UpdateOrderTotalDto): string;
     remove(id: number): string;
+    dashboard(month: string): Promise<any>;
 }

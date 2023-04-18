@@ -8,12 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminUsersController = void 0;
 const common_1 = require("@nestjs/common");
-const swagger_1 = require("@nestjs/swagger");
 let AdminUsersController = class AdminUsersController {
 };
 AdminUsersController = __decorate([
-    (0, common_1.Controller)('admin-users'),
-    (0, swagger_1.ApiTags)('관리자 유저 API')
+    (0, common_1.Controller)('admin-userss')
 ], AdminUsersController);
 exports.AdminUsersController = AdminUsersController;
 //# sourceMappingURL=admin-users.controller.js.map

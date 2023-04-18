@@ -15,6 +15,7 @@ const product_option_entity_1 = require("./entities/product-option.entity");
 const product_module_1 = require("../product/product.module");
 const file_module_1 = require("../file/file.module");
 const product_info_module_1 = require("../product-info/product-info.module");
+const excel_service_1 = require("../excel/excel.service");
 let ProductOptionModule = class ProductOptionModule {
 };
 ProductOptionModule = __decorate([
@@ -26,7 +27,7 @@ ProductOptionModule = __decorate([
             product_info_module_1.ProductInfoModule
         ],
         controllers: [product_option_controller_1.ProductOptionController],
-        providers: [product_option_service_1.ProductOptionService],
+        providers: [product_option_service_1.ProductOptionService, excel_service_1.ExcelService],
         exports: [product_option_service_1.ProductOptionService]
     })
 ], ProductOptionModule);

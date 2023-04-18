@@ -66,11 +66,11 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({
         summary: '주문 생성 API',
-        description: '최초 실행시 productOptionIdx값만 입력<br>'
-            + '최초 실행 이후 idx(order idx), price(가격), startAt(입주일), endAt(퇴거일), orderProductIdx값 입력<br>'
-            + '주문 완료시 status: 2, imp_uid: 아임포트 고유번호 값 입력<br>'
-            + '주문 상태가 0이 아니고 1이상인 주문인 경우 예외 처리<br>'
-            + 'status 값이 2일때 imp_uid값 없는 경우 예외 처리<br>',
+        description: '최초 실행시 productOptionIdx값만 입력<br>' +
+            '최초 실행 이후 idx(order idx), price(가격), startAt(입주일), endAt(퇴거일), orderProductIdx값 입력<br>' +
+            '주문 완료시 status: 2, imp_uid: 아임포트 고유번호 값 입력<br>' +
+            '주문 상태가 0이 아니고 1이상인 주문인 경우 예외 처리<br>' +
+            'status 값이 2일때 imp_uid값 없는 경우 예외 처리<br>',
     }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
@@ -104,23 +104,23 @@ __decorate([
     (0, common_1.Get)('guest'),
     (0, swagger_1.ApiOperation)({
         summary: '게스트 주문 리스트 조회 API',
-        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능<br>'
-            + '호스트, 게스트 계정 로그인 상태에서 리스트 조회시 자신의 주문 내역만 확인 가능<br>',
+        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능<br>' +
+            '호스트, 게스트 계정 로그인 상태에서 리스트 조회시 자신의 주문 내역만 확인 가능<br>',
     }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiQuery)({
-        name: "search",
-        description: ''
-            + 'search=status:상태검색 (1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정,<br>'
-            + '7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료))<br>'
-            + 'search=code:주문코드검생<br>'
-            + 'search=imp_uid:아임포트 고유 아이디 검색<br>'
-            + 'search=payment:결제방법 검색(bank, card, trans, vbank)<br>'
-            + 'search=clientName:주문자명 검색<br>',
-        required: false
+        name: 'search',
+        description: '' +
+            'search=status:상태검색 (1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정,<br>' +
+            '7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료))<br>' +
+            'search=code:주문코드검생<br>' +
+            'search=imp_uid:아임포트 고유 아이디 검색<br>' +
+            'search=payment:결제방법 검색(bank, card, trans, vbank)<br>' +
+            'search=clientName:주문자명 검색<br>',
+        required: false,
     }),
-    (0, swagger_1.ApiQuery)({ name: "order", required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'order', required: false }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('page')),
@@ -134,24 +134,24 @@ __decorate([
     (0, common_1.Get)('host'),
     (0, swagger_1.ApiOperation)({
         summary: '호스트 주문 리스트 조회 API',
-        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능<br>'
-            + '호스트 계정 로그인 상태에서 리스트 조회시 자신의 숙소 주문 내역만 확인 가능<br>'
-            + '게스트는 권한 없음',
+        description: '관리자 계정 로그인 상태에서 리스트 조회시 다른 사람의 주문 내역 확인 가능<br>' +
+            '호스트 계정 로그인 상태에서 리스트 조회시 자신의 숙소 주문 내역만 확인 가능<br>' +
+            '게스트는 권한 없음',
     }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiQuery)({
-        name: "search",
-        description: ''
-            + 'search=status:상태검색 (1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정,<br>'
-            + '7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료))<br>'
-            + 'search=code:주문코드검생<br>'
-            + 'search=imp_uid:아임포트 고유 아이디 검색<br>'
-            + 'search=payment:결제방법 검색(bank, card, trans, vbank)<br>'
-            + 'search=clientName:주문자명 검색<br>',
-        required: false
+        name: 'search',
+        description: '' +
+            'search=status:상태검색 (1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정,<br>' +
+            '7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료))<br>' +
+            'search=code:주문코드검생<br>' +
+            'search=imp_uid:아임포트 고유 아이디 검색<br>' +
+            'search=payment:결제방법 검색(bank, card, trans, vbank)<br>' +
+            'search=clientName:주문자명 검색<br>',
+        required: false,
     }),
-    (0, swagger_1.ApiQuery)({ name: "order", required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'order', required: false }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('page')),
@@ -165,9 +165,9 @@ __decorate([
     (0, common_1.Get)('guest/:idx'),
     (0, swagger_1.ApiOperation)({
         summary: '게스트 주문 상세 조회 API',
-        description: '게스트가 바로결제한 주문의 상세 조회 모든 계정 조회 가능<br>'
-            + '자신이 바로결제한 주문만 조회 가능<br>'
-            + '관리자 계정의 경우 모든 계정의 주문 상세 조회 가능'
+        description: '게스트가 바로결제한 주문의 상세 조회 모든 계정 조회 가능<br>' +
+            '자신이 바로결제한 주문만 조회 가능<br>' +
+            '관리자 계정의 경우 모든 계정의 주문 상세 조회 가능',
     }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
@@ -181,9 +181,9 @@ __decorate([
     (0, common_1.Get)('host/:idx'),
     (0, swagger_1.ApiOperation)({
         summary: '호스트 주문 상세 조회 API',
-        description: '호스트가 관리하는 숙소의 상세 조회 자신의 숙소 주문 상세만 조회 가능<br>'
-            + '게스트 계정은 권한 없음<br>'
-            + '관리자 계정의 경우 모든 주문 상세 조회 가능'
+        description: '호스트가 관리하는 숙소의 상세 조회 자신의 숙소 주문 상세만 조회 가능<br>' +
+            '게스트 계정은 권한 없음<br>' +
+            '관리자 계정의 경우 모든 주문 상세 조회 가능',
     }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
     (0, swagger_1.ApiBearerAuth)(),

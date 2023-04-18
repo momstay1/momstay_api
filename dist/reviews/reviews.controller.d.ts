@@ -26,5 +26,5 @@ export declare class ReviewsController {
         review: import("./entities/review.entity").ReviewEntity;
         file_info: any;
     }>;
-    statusUpdate(user: UsersEntity, idxs: []): Promise<void>;
+    remove(user: UsersEntity, idxs: []): Promise<void>;
 }

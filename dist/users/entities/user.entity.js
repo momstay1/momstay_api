@@ -88,7 +88,7 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "phone", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'date', default: '0' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true }),
     __metadata("design:type", Object)
 ], UsersEntity.prototype, "birthday", void 0);
 __decorate([
@@ -189,9 +189,17 @@ __decorate([
     __metadata("design:type", Date)
 ], UsersEntity.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'datetime', default: '0' }),
+    (0, typeorm_1.Column)({ type: 'date', default: null, nullable: true, comment: '마지막 활동 날짜' }),
+    __metadata("design:type", Date)
+], UsersEntity.prototype, "activitedAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', default: '0', comment: '탈퇴 처리한 날짜' }),
     __metadata("design:type", Date)
 ], UsersEntity.prototype, "leaveAt", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'datetime', default: '0', comment: '호스트로 변경된 날짜' }),
+    __metadata("design:type", Date)
+], UsersEntity.prototype, "hostAt", void 0);
 UsersEntity = __decorate([
     (0, typeorm_1.Entity)('users')
 ], UsersEntity);

@@ -24,6 +24,7 @@ const zl = require("zip-lib");
 const fs = require("fs");
 const sharp = require("sharp");
 const moment = require("moment");
+const common_utils_1 = require("../common/common.utils");
 const AWS = require('aws-sdk');
 const storage_url = 'https://kr.object.ncloudstorage.com';
 const endpoint = new AWS.Endpoint(storage_url);
@@ -45,6 +46,12 @@ const params = {
     MaxKeys: MAX_KEYS,
     FetchOwner: true
 };
+const watermarkCategory = [
+    'lodgingDetailImg',
+    'mealsImg',
+    'roomDetailImg',
+    'site_og'
+];
 const img_url = '/file/img/';
 let FileService = class FileService {
     constructor(fileRepository) {
@@ -54,8 +61,12 @@ let FileService = class FileService {
         return 'This action adds a new file';
     }
     async uploadImg(files) {
-        console.log({ files });
-        console.log(files['img']);
+        const filesInfo = common_utils_1.commonUtils.getArrayKey(files, ['fieldname'], true);
+        return await this.fileInfoInsert(filesInfo, 1);
+    }
+    async uploadTempImg(files) {
+        const filesInfo = common_utils_1.commonUtils.getArrayKey(files, ['fieldname'], true);
+        return await this.fileInfoInsert(filesInfo, 0);
     }
     async ckeditorUploadImg(file) {
         const file_info = await this.fileInfoInsert({ ckeditor: file }, 0);
@@ -198,6 +209,15 @@ let FileService = class FileService {
                     console.log('-------------------없음');
                 }
             }
+            if (fs.existsSync(files[key].file_watermark_name)) {
+                try {
+                    fs.unlinkSync(files[key].file_watermark_path);
+                }
+                catch (error) {
+                    console.log('-------------------삭제할 워터마크 파일: ' + files[key].file_watermark_name);
+                    console.log('-------------------없음');
+                }
+            }
         }
     }
     async fileInfoInsert(files, foreign_idx) {
@@ -209,8 +229,8 @@ let FileService = class FileService {
         for (const i in files) {
             file_category.push(i);
             for (const j in files[i]) {
-                const raw_name = files[i][j].filename.split('.')[0];
-                files_data.push({
+                const raw_name = files[i][j].filename.split('.');
+                const file_data = {
                     file_category: i,
                     file_foreign_idx: foreign_idx,
                     file_name: files[i][j].filename,
@@ -219,9 +239,9 @@ let FileService = class FileService {
                     file_full_path: files[i][j].path,
                     file_storage_path: storage_url + '/' + bucket_name + '/' + folder + files[i][j].filename,
                     file_html_path: '',
-                    file_html_full_path: img_url + raw_name,
+                    file_html_full_path: img_url + raw_name[0],
                     file_html_thumb_path: '',
-                    file_raw_name: raw_name,
+                    file_raw_name: raw_name[0],
                     file_orig_name: files[i][j].originalname,
                     file_client_name: files[i][j].originalname,
                     file_ext: path.extname(files[i][j].originalname),
@@ -232,12 +252,19 @@ let FileService = class FileService {
                     file_image_type: '',
                     file_image_size_str: '',
                     file_order: base_order * order,
-                });
+                };
                 order++;
-                console.log(files[i][j].originalname);
                 await this.sharpFile(files[i][j]);
-                await this.uploadStorage(files[i][j]);
-                await this.deleteFile([files_data[j]]);
+                if (watermarkCategory.includes(i)) {
+                    const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
+                    file_data['file_watermark_name'] = watermark_name;
+                    file_data['file_watermark_storage_path'] = storage_url + '/' + bucket_name + '/' + folder + watermark_name;
+                    file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
+                    await this.fileWatermark(file_data);
+                }
+                await this.uploadStorage(files[i][j], file_data);
+                await this.deleteFile([file_data]);
+                files_data.push(file_data);
             }
         }
         await this.fileRepository
@@ -247,10 +274,8 @@ let FileService = class FileService {
             .execute();
         return await this.findCategoryFiles(file_category, foreign_idx);
     }
-    async uploadStorage(file) {
+    async uploadStorage(file, file_data) {
         const folder = 'momstay/' + moment().format('YYYY-MM') + '/';
-        console.log('uploadStorage', file.path);
-        console.log('uploadStorage', file.name);
         await S3.putObject({
             Bucket: bucket_name,
             Key: folder + file.filename,
@@ -258,6 +283,15 @@ let FileService = class FileService {
             Body: fs.createReadStream(file.path),
             ContentType: file.mimetype
         }).promise();
+        if ((0, lodash_1.get)(file_data, 'file_watermark_name', '')) {
+            await S3.putObject({
+                Bucket: bucket_name,
+                Key: folder + file_data.file_watermark_name,
+                ACL: 'public-read',
+                Body: fs.createReadStream(file.destination + '/' + file_data.file_watermark_name),
+                ContentType: file.mimetype
+            }).promise();
+        }
     }
     isImage(type) {
         const png_mimes = ['image/x-png'];
@@ -288,8 +322,7 @@ let FileService = class FileService {
         return { file_name: zip_file_name, file_path: zip_file_path };
     }
     async sharpFile(file) {
-        const fileBuffer = fs.readFileSync(file.path);
-        const image = await sharp(fileBuffer);
+        const image = await sharp(file.path);
         const { format, width, height } = await image.metadata();
         if (width >= 1200) {
             await image.resize(1200, null, { fit: 'contain' });
@@ -302,6 +335,25 @@ let FileService = class FileService {
             .toFile(file.path, (err, info) => {
             console.log(`파일 압축 info :${JSON.stringify(info, null, 2)}`);
             console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);
+        })
+            .toBuffer();
+    }
+    async fileWatermark(file_data) {
+        console.log(file_data.file_full_path);
+        const image = await sharp(file_data.file_full_path);
+        const { width, height } = await image.metadata();
+        const watermark = sharp('./src/file/watermark/watermark.png');
+        const multipleNum = width < height ? 3 : 4;
+        console.log({ multipleNum });
+        watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
+        const watermarkBuffer = await watermark.toBuffer();
+        const watermarked = await image
+            .composite([{
+                input: watermarkBuffer,
+                gravity: 'southeast',
+            }])
+            .toFile(file_data.file_watermark_path, (err, info) => {
+            console.log(`워터마크된 이미지 info : ${JSON.stringify(info, null, 2)}`);
         })
             .toBuffer();
     }
@@ -331,6 +383,20 @@ let FileService = class FileService {
             fileIdxs = (0, lodash_1.map)(new_file[idx], (obj) => (0, lodash_1.map)(obj, o => "" + o.file_idx));
         }
         return fileIdxs;
+    }
+    async fileDownload() {
+        const object_name = 'momstay/2023-02/00b83586-ab61-4d4a-b602-79c28da12cd8.jpg';
+        const local_file_path = './src/file/tmp/test.jpg';
+        let outStream = fs.createWriteStream(local_file_path);
+        let inStream = S3.getObject({
+            Bucket: bucket_name,
+            Key: object_name
+        }).createReadStream();
+        console.log({ inStream });
+        inStream.pipe(outStream);
+        inStream.on('end', () => {
+            console.log("Download Done");
+        });
     }
 };
 FileService = __decorate([

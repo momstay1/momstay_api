@@ -6,13 +6,15 @@ import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
+import { ExcelService } from 'src/excel/excel.service';
 export declare class ReservationService {
     private reservationRepository;
     private readonly productOptionService;
     private readonly usersService;
     private readonly fileService;
     private readonly pushNotiService;
-    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService);
+    private readonly excelSerivce;
+    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService, excelSerivce: ExcelService);
     create(userInfo: any, createReservationDto: CreateReservationDto): Promise<{
         reservation: ReservationEntity;
     }>;
@@ -24,11 +26,18 @@ export declare class ReservationService {
         data: Pagination<ReservationEntity>;
         file_info: {};
     }>;
+    findAll(userInfo: any, options: PaginationOptions, search: string[], order: string): Promise<{
+        data: Pagination<ReservationEntity>;
+        file_info: {};
+    }>;
     findOne(idx: number): Promise<{
         reservation: ReservationEntity;
         file_info: {};
     }>;
     findOneIdx(idx: number): Promise<ReservationEntity>;
+    findIdxs(idxs: number[]): Promise<Array<ReservationEntity>>;
+    guestConfirmation(userInfo: any, idx: number): Promise<void>;
+    hostApproval(userInfo: any, idx: number): Promise<void>;
     update(userInfo: any, idx: number): Promise<void>;
     guestCancel(userInfo: any, idx: number): Promise<void>;
     hostCancel(userInfo: any, idx: number): Promise<void>;
@@ -37,5 +46,11 @@ export declare class ReservationService {
         group: any;
         id: any;
     }, idx: any): Promise<void>;
-    changeStatus(status: number, idx: number): Promise<void>;
+    changeStatus(status: number, idx: number | number[]): Promise<void>;
+    adminChangeStatus(status: number, idxs: number[]): Promise<void>;
+    dashboard(month: string): Promise<any>;
+    createExcel(userInfo: any, options: PaginationOptions, search: string[], order: string): Promise<{
+        file_name: string;
+        file_path: string;
+    }>;
 }

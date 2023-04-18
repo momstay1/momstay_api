@@ -24,11 +24,17 @@ __decorate([
     __metadata("design:type", Number)
 ], ProductEntity.prototype, "idx", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 2, comment: '숙소 상태 (0: 미등록, 1: 미사용, 2: 사용)' }),
+    (0, typeorm_1.Column)({
+        default: 2,
+        comment: '숙소 상태 (-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)',
+    }),
     __metadata("design:type", Number)
 ], ProductEntity.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: '' }),
+    (0, typeorm_1.Column)({
+        default: '',
+        comment: '숙소 유형 (1: 하숙집, 2: 쉐어하우스, 3: 게스트하우스, 4: 홈스테이)',
+    }),
     __metadata("design:type", String)
 ], ProductEntity.prototype, "type", void 0);
 __decorate([
@@ -128,7 +134,7 @@ __decorate([
     __metadata("design:type", String)
 ], ProductEntity.prototype, "detailsChn", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0, }),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], ProductEntity.prototype, "oldIdx", void 0);
 __decorate([
@@ -140,7 +146,13 @@ __decorate([
     __metadata("design:type", String)
 ], ProductEntity.prototype, "productInfoIdxs", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "decimal", default: 0.0, precision: 10, scale: 1, comment: '평균 평점' }),
+    (0, typeorm_1.Column)({
+        type: 'decimal',
+        default: 0.0,
+        precision: 10,
+        scale: 1,
+        comment: '평균 평점',
+    }),
     __metadata("design:type", Number)
 ], ProductEntity.prototype, "star", void 0);
 __decorate([
@@ -158,7 +170,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.UsersEntity, (user) => user.product, {
         onDelete: 'NO ACTION',
-        onUpdate: 'NO ACTION'
+        onUpdate: 'NO ACTION',
     }),
     __metadata("design:type", user_entity_1.UsersEntity)
 ], ProductEntity.prototype, "user", void 0);

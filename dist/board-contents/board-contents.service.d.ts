@@ -2,6 +2,7 @@ import { BoardCategoriesService } from 'src/board-categories/board-categories.se
 import { BoardSelectedCategoriesService } from 'src/board-selected-categories/board-selected-categories.service';
 import { BoardsService } from 'src/boards/boards.service';
 import { UsersService } from 'src/users/users.service';
+import { ExcelService } from 'src/excel/excel.service';
 import { Repository } from 'typeorm';
 import { CreateBoardContentDto } from './dto/create-board-content.dto';
 import { UpdateBoardContentDto } from './dto/update-board-content.dto';
@@ -13,7 +14,8 @@ export declare class BoardContentsService {
     private readonly boardsService;
     private readonly bscatsService;
     private readonly bcatsService;
-    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService);
+    private readonly excelService;
+    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService, excelService: ExcelService);
     create(userInfo: any, bc: CreateBoardContentDto): Promise<any>;
     statusChange(statusChange: any): Promise<void>;
     statusAnswer(bcIdx: number): Promise<void>;
@@ -33,7 +35,7 @@ export declare class BoardContentsService {
     findBdBcIndex(bcIdx: number): Promise<BoardContentsEntity>;
     update(userInfo: any, bcIdx: number, updateBoardContentDto: UpdateBoardContentDto): Promise<any>;
     countUp(bc_idx: any, bc_count: number): Promise<number>;
-    adminFindCategoryAll(bd_idx: any, category: string, options: PaginationOptions, order: any): Promise<{
+    adminFindCategoryAll(bd_idx: any, category: string, options: PaginationOptions, search: string[], order: any): Promise<{
         bcats: import("../board-categories/entities/board-categories.entity").BoardCategoriesEntity[];
         bc: Pagination<BoardContentsEntity>;
     }>;
@@ -42,4 +44,8 @@ export declare class BoardContentsService {
     private updateBoardContent;
     getPrivateColumn(): any[];
     getNoneNoticeType(): number[];
+    createExcel(bd_idx: any, category: string, options: PaginationOptions, search: string[], order: any): Promise<{
+        file_name: string;
+        file_path: string;
+    }>;
 }

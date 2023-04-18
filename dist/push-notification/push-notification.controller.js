@@ -15,8 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PushNotificationController = void 0;
 const common_1 = require("@nestjs/common");
 const push_notification_service_1 = require("./push-notification.service");
-const create_push_notification_dto_1 = require("./dto/create-push-notification.dto");
-const update_push_notification_dto_1 = require("./dto/update-push-notification.dto");
 const swagger_1 = require("@nestjs/swagger");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const getuser_decorator_1 = require("../auth/getuser.decorator");
@@ -25,20 +23,31 @@ let PushNotificationController = class PushNotificationController {
     constructor(pushNotificationService) {
         this.pushNotificationService = pushNotificationService;
     }
-    create(createPushNotificationDto) {
-        return this.pushNotificationService.create(createPushNotificationDto);
-    }
-    async test() {
+    async test(topic, token, title, body) {
         const target = {
-            token: '5BAA98BFE537F9A4577F2899A647F122A0C9436F1421024A678E3211C93672C2',
-            topic: '',
+            token: '',
+            topic: 'marketing',
         };
         const notifications = {
             title: '앱 푸시 테스트',
             body: '앱 푸시 테스트 입니다.',
-            data: {}
         };
-        return await this.pushNotificationService.sendPush(target, notifications);
+        if (topic) {
+            target['topic'] = topic;
+            target['token'] = '';
+        }
+        if (token) {
+            target['token'] = token;
+            target['topic'] = '';
+        }
+        if (title) {
+            notifications['title'] = title;
+        }
+        if (body) {
+            notifications['body'] = body;
+        }
+        const response = await this.pushNotificationService.sendPush(target, notifications);
+        await this.pushNotificationService.historySave(response);
     }
     async findAll(user, take, page, search, order) {
         const { data } = await this.pushNotificationService.findAll({ take, page }, search, order, user);
@@ -48,27 +57,39 @@ let PushNotificationController = class PushNotificationController {
         const { data } = await this.pushNotificationService.findAll({ take, page }, search, order);
         return Object.assign({}, data);
     }
-    findOne(id) {
-        return this.pushNotificationService.findOne(+id);
-    }
-    update(id, updatePushNotificationDto) {
-        return this.pushNotificationService.update(+id, updatePushNotificationDto);
-    }
-    remove(id) {
-        return this.pushNotificationService.remove(+id);
-    }
 };
 __decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_push_notification_dto_1.CreatePushNotificationDto]),
-    __metadata("design:returntype", void 0)
-], PushNotificationController.prototype, "create", null);
-__decorate([
     (0, common_1.Get)('test'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'app push test',
+        description: 'topic, token 둘중 하나만 설정 필요'
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "topic",
+        description: 'topic전달 값 token 빈값으로 설정',
+        required: false
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "token",
+        description: 'token전달 값 topic 빈값으로 설정',
+        required: false
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "title",
+        description: '앱 푸시 제목',
+        required: false
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: "body",
+        description: '앱 푸시 설명',
+        required: false
+    }),
+    __param(0, (0, common_1.Query)('topic')),
+    __param(1, (0, common_1.Query)('token')),
+    __param(2, (0, common_1.Query)('title')),
+    __param(3, (0, common_1.Query)('body')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], PushNotificationController.prototype, "test", null);
 __decorate([
@@ -114,28 +135,6 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, Array, String]),
     __metadata("design:returntype", Promise)
 ], PushNotificationController.prototype, "findAllNonMember", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], PushNotificationController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_push_notification_dto_1.UpdatePushNotificationDto]),
-    __metadata("design:returntype", void 0)
-], PushNotificationController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], PushNotificationController.prototype, "remove", null);
 PushNotificationController = __decorate([
     (0, common_1.Controller)('push-notification'),
     (0, swagger_1.ApiTags)('알림 API'),

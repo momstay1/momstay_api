@@ -21,7 +21,8 @@ SettingsModule = __decorate([
             typeorm_1.TypeOrmModule.forFeature([setting_entity_1.SettingEntity]),
         ],
         controllers: [settings_controller_1.SettingsController],
-        providers: [settings_service_1.SettingsService, common_service_1.CommonService]
+        providers: [settings_service_1.SettingsService, common_service_1.CommonService],
+        exports: [settings_service_1.SettingsService]
     })
 ], SettingsModule);
 exports.SettingsModule = SettingsModule;

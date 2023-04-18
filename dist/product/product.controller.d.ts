@@ -10,7 +10,7 @@ export declare class ProductController {
         product: import("./entities/product.entity").ProductEntity;
         file_info: any;
     }>;
-    findAll(take: number, page: number, search: string[]): Promise<{
+    findAll(take: number, page: number, search: string[], order: string): Promise<{
         file_info: {};
         results: import("./entities/product.entity").ProductEntity[];
         pageTotal: number;
@@ -22,5 +22,5 @@ export declare class ProductController {
         file_info: {};
     }>;
     update(id: string, updateProductDto: UpdateProductDto): string;
-    remove(id: string): string;
+    remove(user: any, idx: string): Promise<void>;
 }

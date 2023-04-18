@@ -8,70 +8,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserLeaveController = void 0;
 const common_1 = require("@nestjs/common");
 const user_leave_service_1 = require("./user-leave.service");
-const create_user_leave_dto_1 = require("./dto/create-user-leave.dto");
-const update_user_leave_dto_1 = require("./dto/update-user-leave.dto");
 let UserLeaveController = class UserLeaveController {
     constructor(userLeaveService) {
         this.userLeaveService = userLeaveService;
     }
-    create(createUserLeaveDto) {
-        return this.userLeaveService.create(createUserLeaveDto);
-    }
-    findAll() {
-        return this.userLeaveService.findAll();
-    }
-    findOne(id) {
-        return this.userLeaveService.findOne(+id);
-    }
-    update(id, updateUserLeaveDto) {
-        return this.userLeaveService.update(+id, updateUserLeaveDto);
-    }
-    remove(id) {
-        return this.userLeaveService.remove(+id);
-    }
 };
-__decorate([
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_leave_dto_1.CreateUserLeaveDto]),
-    __metadata("design:returntype", void 0)
-], UserLeaveController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UserLeaveController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], UserLeaveController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_leave_dto_1.UpdateUserLeaveDto]),
-    __metadata("design:returntype", void 0)
-], UserLeaveController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], UserLeaveController.prototype, "remove", null);
 UserLeaveController = __decorate([
     (0, common_1.Controller)('user-leave'),
     __metadata("design:paramtypes", [user_leave_service_1.UserLeaveService])

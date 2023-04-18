@@ -52,13 +52,13 @@ let CollegeService = class CollegeService {
     }
     async findAllIdx(idxs) {
         if (idxs.length <= 0) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('college.service.findAllIdx: 잘못된 정보 입니다.');
         }
         const metro = await this.collegeRepository.find({
             where: { idx: (0, typeorm_2.In)(idxs) }
         });
         if (metro.length <= 0) {
-            throw new common_1.NotFoundException('조회된 대학교 정보가 없습니다.');
+            throw new common_1.NotFoundException('college.service.findAllIdx: 조회된 대학교 정보가 없습니다.');
         }
         return metro;
     }

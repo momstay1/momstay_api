@@ -32,6 +32,7 @@ class ConfigService {
             },
             synchronize: true,
             ssl: false,
+            timezone: this.getValue('DB_TIMEZONE'),
             logging: Boolean(this.getValue('DB_LOGGING') == 'true'),
         };
     }

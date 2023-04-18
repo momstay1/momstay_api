@@ -9,9 +9,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardModule = void 0;
 const common_1 = require("@nestjs/common");
 const dashboard_service_1 = require("./dashboard.service");
-const dashboard_controller_1 = require("./dashboard.controller");
+const admin_dashboard_controller_1 = require("./admin-dashboard.controller");
 const admin_users_module_1 = require("../admin-users/admin-users.module");
 const users_module_1 = require("../users/users.module");
+const product_module_1 = require("../product/product.module");
+const order_module_1 = require("../order/order.module");
+const reservation_module_1 = require("../reservation/reservation.module");
+const order_total_module_1 = require("../order-total/order-total.module");
 let DashboardModule = class DashboardModule {
 };
 DashboardModule = __decorate([
@@ -19,8 +23,12 @@ DashboardModule = __decorate([
         imports: [
             users_module_1.UsersModule,
             admin_users_module_1.AdminUsersModule,
+            product_module_1.ProductModule,
+            order_module_1.OrderModule,
+            order_total_module_1.OrderTotalModule,
+            reservation_module_1.ReservationModule,
         ],
-        controllers: [dashboard_controller_1.DashboardController],
+        controllers: [admin_dashboard_controller_1.AdminDashboardController],
         providers: [dashboard_service_1.DashboardService]
     })
 ], DashboardModule);

@@ -89,7 +89,6 @@ let UsersController = class UsersController {
         return await this.usersService.email(email, type);
     }
     async test(id) {
-        const data = await this.iamportService.getPaymentByImpUid(id);
     }
     async changePassword(id, password) {
         const data = await this.usersService.chpw(id, password);
@@ -99,13 +98,19 @@ let UsersController = class UsersController {
         const data = await this.usersService.rspw(user, prevpassword, password);
         return data;
     }
+    async lastActivity(id) {
+        await this.usersService.lastActivity(id);
+    }
+    async dormantRecovery(id) {
+        const data = await this.usersService.dormantRecovery(id);
+    }
     async update(id, updateUserDto, files) {
         const data = await this.usersService.update(id, updateUserDto, files);
         const jwt = await this.authService.login(data['user'], '');
         return Object.assign(Object.assign({}, data), { jwt });
     }
-    async leave(id) {
-        await this.usersService.leave(id);
+    async leave(id, reason) {
+        await this.usersService.leave(id, reason);
     }
 };
 __decorate([
@@ -278,8 +283,27 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "resettingPassword", null);
 __decorate([
+    (0, common_1.Patch)('activity/:id'),
+    (0, swagger_1.ApiOperation)({ summary: '회원 활동 날짜 수정 API' }),
+    (0, role_decorator_1.Auth)(['Any']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "lastActivity", null);
+__decorate([
+    (0, common_1.Patch)('dormant/recovery/:id'),
+    (0, swagger_1.ApiOperation)({ summary: '휴면 회원 복원 API' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "dormantRecovery", null);
+__decorate([
     (0, common_1.Patch)(':id'),
-    (0, role_decorator_1.Auth)(['root', 'admin', 'host', 'guest']),
+    (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
         { name: 'profile', maxCount: 1 },
@@ -296,10 +320,20 @@ __decorate([
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)('leave/:id'),
+    (0, swagger_1.ApiOperation)({ summary: '회원 탈퇴 API' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                reason: { type: 'string', description: '탈퇴 사유' },
+            }
+        }
+    }),
     (0, common_1.HttpCode)(204),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('reason')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "leave", null);
 UsersController = __decorate([

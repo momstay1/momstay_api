@@ -9,13 +9,14 @@ export declare class ProductOptionController {
         productOption: import("./entities/product-option.entity").ProductOptionEntity;
         file_info: any;
     }>;
-    findAll(take: number, page: number, search: string[]): Promise<{
+    findAll(take: number, page: number, search: string[], order: string): Promise<{
         file_info: {};
         results: import("./entities/product-option.entity").ProductOptionEntity[];
         pageTotal: number;
         total: number;
         page: number;
     }>;
+    excelDownload(take: number, page: number, search: string[], order: string, res: any): Promise<void>;
     findOne(idx: string): Promise<{
         productOption: import("./entities/product-option.entity").ProductOptionEntity;
         file_info: {};

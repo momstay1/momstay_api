@@ -6,11 +6,15 @@ import { UpdateMembershipDto } from './dto/update-membership.dto';
 import { MembershipHistoryEntity } from './entities/membership-history.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductService } from 'src/product/product.service';
+import { ExcelService } from 'src/excel/excel.service';
+import { SettingsService } from 'src/settings/settings.service';
 export declare class MembershipService {
     private membershipHistoryRepository;
     private readonly userService;
     private readonly productService;
-    constructor(membershipHistoryRepository: Repository<MembershipHistoryEntity>, userService: UsersService, productService: ProductService);
+    private readonly excelService;
+    private readonly settingsService;
+    constructor(membershipHistoryRepository: Repository<MembershipHistoryEntity>, userService: UsersService, productService: ProductService, excelService: ExcelService, settingsService: SettingsService);
     create(userInfo: UsersEntity, createMembershipDto: CreateMembershipDto): Promise<{
         membership: MembershipHistoryEntity;
     }>;
@@ -27,9 +31,13 @@ export declare class MembershipService {
     }>;
     update(id: number, updateMembershipDto: UpdateMembershipDto): string;
     changeStatus(idx: number, status: number): Promise<void>;
-    membershipApproval(idx: number, updateMembershipDto: UpdateMembershipDto): Promise<{
+    membershipStatusChange(idx: number, updateMembershipDto: UpdateMembershipDto): Promise<{
         membership: MembershipHistoryEntity;
     }>;
     remove(id: number): string;
     checkMembership(): Promise<void>;
+    createExcel(options: PaginationOptions, search: string[], order: string): Promise<{
+        file_name: string;
+        file_path: string;
+    }>;
 }

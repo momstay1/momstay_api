@@ -16,6 +16,8 @@ const product_option_module_1 = require("../product-option/product-option.module
 const users_module_1 = require("../users/users.module");
 const file_module_1 = require("../file/file.module");
 const push_notification_module_1 = require("../push-notification/push-notification.module");
+const admin_reservation_controller_1 = require("./admin-reservation.controller");
+const excel_service_1 = require("../excel/excel.service");
 let ReservationModule = class ReservationModule {
 };
 ReservationModule = __decorate([
@@ -27,8 +29,8 @@ ReservationModule = __decorate([
             file_module_1.FileModule,
             push_notification_module_1.PushNotificationModule
         ],
-        controllers: [reservation_controller_1.ReservationController],
-        providers: [reservation_service_1.ReservationService],
+        controllers: [reservation_controller_1.ReservationController, admin_reservation_controller_1.AdminReservationController],
+        providers: [reservation_service_1.ReservationService, excel_service_1.ExcelService],
         exports: [reservation_service_1.ReservationService]
     })
 ], ReservationModule);

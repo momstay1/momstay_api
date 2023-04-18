@@ -40,10 +40,12 @@ export declare class UsersController {
     test(id: string): Promise<void>;
     changePassword(id: string, password: string): Promise<UsersEntity>;
     resettingPassword(user: UsersEntity, prevpassword: string, password: string): Promise<UsersEntity>;
+    lastActivity(id: string): Promise<void>;
+    dormantRecovery(id: string): Promise<void>;
     update(id: string, updateUserDto: UpdateUserDto, files: Array<Express.Multer.File>): Promise<{
         jwt: ResponseAuthDto;
         user: UsersEntity;
         file_info: any;
     }>;
-    leave(id: string): Promise<void>;
+    leave(id: string, reason: string): Promise<void>;
 }

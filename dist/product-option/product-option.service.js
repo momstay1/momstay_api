@@ -24,12 +24,15 @@ const product_service_1 = require("../product/product.service");
 const file_service_1 = require("../file/file.service");
 const exceptions_1 = require("@nestjs/common/exceptions");
 const product_info_service_1 = require("../product-info/product-info.service");
+const excel_service_1 = require("../excel/excel.service");
+const registrationStatus = '2';
 let ProductOptionService = class ProductOptionService {
-    constructor(productOptionRepository, productService, fileService, productInfoService) {
+    constructor(productOptionRepository, productService, fileService, productInfoService, excelService) {
         this.productOptionRepository = productOptionRepository;
         this.productService = productService;
         this.fileService = fileService;
         this.productInfoService = productInfoService;
+        this.excelService = excelService;
     }
     async create(createProductOptionDto, files) {
         let product;
@@ -39,7 +42,7 @@ let ProductOptionService = class ProductOptionService {
         }
         let productInfo;
         if ((0, lodash_1.get)(createProductOptionDto, 'productInfoIdx', '')) {
-            const productInfoIdx = (0, lodash_1.get)(createProductOptionDto, 'productInfoIdx').split(",");
+            const productInfoIdx = (0, lodash_1.get)(createProductOptionDto, 'productInfoIdx').split(',');
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
         }
         const product_option_data = {
@@ -93,9 +96,9 @@ let ProductOptionService = class ProductOptionService {
         let fileIdxs = [];
         if (fileIdx) {
             try {
-                const productOptionFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(["roomDetailImg"], "" + productOption['idx']), (o) => "" + o.file_idx);
-                fileIdxs = fileIdx.split(",");
-                const delFileIdxs = productOptionFileIdxs.filter(o => !fileIdxs.includes(o));
+                const productOptionFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(['roomDetailImg'], '' + productOption['idx']), (o) => '' + o.file_idx);
+                fileIdxs = fileIdx.split(',');
+                const delFileIdxs = productOptionFileIdxs.filter((o) => !fileIdxs.includes(o));
                 if (delFileIdxs.length > 0) {
                     await this.fileService.removes(delFileIdxs);
                 }
@@ -107,7 +110,7 @@ let ProductOptionService = class ProductOptionService {
         let new_file;
         if (!(0, lodash_1.isEmpty)(files)) {
             new_file = await this.fileService.fileInfoInsert(files, productOption['idx']);
-            fileIdxs = (0, lodash_1.union)(fileIdxs, ...(0, lodash_1.map)(new_file[product_option_data['idx']], (obj) => (0, lodash_1.map)(obj, o => "" + o.file_idx)));
+            fileIdxs = (0, lodash_1.union)(fileIdxs, ...(0, lodash_1.map)(new_file[product_option_data['idx']], (obj) => (0, lodash_1.map)(obj, (o) => '' + o.file_idx)));
         }
         let file_info;
         if (fileIdxs.length > 0) {
@@ -116,9 +119,11 @@ let ProductOptionService = class ProductOptionService {
         return { productOption, file_info };
     }
     async productOptionCreateCode() {
-        const code = common_utils_1.commonUtils.generateRandomString(8).toUpperCase() + '-' + common_utils_1.commonUtils.generateRandomNumber(4);
+        const code = common_utils_1.commonUtils.generateRandomString(8).toUpperCase() +
+            '-' +
+            common_utils_1.commonUtils.generateRandomNumber(4);
         const isCode = await this.productOptionRepository.findOne({
-            where: { code: code }
+            where: { code: code },
         });
         if (isCode) {
             this.productOptionCreateCode();
@@ -127,28 +132,38 @@ let ProductOptionService = class ProductOptionService {
             return code;
         }
     }
-    async findAll(options, search) {
+    async findAll(options, search, order) {
         const { take, page } = options;
         const where = common_utils_1.commonUtils.searchSplit(search);
-        const [results, total] = await this.productOptionRepository.createQueryBuilder('product_option')
+        where['status'] = (0, lodash_1.get)(where, 'status', [registrationStatus]);
+        const alias = 'product_option';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
+        const [results, total] = await this.productOptionRepository
+            .createQueryBuilder('product_option')
             .leftJoinAndSelect('product_option.product', 'product')
+            .leftJoinAndSelect('product.user', 'user')
             .leftJoinAndSelect('product_option.productInfo', 'productInfo')
             .leftJoinAndSelect('product_info_product_product', 'product_info_to_product', '`product`.idx = `product_info_to_product`.productIdx')
             .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
             .where((qb) => {
-            qb.where('`product_option`.status IN (:status)', { status: (0, lodash_1.get)(where, 'status', ['2']) });
+            qb.where('`product_option`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'title') });
             (0, lodash_1.get)(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: (0, lodash_1.get)(where, 'product_idx') });
+            (0, lodash_1.get)(where, 'po_title', '') && qb.andWhere('`product_option`.`title` LIKE :po_title', { po_title: '%' + (0, lodash_1.get)(where, 'po_title') + '%' });
+            (0, lodash_1.get)(where, 'name', '') && qb.andWhere('`user`.`name` LIKE :name', { name: '%' + (0, lodash_1.get)(where, 'name') + '%' });
+            (0, lodash_1.get)(where, 'id', '') && qb.andWhere('`user`.`id` LIKE :id', { id: '%' + (0, lodash_1.get)(where, 'id') + '%' });
             (0, lodash_1.get)(where, 'title', '') && qb.andWhere('`product`.`title` LIKE :title', { title: '%' + (0, lodash_1.get)(where, 'title') + '%' });
             (0, lodash_1.get)(where, 'addr1', '') && qb.andWhere('`product`.`addr1` LIKE :addr1', { addr1: '%' + (0, lodash_1.get)(where, 'addr1') + '%' });
             (0, lodash_1.get)(where, 'addr2', '') && qb.andWhere('`product`.`addr2` LIKE :addr2', { addr2: '%' + (0, lodash_1.get)(where, 'addr2') + '%' });
             (0, lodash_1.get)(where, 'metro', '') && qb.andWhere('`product`.`metro` LIKE :metro', { metro: '%' + (0, lodash_1.get)(where, 'metro') + '%' });
             (0, lodash_1.get)(where, 'college', '') && qb.andWhere('`product`.`college` LIKE :college', { college: '%' + (0, lodash_1.get)(where, 'college') + '%' });
         })
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .orderBy(order_by)
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
-        const product_option_idxs = (0, lodash_1.map)(results, o => o.idx);
+        const product_option_idxs = (0, lodash_1.map)(results, (o) => o.idx);
         let file_info = {};
         try {
             file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
@@ -182,7 +197,13 @@ let ProductOptionService = class ProductOptionService {
         }
         const productOption = await this.productOptionRepository.findOne({
             where: { idx: idx },
-            relations: ['product', 'product.productInfo', 'productInfo', 'product.user', 'product.user.device']
+            relations: [
+                'product',
+                'product.productInfo',
+                'productInfo',
+                'product.user',
+                'product.user.device',
+            ],
         });
         if (!(0, lodash_1.get)(productOption, 'idx')) {
             throw new exceptions_1.NotFoundException('정보를 찾을 수 없습니다.');
@@ -195,6 +216,15 @@ let ProductOptionService = class ProductOptionService {
     remove(id) {
         return `This action removes a #${id} productOption`;
     }
+    async createExcel(options, search, order) {
+        const { data } = await this.findAll(options, search, order);
+        if (!data) {
+            throw new exceptions_1.NotFoundException('product-option.service.excel: 다운로드할 데이터가 없습니다.');
+        }
+        return this.excelService.createExcel(data, {
+            type: 'product_option',
+        });
+    }
 };
 ProductOptionService = __decorate([
     (0, common_1.Injectable)(),
@@ -202,7 +232,8 @@ ProductOptionService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         product_service_1.ProductService,
         file_service_1.FileService,
-        product_info_service_1.ProductInfoService])
+        product_info_service_1.ProductInfoService,
+        excel_service_1.ExcelService])
 ], ProductOptionService);
 exports.ProductOptionService = ProductOptionService;
 //# sourceMappingURL=product-option.service.js.map

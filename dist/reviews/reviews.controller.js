@@ -43,8 +43,8 @@ let ReviewsController = class ReviewsController {
     async update(idx, user, updateReviewDto, files) {
         return await this.reviewsService.update(idx, user, updateReviewDto, files);
     }
-    async statusUpdate(user, idxs) {
-        await this.reviewsService.statusUpdate(idxs, user);
+    async remove(user, idxs) {
+        await this.reviewsService.remove(idxs, user);
     }
 };
 __decorate([
@@ -82,7 +82,7 @@ __decorate([
     }),
     (0, swagger_1.ApiQuery)({
         name: "search",
-        description: 'search=status:상태값(1:삭제|2:등록, 기본값:2)<br>',
+        description: 'search=status:상태값(-1:삭제|1:미등록|2:등록, 기본값:2)<br>',
         required: false
     }),
     (0, swagger_1.ApiQuery)({
@@ -114,9 +114,9 @@ __decorate([
         summary: '후기 수정 API',
         description: 'status, star, content, reviewImg 만 변경 가능'
     }),
-    (0, swagger_1.ApiParam)({ name: 'idx', description: 'review idx' }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiParam)({ name: 'idx', description: 'review idx' }),
     (0, decorators_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
         { name: 'reviewImg', maxCount: 10 },
     ], (0, common_file_1.multerOptions)())),
@@ -154,7 +154,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_entity_1.UsersEntity, Array]),
     __metadata("design:returntype", Promise)
-], ReviewsController.prototype, "statusUpdate", null);
+], ReviewsController.prototype, "remove", null);
 ReviewsController = __decorate([
     (0, common_1.Controller)('reviews'),
     (0, swagger_1.ApiTags)('후기 API'),

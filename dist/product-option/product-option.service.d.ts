@@ -6,18 +6,20 @@ import { Repository } from 'typeorm';
 import { ProductService } from 'src/product/product.service';
 import { FileService } from 'src/file/file.service';
 import { ProductInfoService } from 'src/product-info/product-info.service';
+import { ExcelService } from 'src/excel/excel.service';
 export declare class ProductOptionService {
     private productOptionRepository;
     private readonly productService;
     private readonly fileService;
     private readonly productInfoService;
-    constructor(productOptionRepository: Repository<ProductOptionEntity>, productService: ProductService, fileService: FileService, productInfoService: ProductInfoService);
+    private readonly excelService;
+    constructor(productOptionRepository: Repository<ProductOptionEntity>, productService: ProductService, fileService: FileService, productInfoService: ProductInfoService, excelService: ExcelService);
     create(createProductOptionDto: CreateProductOptionDto, files: any): Promise<{
         productOption: ProductOptionEntity;
         file_info: any;
     }>;
     productOptionCreateCode(): Promise<string>;
-    findAll(options: PaginationOptions, search: string[]): Promise<{
+    findAll(options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<ProductOptionEntity>;
         file_info: {};
     }>;
@@ -28,4 +30,8 @@ export declare class ProductOptionService {
     findIdx(idx: number): Promise<ProductOptionEntity>;
     update(id: number, updateProductOptionDto: UpdateProductOptionDto): string;
     remove(id: number): string;
+    createExcel(options: PaginationOptions, search: string[], order: string): Promise<{
+        file_name: string;
+        file_path: string;
+    }>;
 }

@@ -25,6 +25,8 @@ export declare class ReservationController {
         reservation: import("./entities/reservation.entity").ReservationEntity;
         file_info: {};
     }>;
+    guestConfirmation(user: UsersEntity, idx: string): Promise<void>;
+    hostApproval(user: UsersEntity, idx: string): Promise<void>;
     update(user: UsersEntity, idx: string): Promise<void>;
     guestCancel(user: UsersEntity, idx: string): Promise<void>;
     hostCancel(user: UsersEntity, idx: string): Promise<void>;

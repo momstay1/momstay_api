@@ -23,15 +23,19 @@ const moment = require("moment");
 const paginate_1 = require("../paginate");
 const common_utils_1 = require("../common/common.utils");
 const product_service_1 = require("../product/product.service");
+const excel_service_1 = require("../excel/excel.service");
+const settings_service_1 = require("../settings/settings.service");
 const schedule_1 = require("@nestjs/schedule");
 const applicationStatus = 1;
 const approvalStatus = 2;
 const endStatus = 3;
 let MembershipService = class MembershipService {
-    constructor(membershipHistoryRepository, userService, productService) {
+    constructor(membershipHistoryRepository, userService, productService, excelService, settingsService) {
         this.membershipHistoryRepository = membershipHistoryRepository;
         this.userService = userService;
         this.productService = productService;
+        this.excelService = excelService;
+        this.settingsService = settingsService;
     }
     async create(userInfo, createMembershipDto) {
         const user = await this.userService.findId(userInfo['id']);
@@ -66,20 +70,49 @@ let MembershipService = class MembershipService {
     async findAll(options, search, order) {
         const { take, page } = options;
         const where = common_utils_1.commonUtils.searchSplit(search);
-        where['status'] = (0, lodash_1.get)(where, 'status', [1, 2, 3]);
+        where['status'] = (0, lodash_1.get)(where, 'status', [
+            applicationStatus,
+            approvalStatus,
+            endStatus,
+        ]);
         const alias = 'membership';
         let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
         order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
-        const [results, total] = await this.membershipHistoryRepository.createQueryBuilder('membership')
+        const [results, total] = await this.membershipHistoryRepository
+            .createQueryBuilder('membership')
             .leftJoinAndSelect('membership.user', 'user')
-            .where(qb => {
-            qb.where('`membership`.status IN (:status)', { status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'status')) ? (0, lodash_1.get)(where, 'status') : [(0, lodash_1.get)(where, 'status')] });
-            ((0, lodash_1.get)(where, 'depositor', '')) && qb.andWhere('`membership`.`depositor` = :depositor', { depositor: (0, lodash_1.get)(where, 'depositor') });
-            ((0, lodash_1.get)(where, 'month', '')) && qb.andWhere('`membership`.`month` IN (:month)', { month: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'month')) ? (0, lodash_1.get)(where, 'month') : [(0, lodash_1.get)(where, 'month')] });
+            .where((qb) => {
+            qb.where('`membership`.status IN (:status)', {
+                status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'status'))
+                    ? (0, lodash_1.get)(where, 'status')
+                    : [(0, lodash_1.get)(where, 'status')],
+            });
+            (0, lodash_1.get)(where, 'depositor', '') &&
+                qb.andWhere('`membership`.`depositor` LIKE :depositor', {
+                    depositor: '%' + (0, lodash_1.get)(where, 'depositor') + '%',
+                });
+            (0, lodash_1.get)(where, 'name', '') &&
+                qb.andWhere('`user`.`name` LIKE :name', {
+                    name: '%' + (0, lodash_1.get)(where, 'name') + '%',
+                });
+            (0, lodash_1.get)(where, 'id', '') &&
+                qb.andWhere('`user`.`id` LIKE :id', {
+                    id: '%' + (0, lodash_1.get)(where, 'id') + '%',
+                });
+            (0, lodash_1.get)(where, 'phone', '') &&
+                qb.andWhere('`user`.`phone` LIKE :phone', {
+                    phone: '%' + (0, lodash_1.get)(where, 'phone') + '%',
+                });
+            (0, lodash_1.get)(where, 'month', '') &&
+                qb.andWhere('`membership`.`month` IN (:month)', {
+                    month: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'month'))
+                        ? (0, lodash_1.get)(where, 'month')
+                        : [(0, lodash_1.get)(where, 'month')],
+                });
         })
             .orderBy(order_by)
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
         const data = new paginate_1.Pagination({
             results,
@@ -98,7 +131,7 @@ let MembershipService = class MembershipService {
         }
         const membership = await this.membershipHistoryRepository.findOne({
             where: { idx: idx },
-            relations: ['user']
+            relations: ['user'],
         });
         if (!(0, lodash_1.get)(membership, 'idx', '')) {
             throw new common_1.NotFoundException('조회된 멤버십 정보가 없습니다.');
@@ -111,10 +144,10 @@ let MembershipService = class MembershipService {
         }
         const membership = await this.membershipHistoryRepository.findOne({
             where: {
-                user: { idx: userIdx }
+                user: { idx: userIdx },
             },
             order: { createdAt: 'DESC' },
-            relations: ['user']
+            relations: ['user'],
         });
         if (!(0, lodash_1.get)(membership, 'idx', '')) {
             throw new common_1.NotFoundException('조회된 멤버십 정보가 없습니다.');
@@ -130,25 +163,41 @@ let MembershipService = class MembershipService {
         return `This action updates a #${id} membership`;
     }
     async changeStatus(idx, status) {
-        await this.membershipHistoryRepository.createQueryBuilder()
+        await this.membershipHistoryRepository
+            .createQueryBuilder()
             .update()
             .set({ status: status })
-            .where(" idx = :idx", { idx: idx })
+            .where(' idx = :idx', { idx: idx })
             .execute();
     }
-    async membershipApproval(idx, updateMembershipDto) {
-        const membershipInfo = await this.findOneIdx(idx);
-        if (membershipInfo['status'] == approvalStatus) {
-            throw new common_1.NotAcceptableException('이미 처리 완료된 멤버십입니다.');
+    async membershipStatusChange(idx, updateMembershipDto) {
+        if (!(0, lodash_1.get)(updateMembershipDto, ['status'], '')) {
+            throw new common_1.NotAcceptableException('membership.service.membershipStatusChange: 변경 할 상태값이 없습니다.');
         }
-        membershipInfo['status'] = (0, lodash_1.get)(updateMembershipDto, 'status', approvalStatus);
+        const membershipInfo = await this.findOneIdx(idx);
+        if (membershipInfo['status'] == updateMembershipDto['status']) {
+            throw new common_1.NotAcceptableException('membership.service.membershipStatusChange: 이미 처리된 상태 입니다.');
+        }
+        membershipInfo['status'] = (0, lodash_1.get)(updateMembershipDto, 'status');
         membershipInfo['month'] = (0, lodash_1.get)(updateMembershipDto, 'month', membershipInfo['month']);
-        const start = moment().format('YYYY-MM-DD');
-        const end = moment().add(membershipInfo['month'], 'months').format('YYYY-MM-DD');
-        membershipInfo['start'] = start;
-        membershipInfo['end'] = end;
+        let membershipStatus;
+        if (updateMembershipDto['status'] == approvalStatus) {
+            const start = moment().format('YYYY-MM-DD');
+            const end = moment()
+                .add(membershipInfo['month'], 'months')
+                .format('YYYY-MM-DD');
+            membershipInfo['start'] = start;
+            membershipInfo['end'] = end;
+            const membership = await this.membershipHistoryRepository.save(membershipInfo);
+            membershipStatus = '1';
+            await this.productService.updateMembership(membership['user']['idx'], membershipStatus);
+        }
+        else {
+            membershipInfo['start'] = null;
+            membershipInfo['end'] = null;
+            membershipStatus = '0';
+        }
         const membership = await this.membershipHistoryRepository.save(membershipInfo);
-        const membershipStatus = '1';
         await this.productService.updateMembership(membership['user']['idx'], membershipStatus);
         return { membership };
     }
@@ -158,9 +207,10 @@ let MembershipService = class MembershipService {
     async checkMembership() {
         console.log('[cron] checkMembership: ', moment().format('YYYY-MM-DD HH:mm:ss'));
         const today = moment().format('YYYY-MM-DD');
-        const memberships = await this.membershipHistoryRepository.createQueryBuilder('membership')
+        const memberships = await this.membershipHistoryRepository
+            .createQueryBuilder('membership')
             .leftJoinAndSelect('membership.user', 'user')
-            .where(qb => {
+            .where((qb) => {
             qb.where('`membership`.status = :status', { status: approvalStatus });
             qb.andWhere('`membership`.end < :end', { end: today });
         })
@@ -174,6 +224,17 @@ let MembershipService = class MembershipService {
             }
         }
     }
+    async createExcel(options, search, order) {
+        const { data } = await this.findAll(options, search, order);
+        if (!data) {
+            throw new common_1.NotFoundException('membership.service.excel: 다운로드할 데이터가 없습니다.');
+        }
+        const membership_price = await this.settingsService.find('membership_price');
+        return this.excelService.createExcel(data, {
+            type: 'membership',
+            settingsData: membership_price,
+        });
+    }
 };
 __decorate([
     (0, schedule_1.Cron)('0 0 1 * * *'),
@@ -186,7 +247,9 @@ MembershipService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(membership_history_entity_1.MembershipHistoryEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         users_service_1.UsersService,
-        product_service_1.ProductService])
+        product_service_1.ProductService,
+        excel_service_1.ExcelService,
+        settings_service_1.SettingsService])
 ], MembershipService);
 exports.MembershipService = MembershipService;
 //# sourceMappingURL=membership.service.js.map

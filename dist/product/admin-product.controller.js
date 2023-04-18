@@ -17,18 +17,23 @@ const common_1 = require("@nestjs/common");
 const product_service_1 = require("./product.service");
 const update_product_dto_1 = require("./dto/update-product.dto");
 const swagger_1 = require("@nestjs/swagger");
+const role_decorator_1 = require("../common/decorator/role.decorator");
+const fs_1 = require("fs");
 let AdminProductController = class AdminProductController {
     constructor(productService) {
         this.productService = productService;
     }
-    async adminFindAll(take, page, search) {
-        const { data: { results, total, pageTotal }, file_info } = await this.productService.adminFindAll({ take, page }, search);
-        return {
-            results,
-            total,
-            pageTotal,
-            file_info
-        };
+    async adminFindAll(take, page, search, order) {
+        const { data, file_info } = await this.productService.adminFindAll({ take, page }, search, order);
+        return Object.assign(Object.assign({}, data), { file_info });
+    }
+    async excelDownload(take, page, search, order, res) {
+        const excel_file = await this.productService.createExcel({ take, page }, search, order);
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="' + excel_file.file_name + '"',
+        });
+        (0, fs_1.createReadStream)(excel_file.file_path).pipe(res);
     }
     async findOne(idx) {
         return await this.productService.adminFindOne(+idx);
@@ -36,28 +41,70 @@ let AdminProductController = class AdminProductController {
     update(id, updateProductDto) {
         return this.productService.update(+id, updateProductDto);
     }
-    remove(id) {
-        return this.productService.remove(+id);
+    async remove(idx) {
+        await this.productService.remove(+idx);
     }
 };
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: '숙소 리스트 조회 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiQuery)({
-        name: "search",
-        description: 'search=membership:(0|1)<br>'
-            + 'search=keyword:메인검색<br>'
-            + 'search=user_idx:회원idx<br>'
-            + 'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
-        required: false
+        name: 'search',
+        description: 'search=membership:(0|1)<br>' +
+            'search=keyword:메인검색<br>' +
+            'search=user_idx:회원idx(사용안함)<br>' +
+            'search=title:숙소이름<br>' +
+            'search=name:호스트이름<br>' +
+            'search=id:호스트아이디<br>' +
+            'search=type:숙소 구분<br>' +
+            'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'order',
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false,
     }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
     __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, Array]),
+    __metadata("design:paramtypes", [Number, Number, Array, String]),
     __metadata("design:returntype", Promise)
 ], AdminProductController.prototype, "adminFindAll", null);
+__decorate([
+    (0, common_1.Get)('excel'),
+    (0, swagger_1.ApiOperation)({ summary: '숙소 리스트 엑셀 다운로드 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({
+        name: 'search',
+        description: 'search=membership:(0|1)<br>' +
+            'search=keyword:메인검색<br>' +
+            'search=user_idx:회원idx(사용안함)<br>' +
+            'search=title:숙소이름<br>' +
+            'search=name:호스트이름<br>' +
+            'search=id:호스트아이디<br>' +
+            'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
+        required: false,
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'order',
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false,
+    }),
+    __param(0, (0, common_1.Query)('take')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('order')),
+    __param(4, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, Array, String, Object]),
+    __metadata("design:returntype", Promise)
+], AdminProductController.prototype, "excelDownload", null);
 __decorate([
     (0, common_1.Get)(':idx'),
     (0, swagger_1.ApiOperation)({ summary: '숙소 상세 조회 API' }),
@@ -75,15 +122,19 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminProductController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(':idx'),
+    (0, swagger_1.ApiOperation)({ summary: '숙소 삭제 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, common_1.Param)('idx')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AdminProductController.prototype, "remove", null);
 AdminProductController = __decorate([
     (0, common_1.Controller)('admin/product'),
-    (0, swagger_1.ApiTags)('관리자 숙소 API'),
+    (0, swagger_1.ApiTags)('숙소(관리자) API'),
     __metadata("design:paramtypes", [product_service_1.ProductService])
 ], AdminProductController);
 exports.AdminProductController = AdminProductController;

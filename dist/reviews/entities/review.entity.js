@@ -20,7 +20,7 @@ __decorate([
     __metadata("design:type", Number)
 ], ReviewEntity.prototype, "idx", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 2, comment: '상태 (1: 삭제, 2: 등록)' }),
+    (0, typeorm_1.Column)({ default: 2, comment: '상태 (-1: 삭제, 1: 미등록, 2: 등록)' }),
     __metadata("design:type", Number)
 ], ReviewEntity.prototype, "status", void 0);
 __decorate([

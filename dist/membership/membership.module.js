@@ -15,6 +15,8 @@ const membership_history_entity_1 = require("./entities/membership-history.entit
 const admin_membership_controller_1 = require("./admin-membership.controller");
 const users_module_1 = require("../users/users.module");
 const product_module_1 = require("../product/product.module");
+const excel_service_1 = require("../excel/excel.service");
+const settings_module_1 = require("../settings/settings.module");
 let MembershipModule = class MembershipModule {
 };
 MembershipModule = __decorate([
@@ -22,11 +24,12 @@ MembershipModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([membership_history_entity_1.MembershipHistoryEntity]),
             users_module_1.UsersModule,
-            product_module_1.ProductModule
+            product_module_1.ProductModule,
+            settings_module_1.SettingsModule,
         ],
         controllers: [membership_controller_1.MembershipController, admin_membership_controller_1.AdminMembershipController],
-        providers: [membership_service_1.MembershipService],
-        exports: [membership_service_1.MembershipService]
+        providers: [membership_service_1.MembershipService, excel_service_1.ExcelService],
+        exports: [membership_service_1.MembershipService],
     })
 ], MembershipModule);
 exports.MembershipModule = MembershipModule;

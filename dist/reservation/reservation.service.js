@@ -24,13 +24,27 @@ const push_notification_service_1 = require("../push-notification/push-notificat
 const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const reservation_entity_1 = require("./entities/reservation.entity");
+const excel_service_1 = require("../excel/excel.service");
+const readyStatus = 1;
+const approvalStatus = 2;
+const confirmationStatus = 3;
+const cancelStatus = 4;
+const refusalStatus = 5;
+const status = [
+    readyStatus,
+    approvalStatus,
+    confirmationStatus,
+    cancelStatus,
+    refusalStatus,
+];
 let ReservationService = class ReservationService {
-    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService) {
+    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService, excelSerivce) {
         this.reservationRepository = reservationRepository;
         this.productOptionService = productOptionService;
         this.usersService = usersService;
         this.fileService = fileService;
         this.pushNotiService = pushNotiService;
+        this.excelSerivce = excelSerivce;
     }
     async create(userInfo, createReservationDto) {
         const po = await this.productOptionService.findIdx(createReservationDto.productOptionIdx);
@@ -41,7 +55,8 @@ let ReservationService = class ReservationService {
             throw new common_1.NotAcceptableException('방문예약을 사용하지 않는 방입니다.');
         }
         const user = await this.usersService.findId(userInfo.id);
-        if (user['group']['id'] == 'host' && user['idx'] == (0, lodash_1.get)(po, ['product', 'user', 'idx'], '')) {
+        if (user['group']['id'] == 'host' &&
+            user['idx'] == (0, lodash_1.get)(po, ['product', 'user', 'idx'], '')) {
             throw new common_1.NotAcceptableException('자신의 방은 예약할 수 없습니다.');
         }
         const reservation_data = {
@@ -51,7 +66,7 @@ let ReservationService = class ReservationService {
             evictionAt: createReservationDto.evictionAt,
             memo: createReservationDto.memo,
             productOption: po,
-            user: user
+            user: user,
         };
         const reservationEntity = await this.reservationRepository.create(reservation_data);
         const reservation = await this.reservationRepository.save(reservationEntity);
@@ -64,20 +79,21 @@ let ReservationService = class ReservationService {
     }
     async hostFindAll(options, userInfo) {
         const { take, page } = options;
-        const [results, total] = await this.reservationRepository.createQueryBuilder('reservation')
+        const [results, total] = await this.reservationRepository
+            .createQueryBuilder('reservation')
             .leftJoinAndSelect('reservation.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'user')
             .where((qb) => {
-            qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
+            qb.where('`reservation`.status IN (:status)', { status: status });
             if (userInfo['group'] == 'host') {
                 qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
             }
         })
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
-        const product_option_idxs = (0, lodash_1.map)(results, o => o.productOption.idx);
+        const product_option_idxs = (0, lodash_1.map)(results, (o) => o.productOption.idx);
         let file_info = {};
         try {
             file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
@@ -95,20 +111,63 @@ let ReservationService = class ReservationService {
     }
     async guestFindAll(options, userInfo) {
         const { take, page } = options;
-        const [results, total] = await this.reservationRepository.createQueryBuilder('reservation')
+        const [results, total] = await this.reservationRepository
+            .createQueryBuilder('reservation')
             .leftJoinAndSelect('reservation.productOption', 'productOption')
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('reservation.user', 'user')
             .where((qb) => {
-            qb.where('`reservation`.status IN (:status)', { status: [1, 2, 4, 5] });
+            qb.where('`reservation`.status IN (:status)', { status: status });
             if (['host', 'guest'].includes(userInfo['group'])) {
                 qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
             }
         })
-            .skip((take * (page - 1) || 0))
-            .take((take || 10))
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
             .getManyAndCount();
-        const product_option_idxs = (0, lodash_1.map)(results, o => o.productOption.idx);
+        const product_option_idxs = (0, lodash_1.map)(results, (o) => o.productOption.idx);
+        let file_info = {};
+        try {
+            file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
+            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+        }
+        catch (error) {
+            console.log('방 리스트 이미지 파일 없음');
+        }
+        const data = new paginate_1.Pagination({
+            results,
+            total,
+            page,
+        });
+        return { data, file_info };
+    }
+    async findAll(userInfo, options, search, order) {
+        const { take, page } = options;
+        const where = common_utils_1.commonUtils.searchSplit(search);
+        where['status'] = (0, lodash_1.get)(where, 'status', status);
+        const alias = 'reservation';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
+        const [results, total] = await this.reservationRepository
+            .createQueryBuilder('reservation')
+            .leftJoinAndSelect('reservation.user', 'guestUser')
+            .leftJoinAndSelect('reservation.productOption', 'productOption')
+            .leftJoinAndSelect('productOption.product', 'product')
+            .leftJoinAndSelect('product.user', 'hostUser')
+            .where((qb) => {
+            qb.where('`reservation`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
+            (0, lodash_1.get)(where, 'po_title', '') && qb.andWhere('`productOption`.title LIKE :po_title', { po_title: '%' + where['po_title'] + '%' });
+            (0, lodash_1.get)(where, 'name', '') && qb.andWhere('`guestUser`.name LIKE :name', { name: '%' + where['name'] + '%' });
+            (0, lodash_1.get)(where, 'email', '') && qb.andWhere('`guestUser`.email LIKE :email', { email: '%' + where['email'] + '%' });
+            (0, lodash_1.get)(where, 'id', '') && qb.andWhere('`guestUser`.id LIKE :id', { id: '%' + where['id'] + '%' });
+            (0, lodash_1.get)(where, 'min_visit_date', '') && qb.andWhere('`reservation`.visitDate >= :min_visit_date', { min_visit_date: where['min_visit_date'] });
+            (0, lodash_1.get)(where, 'max_visit_date', '') && qb.andWhere('`reservation`.visitDate <= :max_visit_date', { max_visit_date: where['max_visit_date'] });
+        })
+            .orderBy(order_by)
+            .skip(take * (page - 1) || 0)
+            .take(take || 10)
+            .getManyAndCount();
+        const product_option_idxs = (0, lodash_1.map)(results, (o) => o.productOption.idx);
         let file_info = {};
         try {
             file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], product_option_idxs);
@@ -127,18 +186,26 @@ let ReservationService = class ReservationService {
     async findOne(idx) {
         const reservation = await this.findOneIdx(idx);
         let file_info = {};
+        let po_file = [];
+        let product_file = [];
         try {
-            file_info = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [reservation.productOption.idx]);
-            file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+            po_file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [reservation.productOption.idx]);
         }
         catch (error) {
             console.log('방 리스트 이미지 파일 없음');
         }
+        try {
+            product_file = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [reservation.productOption.product.idx]);
+        }
+        catch (error) {
+            console.log('숙소 리스트 이미지 파일 없음');
+        }
+        file_info = common_utils_1.commonUtils.getArrayKey([...po_file, ...product_file], ['file_foreign_idx', 'file_category'], true);
         return { reservation, file_info };
     }
     async findOneIdx(idx) {
         if (!idx) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('reservation.service.findOneIdx: 잘못된 정보 입니다.');
         }
         const reservation = await this.reservationRepository.findOne({
             where: { idx: idx },
@@ -148,19 +215,58 @@ let ReservationService = class ReservationService {
                 'productOption.product.user',
                 'productOption.product.user.device',
                 'user',
-                'user.device'
-            ]
+                'user.device',
+            ],
         });
         if (!reservation.idx) {
-            throw new common_1.NotFoundException('정보를 찾을 수 없습니다.');
+            throw new common_1.NotFoundException('reservation.service.findOneIdx: 정보를 찾을 수 없습니다.');
         }
         return reservation;
+    }
+    async findIdxs(idxs) {
+        if (idxs.length <= 0) {
+            throw new common_1.NotFoundException('reservation.service.findIdxs: 잘못된 정보 입니다.');
+        }
+        const reservation = await this.reservationRepository.find({
+            where: { idx: (0, typeorm_2.In)(idxs) },
+            relations: [
+                'productOption',
+                'productOption.product',
+                'productOption.product.user',
+                'productOption.product.user.device',
+                'user',
+                'user.device',
+            ],
+        });
+        if (reservation.length <= 0) {
+            throw new common_1.NotFoundException('reservation.service.findIdxs: 정보를 찾을 수 없습니다.');
+        }
+        return reservation;
+    }
+    async guestConfirmation(userInfo, idx) {
+        const reservation = await this.findOneIdx(idx);
+        await this.authCheckStatus(userInfo, reservation.user.idx);
+        await this.changeStatus(confirmationStatus, idx);
+        const { user } = (0, lodash_1.get)(reservation, ['productOption', 'product']);
+        if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
+            await this.pushNotiService.guestReservationConfirmationPush(user, reservation);
+        }
+    }
+    async hostApproval(userInfo, idx) {
+        const reservation = await this.findOneIdx(idx);
+        await this.processCheckStatus(reservation.status);
+        await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
+        await this.changeStatus(approvalStatus, idx);
+        const { user } = reservation;
+        if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
+            await this.pushNotiService.hostReservationApprovalPush(user, reservation);
+        }
     }
     async update(userInfo, idx) {
         const reservation = await this.findOneIdx(idx);
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
-        await this.changeStatus(2, idx);
+        await this.changeStatus(approvalStatus, idx);
         const { user } = reservation;
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.hostReservationApprovalPush(user, reservation);
@@ -170,7 +276,7 @@ let ReservationService = class ReservationService {
         const reservation = await this.findOneIdx(idx);
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.user.idx);
-        await this.changeStatus(4, idx);
+        await this.changeStatus(cancelStatus, idx);
         const { user } = (0, lodash_1.get)(reservation, ['productOption', 'product']);
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationCancelPush(user, reservation);
@@ -180,31 +286,62 @@ let ReservationService = class ReservationService {
         const reservation = await this.findOneIdx(idx);
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
-        await this.changeStatus(5, idx);
+        await this.changeStatus(refusalStatus, idx);
         const { user } = reservation;
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.hostReservationCancelPush(user, reservation);
         }
     }
     async processCheckStatus(status) {
-        if (status != 1) {
-            throw new common_1.NotAcceptableException('이미 처리된 방문예약입니다.');
+        if (status != readyStatus) {
+            throw new common_1.NotAcceptableException('reservation.service.processCheckStatus: 이미 처리된 방문예약입니다.');
         }
     }
     async authCheckStatus({ group, id }, idx) {
         if (!common_utils_1.commonUtils.isAdmin(group)) {
             const user = await this.usersService.findId(id);
             if (user.idx != idx) {
-                throw new common_1.NotAcceptableException('거부할 수 없는 방문 예약 입니다.');
+                throw new common_1.NotAcceptableException('reservation.service.authCheckStatus: 거부할 수 없는 방문 예약 입니다.');
             }
         }
     }
     async changeStatus(status, idx) {
-        await this.reservationRepository.createQueryBuilder()
+        await this.reservationRepository
+            .createQueryBuilder()
             .update(reservation_entity_1.ReservationEntity)
             .set({ status: status })
-            .where(" idx IN (:idx)", { idx: idx })
+            .where(' idx IN (:idx)', { idx: idx })
             .execute();
+    }
+    async adminChangeStatus(status, idxs) {
+        const reservations = await this.findIdxs(idxs);
+        await this.changeStatus(status, idxs);
+        for (const key in reservations) {
+            const guestUser = reservations[key].user;
+            const hostUser = reservations[key].productOption.product.user;
+            await this.pushNotiService.adminReservationStatusChange(guestUser, hostUser, reservations[key]);
+        }
+    }
+    async dashboard(month) {
+        const reservation_cnt = await this.reservationRepository
+            .createQueryBuilder()
+            .select('COUNT(`idx`)', 'total_cnt')
+            .where((qb) => {
+            qb.where('DATE_FORMAT(`createdAt`, "%Y-%m") = :month', {
+                month: month,
+            });
+        })
+            .execute();
+        return reservation_cnt;
+    }
+    async createExcel(userInfo, options, search, order) {
+        const reservation = await this.findAll(userInfo, options, search, order);
+        if (!reservation) {
+            throw new common_1.NotFoundException('reservation.service.excel: 다운로드할 데이터가 없습니다.');
+        }
+        return this.excelSerivce.createExcel(reservation['data'], {
+            type: 'reservation',
+        });
     }
 };
 ReservationService = __decorate([
@@ -214,7 +351,8 @@ ReservationService = __decorate([
         product_option_service_1.ProductOptionService,
         users_service_1.UsersService,
         file_service_1.FileService,
-        push_notification_service_1.PushNotificationService])
+        push_notification_service_1.PushNotificationService,
+        excel_service_1.ExcelService])
 ], ReservationService);
 exports.ReservationService = ReservationService;
 //# sourceMappingURL=reservation.service.js.map

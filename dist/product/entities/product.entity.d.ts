@@ -1,7 +1,7 @@
-import { CollegeEntity } from "src/college/entities/college.entity";
-import { MetroEntity } from "src/metro/entities/metro.entity";
-import { ProductInfoEntity } from "src/product-info/entities/product-info.entity";
-import { UsersEntity } from "src/users/entities/user.entity";
+import { CollegeEntity } from 'src/college/entities/college.entity';
+import { MetroEntity } from 'src/metro/entities/metro.entity';
+import { ProductInfoEntity } from 'src/product-info/entities/product-info.entity';
+import { UsersEntity } from 'src/users/entities/user.entity';
 export declare class ProductEntity {
     idx: number;
     status: number;

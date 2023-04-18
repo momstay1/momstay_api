@@ -7,10 +7,13 @@ export declare class FileEntity {
     file_path: string;
     file_full_path: string;
     file_storage_path: string;
+    file_watermark_storage_path: string;
+    file_watermark_path: string;
     file_html_path: string;
     file_html_full_path: string;
     file_html_thumb_path: string;
     file_raw_name: string;
+    file_watermark_name: string;
     file_orig_name: string;
     file_client_name: string;
     file_ext: string;

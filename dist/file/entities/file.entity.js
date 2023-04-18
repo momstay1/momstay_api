@@ -42,9 +42,17 @@ __decorate([
     __metadata("design:type", String)
 ], FileEntity.prototype, "file_full_path", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: '' }),
+    (0, typeorm_1.Column)({ default: '', comment: '이미지 스토리지 서버 경로' }),
     __metadata("design:type", String)
 ], FileEntity.prototype, "file_storage_path", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '', comment: '워터마크 추가된 이미지 스토리지 서버 경로' }),
+    __metadata("design:type", String)
+], FileEntity.prototype, "file_watermark_storage_path", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '', comment: '워터마크 추가된 이미지 경로' }),
+    __metadata("design:type", String)
+], FileEntity.prototype, "file_watermark_path", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
@@ -58,9 +66,13 @@ __decorate([
     __metadata("design:type", String)
 ], FileEntity.prototype, "file_html_thumb_path", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: '' }),
+    (0, typeorm_1.Column)({ default: '', comment: '랜덤 처리된 이미지 이름' }),
     __metadata("design:type", String)
 ], FileEntity.prototype, "file_raw_name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '', comment: '워터마크 추가된 이미지 이름' }),
+    __metadata("design:type", String)
+], FileEntity.prototype, "file_watermark_name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)

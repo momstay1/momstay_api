@@ -23,25 +23,38 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '숙소 상태 <br>(0: 미등록, 1: 미사용, 2: 사용)', required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '숙소 상태 <br>(-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)',
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '숙소 유형', required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '숙소 유형 <br>(1: 하숙집, 2: 쉐어하우스, 3: 게스트하우스, 4: 홈스테이)',
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "type", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '멤버쉽 유무(0: 미사용, 1: 사용)', default: 0, required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '멤버쉽 유무(0: 미사용, 1: 사용)',
+        default: 0,
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "membership", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '사업자 구분 <br>(1: 개인사업자, 2: 법인사업자, 3: 개인)', required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '사업자 구분 <br>(1: 개인사업자, 2: 법인사업자, 3: 개인)',
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "hostBusiness", void 0);
 __decorate([
@@ -125,7 +138,12 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '호스트 사용 언어 <br>(KR: 한국어, EN: 영어, JP: 일어, CH: 중국어)', example: "KR,EN", default: "KR", required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '호스트 사용 언어 <br>(KR: 한국어, EN: 영어, JP: 일어, CH: 중국어)',
+        example: 'KR,EN',
+        default: 'KR',
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "language", void 0);
 __decorate([
@@ -184,13 +202,19 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '유지될 파일 idx <br> (ex> 33,34)', required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '유지될 파일 idx <br> (ex> 33,34)',
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "filesIdx", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '생활 및 편의 <br> (ex> 33,34)', required: false }),
+    (0, swagger_1.ApiProperty)({
+        description: '생활 및 편의 <br> (ex> 33,34)',
+        required: false,
+    }),
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "productInfoIdx", void 0);
 __decorate([
@@ -200,7 +224,11 @@ __decorate([
 ], CreateProductDto.prototype, "lodgingDetailImg", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, swagger_1.ApiProperty)({ format: 'binary', description: '식사 서비스 사진', required: false }),
+    (0, swagger_1.ApiProperty)({
+        format: 'binary',
+        description: '식사 서비스 사진',
+        required: false,
+    }),
     __metadata("design:type", Array)
 ], CreateProductDto.prototype, "mealsImg", void 0);
 exports.CreateProductDto = CreateProductDto;
