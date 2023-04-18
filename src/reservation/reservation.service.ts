@@ -259,6 +259,25 @@ export class ReservationService {
     return { data, file_info };
   }
 
+  async findOne(idx: number) {
+    const reservation = await this.findOneIdx(idx);
+    let file_info = {};
+    let po_file = [];
+    let product_file = [];
+    try {
+      po_file = await this.fileService.findCategoryForeignAll(['roomDetailImg'], [reservation.productOption.idx]);
+    } catch (error) {
+      console.log('방 리스트 이미지 파일 없음');
+    }
+    try {
+      product_file = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], [reservation.productOption.product.idx]);
+    } catch (error) {
+      console.log('숙소 리스트 이미지 파일 없음');
+    }
+    file_info = commonUtils.getArrayKey([...po_file, ...product_file], ['file_foreign_idx', 'file_category'], true);
+    return { reservation, file_info };
+  }
+
   async findOneIdx(idx: number) {
     if (!idx) {
       throw new NotFoundException(
