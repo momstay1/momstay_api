@@ -322,5 +322,8 @@ export const commonUtils = {
         break;
     }
     return result;
-  }
+  },
+  formatPrice(price) {
+    return new Intl.NumberFormat().format(price);
+  },
 };
