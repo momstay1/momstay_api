@@ -116,6 +116,11 @@ export class EmailService {
       board_title: '#{게시판이름}',
       inquiry_content: '#{문의내용}',
       answer_content: '#{답변내용}',
+      payment: '#{결제금액}',
+      po_payment: '#{방금액}',
+      tax: '#{부가세}',
+      fee: '#{수수료}',
+      cancel_reason: '#{취소사유}',
       // link: '#{링크}',
       // logo: '#{로고 이미지 변수}',
     };

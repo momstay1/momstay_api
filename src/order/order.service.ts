@@ -25,6 +25,7 @@ import { PushNotificationService } from 'src/push-notification/push-notification
 
 import * as moment from 'moment';
 import { SettingsService } from 'src/settings/settings.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class OrderService {
@@ -42,6 +43,7 @@ export class OrderService {
     private readonly pushNotiService: PushNotificationService,
     private readonly settingsService: SettingsService,
     private readonly excelService: ExcelService,
+    private readonly emailService: EmailService,
   ) { }
 
   async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
@@ -171,7 +173,8 @@ export class OrderService {
       await this.pushNotiService.guestOrderPush(user, po);
     }
 
-    // 바로결제 메일 발송 (관리자, 호스트, 게스트)
+    // 주문 관련 메일
+    await this.guestOrderMail(order.idx, '');
 
     return { order, orderProduct, po, priceInfo };
   }
@@ -694,7 +697,7 @@ export class OrderService {
     }
 
     // 취소 사유
-    const cancelReason = '게스트 취소';
+    const cancelReason = 'guest cancel';
     // 취소 처리
     await this.cancelProcess(order, cancelReason);
 
@@ -706,6 +709,9 @@ export class OrderService {
     if (get(hostUser, ['device', 'token'], '')) {
       await this.pushNotiService.guestOrderCancelPush(hostUser, po);
     }
+
+    // 주문 관련 메일
+    await this.guestOrderMail(order.idx, cancelReason);
   }
 
   async hostOrderApproval(code: string, userInfo: UsersEntity) {
@@ -756,6 +762,10 @@ export class OrderService {
       // 게스트에게 바로결제 승인 push 알림 발송
       await this.pushNotiService.hostOrderApprovalPush(guestUser, orderInfo);
     }
+
+    // 주문 관련 메일
+    // 주문 관련 메일
+    await this.hostOrderMail(order.idx, '');
   }
 
   async hostOrderCancel(
@@ -803,8 +813,7 @@ export class OrderService {
     }
 
     // 취소 사유
-    const cancelReason =
-      '호스트 취소(' + get(updateOrderDto, 'cancelReason', '') + ')';
+    const cancelReason = 'host cancel(' + get(updateOrderDto, 'cancelReason', '') + ')';
 
     // 취소 처리
     await this.cancelProcess(order, cancelReason);
@@ -815,6 +824,13 @@ export class OrderService {
     if (get(guestUser, ['device', 'token'], '')) {
       // 게스트에게 바로결제 거절 push 알림 발송
       await this.pushNotiService.hostOrderCancelPush(guestUser, orderInfo);
+    }
+
+    // 주문 관련 메일
+    if (['root', 'admin'].includes(user.group.id)) {
+      await this.adminOrderMail(order.idx, 'momstay cancel');
+    } else {
+      await this.hostOrderMail(order.idx, cancelReason);
     }
   }
 
@@ -884,6 +900,216 @@ export class OrderService {
 
   remove(id: number) {
     return `This action removes a #${id} order`;
+  }
+
+  // 주문 메일 발송 데이터
+  async orderMailSendInfo(orderIdx: number) {
+    const order = await this.findOneIdx(orderIdx);
+
+    const guestUser = order.user;
+    const hostUser = order.orderProduct[0].productOption.product.user;
+
+    const lang = commonUtils.langValue(
+      guestUser.language == 'ko' ? guestUser.language : 'en'
+    );
+
+    let po_title = order.orderProduct[0].productOption['title' + lang];
+    let po_title_ko;
+    let po_title_en;
+    if (order.orderProduct.length > 1) {
+      po_title_ko += po_title + ' 외 ' + order.orderProduct.length + '건';
+      po_title_en += po_title + ' and ' + order.orderProduct.length + ' other case';
+    }
+    const sendInfo = {
+      po_title: po_title_ko,
+      product_title: order.orderProduct[0].productOption.product['title' + lang],
+      occupancy_date: order.orderProduct[0].startAt,
+      eviction_date: order.orderProduct[0].endAt,
+      payment: order.orderProduct[0].payPrice, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      po_payment: order.orderProduct[0].price, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      tax: order.orderProduct[0].taxPrice, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      fee: order.orderProduct[0].feePrice, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      user_name: guestUser.name,
+      phone: guestUser.countryCode + ' ' + guestUser.phone,
+      cancel_reason: '',
+    };
+
+    const site = await this.settingsService.find('site');
+
+    return {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    };
+  }
+
+  // 게스트가 이벤트 발생시 메일 발송
+  async guestOrderMail(orderIdx: number, cancelReason: string) {
+    const {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    } = await this.orderMailSendInfo(orderIdx);
+    sendInfo.cancel_reason = cancelReason;
+
+    let code;
+    switch (order.status) {
+      case 2: // 주문 완료
+        code = 'payment';
+        break;
+      case 8: // 주문 취소
+        code = 'guest_cancel';
+        break;
+    }
+
+    if (get(guestUser, 'email', '') != '') {
+      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+      // 게스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(hostUser, 'email', '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'host', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'admin', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
+  }
+
+  // 호스트가 이벤트 발생시 메일 발송
+  async hostOrderMail(orderIdx: number, cancelReason: string) {
+    const {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    } = await this.orderMailSendInfo(orderIdx);
+    sendInfo.cancel_reason = cancelReason;
+
+    let code;
+    switch (order.status) {
+      case 4: // 호스트 승인
+        code = 'shipping';
+        break;
+      case 8: // 주문 취소
+        code = 'admin_cancel';
+        break;
+    }
+
+    if (get(guestUser, 'email', '') != '') {
+      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+      // 게스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(hostUser, 'email', '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'host', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'admin', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
+  }
+
+  // 관리자가 이벤트 발생시 메일 발송
+  async adminOrderMail(orderIdx: number, cancelReason: string) {
+    const {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    } = await this.orderMailSendInfo(orderIdx);
+    sendInfo.cancel_reason = cancelReason;
+
+    let code;
+    switch (order.status) {
+      case 8: // 주문 취소
+        code = 'host_cancel';
+        break;
+    }
+
+    if (get(guestUser, 'email', '') != '') {
+      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+      // 게스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(hostUser, 'email', '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'host', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'admin', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
   }
 
   // 주문 검증
