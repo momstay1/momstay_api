@@ -113,6 +113,9 @@ export class EmailService {
       membership_price: '#{멤버십금액}',
       membership_bank: '#{은행명}',
       membership_account: '#{계좌번호}',
+      board_title: '#{게시판이름}',
+      inquiry_content: '#{문의내용}',
+      answer_content: '#{답변내용}',
       // link: '#{링크}',
       // logo: '#{로고 이미지 변수}',
     };

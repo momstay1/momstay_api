@@ -12,6 +12,8 @@ import { AdminUsersModule } from 'src/admin-users/admin-users.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { AdminBoardContentsController } from './admin-board-contents.controller';
 import { ExcelService } from 'src/excel/excel.service';
+import { EmailModule } from 'src/email/email.module';
+import { SettingsModule } from 'src/settings/settings.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { ExcelService } from 'src/excel/excel.service';
     BoardCategoriesModule,
     AdminUsersModule,
     GroupsModule,
+    EmailModule,
+    SettingsModule
   ],
   controllers: [
     BoardContentsController,
@@ -31,4 +35,4 @@ import { ExcelService } from 'src/excel/excel.service';
   providers: [BoardContentsService, ExcelService],
   exports: [BoardContentsService],
 })
-export class BoardContentsModule {}
+export class BoardContentsModule { }

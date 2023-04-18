@@ -20,7 +20,10 @@ import { Pagination, PaginationOptions } from 'src/paginate';
 import { get, isArray, keyBy, values } from 'lodash';
 import { GroupsService } from 'src/groups/groups.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
+import { EmailService } from 'src/email/email.service';
+import { SettingsService } from 'src/settings/settings.service';
 
+const inquiryIdx = 5;
 @Injectable()
 export class BoardContentsService {
   constructor(
@@ -31,7 +34,9 @@ export class BoardContentsService {
     private readonly bscatsService: BoardSelectedCategoriesService,
     private readonly bcatsService: BoardCategoriesService,
     private readonly excelService: ExcelService,
-  ) {}
+    private readonly emailService: EmailService,
+    private readonly settingsService: SettingsService,
+  ) { }
 
   /******************
    *
@@ -74,6 +79,21 @@ export class BoardContentsService {
         );
       }
     }
+
+    const site = await this.settingsService.find('site');
+    if (board.idx == inquiryIdx && get(site, ['site_ko_email', 'set_value'], '')) {
+      // 1:1 문의 관리자 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'board', group: 'admin', code: 'inquiry', lang: 'ko' },
+        {
+          board_title: board.name
+        }
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
+
     return boardContent;
   }
 
@@ -89,12 +109,26 @@ export class BoardContentsService {
   }
 
   // 게시글 답변 완료 상태 변경
-  async statusAnswer(bcIdx: number) {
+  async statusAnswer(bcIdx: number, answerContent: string) {
     const bc = await this.findIndex(bcIdx);
     // 답변 대기 상태인 게시글만 답변 완료 상태로 변경
     if (bc['status'] == bcConstants.status.answerWait) {
       bc['status'] = bcConstants.status.answerComplete;
       await this.bcRepository.save(bc);
+
+      if (bc.board.idx == inquiryIdx && get(bc, ['user', 'email'], '')) {
+        // 1:1 문의 답변 메일 발송
+        const { mail, email_tmpl } = await this.emailService.mailSettings(
+          { type: 'board', group: 'guest', code: 'inquiry', lang: bc.user.language },
+          {
+            inquiry_content: bc.content,
+            answer_content: answerContent
+          }
+        );
+        if (mail != '' && email_tmpl != '') {
+          await this.emailService.sendMail(bc.user.email, mail.title, email_tmpl);
+        }
+      }
     }
   }
 
