@@ -50,6 +50,7 @@ const watermarkCategory = [
 
 // const sharp = require('sharp');
 const img_url = '/file/img/';
+const site_api_url = 'http://momstay.cf148.reconers.com';
 @Injectable()
 export class FileService {
   constructor(
@@ -84,8 +85,8 @@ export class FileService {
   async findOneName(name: string) {
     // return `This action returns a #${id} file`;
     const file = await this.fileRepository.findOne({
-      where: {
-        file_raw_name: name
+      where: qb => {
+        qb.where('file_raw_name = :name OR file_watermark_name = :name', { name: name })
       }
     });
     if (!file) {
@@ -285,9 +286,7 @@ export class FileService {
           file_type: files[i][j].mimetype,
           file_path: files[i][j].destination,
           file_full_path: files[i][j].path,
-          file_storage_path: storage_url + '/' + bucket_name + '/' + folder + files[i][j].filename,
-          // file_watermark_storage_path: storage_url + '/' + bucket_name + '/' + folder + watermark_name,
-          // file_watermark_path: files[i][j].destination + '/' + watermark_name,
+          file_storage_path: site_api_url + img_url + raw_name[0],
           file_html_path: '',
           file_html_full_path: img_url + raw_name[0],
           file_html_thumb_path: '',
@@ -312,16 +311,16 @@ export class FileService {
           if (watermarkCategory.includes(i)) {
             const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
             file_data['file_watermark_name'] = watermark_name;
-            file_data['file_watermark_storage_path'] = storage_url + '/' + bucket_name + '/' + folder + watermark_name;
+            file_data['file_watermark_storage_path'] = site_api_url + img_url + watermark_name;
             file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
             // 이미지 워터마크
             await this.fileWatermark(file_data);
           }
         }
         // 스토리지 서버에 업로드
-        await this.uploadStorage(files[i][j], file_data);
+        // await this.uploadStorage(files[i][j], file_data);
         // api 서버에 파일은 제거
-        await this.deleteFile([file_data]);
+        // await this.deleteFile([file_data]);
         files_data.push(file_data);
       }
 

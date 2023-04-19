@@ -84,6 +84,13 @@ export class FileController {
     return res.sendFile(file.file_full_path);
   }
 
+  @Get('watermark_img/:name')
+  @ApiOperation({ summary: '워터마크 이미지 파일 API' })
+  async getWatermarkFile(@Param('name') name: string, @Res() res) {
+    const file = await this.fileService.findOneName(name);
+    return res.sendFile(file.file_watermark_path);
+  }
+
   @Get('downloads/select')
   @ApiOperation({ summary: '선택 이미지 파일 다운로드 API' })
   async selectDownloadFile(@Query('file') file: string, @Res() res) {
