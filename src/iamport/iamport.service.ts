@@ -51,9 +51,9 @@ export class IamportService {
   // 404 에러 휴대폰 본인인증결과를 찾을 수 없음
   async getCertification(imp_uid: string) {
     // 밀림 아임포트 key정보 (테스트용)
-    const iamport = 'imp65825226';
-    const iamport_key = '0568292538093639';
-    const iamport_secret_key = 'm89vemChTh78hpGAhHxDlSA2tpk2GAI3ISyXfbe8smhJLYk2FRF0Kg3eFnglXZoGSXE78SgBexk0wF3b';
+    // const iamport = 'imp65825226';
+    // const iamport_key = '0568292538093639';
+    // const iamport_secret_key = 'm89vemChTh78hpGAhHxDlSA2tpk2GAI3ISyXfbe8smhJLYk2FRF0Kg3eFnglXZoGSXE78SgBexk0wF3b';
     const { Certifications } = Request;
     const getCertification = Certifications.getCertification({
       imp_uid: imp_uid,
