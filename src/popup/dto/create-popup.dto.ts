@@ -14,6 +14,9 @@ export class CreatePopupDto {
   @ApiProperty({ description: '팝업 사용 상태 (1: 사용안함, 2: 사용)' })
   readonly status: number;
   @IsString()
+  @ApiProperty({ description: '팝업 아이디', required: true })
+  readonly id: string;
+  @IsString()
   @ApiProperty({ description: '팝업명', required: true })
   readonly title: string;
   @IsOptional()

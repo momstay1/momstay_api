@@ -12,7 +12,7 @@ import { PopupEntity } from './entities/popup.entity';
 @Controller('popup')
 @ApiTags('팝업 API')
 export class PopupController {
-  constructor(private readonly popupService: PopupService) {}
+  constructor(private readonly popupService: PopupService) { }
 
   @Get('')
   @ApiOperation({ summary: '팝업 리스트 호출 API' })

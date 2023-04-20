@@ -24,22 +24,13 @@ export class EmailHistoryEntity {
 
   @Column({ default: 2 })
   status: number;
-
   @Column()
   email: string;
-
   @Column({ type: 'text', default: '' })
   response: string;
 
-  @ManyToOne(() => EmailTmplEntity, (emailTmpl) => emailTmpl.emailHistory, {
-    onDelete: 'NO ACTION',
-    onUpdate: 'NO ACTION'
-  })
-  emailTmpl: EmailTmplEntity;
-
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
 }

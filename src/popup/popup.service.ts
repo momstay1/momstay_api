@@ -22,11 +22,18 @@ export class PopupService {
     @InjectRepository(PopupEntity)
     private popupRepository: Repository<PopupEntity>,
     private fileService: FileService,
-  ) {}
+  ) { }
   async create(createPopupDto: CreatePopupDto, files) {
+    // popup id 중복체크
+    const popupChk = await this.checkPopupIdExists(createPopupDto.id);
+    if (popupChk) {
+      throw new UnprocessableEntityException('popup.service.create: 아이디가 중복 됩니다.');
+    }
+
     // 팝업 데이터 가져오기
     const popup_data = {
       status: get(createPopupDto, 'status'),
+      id: get(createPopupDto, 'id'),
       title: get(createPopupDto, 'title'),
       page: get(createPopupDto, 'page'),
       startPeriod: get(createPopupDto, 'startPeriod', null),

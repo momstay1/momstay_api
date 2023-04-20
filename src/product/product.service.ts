@@ -44,7 +44,7 @@ export class ProductService {
     private readonly metroService: MetroService,
     private readonly collegeService: CollegeService,
     private readonly excelService: ExcelService,
-  ) {}
+  ) { }
 
   async test(id) {
     const code = await this.productCreateCode();
@@ -318,27 +318,27 @@ export class ProductService {
         if (get(where, 'keyword', '')) {
           qb.andWhere(
             '(' +
-              '`product`.`title` LIKE :keyword' +
-              ' OR `product`.`titleEng` LIKE :keyword' +
-              ' OR `product`.`titleJpn` LIKE :keyword' +
-              ' OR `product`.`titleChn` LIKE :keyword' +
-              ' OR `product`.`addr1` LIKE :keyword' +
-              ' OR `product`.`addr2` LIKE :keyword' +
-              ' OR `product`.`addr1Eng` LIKE :keyword' +
-              ' OR `product`.`addr2Eng` LIKE :keyword' +
-              ' OR `product`.`addr1Jpn` LIKE :keyword' +
-              ' OR `product`.`addr2Jpn` LIKE :keyword' +
-              ' OR `product`.`addr1Chn` LIKE :keyword' +
-              ' OR `product`.`addr2Chn` LIKE :keyword' +
-              ' OR `metro`.`stationKor` LIKE :keyword' +
-              ' OR `college`.`nameKor` LIKE :keyword' +
-              ' OR `metro`.`stationEng` LIKE :keyword' +
-              ' OR `college`.`nameEng` LIKE :keyword' +
-              ' OR `metro`.`stationJpn` LIKE :keyword' +
-              ' OR `college`.`nameJpn` LIKE :keyword' +
-              ' OR `metro`.`stationChn` LIKE :keyword' +
-              ' OR `college`.`nameChn` LIKE :keyword' +
-              ')',
+            '`product`.`title` LIKE :keyword' +
+            ' OR `product`.`titleEng` LIKE :keyword' +
+            ' OR `product`.`titleJpn` LIKE :keyword' +
+            ' OR `product`.`titleChn` LIKE :keyword' +
+            ' OR `product`.`addr1` LIKE :keyword' +
+            ' OR `product`.`addr2` LIKE :keyword' +
+            ' OR `product`.`addr1Eng` LIKE :keyword' +
+            ' OR `product`.`addr2Eng` LIKE :keyword' +
+            ' OR `product`.`addr1Jpn` LIKE :keyword' +
+            ' OR `product`.`addr2Jpn` LIKE :keyword' +
+            ' OR `product`.`addr1Chn` LIKE :keyword' +
+            ' OR `product`.`addr2Chn` LIKE :keyword' +
+            ' OR `metro`.`stationKor` LIKE :keyword' +
+            ' OR `college`.`nameKor` LIKE :keyword' +
+            ' OR `metro`.`stationEng` LIKE :keyword' +
+            ' OR `college`.`nameEng` LIKE :keyword' +
+            ' OR `metro`.`stationJpn` LIKE :keyword' +
+            ' OR `college`.`nameJpn` LIKE :keyword' +
+            ' OR `metro`.`stationChn` LIKE :keyword' +
+            ' OR `college`.`nameChn` LIKE :keyword' +
+            ')',
             {
               keyword: '%' + get(where, 'keyword') + '%',
             },
@@ -423,18 +423,18 @@ export class ProductService {
         if (get(where, 'keyword', '')) {
           qb.andWhere(
             '(' +
-              '`product`.`title` LIKE :keyword' +
-              ' OR `product`.`addr1` LIKE :keyword' +
-              ' OR `product`.`addr2` LIKE :keyword' +
-              ' OR `metro`.`stationKor` LIKE :keyword' +
-              ' OR `college`.`nameKor` LIKE :keyword' +
-              ' OR `metro`.`stationEng` LIKE :keyword' +
-              ' OR `college`.`nameEng` LIKE :keyword' +
-              ' OR `metro`.`stationJpn` LIKE :keyword' +
-              ' OR `college`.`nameJpn` LIKE :keyword' +
-              ' OR `metro`.`stationChn` LIKE :keyword' +
-              ' OR `college`.`nameChn` LIKE :keyword' +
-              ')',
+            '`product`.`title` LIKE :keyword' +
+            ' OR `product`.`addr1` LIKE :keyword' +
+            ' OR `product`.`addr2` LIKE :keyword' +
+            ' OR `metro`.`stationKor` LIKE :keyword' +
+            ' OR `college`.`nameKor` LIKE :keyword' +
+            ' OR `metro`.`stationEng` LIKE :keyword' +
+            ' OR `college`.`nameEng` LIKE :keyword' +
+            ' OR `metro`.`stationJpn` LIKE :keyword' +
+            ' OR `college`.`nameJpn` LIKE :keyword' +
+            ' OR `metro`.`stationChn` LIKE :keyword' +
+            ' OR `college`.`nameChn` LIKE :keyword' +
+            ')',
             {
               keyword: '%' + get(where, 'keyword') + '%',
             },

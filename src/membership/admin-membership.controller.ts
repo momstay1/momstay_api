@@ -26,7 +26,7 @@ import { createReadStream } from 'fs';
 @Controller('admin/membership')
 @ApiTags('멤버십(관리자) API')
 export class AdminMembershipController {
-  constructor(private readonly membershipService: MembershipService) {}
+  constructor(private readonly membershipService: MembershipService) { }
 
   @Get()
   @ApiOperation({ summary: '관리자 멤버십 리스트 API' })

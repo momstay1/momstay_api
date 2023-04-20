@@ -30,7 +30,7 @@ import { createReadStream } from 'fs';
 @Controller('admin/product')
 @ApiTags('숙소(관리자) API')
 export class AdminProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   // @Post()
   // @ApiOperation({summary: '숙소 등록 API'})
@@ -70,6 +70,12 @@ export class AdminProductController {
     name: 'order',
     description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
     required: false,
+  })
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
   })
   async adminFindAll(
     @Query('take') take: number,

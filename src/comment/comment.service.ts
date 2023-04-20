@@ -42,7 +42,7 @@ export class CommentService {
 
     if (comment['category'] == 'bc') {
       // 답변 완료 상태로 변경
-      await this.boardContentsService.statusAnswer(comment['foreignIdx']);
+      await this.boardContentsService.statusAnswer(comment['foreignIdx'], comment.contents);
       // 댓글 개수 추가
       await this.boardContentsService.commentCountUp(comment['foreignIdx']);
     }

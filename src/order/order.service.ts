@@ -4,27 +4,28 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import {InjectRepository} from '@nestjs/typeorm';
-import {get, isArray, isEmpty, map, reduce, values} from 'lodash';
-import {Repository} from 'typeorm';
-import {CreateOrderDto} from './dto/create-order.dto';
-import {UpdateOrderDto} from './dto/update-order.dto';
-import {OrderEntity} from './entities/order.entity';
-import {commonUtils} from 'src/common/common.utils';
-import {ProductService} from 'src/product/product.service';
-import {ProductOptionService} from 'src/product-option/product-option.service';
-import {UsersService} from 'src/users/users.service';
-import {OrderProductService} from 'src/order-product/order-product.service';
-import {OrderTotalService} from 'src/order-total/order-total.service';
-import {IamportService} from 'src/iamport/iamport.service';
-import {PgDataService} from 'src/pg-data/pg-data.service';
-import {ExcelService} from 'src/excel/excel.service';
-import {Pagination, PaginationOptions} from 'src/paginate';
-import {UsersEntity} from 'src/users/entities/user.entity';
-import {PushNotificationService} from 'src/push-notification/push-notification.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { get, isArray, isEmpty, map, reduce, values } from 'lodash';
+import { Repository } from 'typeorm';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrderEntity } from './entities/order.entity';
+import { commonUtils } from 'src/common/common.utils';
+import { ProductService } from 'src/product/product.service';
+import { ProductOptionService } from 'src/product-option/product-option.service';
+import { UsersService } from 'src/users/users.service';
+import { OrderProductService } from 'src/order-product/order-product.service';
+import { OrderTotalService } from 'src/order-total/order-total.service';
+import { IamportService } from 'src/iamport/iamport.service';
+import { PgDataService } from 'src/pg-data/pg-data.service';
+import { ExcelService } from 'src/excel/excel.service';
+import { Pagination, PaginationOptions } from 'src/paginate';
+import { UsersEntity } from 'src/users/entities/user.entity';
+import { PushNotificationService } from 'src/push-notification/push-notification.service';
 
 import * as moment from 'moment';
-import {SettingsService} from 'src/settings/settings.service';
+import { SettingsService } from 'src/settings/settings.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class OrderService {
@@ -42,7 +43,8 @@ export class OrderService {
     private readonly pushNotiService: PushNotificationService,
     private readonly settingsService: SettingsService,
     private readonly excelService: ExcelService,
-  ) {}
+    private readonly emailService: EmailService,
+  ) { }
 
   async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
     const ord_data = {};
@@ -155,7 +157,7 @@ export class OrderService {
 
     // 주문 상품 설정 기능 작업중
     // 추후 주문 상품을 배열로 전달 (한 주문에 여러 주문 상품을 처리하는 경우에 작업 필요)
-    const {orderProduct, priceInfo} =
+    const { orderProduct, priceInfo } =
       await this.orderProductService.createOrderProduct(
         order,
         po,
@@ -166,19 +168,22 @@ export class OrderService {
     await this.ordertotalService.orderTotalCreate(order, orderProduct);
 
     // 호스트에게 push 알림 발송
-    const {user} = get(po, ['product']);
+    const { user } = get(po, ['product']);
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.guestOrderPush(user, po);
     }
 
-    return {order, orderProduct, po, priceInfo};
+    // 주문 관련 메일
+    await this.guestOrderMail(order.idx, '');
+
+    return { order, orderProduct, po, priceInfo };
   }
 
   async ordCreateCode() {
     const code =
       moment().format('YYMMDD') + commonUtils.createCode().toUpperCase();
     const isCode = await this.orderRepository.findOne({
-      where: {code: code},
+      where: { code: code },
     });
 
     if (isCode) {
@@ -195,7 +200,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
@@ -214,7 +219,7 @@ export class OrderService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository
       .createQueryBuilder('order')
@@ -299,7 +304,7 @@ export class OrderService {
       page,
     });
 
-    return {data};
+    return { data };
   }
 
   // 게스트 결제 내역 리스트
@@ -309,7 +314,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
@@ -328,7 +333,7 @@ export class OrderService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository
       .createQueryBuilder('order')
@@ -389,7 +394,7 @@ export class OrderService {
           });
         if (['host', 'guest'].includes(user['group']['id'])) {
           // 자신의 주문 내역만 확인 가능
-          qb.andWhere('`guestUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -403,7 +408,7 @@ export class OrderService {
       page,
     });
 
-    return {data};
+    return { data };
   }
 
   // 호스트 결제 내역 리스트
@@ -413,7 +418,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {take, page} = options;
+    const { take, page } = options;
 
     const user = await this.usersService.findId(userInfo.id);
 
@@ -432,7 +437,7 @@ export class OrderService {
       alias + '.createdAt',
       'DESC',
     );
-    console.log({order_by});
+    console.log({ order_by });
 
     const [results, total] = await this.orderRepository
       .createQueryBuilder('order')
@@ -492,7 +497,7 @@ export class OrderService {
               : [where['remitter']],
           });
         if (user['group']['id'] == 'host') {
-          qb.andWhere('`hostUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .orderBy(order_by)
@@ -506,7 +511,7 @@ export class OrderService {
       page,
     });
 
-    return {data};
+    return { data };
   }
 
   async findOneIdxByAdmin(idx: number) {
@@ -516,7 +521,7 @@ export class OrderService {
       );
     }
     const order = await this.orderRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: [
         'user',
         'orderProduct',
@@ -531,7 +536,7 @@ export class OrderService {
       );
     }
 
-    return {order};
+    return { order };
   }
 
   async findOneIdxByGuest(userInfo: UsersEntity, idx: number) {
@@ -549,9 +554,9 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'hostUser')
       .where((qb) => {
-        qb.where('`order`.idx = :idx', {idx: idx});
+        qb.where('`order`.idx = :idx', { idx: idx });
         if (!['root', 'admin'].includes(user['group']['id'])) {
-          qb.andWhere('`guestUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`guestUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .getOne();
@@ -561,7 +566,7 @@ export class OrderService {
       );
     }
 
-    return {order};
+    return { order };
   }
 
   async findOneIdxByHost(userInfo: UsersEntity, idx: number) {
@@ -579,9 +584,9 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'hostUser')
       .where((qb) => {
-        qb.where('`order`.idx = :idx', {idx: idx});
+        qb.where('`order`.idx = :idx', { idx: idx });
         if (!['root', 'admin'].includes(user['group']['id'])) {
-          qb.andWhere('`hostUser`.idx = :userIdx', {userIdx: user['idx']});
+          qb.andWhere('`hostUser`.idx = :userIdx', { userIdx: user['idx'] });
         }
       })
       .getOne();
@@ -591,7 +596,7 @@ export class OrderService {
       );
     }
 
-    return {order};
+    return { order };
   }
 
   async findOneIdx(idx: number) {
@@ -601,7 +606,7 @@ export class OrderService {
       );
     }
     const order = await this.orderRepository.findOne({
-      where: {idx: idx},
+      where: { idx: idx },
       relations: [
         'user',
         'user.device',
@@ -635,7 +640,7 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'hostUser')
       .where((qb) => {
-        qb.where('`order`.code = :code', {code: code});
+        qb.where('`order`.code = :code', { code: code });
       })
       .getOne();
     if (!get(order, 'idx', '')) {
@@ -643,7 +648,7 @@ export class OrderService {
         'order.service.findOneCodeByNonmember: 정보를 찾을 수 없습니다.',
       );
     }
-    return {order};
+    return { order };
   }
 
   update(id: number, updateOrderDto: UpdateOrderDto) {
@@ -668,8 +673,8 @@ export class OrderService {
       .leftJoinAndSelect('orderProduct.productOption', 'productOption')
       .leftJoinAndSelect('productOption.product', 'product')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', {userIdx: user['idx']});
-        qb.andWhere('`order`.code = :code', {code: code});
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -686,13 +691,13 @@ export class OrderService {
       const site = await this.settingsService.findOne('site_tel');
       throw new NotAcceptableException(
         'order.service.guestOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
-          site.set_value +
-          ')에 문의해주세요.',
+        site.set_value +
+        ')에 문의해주세요.',
       );
     }
 
     // 취소 사유
-    const cancelReason = '게스트 취소';
+    const cancelReason = 'guest cancel';
     // 취소 처리
     await this.cancelProcess(order, cancelReason);
 
@@ -704,6 +709,9 @@ export class OrderService {
     if (get(hostUser, ['device', 'token'], '')) {
       await this.pushNotiService.guestOrderCancelPush(hostUser, po);
     }
+
+    // 주문 관련 메일
+    await this.guestOrderMail(order.idx, cancelReason);
   }
 
   async hostOrderApproval(code: string, userInfo: UsersEntity) {
@@ -723,8 +731,8 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', {userIdx: user['idx']});
-        qb.andWhere('`order`.code = :code', {code: code});
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -754,6 +762,10 @@ export class OrderService {
       // 게스트에게 바로결제 승인 push 알림 발송
       await this.pushNotiService.hostOrderApprovalPush(guestUser, orderInfo);
     }
+
+    // 주문 관련 메일
+    // 주문 관련 메일
+    await this.hostOrderMail(order.idx, '');
   }
 
   async hostOrderCancel(
@@ -777,8 +789,8 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', {userIdx: user['idx']});
-        qb.andWhere('`order`.code = :code', {code: code});
+        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
+        qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
@@ -795,14 +807,13 @@ export class OrderService {
       const site = await this.settingsService.findOne('site_tel');
       throw new NotAcceptableException(
         'order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
-          site.set_value +
-          ')에 문의해주세요.',
+        site.set_value +
+        ')에 문의해주세요.',
       );
     }
 
     // 취소 사유
-    const cancelReason =
-      '호스트 취소(' + get(updateOrderDto, 'cancelReason', '') + ')';
+    const cancelReason = 'host cancel(' + get(updateOrderDto, 'cancelReason', '') + ')';
 
     // 취소 처리
     await this.cancelProcess(order, cancelReason);
@@ -813,6 +824,13 @@ export class OrderService {
     if (get(guestUser, ['device', 'token'], '')) {
       // 게스트에게 바로결제 거절 push 알림 발송
       await this.pushNotiService.hostOrderCancelPush(guestUser, orderInfo);
+    }
+
+    // 주문 관련 메일
+    if (['root', 'admin'].includes(user.group.id)) {
+      await this.adminOrderMail(order.idx, 'momstay cancel');
+    } else {
+      await this.hostOrderMail(order.idx, cancelReason);
     }
   }
 
@@ -865,8 +883,8 @@ export class OrderService {
     await this.orderRepository
       .createQueryBuilder()
       .update(OrderEntity)
-      .set({status: status})
-      .where(' idx = :idx', {idx: idx})
+      .set({ status: status })
+      .where(' idx = :idx', { idx: idx })
       .execute();
   }
 
@@ -884,12 +902,222 @@ export class OrderService {
     return `This action removes a #${id} order`;
   }
 
+  // 주문 메일 발송 데이터
+  async orderMailSendInfo(orderIdx: number) {
+    const order = await this.findOneIdx(orderIdx);
+
+    const guestUser = order.user;
+    const hostUser = order.orderProduct[0].productOption.product.user;
+
+    const lang = commonUtils.langValue(
+      guestUser.language == 'ko' ? guestUser.language : 'en'
+    );
+
+    let po_title = order.orderProduct[0].productOption['title' + lang];
+    let po_title_ko;
+    let po_title_en;
+    if (order.orderProduct.length > 1) {
+      po_title_ko += po_title + ' 외 ' + order.orderProduct.length + '건';
+      po_title_en += po_title + ' and ' + order.orderProduct.length + ' other case';
+    }
+    const sendInfo = {
+      po_title: po_title_ko,
+      product_title: order.orderProduct[0].productOption.product['title' + lang],
+      occupancy_date: order.orderProduct[0].startAt,
+      eviction_date: order.orderProduct[0].endAt,
+      payment: order.orderProduct[0].payPrice, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      po_payment: order.orderProduct[0].price, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      tax: order.orderProduct[0].taxPrice, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      fee: order.orderProduct[0].feePrice, // 장바구니 기능 추가시 order_total 테이블 데이터로 표현
+      user_name: guestUser.name,
+      phone: guestUser.countryCode + ' ' + guestUser.phone,
+      cancel_reason: '',
+    };
+
+    const site = await this.settingsService.find('site');
+
+    return {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    };
+  }
+
+  // 게스트가 이벤트 발생시 메일 발송
+  async guestOrderMail(orderIdx: number, cancelReason: string) {
+    const {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    } = await this.orderMailSendInfo(orderIdx);
+    sendInfo.cancel_reason = cancelReason;
+
+    let code;
+    switch (order.status) {
+      case 2: // 주문 완료
+        code = 'payment';
+        break;
+      case 8: // 주문 취소
+        code = 'guest_cancel';
+        break;
+    }
+
+    if (get(guestUser, 'email', '') != '') {
+      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+      // 게스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(hostUser, 'email', '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'host', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'admin', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
+  }
+
+  // 호스트가 이벤트 발생시 메일 발송
+  async hostOrderMail(orderIdx: number, cancelReason: string) {
+    const {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    } = await this.orderMailSendInfo(orderIdx);
+    sendInfo.cancel_reason = cancelReason;
+
+    let code;
+    switch (order.status) {
+      case 4: // 호스트 승인
+        code = 'shipping';
+        break;
+      case 8: // 주문 취소
+        code = 'admin_cancel';
+        break;
+    }
+
+    if (get(guestUser, 'email', '') != '') {
+      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+      // 게스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(hostUser, 'email', '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'host', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'admin', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
+  }
+
+  // 관리자가 이벤트 발생시 메일 발송
+  async adminOrderMail(orderIdx: number, cancelReason: string) {
+    const {
+      order,
+      guestUser,
+      hostUser,
+      po_title_ko,
+      po_title_en,
+      sendInfo,
+      site
+    } = await this.orderMailSendInfo(orderIdx);
+    sendInfo.cancel_reason = cancelReason;
+
+    let code;
+    switch (order.status) {
+      case 8: // 주문 취소
+        code = 'host_cancel';
+        break;
+    }
+
+    if (get(guestUser, 'email', '') != '') {
+      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+      // 게스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(hostUser, 'email', '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'host', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      }
+    }
+    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      // 호스트 주문 완료 메일 발송
+      const { mail, email_tmpl } = await this.emailService.mailSettings(
+        { type: 'order', group: 'admin', code: code, lang: 'ko' },
+        sendInfo
+      );
+      if (mail != '' && email_tmpl != '') {
+        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      }
+    }
+  }
+
   // 주문 검증
   async orderVerification(createOrderDto: CreateOrderDto) {
-    const {response} = await this.iamportService.getPaymentByImpUid(
+    const { response } = await this.iamportService.getPaymentByImpUid(
       createOrderDto['imp_uid'],
     );
-    const result = {status: true, message: ''};
+    const result = { status: true, message: '' };
 
     // 결제 금액과 DB에 저장될 금액이 동일한지 체크
     if (response['amount'] != createOrderDto['price']) {
@@ -935,7 +1163,7 @@ export class OrderService {
     search: string[],
     order: string,
   ) {
-    const {data} = await this.adminFindAll(userInfo, options, search, order);
+    const { data } = await this.adminFindAll(userInfo, options, search, order);
     if (!data) {
       throw new NotFoundException(
         'order.service.excel: 다운로드할 데이터가 없습니다.',

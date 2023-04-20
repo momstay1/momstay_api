@@ -20,4 +20,4 @@ import { ExcelService } from 'src/excel/excel.service';
   providers: [ReviewsService, ExcelService],
   exports: [ReviewsService],
 })
-export class ReviewsModule {}
+export class ReviewsModule { }

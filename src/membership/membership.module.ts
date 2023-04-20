@@ -7,6 +7,7 @@ import { AdminMembershipController } from './admin-membership.controller';
 import { UsersModule } from 'src/users/users.module';
 import { ProductModule } from 'src/product/product.module';
 import { ExcelService } from 'src/excel/excel.service';
+import { EmailModule } from 'src/email/email.module';
 import { SettingsModule } from 'src/settings/settings.module';
 
 @Module({
@@ -15,9 +16,11 @@ import { SettingsModule } from 'src/settings/settings.module';
     UsersModule,
     ProductModule,
     SettingsModule,
+    EmailModule,
+    SettingsModule
   ],
   controllers: [MembershipController, AdminMembershipController],
   providers: [MembershipService, ExcelService],
   exports: [MembershipService],
 })
-export class MembershipModule {}
+export class MembershipModule { }

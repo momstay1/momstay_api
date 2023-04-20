@@ -24,22 +24,15 @@ export class EmailTmplEntity {
 
   @Column({ default: 2 })
   status: number;
-
   @Column({ default: 'main' })
   type: string;
-
   @Column({ length: 255 })
   id: string;
-
   @Column({ type: 'text', default: '' })
   template: string;
 
-  @OneToMany(() => EmailHistoryEntity, (emailHistory) => emailHistory.emailTmpl)
-  emailHistory: undefined;
-
   @CreateDateColumn()
   createdAt: Date;
-
   @UpdateDateColumn()
   updatedAt: Date;
 }

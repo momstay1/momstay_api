@@ -39,7 +39,7 @@ export class UsersService {
     private readonly userLeaveService: UserLeaveService,
     private readonly userDormantService: UserDormantService,
     private readonly excelService: ExcelService,
-  ) {}
+  ) { }
 
   async test(id) {
     try {
@@ -57,8 +57,7 @@ export class UsersService {
       if (type == 'pw') {
         // 비밀번호 재설정 인증코드 발송 성공
         const code = await this.emailService.createCode(email, 0);
-        this.emailService.snedMail(
-          1,
+        this.emailService.sendMail(
           email,
           'momstay - Email Authentication',
           `Please enter your email verification code below.
@@ -75,8 +74,7 @@ export class UsersService {
       if (type == 'sign') {
         // 회원가입 인증코드 발송 성공
         const code = await this.emailService.createCode(email, 0);
-        this.emailService.snedMail(
-          1,
+        this.emailService.sendMail(
           email,
           'momstay - Email Authentication',
           `Please enter the email authentication code below to register as a member.
@@ -133,6 +131,9 @@ export class UsersService {
         save_user['idx'],
       );
     }
+
+    // TODO: 회원 가입 완료 메일 발송 (게스트)
+
     return { user, file_info };
   }
 
@@ -146,7 +147,7 @@ export class UsersService {
 
     const status_arr: number[] = [];
     for (const key in usersConstant.status) {
-      if (key != 'delete') {
+      if (key != 'delete' && key != 'dormant' && key != 'leave') {
         status_arr.push(usersConstant.status[key]);
       }
     }
@@ -447,6 +448,7 @@ export class UsersService {
 
   async leave(id: string, reason: string) {
     const user = await this.findId(id);
+    const { language, name, email } = user;
     const userLeave = await this.userLeaveService.leaveUser(user, reason);
     user.status = usersConstant.status.leave;
     // user.id = '';
@@ -464,6 +466,17 @@ export class UsersService {
     user.leaveAt = new Date();
     user.marketing = '0';
     await this.usersRepository.save(user);
+
+    // TODO: 회원 탈퇴 완료 메일 발송 (게스트)
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'user', group: 'guest', code: 'leave', lang: language },
+      {
+        user_name: name,
+      }
+    );
+    if (email != '' && mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(email, mail.title, email_tmpl);
+    }
   }
 
   async dormant(user: UsersEntity) {
@@ -530,6 +543,18 @@ export class UsersService {
       .execute();
   }
 
+  async signupMail(userInfo: UsersEntity) {
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'user', group: 'guest', code: 'signup', lang: userInfo.language },
+      {
+        user_name: userInfo.name,
+      }
+    );
+    if (get(userInfo, 'email', '') && mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(userInfo.email, mail.title, email_tmpl);
+    }
+  }
+
   async dashboard() {
     const today = moment().format('YYYY-MM-DD');
     const user = await this.usersRepository
@@ -543,8 +568,8 @@ export class UsersService {
       .addSelect('SUM(IF(`status` = 5, 1, 0))', 'dormant_cnt')
       .addSelect(
         'SUM(IF(Date_format(`leaveAt`, "%y-%m-%d") = "' +
-          today +
-          '" AND `status` = 9, 1, 0))',
+        today +
+        '" AND `status` = 9, 1, 0))',
         'new_leave_cnt',
       )
       .addSelect(
@@ -614,33 +639,38 @@ export class UsersService {
   }
 
   // 매일 01시 휴면 회원 안내
-  // @Cron('0 0 1 * * *')
-  // async dormantNotice() {
-  //   console.log('[cron] dormantNotice: ', moment().format('YYYY-MM-DD HH:mm:ss'));
-  //   const yearAgo = moment().add(-11, 'month').format('YYYY-MM-DD');
-  //   const group = [3]; // 휴면 안내할 그룹
-  //   const users = await this.usersRepository.createQueryBuilder('user')
-  //     .where(qb => {
-  //       qb.where('group.idx IN (:group)', { group: group })
-  //       qb.andWhere('user.status = :status', { status: usersConstant.status.registration })
-  //       qb.andWhere('user.activitedAt < :activitedAt', { activitedAt: yearAgo })
-  //     })
-  //     .getMany();
-  //   console.log('휴면 회원 안내 숫자: ', users.length);
-  //   if (users.length > 0) {
-  //     // 휴면 회원 안내
-  //     for (const key in users) {
-  //       this.emailService.snedMail(
-  //         1,
-  //         users[key].email,
-  //         'momstay - Guidelines for Conversion of Dormant Members',
-  //         `Accounts that have not logged in or used the service for more than a year <br>
-  //         will be converted to dormant accounts, and personal information will be destroyed or stored and managed separately for safe personal information management.
-  //         `
-  //       );
-  //     }
-  //   }
-  // }
+  @Cron('0 0 1 * * *')
+  async dormantNotice() {
+    console.log('[cron] dormantNotice: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+    const yearAgo = moment().add(-11, 'month').format('YYYY-MM-DD');
+    const group = [3]; // 휴면 안내할 그룹
+    const users = await this.usersRepository.createQueryBuilder('user')
+      .where(qb => {
+        qb.where('group.idx IN (:group)', { group: group })
+        qb.andWhere('user.status = :status', { status: usersConstant.status.registration })
+        qb.andWhere('user.activitedAt < :activitedAt', { activitedAt: yearAgo })
+      })
+      .getMany();
+    console.log('휴면 회원 안내 숫자: ', users.length);
+    if (users.length > 0) {
+      // 휴면 회원 안내
+      const after_one_month = moment().add(1, 'month').format('YYYY-MM-DD')
+      for (const key in users) {
+        // 휴면 회원 안내 메일 (게스트)
+        const { mail, email_tmpl } = await this.emailService.mailSettings(
+          { type: 'user', group: 'guest', code: 'dormant', lang: users[key].language },
+          {
+            user_name: users[key].name,
+            user_id: users[key].id,
+            dormant_date: after_one_month
+          }
+        );
+        if (get(users[key], 'email', '') && mail != '' && email_tmpl != '') {
+          await this.emailService.sendMail(users[key].email, mail.title, email_tmpl);
+        }
+      }
+    }
+  }
 
   // 매일 01시 휴면 회원 처리
   // @Cron('*/10 * * * * *') // 테스트용 시간

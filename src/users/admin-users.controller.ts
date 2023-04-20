@@ -52,7 +52,7 @@ export class AdminUsersController {
   constructor(
     private authService: AuthService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   // 회원 생성
   @Post()
