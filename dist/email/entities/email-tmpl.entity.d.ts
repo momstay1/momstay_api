@@ -4,7 +4,6 @@ export declare class EmailTmplEntity {
     type: string;
     id: string;
     template: string;
-    emailHistory: undefined;
     createdAt: Date;
     updatedAt: Date;
 }

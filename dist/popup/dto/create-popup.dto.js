@@ -23,6 +23,11 @@ __decorate([
 ], CreatePopupDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '팝업 아이디', required: true }),
+    __metadata("design:type", String)
+], CreatePopupDto.prototype, "id", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '팝업명', required: true }),
     __metadata("design:type", String)
 ], CreatePopupDto.prototype, "title", void 0);

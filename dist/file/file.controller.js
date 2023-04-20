@@ -46,6 +46,10 @@ let FileController = class FileController {
         const file = await this.fileService.findOneName(name);
         return res.sendFile(file.file_full_path);
     }
+    async getWatermarkFile(name, res) {
+        const file = await this.fileService.findOneName(name);
+        return res.sendFile(file.file_watermark_path);
+    }
     async selectDownloadFile(file, res) {
         const files = await this.fileService.findIndexsZip(file.split(','));
         res.set({
@@ -125,6 +129,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], FileController.prototype, "getFile", null);
+__decorate([
+    (0, common_1.Get)('watermark_img/:name'),
+    (0, swagger_1.ApiOperation)({ summary: '워터마크 이미지 파일 API' }),
+    __param(0, (0, common_1.Param)('name')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], FileController.prototype, "getWatermarkFile", null);
 __decorate([
     (0, common_1.Get)('downloads/select'),
     (0, swagger_1.ApiOperation)({ summary: '선택 이미지 파일 다운로드 API' }),

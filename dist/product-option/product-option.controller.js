@@ -91,6 +91,11 @@ __decorate([
         description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
         required: false,
     }),
+    (0, swagger_1.ApiQuery)({
+        name: "order",
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false
+    }),
     __param(0, (0, common_1.Query)('take')),
     __param(1, (0, common_1.Query)('page')),
     __param(2, (0, common_1.Query)('search')),

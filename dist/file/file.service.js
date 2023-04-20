@@ -53,6 +53,7 @@ const watermarkCategory = [
     'site_og'
 ];
 const img_url = '/file/img/';
+const site_api_url = 'http://momstay.cf148.reconers.com';
 let FileService = class FileService {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
@@ -77,8 +78,8 @@ let FileService = class FileService {
     }
     async findOneName(name) {
         const file = await this.fileRepository.findOne({
-            where: {
-                file_raw_name: name
+            where: qb => {
+                qb.where('file_raw_name = :name OR file_watermark_name = :name', { name: name });
             }
         });
         if (!file) {
@@ -237,7 +238,7 @@ let FileService = class FileService {
                     file_type: files[i][j].mimetype,
                     file_path: files[i][j].destination,
                     file_full_path: files[i][j].path,
-                    file_storage_path: storage_url + '/' + bucket_name + '/' + folder + files[i][j].filename,
+                    file_storage_path: site_api_url + img_url + raw_name[0],
                     file_html_path: '',
                     file_html_full_path: img_url + raw_name[0],
                     file_html_thumb_path: '',
@@ -254,16 +255,16 @@ let FileService = class FileService {
                     file_order: base_order * order,
                 };
                 order++;
-                await this.sharpFile(files[i][j]);
-                if (watermarkCategory.includes(i)) {
-                    const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
-                    file_data['file_watermark_name'] = watermark_name;
-                    file_data['file_watermark_storage_path'] = storage_url + '/' + bucket_name + '/' + folder + watermark_name;
-                    file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
-                    await this.fileWatermark(file_data);
+                if (file_data.file_is_img) {
+                    await this.sharpFile(files[i][j]);
+                    if (watermarkCategory.includes(i)) {
+                        const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
+                        file_data['file_watermark_name'] = watermark_name;
+                        file_data['file_watermark_storage_path'] = site_api_url + img_url + watermark_name;
+                        file_data['file_watermark_path'] = files[i][j].destination + '/' + watermark_name;
+                        await this.fileWatermark(file_data);
+                    }
                 }
-                await this.uploadStorage(files[i][j], file_data);
-                await this.deleteFile([file_data]);
                 files_data.push(file_data);
             }
         }

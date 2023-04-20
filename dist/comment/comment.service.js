@@ -48,7 +48,7 @@ let CommentService = class CommentService {
         const commentEntity = await this.commentRepository.create(comment_data);
         const comment = await this.commentRepository.save(commentEntity);
         if (comment['category'] == 'bc') {
-            await this.boardContentsService.statusAnswer(comment['foreignIdx']);
+            await this.boardContentsService.statusAnswer(comment['foreignIdx'], comment.contents);
             await this.boardContentsService.commentCountUp(comment['foreignIdx']);
         }
         return { comment };

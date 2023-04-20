@@ -41,7 +41,6 @@ class ConfigService {
             domain: this.getValue('EMAIL_DOMAIN'),
             email: this.getValue('EMAIL_EMAIL'),
             api_key: this.getValue('EMAIL_API_KEY'),
-            auth_password: this.getValue('EMAIL_AUTH_PASSWORD'),
             host: this.getValue('EMAIL_HOST'),
             name: this.getValue('EMAIL_FROM_USER_NAME'),
         };

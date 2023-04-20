@@ -29,6 +29,7 @@ export declare class PopupService {
         popup: {
             filesIdx: string;
             status: number;
+            id: string;
             title: string;
             page: string;
             startPeriod: string | Date;
@@ -37,7 +38,6 @@ export declare class PopupService {
             link: string;
             popupImg?: string[];
             idx: number;
-            id: string;
             createdAt: Date;
             updatedAt: Date;
         } & PopupEntity;

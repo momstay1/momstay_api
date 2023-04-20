@@ -12,6 +12,7 @@ export declare class FileController {
     uploadTempImg(files: Array<Express.Multer.File>): Promise<{}>;
     test(): Promise<void>;
     getFile(name: string, res: any): Promise<any>;
+    getWatermarkFile(name: string, res: any): Promise<any>;
     selectDownloadFile(file: string, res: any): Promise<void>;
     downloadFile(name: string, res: any): Promise<void>;
     downloadsFile(type: string, place_idx: string, res: any): Promise<void>;

@@ -8,13 +8,15 @@ import { Pagination, PaginationOptions } from 'src/paginate';
 import { ProductService } from 'src/product/product.service';
 import { ExcelService } from 'src/excel/excel.service';
 import { SettingsService } from 'src/settings/settings.service';
+import { EmailService } from 'src/email/email.service';
 export declare class MembershipService {
     private membershipHistoryRepository;
     private readonly userService;
     private readonly productService;
     private readonly excelService;
+    private readonly emailService;
     private readonly settingsService;
-    constructor(membershipHistoryRepository: Repository<MembershipHistoryEntity>, userService: UsersService, productService: ProductService, excelService: ExcelService, settingsService: SettingsService);
+    constructor(membershipHistoryRepository: Repository<MembershipHistoryEntity>, userService: UsersService, productService: ProductService, excelService: ExcelService, emailService: EmailService, settingsService: SettingsService);
     create(userInfo: UsersEntity, createMembershipDto: CreateMembershipDto): Promise<{
         membership: MembershipHistoryEntity;
     }>;

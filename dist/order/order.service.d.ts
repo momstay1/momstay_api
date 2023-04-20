@@ -1,3 +1,4 @@
+/// <reference types="lodash" />
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -14,6 +15,7 @@ import { Pagination, PaginationOptions } from 'src/paginate';
 import { UsersEntity } from 'src/users/entities/user.entity';
 import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { SettingsService } from 'src/settings/settings.service';
+import { EmailService } from 'src/email/email.service';
 export declare class OrderService {
     private orderRepository;
     private readonly productService;
@@ -27,7 +29,8 @@ export declare class OrderService {
     private readonly pushNotiService;
     private readonly settingsService;
     private readonly excelService;
-    constructor(orderRepository: Repository<OrderEntity>, productService: ProductService, usersService: UsersService, productOptionService: ProductOptionService, userService: UsersService, orderProductService: OrderProductService, ordertotalService: OrderTotalService, iamportService: IamportService, pgDataService: PgDataService, pushNotiService: PushNotificationService, settingsService: SettingsService, excelService: ExcelService);
+    private readonly emailService;
+    constructor(orderRepository: Repository<OrderEntity>, productService: ProductService, usersService: UsersService, productOptionService: ProductOptionService, userService: UsersService, orderProductService: OrderProductService, ordertotalService: OrderTotalService, iamportService: IamportService, pgDataService: PgDataService, pushNotiService: PushNotificationService, settingsService: SettingsService, excelService: ExcelService, emailService: EmailService);
     create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req: any): Promise<{
         order: OrderEntity;
         orderProduct: import("../order-product/entities/order-product.entity").OrderProductEntity;
@@ -65,6 +68,30 @@ export declare class OrderService {
     statusChange(idx: number, status: number): Promise<void>;
     test(order_idx: string, price: string): Promise<void>;
     remove(id: number): string;
+    orderMailSendInfo(orderIdx: number): Promise<{
+        order: OrderEntity;
+        guestUser: UsersEntity;
+        hostUser: UsersEntity;
+        po_title_ko: any;
+        po_title_en: any;
+        sendInfo: {
+            po_title: any;
+            product_title: any;
+            occupancy_date: string;
+            eviction_date: string;
+            payment: number;
+            po_payment: number;
+            tax: number;
+            fee: number;
+            user_name: string;
+            phone: string;
+            cancel_reason: string;
+        };
+        site: import("lodash").Dictionary<import("../settings/entities/setting.entity").SettingEntity>;
+    }>;
+    guestOrderMail(orderIdx: number, cancelReason: string): Promise<void>;
+    hostOrderMail(orderIdx: number, cancelReason: string): Promise<void>;
+    adminOrderMail(orderIdx: number, cancelReason: string): Promise<void>;
     orderVerification(createOrderDto: CreateOrderDto): Promise<any>;
     dashboard(month: string): Promise<any>;
     createExcel(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{

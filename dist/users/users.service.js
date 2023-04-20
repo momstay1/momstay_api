@@ -59,7 +59,7 @@ let UsersService = class UsersService {
             await this.findId(email);
             if (type == 'pw') {
                 const code = await this.emailService.createCode(email, 0);
-                this.emailService.snedMail(1, email, 'momstay - Email Authentication', `Please enter your email verification code below.
+                this.emailService.sendMail(email, 'momstay - Email Authentication', `Please enter your email verification code below.
           <br><br>
           Email authentication code : ${code.toUpperCase()}`);
                 result['message'] = '인증 코드 메일 발송 완료';
@@ -72,7 +72,7 @@ let UsersService = class UsersService {
         catch (error) {
             if (type == 'sign') {
                 const code = await this.emailService.createCode(email, 0);
-                this.emailService.snedMail(1, email, 'momstay - Email Authentication', `Please enter the email authentication code below to register as a member.
+                this.emailService.sendMail(email, 'momstay - Email Authentication', `Please enter the email authentication code below to register as a member.
           <br><br>
           Email authentication code : ${code.toUpperCase()}`);
                 result['message'] = '인증 코드 메일 발송 완료';
@@ -113,7 +113,7 @@ let UsersService = class UsersService {
         const { take, page } = options;
         const status_arr = [];
         for (const key in constants_1.usersConstant.status) {
-            if (key != 'delete') {
+            if (key != 'delete' && key != 'dormant' && key != 'leave') {
                 status_arr.push(constants_1.usersConstant.status[key]);
             }
         }
@@ -338,6 +338,7 @@ let UsersService = class UsersService {
     }
     async leave(id, reason) {
         const user = await this.findId(id);
+        const { language, name, email } = user;
         const userLeave = await this.userLeaveService.leaveUser(user, reason);
         user.status = constants_1.usersConstant.status.leave;
         user.password = '';
@@ -354,6 +355,12 @@ let UsersService = class UsersService {
         user.leaveAt = new Date();
         user.marketing = '0';
         await this.usersRepository.save(user);
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'guest', code: 'leave', lang: language }, {
+            user_name: name,
+        });
+        if (email != '' && mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(email, mail.title, email_tmpl);
+        }
     }
     async dormant(user) {
         const userDormant = await this.userDormantService.dormantUser(user);
@@ -410,6 +417,14 @@ let UsersService = class UsersService {
             .where(' id IN (:ids)', { ids: ids })
             .execute();
     }
+    async signupMail(userInfo) {
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'guest', code: 'signup', lang: userInfo.language }, {
+            user_name: userInfo.name,
+        });
+        if ((0, lodash_1.get)(userInfo, 'email', '') && mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(userInfo.email, mail.title, email_tmpl);
+        }
+    }
     async dashboard() {
         const today = moment().format('YYYY-MM-DD');
         const user = await this.usersRepository
@@ -457,6 +472,32 @@ let UsersService = class UsersService {
             .where(' status = :status', { status: constants_1.usersConstant.status.leave })
             .execute();
     }
+    async dormantNotice() {
+        console.log('[cron] dormantNotice: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+        const yearAgo = moment().add(-11, 'month').format('YYYY-MM-DD');
+        const group = [3];
+        const users = await this.usersRepository.createQueryBuilder('user')
+            .where(qb => {
+            qb.where('group.idx IN (:group)', { group: group });
+            qb.andWhere('user.status = :status', { status: constants_1.usersConstant.status.registration });
+            qb.andWhere('user.activitedAt < :activitedAt', { activitedAt: yearAgo });
+        })
+            .getMany();
+        console.log('휴면 회원 안내 숫자: ', users.length);
+        if (users.length > 0) {
+            const after_one_month = moment().add(1, 'month').format('YYYY-MM-DD');
+            for (const key in users) {
+                const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'guest', code: 'dormant', lang: users[key].language }, {
+                    user_name: users[key].name,
+                    user_id: users[key].id,
+                    dormant_date: after_one_month
+                });
+                if ((0, lodash_1.get)(users[key], 'email', '') && mail != '' && email_tmpl != '') {
+                    await this.emailService.sendMail(users[key].email, mail.title, email_tmpl);
+                }
+            }
+        }
+    }
     async dormantUser() {
         console.log('[cron] dormantUser: ', moment().format('YYYY-MM-DD HH:mm:ss'));
         const yearAgo = moment().add(-1, 'year').format('YYYY-MM-DD');
@@ -497,6 +538,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UsersService.prototype, "deleteUniqueKey", null);
+__decorate([
+    (0, schedule_1.Cron)('0 0 1 * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UsersService.prototype, "dormantNotice", null);
 __decorate([
     (0, schedule_1.Cron)('0 0 1 * * *'),
     __metadata("design:type", Function),

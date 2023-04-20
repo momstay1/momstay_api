@@ -26,15 +26,17 @@ const product_service_1 = require("../product/product.service");
 const excel_service_1 = require("../excel/excel.service");
 const settings_service_1 = require("../settings/settings.service");
 const schedule_1 = require("@nestjs/schedule");
+const email_service_1 = require("../email/email.service");
 const applicationStatus = 1;
 const approvalStatus = 2;
 const endStatus = 3;
 let MembershipService = class MembershipService {
-    constructor(membershipHistoryRepository, userService, productService, excelService, settingsService) {
+    constructor(membershipHistoryRepository, userService, productService, excelService, emailService, settingsService) {
         this.membershipHistoryRepository = membershipHistoryRepository;
         this.userService = userService;
         this.productService = productService;
         this.excelService = excelService;
+        this.emailService = emailService;
         this.settingsService = settingsService;
     }
     async create(userInfo, createMembershipDto) {
@@ -65,6 +67,25 @@ let MembershipService = class MembershipService {
         };
         const membershipHistoryEntity = await this.membershipHistoryRepository.create(mh_data);
         const membership = await this.membershipHistoryRepository.save(membershipHistoryEntity);
+        if (user.email != '') {
+            const membershipInfo = await this.settingsService.find('membership');
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'host', code: 'membership', lang: user.language }, {
+                membership_month: membership.month,
+                membership_price: (0, lodash_1.get)(membershipInfo, ['membership_price_discount_' + membership.month, 'set_value'], 0),
+                membership_bank: (0, lodash_1.get)(membershipInfo, ['membership_bank', 'set_value'], ''),
+                membership_account: (0, lodash_1.get)(membershipInfo, ['membership_account', 'set_value'], ''),
+            });
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(user.email, mail.title, email_tmpl);
+            }
+        }
+        const site = await this.settingsService.find('site');
+        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '')) {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'admin', code: 'membership', lang: user.language }, {});
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(user.email, mail.title, email_tmpl);
+            }
+        }
         return { membership };
     }
     async findAll(options, search, order) {
@@ -199,6 +220,12 @@ let MembershipService = class MembershipService {
         }
         const membership = await this.membershipHistoryRepository.save(membershipInfo);
         await this.productService.updateMembership(membership['user']['idx'], membershipStatus);
+        if (membership.user.email != '' && membership.status == approvalStatus) {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'host', code: 'membership_complete', lang: membership.user.language }, {});
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(membership.user.email, mail.title, email_tmpl);
+            }
+        }
         return { membership };
     }
     remove(id) {
@@ -249,6 +276,7 @@ MembershipService = __decorate([
         users_service_1.UsersService,
         product_service_1.ProductService,
         excel_service_1.ExcelService,
+        email_service_1.EmailService,
         settings_service_1.SettingsService])
 ], MembershipService);
 exports.MembershipService = MembershipService;

@@ -11,7 +11,6 @@ export declare class ConfigService {
         domain: string;
         email: string;
         api_key: string;
-        auth_password: string;
         host: string;
         name: string;
     };

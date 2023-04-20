@@ -1,5 +1,6 @@
 export declare class CreatePopupDto {
     readonly status: number;
+    readonly id: string;
     readonly title: string;
     readonly page: string;
     readonly startPeriod: string;

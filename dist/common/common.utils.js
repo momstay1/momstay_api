@@ -303,5 +303,24 @@ exports.commonUtils = {
     formatPrice(price) {
         return new Intl.NumberFormat().format(price);
     },
+    langChk(lang) {
+        let result = 'ko';
+        switch (lang) {
+            case 'eng':
+            case 'en':
+                result = 'en';
+                break;
+            case 'jp':
+            case 'ja':
+                result = 'jp';
+                break;
+            case 'ch':
+            case 'cn':
+            case 'zh-CN':
+                result = 'ch';
+                break;
+        }
+        return result;
+    }
 };
 //# sourceMappingURL=common.utils.js.map

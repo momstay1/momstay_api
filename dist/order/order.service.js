@@ -31,8 +31,9 @@ const paginate_1 = require("../paginate");
 const push_notification_service_1 = require("../push-notification/push-notification.service");
 const moment = require("moment");
 const settings_service_1 = require("../settings/settings.service");
+const email_service_1 = require("../email/email.service");
 let OrderService = class OrderService {
-    constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService, settingsService, excelService) {
+    constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService, settingsService, excelService, emailService) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.usersService = usersService;
@@ -45,6 +46,7 @@ let OrderService = class OrderService {
         this.pushNotiService = pushNotiService;
         this.settingsService = settingsService;
         this.excelService = excelService;
+        this.emailService = emailService;
     }
     async create(userInfo, createOrderDto, req) {
         const ord_data = {};
@@ -134,6 +136,7 @@ let OrderService = class OrderService {
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestOrderPush(user, po);
         }
+        await this.guestOrderMail(order.idx, '');
         return { order, orderProduct, po, priceInfo };
     }
     async ordCreateCode() {
@@ -542,13 +545,14 @@ let OrderService = class OrderService {
                 site.set_value +
                 ')에 문의해주세요.');
         }
-        const cancelReason = '게스트 취소';
+        const cancelReason = 'guest cancel';
         await this.cancelProcess(order, cancelReason);
         const po = await this.productOptionService.findIdx(+(0, lodash_1.get)(order, ['orderProduct', '0', 'productOption', 'idx']));
         const hostUser = (0, lodash_1.get)(po, ['product', 'user']);
         if ((0, lodash_1.get)(hostUser, ['device', 'token'], '')) {
             await this.pushNotiService.guestOrderCancelPush(hostUser, po);
         }
+        await this.guestOrderMail(order.idx, cancelReason);
     }
     async hostOrderApproval(code, userInfo) {
         if (!code) {
@@ -580,6 +584,7 @@ let OrderService = class OrderService {
         if ((0, lodash_1.get)(guestUser, ['device', 'token'], '')) {
             await this.pushNotiService.hostOrderApprovalPush(guestUser, orderInfo);
         }
+        await this.hostOrderMail(order.idx, '');
     }
     async hostOrderCancel(code, userInfo, updateOrderDto) {
         if (!code) {
@@ -610,12 +615,18 @@ let OrderService = class OrderService {
                 site.set_value +
                 ')에 문의해주세요.');
         }
-        const cancelReason = '호스트 취소(' + (0, lodash_1.get)(updateOrderDto, 'cancelReason', '') + ')';
+        const cancelReason = 'host cancel(' + (0, lodash_1.get)(updateOrderDto, 'cancelReason', '') + ')';
         await this.cancelProcess(order, cancelReason);
         const orderInfo = await this.findOneIdx(+(0, lodash_1.get)(order, ['idx']));
         const guestUser = (0, lodash_1.get)(orderInfo, 'user');
         if ((0, lodash_1.get)(guestUser, ['device', 'token'], '')) {
             await this.pushNotiService.hostOrderCancelPush(guestUser, orderInfo);
+        }
+        if (['root', 'admin'].includes(user.group.id)) {
+            await this.adminOrderMail(order.idx, 'momstay cancel');
+        }
+        else {
+            await this.hostOrderMail(order.idx, cancelReason);
         }
     }
     async cancelProcess(order, cancelReason) {
@@ -649,6 +660,135 @@ let OrderService = class OrderService {
     }
     remove(id) {
         return `This action removes a #${id} order`;
+    }
+    async orderMailSendInfo(orderIdx) {
+        const order = await this.findOneIdx(orderIdx);
+        const guestUser = order.user;
+        const hostUser = order.orderProduct[0].productOption.product.user;
+        const lang = common_utils_1.commonUtils.langValue(guestUser.language == 'ko' ? guestUser.language : 'en');
+        let po_title = order.orderProduct[0].productOption['title' + lang];
+        let po_title_ko;
+        let po_title_en;
+        if (order.orderProduct.length > 1) {
+            po_title_ko += po_title + ' 외 ' + order.orderProduct.length + '건';
+            po_title_en += po_title + ' and ' + order.orderProduct.length + ' other case';
+        }
+        const sendInfo = {
+            po_title: po_title_ko,
+            product_title: order.orderProduct[0].productOption.product['title' + lang],
+            occupancy_date: order.orderProduct[0].startAt,
+            eviction_date: order.orderProduct[0].endAt,
+            payment: order.orderProduct[0].payPrice,
+            po_payment: order.orderProduct[0].price,
+            tax: order.orderProduct[0].taxPrice,
+            fee: order.orderProduct[0].feePrice,
+            user_name: guestUser.name,
+            phone: guestUser.countryCode + ' ' + guestUser.phone,
+            cancel_reason: '',
+        };
+        const site = await this.settingsService.find('site');
+        return {
+            order,
+            guestUser,
+            hostUser,
+            po_title_ko,
+            po_title_en,
+            sendInfo,
+            site
+        };
+    }
+    async guestOrderMail(orderIdx, cancelReason) {
+        const { order, guestUser, hostUser, po_title_ko, po_title_en, sendInfo, site } = await this.orderMailSendInfo(orderIdx);
+        sendInfo.cancel_reason = cancelReason;
+        let code;
+        switch (order.status) {
+            case 2:
+                code = 'payment';
+                break;
+            case 8:
+                code = 'guest_cancel';
+                break;
+        }
+        if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
+            sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+            }
+        }
+        if ((0, lodash_1.get)(hostUser, 'email', '') != '') {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'host', code: code, lang: 'ko' }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+            }
+        }
+        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+            }
+        }
+    }
+    async hostOrderMail(orderIdx, cancelReason) {
+        const { order, guestUser, hostUser, po_title_ko, po_title_en, sendInfo, site } = await this.orderMailSendInfo(orderIdx);
+        sendInfo.cancel_reason = cancelReason;
+        let code;
+        switch (order.status) {
+            case 4:
+                code = 'shipping';
+                break;
+            case 8:
+                code = 'admin_cancel';
+                break;
+        }
+        if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
+            sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+            }
+        }
+        if ((0, lodash_1.get)(hostUser, 'email', '') != '') {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'host', code: code, lang: 'ko' }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+            }
+        }
+        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+            }
+        }
+    }
+    async adminOrderMail(orderIdx, cancelReason) {
+        const { order, guestUser, hostUser, po_title_ko, po_title_en, sendInfo, site } = await this.orderMailSendInfo(orderIdx);
+        sendInfo.cancel_reason = cancelReason;
+        let code;
+        switch (order.status) {
+            case 8:
+                code = 'host_cancel';
+                break;
+        }
+        if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
+            sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+            }
+        }
+        if ((0, lodash_1.get)(hostUser, 'email', '') != '') {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'host', code: code, lang: 'ko' }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+            }
+        }
+        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+            }
+        }
     }
     async orderVerification(createOrderDto) {
         const { response } = await this.iamportService.getPaymentByImpUid(createOrderDto['imp_uid']);
@@ -701,7 +841,8 @@ OrderService = __decorate([
         pg_data_service_1.PgDataService,
         push_notification_service_1.PushNotificationService,
         settings_service_1.SettingsService,
-        excel_service_1.ExcelService])
+        excel_service_1.ExcelService,
+        email_service_1.EmailService])
 ], OrderService);
 exports.OrderService = OrderService;
 //# sourceMappingURL=order.service.js.map

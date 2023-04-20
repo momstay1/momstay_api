@@ -25,6 +25,7 @@ const users_service_1 = require("../users/users.service");
 const typeorm_2 = require("typeorm");
 const reservation_entity_1 = require("./entities/reservation.entity");
 const excel_service_1 = require("../excel/excel.service");
+const email_service_1 = require("../email/email.service");
 const readyStatus = 1;
 const approvalStatus = 2;
 const confirmationStatus = 3;
@@ -38,13 +39,14 @@ const status = [
     refusalStatus,
 ];
 let ReservationService = class ReservationService {
-    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService, excelSerivce) {
+    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService, excelSerivce, emailService) {
         this.reservationRepository = reservationRepository;
         this.productOptionService = productOptionService;
         this.usersService = usersService;
         this.fileService = fileService;
         this.pushNotiService = pushNotiService;
         this.excelSerivce = excelSerivce;
+        this.emailService = emailService;
     }
     async create(userInfo, createReservationDto) {
         const po = await this.productOptionService.findIdx(createReservationDto.productOptionIdx);
@@ -74,6 +76,18 @@ let ReservationService = class ReservationService {
         console.log(hostUser.device);
         if ((0, lodash_1.get)(hostUser, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationPush(hostUser, po);
+        }
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'host', code: 'request', lang: 'ko' }, {
+            po_title: po.title,
+            product_title: po.product.title,
+            guest_name: user.name,
+            occupancy_date: reservation.occupancyAt,
+            eviction_date: reservation.evictionAt,
+            visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+            phone: user.countryCode + ' ' + user.phone
+        });
+        if (mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
         }
         return { reservation };
     }
@@ -251,6 +265,18 @@ let ReservationService = class ReservationService {
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationConfirmationPush(user, reservation);
         }
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'host', code: 'guest_complete', lang: 'ko' }, {
+            po_title: reservation.productOption.title,
+            product_title: reservation.productOption.product.title,
+            visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+            guest_name: user.name,
+            occupancy_date: reservation.occupancyAt,
+            eviction_date: reservation.evictionAt,
+            phone: user.countryCode + ' ' + user.phone
+        });
+        if (mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(reservation.productOption.product.user.email, mail.title, email_tmpl);
+        }
     }
     async hostApproval(userInfo, idx) {
         const reservation = await this.findOneIdx(idx);
@@ -260,6 +286,19 @@ let ReservationService = class ReservationService {
         const { user } = reservation;
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.hostReservationApprovalPush(user, reservation);
+        }
+        const lang = common_utils_1.commonUtils.langValue(reservation.user.language == 'ko' ? reservation.user.language : 'en');
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'guest', code: 'host_complete', lang: reservation.user.language }, {
+            po_title: reservation.productOption['title' + lang],
+            product_title: reservation.productOption.product['title' + lang],
+            visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+            guest_name: user.name,
+            occupancy_date: reservation.occupancyAt,
+            eviction_date: reservation.evictionAt,
+            phone: user.countryCode + ' ' + user.phone
+        });
+        if (mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(reservation.user.email, mail.title, email_tmpl);
         }
     }
     async update(userInfo, idx) {
@@ -281,6 +320,18 @@ let ReservationService = class ReservationService {
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationCancelPush(user, reservation);
         }
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'host', code: 'guest_cancel', lang: 'ko' }, {
+            po_title: reservation.productOption.title,
+            product_title: reservation.productOption.product.title,
+            visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+            guest_name: user.name,
+            occupancy_date: reservation.occupancyAt,
+            eviction_date: reservation.evictionAt,
+            phone: user.countryCode + ' ' + user.phone
+        });
+        if (mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(reservation.productOption.product.user.email, mail.title, email_tmpl);
+        }
     }
     async hostCancel(userInfo, idx) {
         const reservation = await this.findOneIdx(idx);
@@ -290,6 +341,19 @@ let ReservationService = class ReservationService {
         const { user } = reservation;
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.hostReservationCancelPush(user, reservation);
+        }
+        const lang = common_utils_1.commonUtils.langValue(reservation.user.language == 'ko' ? reservation.user.language : 'en');
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'guest', code: 'host_cancel', lang: reservation.user.language }, {
+            po_title: reservation.productOption['title' + lang],
+            product_title: reservation.productOption.product['title' + lang],
+            visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+            guest_name: user.name,
+            occupancy_date: reservation.occupancyAt,
+            eviction_date: reservation.evictionAt,
+            phone: user.countryCode + ' ' + user.phone
+        });
+        if (mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(reservation.user.email, mail.title, email_tmpl);
         }
     }
     async processCheckStatus(status) {
@@ -319,6 +383,7 @@ let ReservationService = class ReservationService {
         for (const key in reservations) {
             const guestUser = reservations[key].user;
             const hostUser = reservations[key].productOption.product.user;
+            await this.pushNotiService.adminReservationStatusChange(guestUser, hostUser, reservations[key]);
             await this.pushNotiService.adminReservationStatusChange(guestUser, hostUser, reservations[key]);
         }
     }
@@ -352,7 +417,8 @@ ReservationService = __decorate([
         users_service_1.UsersService,
         file_service_1.FileService,
         push_notification_service_1.PushNotificationService,
-        excel_service_1.ExcelService])
+        excel_service_1.ExcelService,
+        email_service_1.EmailService])
 ], ReservationService);
 exports.ReservationService = ReservationService;
 //# sourceMappingURL=reservation.service.js.map

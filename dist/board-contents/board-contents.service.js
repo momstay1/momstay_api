@@ -27,14 +27,19 @@ const common_utils_1 = require("../common/common.utils");
 const paginate_1 = require("../paginate");
 const lodash_1 = require("lodash");
 const common_bcrypt_1 = require("../common/common.bcrypt");
+const email_service_1 = require("../email/email.service");
+const settings_service_1 = require("../settings/settings.service");
+const inquiryIdx = 5;
 let BoardContentsService = class BoardContentsService {
-    constructor(bcRepository, usersService, boardsService, bscatsService, bcatsService, excelService) {
+    constructor(bcRepository, usersService, boardsService, bscatsService, bcatsService, excelService, emailService, settingsService) {
         this.bcRepository = bcRepository;
         this.usersService = usersService;
         this.boardsService = boardsService;
         this.bscatsService = bscatsService;
         this.bcatsService = bcatsService;
         this.excelService = excelService;
+        this.emailService = emailService;
+        this.settingsService = settingsService;
     }
     async create(userInfo, bc) {
         const board = await this.boardsService.findBoard({ idx: bc.bd_idx });
@@ -56,6 +61,15 @@ let BoardContentsService = class BoardContentsService {
                 boardContent.bscats.push(await this.bscatsService.saveToBscat(bcats[key], boardContent));
             }
         }
+        const site = await this.settingsService.find('site');
+        if (board.idx == inquiryIdx && (0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '')) {
+            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'board', group: 'admin', code: 'inquiry', lang: 'ko' }, {
+                board_title: board.name
+            });
+            if (mail != '' && email_tmpl != '') {
+                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+            }
+        }
         return boardContent;
     }
     async statusChange(statusChange) {
@@ -67,11 +81,20 @@ let BoardContentsService = class BoardContentsService {
             .where(' idx IN (:bc_idx)', { bc_idx: statusChange.bc_idxs })
             .execute();
     }
-    async statusAnswer(bcIdx) {
+    async statusAnswer(bcIdx, answerContent) {
         const bc = await this.findIndex(bcIdx);
         if (bc['status'] == constants_1.bcConstants.status.answerWait) {
             bc['status'] = constants_1.bcConstants.status.answerComplete;
             await this.bcRepository.save(bc);
+            if (bc.board.idx == inquiryIdx && (0, lodash_1.get)(bc, ['user', 'email'], '')) {
+                const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'board', group: 'guest', code: 'inquiry', lang: bc.user.language }, {
+                    inquiry_content: bc.content,
+                    answer_content: answerContent
+                });
+                if (mail != '' && email_tmpl != '') {
+                    await this.emailService.sendMail(bc.user.email, mail.title, email_tmpl);
+                }
+            }
         }
     }
     async commentCountUp(bcIdx) {
@@ -392,7 +415,9 @@ BoardContentsService = __decorate([
         boards_service_1.BoardsService,
         board_selected_categories_service_1.BoardSelectedCategoriesService,
         board_categories_service_1.BoardCategoriesService,
-        excel_service_1.ExcelService])
+        excel_service_1.ExcelService,
+        email_service_1.EmailService,
+        settings_service_1.SettingsService])
 ], BoardContentsService);
 exports.BoardContentsService = BoardContentsService;
 //# sourceMappingURL=board-contents.service.js.map

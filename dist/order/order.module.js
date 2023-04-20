@@ -22,6 +22,7 @@ const pg_data_module_1 = require("../pg-data/pg-data.module");
 const push_notification_module_1 = require("../push-notification/push-notification.module");
 const admin_order_controller_1 = require("./admin-order.controller");
 const settings_module_1 = require("../settings/settings.module");
+const email_module_1 = require("../email/email.module");
 const excel_service_1 = require("../excel/excel.service");
 let OrderModule = class OrderModule {
 };
@@ -38,6 +39,7 @@ OrderModule = __decorate([
             users_module_1.UsersModule,
             push_notification_module_1.PushNotificationModule,
             settings_module_1.SettingsModule,
+            email_module_1.EmailModule
         ],
         controllers: [order_controller_1.OrderController, admin_order_controller_1.AdminOrderController],
         providers: [order_service_1.OrderService, iamport_service_1.IamportService, excel_service_1.ExcelService],

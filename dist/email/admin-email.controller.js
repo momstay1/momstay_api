@@ -25,6 +25,10 @@ let AdminEmailController = class AdminEmailController {
         const message = await this.emailService.emailFindAll(search);
         return { message };
     }
+    async test() {
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'host', code: 'request', lang: 'ko' }, {});
+        await this.emailService.sendMail('shjeon2500@naver.com', mail.title, email_tmpl);
+    }
     async update(idx, status) {
         return await this.emailService.update(+idx, status);
     }
@@ -47,6 +51,12 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
 ], AdminEmailController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('test'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminEmailController.prototype, "test", null);
 __decorate([
     (0, common_1.Patch)(':idx'),
     (0, swagger_1.ApiOperation)({ summary: '메일 상태 수정 API' }),

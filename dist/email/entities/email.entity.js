@@ -34,6 +34,10 @@ __decorate([
     __metadata("design:type", String)
 ], EmailEntity.prototype, "code", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ length: 255, default: '', comment: '언어' }),
+    __metadata("design:type", String)
+], EmailEntity.prototype, "language", void 0);
+__decorate([
     (0, typeorm_1.Column)({ length: 255, default: '', comment: '메일 제목' }),
     __metadata("design:type", String)
 ], EmailEntity.prototype, "title", void 0);

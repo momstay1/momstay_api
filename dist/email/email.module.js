@@ -15,6 +15,8 @@ const email_history_entity_1 = require("./entities/email-history.entity");
 const email_tmpl_entity_1 = require("./entities/email-tmpl.entity");
 const admin_email_controller_1 = require("./admin-email.controller");
 const email_entity_1 = require("./entities/email.entity");
+const settings_module_1 = require("../settings/settings.module");
+const file_module_1 = require("../file/file.module");
 let EmailModule = class EmailModule {
 };
 EmailModule = __decorate([
@@ -24,8 +26,10 @@ EmailModule = __decorate([
                 email_entity_1.EmailEntity,
                 email_tmpl_entity_1.EmailTmplEntity,
                 email_history_entity_1.EmailHistoryEntity,
-                email_code_entity_1.EmailCodeEntity
+                email_code_entity_1.EmailCodeEntity,
             ]),
+            settings_module_1.SettingsModule,
+            file_module_1.FileModule
         ],
         controllers: [admin_email_controller_1.AdminEmailController],
         providers: [email_service_1.EmailService],

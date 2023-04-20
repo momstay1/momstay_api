@@ -8,6 +8,8 @@ import { CreateBoardContentDto } from './dto/create-board-content.dto';
 import { UpdateBoardContentDto } from './dto/update-board-content.dto';
 import { BoardContentsEntity } from './entities/board-content.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
+import { EmailService } from 'src/email/email.service';
+import { SettingsService } from 'src/settings/settings.service';
 export declare class BoardContentsService {
     private bcRepository;
     private readonly usersService;
@@ -15,10 +17,12 @@ export declare class BoardContentsService {
     private readonly bscatsService;
     private readonly bcatsService;
     private readonly excelService;
-    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService, excelService: ExcelService);
+    private readonly emailService;
+    private readonly settingsService;
+    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService, excelService: ExcelService, emailService: EmailService, settingsService: SettingsService);
     create(userInfo: any, bc: CreateBoardContentDto): Promise<any>;
     statusChange(statusChange: any): Promise<void>;
-    statusAnswer(bcIdx: number): Promise<void>;
+    statusAnswer(bcIdx: number, answerContent: string): Promise<void>;
     commentCountUp(bcIdx: number): Promise<void>;
     typeChange(typeChange: any): Promise<void>;
     findCategoryAll(bd_idx: any, category: string, options: PaginationOptions, order: any, search: string[]): Promise<{

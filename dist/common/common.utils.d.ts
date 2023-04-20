@@ -20,4 +20,5 @@ export declare const commonUtils: {
     isRoot(groupId: string): boolean;
     langValue(lang: any): string;
     formatPrice(price: any): string;
+    langChk(lang: any): string;
 };

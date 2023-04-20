@@ -55,11 +55,13 @@ export declare class UsersService {
     dormant(user: UsersEntity): Promise<void>;
     dormantRecovery(id: string): Promise<void>;
     removes(ids: any): Promise<void>;
+    signupMail(userInfo: UsersEntity): Promise<void>;
     dashboard(): Promise<any>;
     getPrivateColumn(): string[];
     private saveUser;
     private checkUserExists;
     deleteUniqueKey(): Promise<void>;
+    dormantNotice(): Promise<void>;
     dormantUser(): Promise<void>;
     createExcel(user: any, options: PaginationOptions, search: string[], order: string): Promise<{
         file_name: string;

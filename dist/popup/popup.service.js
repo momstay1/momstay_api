@@ -29,8 +29,13 @@ let PopupService = class PopupService {
         this.fileService = fileService;
     }
     async create(createPopupDto, files) {
+        const popupChk = await this.checkPopupIdExists(createPopupDto.id);
+        if (popupChk) {
+            throw new common_1.UnprocessableEntityException('popup.service.create: 아이디가 중복 됩니다.');
+        }
         const popup_data = {
             status: (0, lodash_1.get)(createPopupDto, 'status'),
+            id: (0, lodash_1.get)(createPopupDto, 'id'),
             title: (0, lodash_1.get)(createPopupDto, 'title'),
             page: (0, lodash_1.get)(createPopupDto, 'page'),
             startPeriod: (0, lodash_1.get)(createPopupDto, 'startPeriod', null),

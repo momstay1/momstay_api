@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
 import { ExcelService } from 'src/excel/excel.service';
+import { EmailService } from 'src/email/email.service';
 export declare class ReservationService {
     private reservationRepository;
     private readonly productOptionService;
@@ -14,7 +15,8 @@ export declare class ReservationService {
     private readonly fileService;
     private readonly pushNotiService;
     private readonly excelSerivce;
-    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService, excelSerivce: ExcelService);
+    private readonly emailService;
+    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService, excelSerivce: ExcelService, emailService: EmailService);
     create(userInfo: any, createReservationDto: CreateReservationDto): Promise<{
         reservation: ReservationEntity;
     }>;

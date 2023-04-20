@@ -4,6 +4,7 @@ export declare class EmailEntity {
     type: string;
     group: string;
     code: string;
+    language: string;
     title: string;
     content: string;
     template: string;

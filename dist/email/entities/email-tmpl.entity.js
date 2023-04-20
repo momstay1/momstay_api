@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmailTmplEntity = void 0;
 const typeorm_1 = require("typeorm");
-const email_history_entity_1 = require("./email-history.entity");
 let EmailTmplEntity = class EmailTmplEntity {
 };
 __decorate([
@@ -34,10 +33,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'text', default: '' }),
     __metadata("design:type", String)
 ], EmailTmplEntity.prototype, "template", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => email_history_entity_1.EmailHistoryEntity, (emailHistory) => emailHistory.emailTmpl),
-    __metadata("design:type", void 0)
-], EmailTmplEntity.prototype, "emailHistory", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

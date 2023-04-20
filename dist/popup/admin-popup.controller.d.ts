@@ -24,6 +24,7 @@ export declare class AdminPopupController {
         popup: {
             filesIdx: string;
             status: number;
+            id: string;
             title: string;
             page: string;
             startPeriod: string | Date;
@@ -32,7 +33,6 @@ export declare class AdminPopupController {
             link: string;
             popupImg?: string[];
             idx: number;
-            id: string;
             createdAt: Date;
             updatedAt: Date;
         } & PopupEntity;
