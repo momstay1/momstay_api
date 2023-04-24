@@ -25,12 +25,15 @@ const file_service_1 = require("../file/file.service");
 const exceptions_1 = require("@nestjs/common/exceptions");
 const product_info_service_1 = require("../product-info/product-info.service");
 const excel_service_1 = require("../excel/excel.service");
+const users_service_1 = require("../users/users.service");
+const deleteStatus = -1;
 const registrationStatus = '2';
 let ProductOptionService = class ProductOptionService {
-    constructor(productOptionRepository, productService, fileService, productInfoService, excelService) {
+    constructor(productOptionRepository, productService, fileService, userService, productInfoService, excelService) {
         this.productOptionRepository = productOptionRepository;
         this.productService = productService;
         this.fileService = fileService;
+        this.userService = userService;
         this.productInfoService = productInfoService;
         this.excelService = excelService;
     }
@@ -148,6 +151,7 @@ let ProductOptionService = class ProductOptionService {
             .leftJoinAndSelect('product_info', 'product_info', '`product_info`.idx = `product_info_to_product`.productInfoIdx')
             .where((qb) => {
             qb.where('`product_option`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
+            qb.andWhere('`product`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'title') });
             (0, lodash_1.get)(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: (0, lodash_1.get)(where, 'product_idx') });
             (0, lodash_1.get)(where, 'po_title', '') && qb.andWhere('`product_option`.`title` LIKE :po_title', { po_title: '%' + (0, lodash_1.get)(where, 'po_title') + '%' });
@@ -213,8 +217,23 @@ let ProductOptionService = class ProductOptionService {
     update(id, updateProductOptionDto) {
         return `This action updates a #${id} productOption`;
     }
-    remove(id) {
-        return `This action removes a #${id} productOption`;
+    async hostRemove(userInfo, idx) {
+        if (!common_utils_1.commonUtils.isAdmin(userInfo.group)) {
+            const user = await this.userService.findId(userInfo.id);
+            const po = await this.findIdx(idx);
+            if (user.idx != po.product.user.idx) {
+                throw new common_1.NotAcceptableException('product-option.service.hostRemove: 삭제 권한이 없습니다.');
+            }
+        }
+        await this.remove(idx);
+    }
+    async remove(idx) {
+        await this.productOptionRepository
+            .createQueryBuilder()
+            .update(product_option_entity_1.ProductOptionEntity)
+            .set({ status: deleteStatus })
+            .where(' idx = :idx', { idx: idx })
+            .execute();
     }
     async createExcel(options, search, order) {
         const { data } = await this.findAll(options, search, order);
@@ -232,6 +251,7 @@ ProductOptionService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         product_service_1.ProductService,
         file_service_1.FileService,
+        users_service_1.UsersService,
         product_info_service_1.ProductInfoService,
         excel_service_1.ExcelService])
 ], ProductOptionService);

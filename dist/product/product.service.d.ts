@@ -50,7 +50,7 @@ export declare class ProductService {
         reviewCount: any;
     }): Promise<void>;
     updateMembership(userIdx: number, membershipStatus: string): Promise<void>;
-    hostRemove(userIinfo: any, idx: number): Promise<void>;
+    hostRemove(userInfo: any, idx: number): Promise<void>;
     remove(idx: number): Promise<void>;
     dashboard(): Promise<any>;
     createExcel(options: PaginationOptions, search: string[], order: string): Promise<{

@@ -23,6 +23,7 @@ const common_file_1 = require("../common/common.file");
 const platform_express_1 = require("@nestjs/platform-express");
 const role_decorator_1 = require("../common/decorator/role.decorator");
 const fs_1 = require("fs");
+const getuser_decorator_1 = require("../auth/getuser.decorator");
 let ProductOptionController = class ProductOptionController {
     constructor(productOptionService) {
         this.productOptionService = productOptionService;
@@ -48,8 +49,8 @@ let ProductOptionController = class ProductOptionController {
     update(id, updateProductOptionDto) {
         return this.productOptionService.update(+id, updateProductOptionDto);
     }
-    remove(id) {
-        return this.productOptionService.remove(+id);
+    remove(user, idx) {
+        return this.productOptionService.hostRemove(user, +idx);
     }
 };
 __decorate([
@@ -83,7 +84,7 @@ __decorate([
             'search=po_title:방 이름<br>' +
             'search=name:호스트이름<br>' +
             'search=id:호스트아이디<br>' +
-            'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+            'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
         required: false,
     }),
     (0, swagger_1.ApiQuery)({
@@ -152,10 +153,15 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ProductOptionController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(':idx'),
+    (0, swagger_1.ApiOperation)({ summary: '방 삭제 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.HttpCode)(204),
+    __param(0, (0, getuser_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Param)('idx')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ProductOptionController.prototype, "remove", null);
 ProductOptionController = __decorate([

@@ -457,9 +457,9 @@ let ProductService = class ProductService {
             .where(' idx IN (:idx)', { idx: productIdxs })
             .execute();
     }
-    async hostRemove(userIinfo, idx) {
-        if (!common_utils_1.commonUtils.isAdmin(userIinfo.group)) {
-            const user = await this.userService.findId(userIinfo.id);
+    async hostRemove(userInfo, idx) {
+        if (!common_utils_1.commonUtils.isAdmin(userInfo.group)) {
+            const user = await this.userService.findId(userInfo.id);
             const product = await this.findOneIdx(idx);
             if (user.idx != product.user.idx) {
                 throw new exceptions_1.NotAcceptableException('product.service.hostRemove: 삭제 권한이 없습니다.');

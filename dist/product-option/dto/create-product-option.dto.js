@@ -23,7 +23,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, swagger_1.ApiProperty)({ description: '게시 상태 <br>(0: 미등록, 1: 미사용, 2: 사용)', required: false }),
+    (0, swagger_1.ApiProperty)({ description: '게시 상태 <br>(-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)', required: false }),
     __metadata("design:type", String)
 ], CreateProductOptionDto.prototype, "status", void 0);
 __decorate([

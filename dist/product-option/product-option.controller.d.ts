@@ -22,5 +22,5 @@ export declare class ProductOptionController {
         file_info: {};
     }>;
     update(id: string, updateProductOptionDto: UpdateProductOptionDto): string;
-    remove(id: string): string;
+    remove(user: any, idx: string): Promise<void>;
 }
