@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { GetUser } from 'src/auth/getuser.decorator';
 import { UsersEntity } from 'src/users/entities/user.entity';
@@ -30,15 +30,22 @@ export class ReservationController {
   @ApiOperation({ summary: '방문 예약 리스트 (호스트) API' })
   @Auth(['root', 'admin', 'host'])
   @ApiBearerAuth()
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
+  })
   async hostFindAll(
     @GetUser() user: UsersEntity,
     @Query('take') take: number,
     @Query('page') page: number,
+    @Query('order') order: string
   ) {
     const {
       data,
       file_info
-    } = await this.reservationService.hostFindAll({ take, page }, user);
+    } = await this.reservationService.hostFindAll({ take, page }, user, order);
     return {
       ...data,
       file_info
@@ -49,15 +56,22 @@ export class ReservationController {
   @ApiOperation({ summary: '방문 예약 리스트 (게스트) API' })
   @Auth(['Any'])
   @ApiBearerAuth()
+  @ApiQuery({
+    name: "order",
+    description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>'
+    ,
+    required: false
+  })
   async guestFindAll(
     @GetUser() user: UsersEntity,
     @Query('take') take: number,
     @Query('page') page: number,
+    @Query('order') order: string
   ) {
     const {
       data,
       file_info
-    } = await this.reservationService.guestFindAll({ take, page }, user);
+    } = await this.reservationService.guestFindAll({ take, page }, user, order);
     return {
       ...data,
       file_info
