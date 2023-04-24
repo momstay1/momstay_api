@@ -7,13 +7,15 @@ import { ProductModule } from 'src/product/product.module';
 import { FileModule } from 'src/file/file.module';
 import { ProductInfoModule } from 'src/product-info/product-info.module';
 import { ExcelService } from 'src/excel/excel.service';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProductOptionEntity]),
     FileModule,
     ProductModule,
-    ProductInfoModule
+    ProductInfoModule,
+    UsersModule
   ],
   controllers: [ProductOptionController],
   providers: [ProductOptionService, ExcelService],
