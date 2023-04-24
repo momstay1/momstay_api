@@ -7,14 +7,14 @@ export declare class ReservationController {
     create(user: UsersEntity, createReservationDto: CreateReservationDto): Promise<{
         reservation: import("./entities/reservation.entity").ReservationEntity;
     }>;
-    hostFindAll(user: UsersEntity, take: number, page: number): Promise<{
+    hostFindAll(user: UsersEntity, take: number, page: number, order: string): Promise<{
         file_info: {};
         results: import("./entities/reservation.entity").ReservationEntity[];
         pageTotal: number;
         total: number;
         page: number;
     }>;
-    guestFindAll(user: UsersEntity, take: number, page: number): Promise<{
+    guestFindAll(user: UsersEntity, take: number, page: number, order: string): Promise<{
         file_info: {};
         results: import("./entities/reservation.entity").ReservationEntity[];
         pageTotal: number;

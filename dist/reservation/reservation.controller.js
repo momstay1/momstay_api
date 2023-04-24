@@ -27,12 +27,12 @@ let ReservationController = class ReservationController {
     async create(user, createReservationDto) {
         return await this.reservationService.create(user, createReservationDto);
     }
-    async hostFindAll(user, take, page) {
-        const { data, file_info } = await this.reservationService.hostFindAll({ take, page }, user);
+    async hostFindAll(user, take, page, order) {
+        const { data, file_info } = await this.reservationService.hostFindAll({ take, page }, user, order);
         return Object.assign(Object.assign({}, data), { file_info });
     }
-    async guestFindAll(user, take, page) {
-        const { data, file_info } = await this.reservationService.guestFindAll({ take, page }, user);
+    async guestFindAll(user, take, page, order) {
+        const { data, file_info } = await this.reservationService.guestFindAll({ take, page }, user, order);
         return Object.assign(Object.assign({}, data), { file_info });
     }
     async findOne(idx) {
@@ -74,11 +74,17 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '방문 예약 리스트 (호스트) API' }),
     (0, role_decorator_1.Auth)(['root', 'admin', 'host']),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({
+        name: "order",
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false
+    }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number, String]),
     __metadata("design:returntype", Promise)
 ], ReservationController.prototype, "hostFindAll", null);
 __decorate([
@@ -86,11 +92,17 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '방문 예약 리스트 (게스트) API' }),
     (0, role_decorator_1.Auth)(['Any']),
     (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({
+        name: "order",
+        description: 'order=createdAt:(ASC:오래된순|DESC:최신순, 기본값:DESC)<br>',
+        required: false
+    }),
     __param(0, (0, getuser_decorator_1.GetUser)()),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number]),
+    __metadata("design:paramtypes", [user_entity_1.UsersEntity, Number, Number, String]),
     __metadata("design:returntype", Promise)
 ], ReservationController.prototype, "guestFindAll", null);
 __decorate([

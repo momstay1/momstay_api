@@ -20,11 +20,11 @@ export declare class ReservationService {
     create(userInfo: any, createReservationDto: CreateReservationDto): Promise<{
         reservation: ReservationEntity;
     }>;
-    hostFindAll(options: PaginationOptions, userInfo: any): Promise<{
+    hostFindAll(options: PaginationOptions, userInfo: any, order: string): Promise<{
         data: Pagination<ReservationEntity>;
         file_info: {};
     }>;
-    guestFindAll(options: PaginationOptions, userInfo: any): Promise<{
+    guestFindAll(options: PaginationOptions, userInfo: any, order: string): Promise<{
         data: Pagination<ReservationEntity>;
         file_info: {};
     }>;

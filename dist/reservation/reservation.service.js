@@ -91,8 +91,11 @@ let ReservationService = class ReservationService {
         }
         return { reservation };
     }
-    async hostFindAll(options, userInfo) {
+    async hostFindAll(options, userInfo, order) {
         const { take, page } = options;
+        const alias = 'reservation';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
         const [results, total] = await this.reservationRepository
             .createQueryBuilder('reservation')
             .leftJoinAndSelect('reservation.productOption', 'productOption')
@@ -104,6 +107,7 @@ let ReservationService = class ReservationService {
                 qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
             }
         })
+            .orderBy(order_by)
             .skip(take * (page - 1) || 0)
             .take(take || 10)
             .getManyAndCount();
@@ -123,8 +127,11 @@ let ReservationService = class ReservationService {
         });
         return { data, file_info };
     }
-    async guestFindAll(options, userInfo) {
+    async guestFindAll(options, userInfo, order) {
         const { take, page } = options;
+        const alias = 'reservation';
+        let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
+        order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
         const [results, total] = await this.reservationRepository
             .createQueryBuilder('reservation')
             .leftJoinAndSelect('reservation.productOption', 'productOption')
@@ -136,6 +143,7 @@ let ReservationService = class ReservationService {
                 qb.andWhere('`user`.id = :user_id', { user_id: userInfo['id'] });
             }
         })
+            .orderBy(order_by)
             .skip(take * (page - 1) || 0)
             .take(take || 10)
             .getManyAndCount();
