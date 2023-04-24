@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   Res,
+  HttpCode,
 } from '@nestjs/common';
 import { ProductOptionService } from './product-option.service';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
@@ -24,6 +25,7 @@ import { multerOptions } from 'src/common/common.file';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Auth } from 'src/common/decorator/role.decorator';
 import { createReadStream } from 'fs';
+import { GetUser } from 'src/auth/getuser.decorator';
 
 @Controller('product-option')
 @ApiTags('방 API')
@@ -71,7 +73,7 @@ export class ProductOptionController {
       'search=po_title:방 이름<br>' +
       'search=name:호스트이름<br>' +
       'search=id:호스트아이디<br>' +
-      'search=status:상태값(0:미등록|1:미사용|2:사용)<br>',
+      'search=status:상태값(-1:삭제|0:미등록|1:미사용|2:사용)<br>',
     required: false,
   })
   @ApiQuery({
@@ -163,8 +165,15 @@ export class ProductOptionController {
     return this.productOptionService.update(+id, updateProductOptionDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productOptionService.remove(+id);
+  @Delete(':idx')
+  @ApiOperation({ summary: '방 삭제 API' })
+  @Auth(['root', 'admin', 'host'])
+  @ApiBearerAuth()
+  @HttpCode(204)
+  remove(
+    @GetUser() user,
+    @Param('idx') idx: string
+  ) {
+    return this.productOptionService.hostRemove(user, +idx);
   }
 }

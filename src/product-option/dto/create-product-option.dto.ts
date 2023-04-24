@@ -8,7 +8,7 @@ export class CreateProductOptionDto {
   readonly idx: string;
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: '게시 상태 <br>(0: 미등록, 1: 미사용, 2: 사용)', required: false })
+  @ApiProperty({ description: '게시 상태 <br>(-1: 삭제, 0: 미등록, 1: 미사용, 2: 사용)', required: false })
   readonly status: string;
   @IsOptional()
   @IsString()

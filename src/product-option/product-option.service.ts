@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { commonUtils } from 'src/common/common.utils';
 import { CreateProductOptionDto } from './dto/create-product-option.dto';
@@ -12,7 +12,9 @@ import { FileService } from 'src/file/file.service';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { ProductInfoService } from 'src/product-info/product-info.service';
 import { ExcelService } from 'src/excel/excel.service';
+import { UsersService } from 'src/users/users.service';
 
+const deleteStatus = -1;
 const registrationStatus = '2';
 @Injectable()
 export class ProductOptionService {
@@ -21,6 +23,7 @@ export class ProductOptionService {
     private productOptionRepository: Repository<ProductOptionEntity>,
     private readonly productService: ProductService,
     private readonly fileService: FileService,
+    private readonly userService: UsersService,
     private readonly productInfoService: ProductInfoService,
     private readonly excelService: ExcelService,
   ) { }
@@ -223,6 +226,7 @@ export class ProductOptionService {
       )
       .where((qb) => {
         qb.where('`product_option`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
+        qb.andWhere('`product`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'title') });
         get(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: get(where, 'product_idx') });
         get(where, 'po_title', '') && qb.andWhere('`product_option`.`title` LIKE :po_title', { po_title: '%' + get(where, 'po_title') + '%' });
@@ -308,8 +312,31 @@ export class ProductOptionService {
     return `This action updates a #${id} productOption`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} productOption`;
+  async hostRemove(userInfo, idx: number) {
+    // 회원의 숙소인이 확인
+    if (!commonUtils.isAdmin(userInfo.group)) {
+      // 관리자가 아닌 경우
+      // 회원 정보 가져오기
+      const user = await this.userService.findId(userInfo.id);
+      const po = await this.findIdx(idx);
+      if (user.idx != po.product.user.idx) {
+        // 방 호스트가 아닌 경우
+        throw new NotAcceptableException(
+          'product-option.service.hostRemove: 삭제 권한이 없습니다.',
+        );
+      }
+    }
+
+    await this.remove(idx);
+  }
+
+  async remove(idx: number) {
+    await this.productOptionRepository
+      .createQueryBuilder()
+      .update(ProductOptionEntity)
+      .set({ status: deleteStatus })
+      .where(' idx = :idx', { idx: idx })
+      .execute();
   }
 
   // 방 목록 엑셀 생성
