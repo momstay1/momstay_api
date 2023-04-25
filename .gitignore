@@ -4,6 +4,7 @@
 /data/files
 /data/excel
 /data/zip
+/data/old
 
 # Logs
 logs
