@@ -76,6 +76,7 @@ __decorate([
         name: 'search',
         description: 'search=membership:(0:무료|1:유료)<br>' +
             'search=title:숙소이름<br>' +
+            'search=type:숙소타입<br>' +
             'search=addr1:주소1<br>' +
             'search=addr2:주소2<br>' +
             'search=metro:지하철<br>' +

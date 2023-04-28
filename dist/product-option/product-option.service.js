@@ -153,6 +153,7 @@ let ProductOptionService = class ProductOptionService {
             qb.where('`product_option`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
             qb.andWhere('`product`.status IN (:status)', { status: (0, lodash_1.isArray)(where['status']) ? where['status'] : [where['status']] });
             (0, lodash_1.get)(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: (0, lodash_1.get)(where, 'title') });
+            (0, lodash_1.get)(where, 'type', '') && qb.andWhere('`product`.`type` IN (:type)', { type: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'type')) ? (0, lodash_1.get)(where, 'type') : [(0, lodash_1.get)(where, 'type')] });
             (0, lodash_1.get)(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: (0, lodash_1.get)(where, 'product_idx') });
             (0, lodash_1.get)(where, 'po_title', '') && qb.andWhere('`product_option`.`title` LIKE :po_title', { po_title: '%' + (0, lodash_1.get)(where, 'po_title') + '%' });
             (0, lodash_1.get)(where, 'name', '') && qb.andWhere('`user`.`name` LIKE :name', { name: '%' + (0, lodash_1.get)(where, 'name') + '%' });
