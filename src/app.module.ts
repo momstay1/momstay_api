@@ -17,7 +17,6 @@ import { FileModule } from './file/file.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { SettingsModule } from './settings/settings.module';
 import { UserSnsModule } from './user-sns/user-sns.module';
-import { DefectModule } from './defect/defect.module';
 import { LoginModule } from './login/login.module';
 import { UserLeaveModule } from './user-leave/user-leave.module';
 import { UserDormantModule } from './user-dormant/user-dormant.module';
@@ -86,7 +85,6 @@ import { ExcelModule } from './excel/excel.module';
     MetroModule,
     CollegeModule,
     RefreshTokenModule,
-    // DefectModule,
     DashboardModule,
     SettingsModule,
     WishlistModule,
