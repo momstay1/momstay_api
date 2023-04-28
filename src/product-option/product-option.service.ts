@@ -228,6 +228,7 @@ export class ProductOptionService {
         qb.where('`product_option`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         qb.andWhere('`product`.status IN (:status)', { status: isArray(where['status']) ? where['status'] : [where['status']] });
         get(where, 'membership', '') && qb.andWhere('`product`.`membership` = :membership', { membership: get(where, 'title') });
+        get(where, 'type', '') && qb.andWhere('`product`.`type` IN (:type)', { type: isArray(get(where, 'type')) ? get(where, 'type') : [get(where, 'type')] });
         get(where, 'product_idx', '') && qb.andWhere('`product_option`.`productIdx` = :product_idx', { product_idx: get(where, 'product_idx') });
         get(where, 'po_title', '') && qb.andWhere('`product_option`.`title` LIKE :po_title', { po_title: '%' + get(where, 'po_title') + '%' });
         get(where, 'name', '') && qb.andWhere('`user`.`name` LIKE :name', { name: '%' + get(where, 'name') + '%' });
