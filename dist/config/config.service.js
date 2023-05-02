@@ -58,6 +58,11 @@ class ConfigService {
             iamport_secret_key: this.getValue('IAMPORT_SECRET_KEY'),
         };
     }
+    getKoreaeximConfig() {
+        return {
+            koreaexim: this.getValue('KOREAEXIM'),
+        };
+    }
 }
 exports.ConfigService = ConfigService;
 //# sourceMappingURL=config.service.js.map

@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.commonUtils = void 0;
+const axios_1 = require("@nestjs/axios");
 const swagger_1 = require("@nestjs/swagger");
 const lodash_1 = require("lodash");
+const rxjs_1 = require("rxjs");
 const constants_1 = require("../users/constants");
 exports.commonUtils = {
     getConstants: (str) => {
@@ -303,6 +305,13 @@ exports.commonUtils = {
     formatPrice(price) {
         return new Intl.NumberFormat().format(price);
     },
+    stringNumberToInt(stringNumber) {
+        return parseInt(stringNumber.replace(/,/g, ''));
+    },
+    calcExchangeRate(price, exchange_rate) {
+        const dollor = Math.floor((price / exchange_rate) * 100) / 100;
+        return dollor;
+    },
     langChk(lang) {
         let result = 'ko';
         switch (lang) {
@@ -321,6 +330,22 @@ exports.commonUtils = {
                 break;
         }
         return result;
-    }
+    },
+    async getResponse(url, headers) {
+        const http = new axios_1.HttpService;
+        const headersRequest = (0, lodash_1.merge)({ 'Content-Type': 'application/json' }, headers);
+        const response = await (0, rxjs_1.firstValueFrom)(http.get(url, {
+            headers: headersRequest,
+        }));
+        return response;
+    },
+    async postResponse(url, headers, data) {
+        const http = new axios_1.HttpService;
+        const headersRequest = (0, lodash_1.merge)({ 'Content-Type': 'application/json' }, headers);
+        const response = await (0, rxjs_1.firstValueFrom)(http.post(url, JSON.stringify(data), {
+            headers: headersRequest,
+        }));
+        return response;
+    },
 };
 //# sourceMappingURL=common.utils.js.map

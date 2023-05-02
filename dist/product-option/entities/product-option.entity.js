@@ -78,6 +78,18 @@ __decorate([
     __metadata("design:type", Number)
 ], ProductOptionEntity.prototype, "priceWeek", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], ProductOptionEntity.prototype, "priceEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], ProductOptionEntity.prototype, "priceMonthEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], ProductOptionEntity.prototype, "priceWeekEng", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], ProductOptionEntity.prototype, "priceDay", void 0);

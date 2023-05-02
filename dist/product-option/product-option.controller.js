@@ -43,6 +43,9 @@ let ProductOptionController = class ProductOptionController {
         });
         (0, fs_1.createReadStream)(excel_file.file_path).pipe(res);
     }
+    async test() {
+        await this.productOptionService.koreaEximApi();
+    }
     async findOne(idx) {
         return await this.productOptionService.findOne(+idx);
     }
@@ -137,6 +140,13 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, Array, String, Object]),
     __metadata("design:returntype", Promise)
 ], ProductOptionController.prototype, "excelDownload", null);
+__decorate([
+    (0, common_1.Get)('test'),
+    (0, swagger_1.ApiOperation)({ summary: '테스트 API' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ProductOptionController.prototype, "test", null);
 __decorate([
     (0, common_1.Get)(':idx'),
     (0, swagger_1.ApiOperation)({ summary: '방 상세 조회 API' }),

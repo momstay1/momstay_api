@@ -13,6 +13,7 @@ const order_product_controller_1 = require("./order-product.controller");
 const typeorm_1 = require("@nestjs/typeorm");
 const order_product_entity_1 = require("./entities/order-product.entity");
 const file_module_1 = require("../file/file.module");
+const settings_module_1 = require("../settings/settings.module");
 let OrderProductModule = class OrderProductModule {
 };
 OrderProductModule = __decorate([
@@ -20,6 +21,7 @@ OrderProductModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([order_product_entity_1.OrderProductEntity]),
             file_module_1.FileModule,
+            settings_module_1.SettingsModule
         ],
         controllers: [order_product_controller_1.OrderProductController],
         providers: [order_product_service_1.OrderProductService],

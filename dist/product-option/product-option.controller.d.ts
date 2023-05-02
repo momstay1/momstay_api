@@ -17,6 +17,7 @@ export declare class ProductOptionController {
         page: number;
     }>;
     excelDownload(take: number, page: number, search: string[], order: string, res: any): Promise<void>;
+    test(): Promise<void>;
     findOne(idx: string): Promise<{
         productOption: import("./entities/product-option.entity").ProductOptionEntity;
         file_info: {};

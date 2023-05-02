@@ -8,6 +8,7 @@ import { FileService } from 'src/file/file.service';
 import { ProductInfoService } from 'src/product-info/product-info.service';
 import { ExcelService } from 'src/excel/excel.service';
 import { UsersService } from 'src/users/users.service';
+import { SettingsService } from 'src/settings/settings.service';
 export declare class ProductOptionService {
     private productOptionRepository;
     private readonly productService;
@@ -15,7 +16,8 @@ export declare class ProductOptionService {
     private readonly userService;
     private readonly productInfoService;
     private readonly excelService;
-    constructor(productOptionRepository: Repository<ProductOptionEntity>, productService: ProductService, fileService: FileService, userService: UsersService, productInfoService: ProductInfoService, excelService: ExcelService);
+    private readonly settingsService;
+    constructor(productOptionRepository: Repository<ProductOptionEntity>, productService: ProductService, fileService: FileService, userService: UsersService, productInfoService: ProductInfoService, excelService: ExcelService, settingsService: SettingsService);
     create(createProductOptionDto: CreateProductOptionDto, files: any): Promise<{
         productOption: ProductOptionEntity;
         file_info: any;
@@ -37,4 +39,5 @@ export declare class ProductOptionService {
         file_name: string;
         file_path: string;
     }>;
+    koreaEximApi(): Promise<void>;
 }

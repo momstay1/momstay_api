@@ -8,6 +8,7 @@ export declare class SettingsService {
     constructor(settingsRepository: Repository<SettingEntity>);
     getPrivateColumn(): string[];
     create(createSettingDto: CreateSettingDto): Promise<CreateSettingDto>;
+    insert(data: any): Promise<void>;
     findAll(): string;
     findOne(key: string): Promise<SettingEntity>;
     find(key: string): Promise<import("lodash").Dictionary<SettingEntity>>;

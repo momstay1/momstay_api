@@ -26,17 +26,33 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "totalPrice", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '주문 총 금액' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "totalPriceEng", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '취소 주문 총 금액' }),
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "totalCancelPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '취소 주문 총 금액' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "totalCancelPriceEng", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '배송비' }),
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "shipPrice", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '배송비' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "shipPriceEng", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '추가배송비' }),
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "shipAddPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '추가배송비' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "shipAddPriceEng", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0, comment: '포인트 할인 금액' }),
     __metadata("design:type", Number)
@@ -57,6 +73,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '최초 주문시 결제된 금액' }),
     __metadata("design:type", Number)
 ], OrderTotalEntity.prototype, "origPayPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '할인 계산 후 총 금액' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "payPriceEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2, comment: '최초 주문시 결제된 금액' }),
+    __metadata("design:type", Number)
+], OrderTotalEntity.prototype, "origPayPriceEng", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

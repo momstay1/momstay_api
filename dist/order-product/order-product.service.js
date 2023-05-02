@@ -20,11 +20,13 @@ const common_utils_1 = require("../common/common.utils");
 const file_service_1 = require("../file/file.service");
 const typeorm_2 = require("typeorm");
 const order_product_entity_1 = require("./entities/order-product.entity");
+const settings_service_1 = require("../settings/settings.service");
 const moment = require("moment");
 let OrderProductService = class OrderProductService {
-    constructor(orderProductRepository, fileService) {
+    constructor(orderProductRepository, fileService, settingsService) {
         this.orderProductRepository = orderProductRepository;
         this.fileService = fileService;
+        this.settingsService = settingsService;
     }
     create(createOrderProductDto) {
         return 'This action adds a new orderProduct';
@@ -37,6 +39,7 @@ let OrderProductService = class OrderProductService {
         }
         let priceInfo = {};
         if ((0, lodash_1.get)(createOrderDto, 'startAt', '') && (0, lodash_1.get)(createOrderDto, 'endAt', '')) {
+            const dollor_exchange_rate = await this.settingsService.findOne('dollor_exchange_rate');
             priceInfo = {
                 price: await this.calcTotalPrice((0, lodash_1.get)(po, 'priceMonth', 0), (0, lodash_1.get)(createOrderDto, 'startAt'), (0, lodash_1.get)(createOrderDto, 'endAt')),
                 tax: common_utils_1.commonUtils.getStatus('tax'),
@@ -45,6 +48,12 @@ let OrderProductService = class OrderProductService {
             priceInfo['taxPrice'] = common_utils_1.commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
             priceInfo['feePrice'] = common_utils_1.commonUtils.calcTax(priceInfo['price'] + priceInfo['taxPrice'], priceInfo['fee'] + '%');
             priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
+            if (+(0, lodash_1.get)(dollor_exchange_rate, 'set_value', 0) > 0) {
+                priceInfo['priceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
+                priceInfo['taxPriceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
+                priceInfo['feePriceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['price'] + priceInfo['taxPrice'], +dollor_exchange_rate.set_value);
+                priceInfo['totalPriceEng'] = priceInfo['priceEng'] + priceInfo['taxPriceEng'] + priceInfo['feePriceEng'];
+            }
         }
         console.log({ priceInfo });
         op['status'] = order['status'];
@@ -55,11 +64,15 @@ let OrderProductService = class OrderProductService {
         op['parcelCode'] = order['code'] + '-P01';
         op['title'] = po['title'];
         op['options'] = po['code'];
+        op['num'] = (0, lodash_1.get)(createOrderDto, 'num', 1);
         op['taxPrice'] = (0, lodash_1.get)(priceInfo, ['taxPrice'], 0);
         op['feePrice'] = (0, lodash_1.get)(priceInfo, ['feePrice'], 0);
-        op['num'] = (0, lodash_1.get)(createOrderDto, 'num', 1);
         op['price'] = (0, lodash_1.get)(priceInfo, ['price'], 0);
         op['payPrice'] = (0, lodash_1.get)(priceInfo, ['totalPrice'], 0);
+        op['taxPriceEng'] = (0, lodash_1.get)(priceInfo, ['taxPriceEng'], 0);
+        op['feePriceEng'] = (0, lodash_1.get)(priceInfo, ['feePriceEng'], 0);
+        op['priceEng'] = (0, lodash_1.get)(priceInfo, ['priceEng'], 0);
+        op['payPriceEng'] = (0, lodash_1.get)(priceInfo, ['totalPriceEng'], 0);
         op['img'] = file[0]['file_storage_path'];
         op['user'] = (0, lodash_1.get)(order, 'user', null);
         op['order'] = order;
@@ -106,7 +119,7 @@ let OrderProductService = class OrderProductService {
             .where("`orderIdx` = :orderIdx", { orderIdx: orderIdx })
             .execute();
     }
-    async cancelPrice(orderIdx, cancelPrice) {
+    async cancelPrice(orderIdx, cancelPrice, cancelPriceEng) {
         await this.orderProductRepository.createQueryBuilder()
             .update(order_product_entity_1.OrderProductEntity)
             .set({
@@ -114,7 +127,12 @@ let OrderProductService = class OrderProductService {
             taxPrice: 0,
             feePrice: 0,
             payPrice: 0,
+            priceEng: 0,
+            taxPriceEng: 0,
+            feePriceEng: 0,
+            payPriceEng: 0,
             cancelPrice: cancelPrice,
+            cancelPriceEng: cancelPriceEng,
         })
             .where("`orderIdx` = :orderIdx", { orderIdx: orderIdx })
             .execute();
@@ -163,7 +181,8 @@ OrderProductService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(order_product_entity_1.OrderProductEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        file_service_1.FileService])
+        file_service_1.FileService,
+        settings_service_1.SettingsService])
 ], OrderProductService);
 exports.OrderProductService = OrderProductService;
 //# sourceMappingURL=order-product.service.js.map

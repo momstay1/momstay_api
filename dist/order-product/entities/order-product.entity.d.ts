@@ -16,9 +16,14 @@ export declare class OrderProductEntity {
     price: number;
     taxPrice: number;
     feePrice: number;
+    priceEng: number;
+    taxPriceEng: number;
+    feePriceEng: number;
     point: number;
     payPrice: number;
+    payPriceEng: number;
     cancelPrice: number;
+    cancelPriceEng: number;
     cancelPoint: number;
     memo: string;
     cancelReason: string;

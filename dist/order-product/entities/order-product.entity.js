@@ -73,6 +73,18 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderProductEntity.prototype, "feePrice", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], OrderProductEntity.prototype, "priceEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], OrderProductEntity.prototype, "taxPriceEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], OrderProductEntity.prototype, "feePriceEng", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], OrderProductEntity.prototype, "point", void 0);
@@ -83,7 +95,15 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
     __metadata("design:type", Number)
+], OrderProductEntity.prototype, "payPriceEng", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
 ], OrderProductEntity.prototype, "cancelPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "decimal", default: 0.00, precision: 10, scale: 2 }),
+    __metadata("design:type", Number)
+], OrderProductEntity.prototype, "cancelPriceEng", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)

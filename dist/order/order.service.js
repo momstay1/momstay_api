@@ -640,13 +640,17 @@ let OrderService = class OrderService {
         const cancelPrice = (0, lodash_1.reduce)(order.orderProduct, (o, o1) => {
             return o + +o1['payPrice'];
         }, 0);
+        const cancelPriceEng = (0, lodash_1.reduce)(order.orderProduct, (o, o1) => {
+            return o + +o1['payPriceEng'];
+        }, 0);
         if (order['imp_uid']) {
-            await this.iamportService.paymentCancel(order['imp_uid'], cancelPrice, cancelReason);
+            const price = cancelPrice > 0 ? cancelPrice : cancelPriceEng;
+            await this.iamportService.paymentCancel(order['imp_uid'], price, cancelReason);
         }
         await this.statusChange(order['idx'], cancel_status);
         await this.orderProductService.statusChange(order['idx'], cancel_status, cancelReason);
-        await this.orderProductService.cancelPrice(order['idx'], cancelPrice);
-        await this.ordertotalService.priceChange(order['idx'], cancelPrice);
+        await this.orderProductService.cancelPrice(order['idx'], cancelPrice, cancelPriceEng);
+        await this.ordertotalService.priceChange(order['idx'], cancelPrice, cancelPriceEng);
     }
     async statusChange(idx, status) {
         await this.orderRepository
@@ -686,6 +690,12 @@ let OrderService = class OrderService {
             phone: guestUser.countryCode + ' ' + guestUser.phone,
             cancel_reason: '',
         };
+        if (order.orderProduct[0].payPriceEng > 0) {
+            sendInfo['payment'] = order.orderProduct[0].payPriceEng;
+            sendInfo['po_payment'] = order.orderProduct[0].priceEng;
+            sendInfo['tax'] = order.orderProduct[0].taxPriceEng;
+            sendInfo['fee'] = order.orderProduct[0].feePriceEng;
+        }
         const site = await this.settingsService.find('site');
         return {
             order,

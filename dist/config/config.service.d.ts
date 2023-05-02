@@ -23,4 +23,7 @@ export declare class ConfigService {
         iamport_key: string;
         iamport_secret_key: string;
     };
+    getKoreaeximConfig(): {
+        koreaexim: string;
+    };
 }

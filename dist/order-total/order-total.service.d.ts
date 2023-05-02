@@ -9,7 +9,7 @@ export declare class OrderTotalService {
     constructor(orderTotalRepository: Repository<OrderTotalEntity>);
     create(createOrderTotalDto: CreateOrderTotalDto): string;
     orderTotalCreate(order: OrderEntity, orderProduct: OrderProductEntity): Promise<OrderTotalEntity[]>;
-    priceChange(orderIdx: number, cancelPrice: number): Promise<void>;
+    priceChange(orderIdx: number, cancelPrice: number, cancelPriceEng: number): Promise<void>;
     findAll(): string;
     findOne(id: number): string;
     findOneOrderIdx(orderIdx: number): Promise<OrderTotalEntity>;

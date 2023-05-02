@@ -26,16 +26,21 @@ const exceptions_1 = require("@nestjs/common/exceptions");
 const product_info_service_1 = require("../product-info/product-info.service");
 const excel_service_1 = require("../excel/excel.service");
 const users_service_1 = require("../users/users.service");
+const schedule_1 = require("@nestjs/schedule");
+const moment = require("moment");
+const config_service_1 = require("../config/config.service");
+const settings_service_1 = require("../settings/settings.service");
 const deleteStatus = -1;
 const registrationStatus = '2';
 let ProductOptionService = class ProductOptionService {
-    constructor(productOptionRepository, productService, fileService, userService, productInfoService, excelService) {
+    constructor(productOptionRepository, productService, fileService, userService, productInfoService, excelService, settingsService) {
         this.productOptionRepository = productOptionRepository;
         this.productService = productService;
         this.fileService = fileService;
         this.userService = userService;
         this.productInfoService = productInfoService;
         this.excelService = excelService;
+        this.settingsService = settingsService;
     }
     async create(createProductOptionDto, files) {
         let product;
@@ -245,7 +250,40 @@ let ProductOptionService = class ProductOptionService {
             type: 'product_option',
         });
     }
+    async koreaEximApi() {
+        console.log('[cron] koreaEximApi: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+        const configService = new config_service_1.ConfigService(process.env);
+        const koreaeximConfig = configService.getKoreaeximConfig();
+        const yesterday = moment().add(-1, 'day').format('YYYYMMDD');
+        const url = 'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON'
+            + '?authkey=' + koreaeximConfig.koreaexim
+            + '&data=AP01'
+            + '&searchdate=' + yesterday;
+        const response = await common_utils_1.commonUtils.getResponse(url, {});
+        const { data } = response;
+        const usd_idx = (0, lodash_1.findIndex)(data, function (o) { return o['cur_unit'] == 'USD'; });
+        const dollor_exchange_rate = common_utils_1.commonUtils.stringNumberToInt((0, lodash_1.get)(data, [usd_idx, 'bkpr'], '0'));
+        if (dollor_exchange_rate > 0) {
+            await this.settingsService.insert({ dollor_exchange_rate: dollor_exchange_rate });
+            const po = await this.productOptionRepository.find();
+            console.log(po.length);
+            if (po.length > 0) {
+                for (const key in po) {
+                    const priceEng = common_utils_1.commonUtils.calcExchangeRate(po[key].price, dollor_exchange_rate);
+                    const priceMonthEng = common_utils_1.commonUtils.calcExchangeRate(po[key].priceMonth, dollor_exchange_rate);
+                    const priceWeekEng = common_utils_1.commonUtils.calcExchangeRate(po[key].priceWeek, dollor_exchange_rate);
+                    await this.productOptionRepository.update(po[key].idx, { priceEng, priceMonthEng, priceWeekEng });
+                }
+            }
+        }
+    }
 };
+__decorate([
+    (0, schedule_1.Cron)('0 0 1 * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ProductOptionService.prototype, "koreaEximApi", null);
 ProductOptionService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(product_option_entity_1.ProductOptionEntity)),
@@ -254,7 +292,8 @@ ProductOptionService = __decorate([
         file_service_1.FileService,
         users_service_1.UsersService,
         product_info_service_1.ProductInfoService,
-        excel_service_1.ExcelService])
+        excel_service_1.ExcelService,
+        settings_service_1.SettingsService])
 ], ProductOptionService);
 exports.ProductOptionService = ProductOptionService;
 //# sourceMappingURL=product-option.service.js.map

@@ -20,5 +20,9 @@ export declare const commonUtils: {
     isRoot(groupId: string): boolean;
     langValue(lang: any): string;
     formatPrice(price: any): string;
+    stringNumberToInt(stringNumber: string): number;
+    calcExchangeRate(price: number, exchange_rate: number): number;
     langChk(lang: any): string;
+    getResponse(url: string, headers: object): Promise<import("axios").AxiosResponse<any, any>>;
+    postResponse(url: string, headers: object, data: object): Promise<import("axios").AxiosResponse<any, any>>;
 };

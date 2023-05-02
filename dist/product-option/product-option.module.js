@@ -17,6 +17,7 @@ const file_module_1 = require("../file/file.module");
 const product_info_module_1 = require("../product-info/product-info.module");
 const excel_service_1 = require("../excel/excel.service");
 const users_module_1 = require("../users/users.module");
+const settings_module_1 = require("../settings/settings.module");
 let ProductOptionModule = class ProductOptionModule {
 };
 ProductOptionModule = __decorate([
@@ -26,7 +27,8 @@ ProductOptionModule = __decorate([
             file_module_1.FileModule,
             product_module_1.ProductModule,
             product_info_module_1.ProductInfoModule,
-            users_module_1.UsersModule
+            users_module_1.UsersModule,
+            settings_module_1.SettingsModule
         ],
         controllers: [product_option_controller_1.ProductOptionController],
         providers: [product_option_service_1.ProductOptionService, excel_service_1.ExcelService],
