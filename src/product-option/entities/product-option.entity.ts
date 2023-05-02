@@ -40,6 +40,12 @@ export class ProductOptionEntity {
   priceMonth: number;
   @Column({ default: 0 })
   priceWeek: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  priceEng: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  priceMonthEng: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  priceWeekEng: number;
   @Column({ default: 0 })
   priceDay: number;
   @Column({ type: 'text', default: '' })

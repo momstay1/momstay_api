@@ -45,12 +45,22 @@ export class OrderProductEntity {
   taxPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   feePrice: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  priceEng: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  taxPriceEng: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  feePriceEng: number;
   @Column({ default: 0 })
   point: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   payPrice: number;
   @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  payPriceEng: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
   cancelPrice: number;
+  @Column({ type: "decimal", default: 0.00, precision: 10, scale: 2 })
+  cancelPriceEng: number;
   @Column({ default: 0 })
   cancelPoint: number;
   @Column({ type: 'text', default: '' })

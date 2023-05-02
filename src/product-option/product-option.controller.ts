@@ -152,6 +152,12 @@ export class ProductOptionController {
     createReadStream(excel_file.file_path).pipe(res);
   }
 
+  @Get('test')
+  @ApiOperation({ summary: '테스트 API' })
+  async test() {
+    await this.productOptionService.koreaEximApi();
+  }
+
   @Get(':idx')
   @ApiOperation({ summary: '방 상세 조회 API' })
   async findOne(@Param('idx') idx: string) {

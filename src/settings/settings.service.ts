@@ -26,6 +26,13 @@ export class SettingsService {
     return createSettingDto;
   }
 
+  async insert(data) {
+    const key = keys(data);
+    const settings = await this.settingsRepository.create({ set_key: key[0], set_value: data[key[0]] });
+    console.log(settings);
+    await this.settingsRepository.save(settings);
+  }
+
   findAll() {
     return `This action returns all settings`;
   }
