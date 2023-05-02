@@ -32,13 +32,16 @@ export class OrderTotalService {
     orderTotalInfo['totalPrice'] = orderProduct['payPrice'] * num;
     orderTotalInfo['payPrice'] = orderProduct['payPrice'] * num;
     orderTotalInfo['origPayPrice'] = orderProduct['payPrice'] * num;
+    orderTotalInfo['totalPriceEng'] = orderProduct['payPriceEng'] * num;
+    orderTotalInfo['payPriceEng'] = orderProduct['payPriceEng'] * num;
+    orderTotalInfo['origPayPriceEng'] = orderProduct['payPriceEng'] * num;
 
     const orderTotalEntity = await this.orderTotalRepository.create(orderTotalInfo);
     const orderTotal = await this.orderTotalRepository.save(orderTotalEntity);
     return orderTotal;
   }
 
-  async priceChange(orderIdx: number, cancelPrice: number) {
+  async priceChange(orderIdx: number, cancelPrice: number, cancelPriceEng: number) {
     const total = await this.orderTotalRepository.findOne({
       where: { orderIdx: orderIdx }
     });
@@ -46,6 +49,9 @@ export class OrderTotalService {
     total['totalPrice'] = +total['totalPrice'] - cancelPrice;
     total['totalCancelPrice'] = +total['totalCancelPrice'] + cancelPrice;
     total['payPrice'] = +total['payPrice'] - cancelPrice;
+    total['totalPriceEng'] = +total['totalPriceEng'] - cancelPriceEng;
+    total['totalCancelPriceEng'] = +total['totalCancelPriceEng'] + cancelPriceEng;
+    total['payPriceEng'] = +total['payPriceEng'] - cancelPriceEng;
 
     await this.orderTotalRepository.createQueryBuilder()
       .update(OrderTotalEntity)

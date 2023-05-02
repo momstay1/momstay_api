@@ -6,13 +6,17 @@ import { UpdateProductOptionDto } from './dto/update-product-option.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductOptionEntity } from './entities/product-option.entity';
 import { In, Repository } from 'typeorm';
-import { get, isArray, isEmpty, map, merge, union } from 'lodash';
+import { findIndex, get, isArray, isEmpty, map, merge, union } from 'lodash';
 import { ProductService } from 'src/product/product.service';
 import { FileService } from 'src/file/file.service';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { ProductInfoService } from 'src/product-info/product-info.service';
 import { ExcelService } from 'src/excel/excel.service';
 import { UsersService } from 'src/users/users.service';
+import { Cron } from '@nestjs/schedule';
+import * as moment from 'moment';
+import { ConfigService } from 'src/config/config.service';
+import { SettingsService } from 'src/settings/settings.service';
 
 const deleteStatus = -1;
 const registrationStatus = '2';
@@ -26,6 +30,7 @@ export class ProductOptionService {
     private readonly userService: UsersService,
     private readonly productInfoService: ProductInfoService,
     private readonly excelService: ExcelService,
+    private readonly settingsService: SettingsService,
   ) { }
 
   async create(createProductOptionDto: CreateProductOptionDto, files) {
@@ -356,4 +361,48 @@ export class ProductOptionService {
       type: 'product_option',
     });
   }
+
+  /******************** cron ********************/
+  // 오전 01시 환율 정보 가져오기 및 달러 가격 변경
+  @Cron('0 0 1 * * *')
+  async koreaEximApi() {
+    console.log(
+      '[cron] koreaEximApi: ',
+      moment().format('YYYY-MM-DD HH:mm:ss'),
+    );
+    // 환율 API
+    const configService = new ConfigService(process.env);
+    const koreaeximConfig = configService.getKoreaeximConfig();
+
+    const yesterday = moment().add(-1, 'day').format('YYYYMMDD');
+    const url = 'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON'
+      + '?authkey=' + koreaeximConfig.koreaexim
+      + '&data=AP01'
+      + '&searchdate=' + yesterday;
+
+    const response = await commonUtils.getResponse(url, {});
+    const { data } = response;
+    const usd_idx = findIndex(data, function (o) { return o['cur_unit'] == 'USD'; });
+    const dollor_exchange_rate = commonUtils.stringNumberToInt(get(data, [usd_idx, 'bkpr'], '0'));
+
+    if (dollor_exchange_rate > 0) {
+      // 달러 환율 정보 변경
+      await this.settingsService.insert({ dollor_exchange_rate: dollor_exchange_rate });
+
+      // 방 달러 금액 수정
+      const po = await this.productOptionRepository.find();
+      console.log(po.length);
+      if (po.length > 0) {
+        for (const key in po) {
+          const priceEng = commonUtils.calcExchangeRate(po[key].price, dollor_exchange_rate);
+          const priceMonthEng = commonUtils.calcExchangeRate(po[key].priceMonth, dollor_exchange_rate);
+          const priceWeekEng = commonUtils.calcExchangeRate(po[key].priceWeek, dollor_exchange_rate);
+          await this.productOptionRepository.update(po[key].idx, { priceEng, priceMonthEng, priceWeekEng });
+        }
+      }
+    }
+
+
+  }
+
 }

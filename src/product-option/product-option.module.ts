@@ -8,6 +8,7 @@ import { FileModule } from 'src/file/file.module';
 import { ProductInfoModule } from 'src/product-info/product-info.module';
 import { ExcelService } from 'src/excel/excel.service';
 import { UsersModule } from 'src/users/users.module';
+import { SettingsModule } from 'src/settings/settings.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { UsersModule } from 'src/users/users.module';
     FileModule,
     ProductModule,
     ProductInfoModule,
-    UsersModule
+    UsersModule,
+    SettingsModule
   ],
   controllers: [ProductOptionController],
   providers: [ProductOptionService, ExcelService],

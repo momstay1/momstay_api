@@ -1,6 +1,8 @@
+import { HttpService } from '@nestjs/axios';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { filter, get, isArray, isEmpty, isObject, map } from 'lodash';
+import { filter, get, isArray, isEmpty, isObject, map, merge } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import { usersConstant } from 'src/users/constants';
 
 export const commonUtils = {
@@ -327,6 +329,13 @@ export const commonUtils = {
   formatPrice(price) {
     return new Intl.NumberFormat().format(price);
   },
+  stringNumberToInt(stringNumber: string) {
+    return parseInt(stringNumber.replace(/,/g, ''));
+  },
+  calcExchangeRate(price: number, exchange_rate: number) {
+    const dollor = Math.floor((price / exchange_rate) * 100) / 100;
+    return dollor;
+  },
   langChk(lang) {
     let result = 'ko';
     switch (lang) {
@@ -345,5 +354,29 @@ export const commonUtils = {
         break;
     }
     return result;
-  }
+  },
+  async getResponse(url: string, headers: object) {
+    const http = new HttpService;
+    const headersRequest = merge({ 'Content-Type': 'application/json' }, headers);
+    // 메시지 발송
+    const response = await firstValueFrom(
+      http.get(url, {
+        headers: headersRequest,
+      })
+    );
+
+    return response;
+  },
+  async postResponse(url: string, headers: object, data: object) {
+    const http = new HttpService;
+    const headersRequest = merge({ 'Content-Type': 'application/json' }, headers);
+    // 메시지 발송
+    const response = await firstValueFrom(
+      http.post(url, JSON.stringify(data), {
+        headers: headersRequest,
+      })
+    );
+
+    return response;
+  },
 };

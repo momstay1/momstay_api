@@ -855,13 +855,21 @@ export class OrderService {
       },
       0,
     );
+    const cancelPriceEng = reduce(
+      order.orderProduct,
+      (o, o1) => {
+        return o + +o1['payPriceEng'];
+      },
+      0,
+    );
 
     // 결제 내역 취소
     // 결제 금액 0원 설정시 전액 취소
     if (order['imp_uid']) {
+      const price = cancelPrice > 0 ? cancelPrice : cancelPriceEng;
       await this.iamportService.paymentCancel(
         order['imp_uid'],
-        cancelPrice,
+        price,
         cancelReason,
       );
     }
@@ -874,9 +882,9 @@ export class OrderService {
       cancelReason,
     );
     // 주문 상품 가격 정보 변경
-    await this.orderProductService.cancelPrice(order['idx'], cancelPrice);
+    await this.orderProductService.cancelPrice(order['idx'], cancelPrice, cancelPriceEng);
     // 주문 토탈 가격 정보 변경
-    await this.ordertotalService.priceChange(order['idx'], cancelPrice);
+    await this.ordertotalService.priceChange(order['idx'], cancelPrice, cancelPriceEng);
   }
 
   async statusChange(idx: number, status: number) {
@@ -933,6 +941,13 @@ export class OrderService {
       phone: guestUser.countryCode + ' ' + guestUser.phone,
       cancel_reason: '',
     };
+
+    if (order.orderProduct[0].payPriceEng > 0) {
+      sendInfo['payment'] = order.orderProduct[0].payPriceEng;
+      sendInfo['po_payment'] = order.orderProduct[0].priceEng;
+      sendInfo['tax'] = order.orderProduct[0].taxPriceEng;
+      sendInfo['fee'] = order.orderProduct[0].feePriceEng;
+    }
 
     const site = await this.settingsService.find('site');
 

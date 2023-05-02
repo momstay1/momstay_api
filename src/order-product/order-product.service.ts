@@ -9,15 +9,16 @@ import { Repository } from 'typeorm';
 import { CreateOrderProductDto } from './dto/create-order-product.dto';
 import { UpdateOrderProductDto } from './dto/update-order-product.dto';
 import { OrderProductEntity } from './entities/order-product.entity';
+import { SettingsService } from 'src/settings/settings.service';
 
 import * as moment from 'moment';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class OrderProductService {
   constructor(
     @InjectRepository(OrderProductEntity) private orderProductRepository: Repository<OrderProductEntity>,
     private readonly fileService: FileService,
+    private readonly settingsService: SettingsService,
     // private readonly productService: ProductService,
     // private readonly productOptionService: ProductOptionService,
     // private readonly userService: UsersService,
@@ -41,6 +42,9 @@ export class OrderProductService {
 
     let priceInfo = {};
     if (get(createOrderDto, 'startAt', '') && get(createOrderDto, 'endAt', '')) {
+      // 환율정보 가져오기
+      const dollor_exchange_rate = await this.settingsService.findOne('dollor_exchange_rate');
+
       priceInfo = {
         price: await this.calcTotalPrice(get(po, 'priceMonth', 0), get(createOrderDto, 'startAt'), get(createOrderDto, 'endAt')),
         tax: commonUtils.getStatus('tax'),
@@ -50,6 +54,13 @@ export class OrderProductService {
       priceInfo['taxPrice'] = commonUtils.calcTax(priceInfo['price'], priceInfo['tax'] + '%');
       priceInfo['feePrice'] = commonUtils.calcTax(priceInfo['price'] + priceInfo['taxPrice'], priceInfo['fee'] + '%');
       priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
+
+      if (+get(dollor_exchange_rate, 'set_value', 0) > 0) {
+        priceInfo['priceEng'] = commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
+        priceInfo['taxPriceEng'] = commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
+        priceInfo['feePriceEng'] = commonUtils.calcExchangeRate(priceInfo['price'] + priceInfo['taxPrice'], +dollor_exchange_rate.set_value);
+        priceInfo['totalPriceEng'] = priceInfo['priceEng'] + priceInfo['taxPriceEng'] + priceInfo['feePriceEng'];
+      }
     }
     console.log({ priceInfo });
 
@@ -62,11 +73,15 @@ export class OrderProductService {
     op['parcelCode'] = order['code'] + '-P01';
     op['title'] = po['title'];
     op['options'] = po['code'];
+    op['num'] = get(createOrderDto, 'num', 1);
     op['taxPrice'] = get(priceInfo, ['taxPrice'], 0);
     op['feePrice'] = get(priceInfo, ['feePrice'], 0);
-    op['num'] = get(createOrderDto, 'num', 1);
     op['price'] = get(priceInfo, ['price'], 0);
     op['payPrice'] = get(priceInfo, ['totalPrice'], 0);
+    op['taxPriceEng'] = get(priceInfo, ['taxPriceEng'], 0);
+    op['feePriceEng'] = get(priceInfo, ['feePriceEng'], 0);
+    op['priceEng'] = get(priceInfo, ['priceEng'], 0);
+    op['payPriceEng'] = get(priceInfo, ['totalPriceEng'], 0);
     op['img'] = file[0]['file_storage_path'];
     op['user'] = get(order, 'user', null);
     op['order'] = order;
@@ -118,7 +133,7 @@ export class OrderProductService {
       .execute()
   }
 
-  async cancelPrice(orderIdx: number, cancelPrice: number) {
+  async cancelPrice(orderIdx: number, cancelPrice: number, cancelPriceEng: number) {
     await this.orderProductRepository.createQueryBuilder()
       .update(OrderProductEntity)
       .set({
@@ -126,7 +141,12 @@ export class OrderProductService {
         taxPrice: 0,
         feePrice: 0,
         payPrice: 0,
+        priceEng: 0,
+        taxPriceEng: 0,
+        feePriceEng: 0,
+        payPriceEng: 0,
         cancelPrice: cancelPrice,
+        cancelPriceEng: cancelPriceEng,
       })
       .where("`orderIdx` = :orderIdx", { orderIdx: orderIdx })
       .execute()
