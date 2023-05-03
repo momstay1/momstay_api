@@ -59,6 +59,7 @@ let ProductOptionService = class ProductOptionService {
             product: product,
             productInfo: productInfo,
         };
+        const dollor_exchange_rate = await this.settingsService.findOne('dollor_exchange_rate');
         if ((0, lodash_1.get)(createProductOptionDto, 'status', 0))
             product_option_data['status'] = +(0, lodash_1.get)(createProductOptionDto, 'status');
         if ((0, lodash_1.get)(createProductOptionDto, 'type', ''))
@@ -77,14 +78,22 @@ let ProductOptionService = class ProductOptionService {
             product_option_data['titleJpn'] = (0, lodash_1.get)(createProductOptionDto, 'titleJpn');
         if ((0, lodash_1.get)(createProductOptionDto, 'titleChn', ''))
             product_option_data['titleChn'] = (0, lodash_1.get)(createProductOptionDto, 'titleChn');
-        if ((0, lodash_1.get)(createProductOptionDto, 'price', ''))
+        if ((0, lodash_1.get)(createProductOptionDto, 'price', '')) {
             product_option_data['price'] = +(0, lodash_1.get)(createProductOptionDto, 'price');
-        if ((0, lodash_1.get)(createProductOptionDto, 'priceMonth', ''))
+            product_option_data['priceEng'] = common_utils_1.commonUtils.calcExchangeRate(product_option_data['price'], +dollor_exchange_rate.set_value);
+        }
+        if ((0, lodash_1.get)(createProductOptionDto, 'priceMonth', '')) {
             product_option_data['priceMonth'] = +(0, lodash_1.get)(createProductOptionDto, 'priceMonth');
-        if ((0, lodash_1.get)(createProductOptionDto, 'priceWeek', ''))
+            product_option_data['priceMonthEng'] = common_utils_1.commonUtils.calcExchangeRate(product_option_data['priceMonth'], +dollor_exchange_rate.set_value);
+        }
+        if ((0, lodash_1.get)(createProductOptionDto, 'priceWeek', '')) {
             product_option_data['priceWeek'] = +(0, lodash_1.get)(createProductOptionDto, 'priceWeek');
-        if ((0, lodash_1.get)(createProductOptionDto, 'priceDay', ''))
+            product_option_data['priceWeekEng'] = common_utils_1.commonUtils.calcExchangeRate(product_option_data['priceWeek'], +dollor_exchange_rate.set_value);
+        }
+        if ((0, lodash_1.get)(createProductOptionDto, 'priceDay', '')) {
             product_option_data['priceDay'] = +(0, lodash_1.get)(createProductOptionDto, 'priceDay');
+            product_option_data['priceDayEng'] = common_utils_1.commonUtils.calcExchangeRate(product_option_data['priceDay'], +dollor_exchange_rate.set_value);
+        }
         if ((0, lodash_1.get)(createProductOptionDto, 'detailsKor', ''))
             product_option_data['detailsKor'] = (0, lodash_1.get)(createProductOptionDto, 'detailsKor');
         if ((0, lodash_1.get)(createProductOptionDto, 'detailsEng', ''))

@@ -13,6 +13,10 @@ export declare class CreateProductOptionDto {
     readonly priceMonth: string;
     readonly priceWeek: string;
     readonly priceDay: string;
+    readonly priceEng: string;
+    readonly priceMonthEng: string;
+    readonly priceWeekEng: string;
+    readonly priceDayEng: string;
     readonly detailsKor: string;
     readonly detailsEng: string;
     readonly detailsJpn: string;

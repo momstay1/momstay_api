@@ -16,10 +16,11 @@ export declare class ProductOptionEntity {
     price: number;
     priceMonth: number;
     priceWeek: number;
+    priceDay: number;
     priceEng: number;
     priceMonthEng: number;
     priceWeekEng: number;
-    priceDay: number;
+    priceDayEng: number;
     detailsKor: string;
     detailsEng: string;
     detailsJpn: string;

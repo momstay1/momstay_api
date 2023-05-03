@@ -101,6 +101,30 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 가격(달러)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "priceEng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 달 가격(달러)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "priceMonthEng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 주 가격(달러)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "priceWeekEng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ description: '방 일 가격(달러)', required: false }),
+    __metadata("design:type", String)
+], CreateProductOptionDto.prototype, "priceDayEng", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     (0, swagger_1.ApiProperty)({ description: '방 소개(한글)', required: false }),
     __metadata("design:type", String)
 ], CreateProductOptionDto.prototype, "detailsKor", void 0);
