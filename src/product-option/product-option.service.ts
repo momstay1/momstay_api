@@ -59,6 +59,9 @@ export class ProductOptionService {
       productInfo: productInfo,
     };
 
+    // 달러 환율 정보
+    const dollor_exchange_rate = await this.settingsService.findOne('dollor_exchange_rate');
+
     if (get(createProductOptionDto, 'status', 0))
       product_option_data['status'] = +get(createProductOptionDto, 'status');
     if (get(createProductOptionDto, 'type', ''))
@@ -86,23 +89,31 @@ export class ProductOptionService {
       product_option_data['titleJpn'] = get(createProductOptionDto, 'titleJpn');
     if (get(createProductOptionDto, 'titleChn', ''))
       product_option_data['titleChn'] = get(createProductOptionDto, 'titleChn');
-    if (get(createProductOptionDto, 'price', ''))
+    if (get(createProductOptionDto, 'price', '')) {
       product_option_data['price'] = +get(createProductOptionDto, 'price');
-    if (get(createProductOptionDto, 'priceMonth', ''))
+      product_option_data['priceEng'] = commonUtils.calcExchangeRate(product_option_data['price'], +dollor_exchange_rate.set_value);
+    }
+    if (get(createProductOptionDto, 'priceMonth', '')) {
       product_option_data['priceMonth'] = +get(
         createProductOptionDto,
         'priceMonth',
       );
-    if (get(createProductOptionDto, 'priceWeek', ''))
+      product_option_data['priceMonthEng'] = commonUtils.calcExchangeRate(product_option_data['priceMonth'], +dollor_exchange_rate.set_value);
+    }
+    if (get(createProductOptionDto, 'priceWeek', '')) {
       product_option_data['priceWeek'] = +get(
         createProductOptionDto,
         'priceWeek',
       );
-    if (get(createProductOptionDto, 'priceDay', ''))
+      product_option_data['priceWeekEng'] = commonUtils.calcExchangeRate(product_option_data['priceWeek'], +dollor_exchange_rate.set_value);
+    }
+    if (get(createProductOptionDto, 'priceDay', '')) {
       product_option_data['priceDay'] = +get(
         createProductOptionDto,
         'priceDay',
       );
+      product_option_data['priceDayEng'] = commonUtils.calcExchangeRate(product_option_data['priceDay'], +dollor_exchange_rate.set_value);
+    }
     if (get(createProductOptionDto, 'detailsKor', ''))
       product_option_data['detailsKor'] = get(
         createProductOptionDto,

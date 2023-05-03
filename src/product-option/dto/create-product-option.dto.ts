@@ -60,6 +60,22 @@ export class CreateProductOptionDto {
   readonly priceDay: string;
   @IsOptional()
   @IsString()
+  @ApiProperty({ description: '방 가격(달러)', required: false })
+  readonly priceEng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '방 달 가격(달러)', required: false })
+  readonly priceMonthEng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '방 주 가격(달러)', required: false })
+  readonly priceWeekEng: string;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ description: '방 일 가격(달러)', required: false })
+  readonly priceDayEng: string;
+  @IsOptional()
+  @IsString()
   @ApiProperty({ description: '방 소개(한글)', required: false })
   readonly detailsKor: string;
   @IsOptional()
