@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { map } from 'lodash';
+import { get, map } from 'lodash';
 import { commonUtils } from 'src/common/common.utils';
 import { FileService } from 'src/file/file.service';
 import { ProductService } from 'src/product/product.service';
@@ -44,12 +44,15 @@ export class WishlistService {
   }
 
   async findUserAll(userInfo: UsersEntity) {
+    if (get(userInfo, 'id', '') == '') {
+      throw new NotFoundException('wishlist.service.findUserAll: 회원 정보가 없습니다.');
+    }
     const user = await this.userService.findId(userInfo['id']);
     const wishlist = await this.wishlistRepository.find({
       where: { user_idx: user['idx'] }
     });
     if (!wishlist) {
-      throw new NotFoundException('찜 목록이 없습니다.');
+      throw new NotFoundException('wishlist.service.findUserAll: 찜 목록이 없습니다.');
     }
     const wishlist_idxs = map(wishlist, o => o['product_idx']);
     const product = await this.productService.findIdxAll(wishlist_idxs);
@@ -58,7 +61,7 @@ export class WishlistService {
       file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], wishlist_idxs);
       file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
     } catch (error) {
-      console.log('위시리스트에 이미지 파일 없음');
+      console.log('wishlist.service.findUserAll: 위시리스트에 이미지 파일 없음');
     }
     return { product, file_info };
   }
@@ -69,13 +72,13 @@ export class WishlistService {
 
   async findUserProOne(user_idx: number, product_idx: number) {
     if (!user_idx || !product_idx) {
-      throw new NotFoundException('잘못된 정보 입니다.');
+      throw new NotFoundException('wishlist.service.findUserProOne: 잘못된 정보 입니다.');
     }
     const wishlist = await this.wishlistRepository.findOne({
       where: { user_idx: user_idx, product_idx: product_idx },
     });
     if (!wishlist) {
-      throw new NotFoundException('찜 목록이 없습니다.');
+      throw new NotFoundException('wishlist.service.findUserProOne: 찜 목록이 없습니다.');
     }
     return wishlist;
   }
