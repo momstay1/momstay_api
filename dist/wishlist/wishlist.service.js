@@ -49,12 +49,15 @@ let WishlistService = class WishlistService {
         return `This action returns all wishlist`;
     }
     async findUserAll(userInfo) {
+        if ((0, lodash_1.get)(userInfo, 'id', '') == '') {
+            throw new common_1.NotFoundException('wishlist.service.findUserAll: 회원 정보가 없습니다.');
+        }
         const user = await this.userService.findId(userInfo['id']);
         const wishlist = await this.wishlistRepository.find({
             where: { user_idx: user['idx'] }
         });
         if (!wishlist) {
-            throw new common_1.NotFoundException('찜 목록이 없습니다.');
+            throw new common_1.NotFoundException('wishlist.service.findUserAll: 찜 목록이 없습니다.');
         }
         const wishlist_idxs = (0, lodash_1.map)(wishlist, o => o['product_idx']);
         const product = await this.productService.findIdxAll(wishlist_idxs);
@@ -64,7 +67,7 @@ let WishlistService = class WishlistService {
             file_info = common_utils_1.commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
         }
         catch (error) {
-            console.log('위시리스트에 이미지 파일 없음');
+            console.log('wishlist.service.findUserAll: 위시리스트에 이미지 파일 없음');
         }
         return { product, file_info };
     }
@@ -73,13 +76,13 @@ let WishlistService = class WishlistService {
     }
     async findUserProOne(user_idx, product_idx) {
         if (!user_idx || !product_idx) {
-            throw new common_1.NotFoundException('잘못된 정보 입니다.');
+            throw new common_1.NotFoundException('wishlist.service.findUserProOne: 잘못된 정보 입니다.');
         }
         const wishlist = await this.wishlistRepository.findOne({
             where: { user_idx: user_idx, product_idx: product_idx },
         });
         if (!wishlist) {
-            throw new common_1.NotFoundException('찜 목록이 없습니다.');
+            throw new common_1.NotFoundException('wishlist.service.findUserProOne: 찜 목록이 없습니다.');
         }
         return wishlist;
     }
