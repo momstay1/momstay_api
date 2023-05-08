@@ -985,35 +985,38 @@ export class OrderService {
         break;
     }
 
-    if (get(guestUser, 'email', '') != '') {
-      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
-      // 게스트 주문 완료 메일 발송
-      const { mail, email_tmpl } = await this.emailService.mailSettings(
-        { type: 'order', group: 'guest', code: code, lang: guestUser.language },
-        sendInfo
-      );
-      if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+    if (code) {
+      if (get(guestUser, 'email', '') != '') {
+        sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+        // 게스트 주문 완료 메일 발송
+        console.log({ type: 'order', group: 'guest', code: code, lang: guestUser.language });
+        const { mail, email_tmpl } = await this.emailService.mailSettings(
+          { type: 'order', group: 'guest', code: code, lang: guestUser.language },
+          sendInfo
+        );
+        if (mail != '' && email_tmpl != '') {
+          await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+        }
       }
-    }
-    if (get(hostUser, 'email', '') != '') {
-      // 호스트 주문 완료 메일 발송
-      const { mail, email_tmpl } = await this.emailService.mailSettings(
-        { type: 'order', group: 'host', code: code, lang: 'ko' },
-        sendInfo
-      );
-      if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+      if (get(hostUser, 'email', '') != '') {
+        // 호스트 주문 완료 메일 발송
+        const { mail, email_tmpl } = await this.emailService.mailSettings(
+          { type: 'order', group: 'host', code: code, lang: 'ko' },
+          sendInfo
+        );
+        if (mail != '' && email_tmpl != '') {
+          await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+        }
       }
-    }
-    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
-      // 호스트 주문 완료 메일 발송
-      const { mail, email_tmpl } = await this.emailService.mailSettings(
-        { type: 'order', group: 'admin', code: code, lang: 'ko' },
-        sendInfo
-      );
-      if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+      if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+        // 호스트 주문 완료 메일 발송
+        const { mail, email_tmpl } = await this.emailService.mailSettings(
+          { type: 'order', group: 'admin', code: code, lang: 'ko' },
+          sendInfo
+        );
+        if (mail != '' && email_tmpl != '') {
+          await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+        }
       }
     }
   }

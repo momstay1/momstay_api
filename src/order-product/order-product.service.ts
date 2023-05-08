@@ -57,9 +57,9 @@ export class OrderProductService {
 
       if (+get(dollor_exchange_rate, 'set_value', 0) > 0) {
         priceInfo['priceEng'] = commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
-        priceInfo['taxPriceEng'] = commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
-        priceInfo['feePriceEng'] = commonUtils.calcExchangeRate(priceInfo['price'] + priceInfo['taxPrice'], +dollor_exchange_rate.set_value);
-        priceInfo['totalPriceEng'] = priceInfo['priceEng'] + priceInfo['taxPriceEng'] + priceInfo['feePriceEng'];
+        priceInfo['taxPriceEng'] = commonUtils.calcExchangeRate(priceInfo['taxPrice'], +dollor_exchange_rate.set_value);
+        priceInfo['feePriceEng'] = commonUtils.calcExchangeRate(priceInfo['feePrice'], +dollor_exchange_rate.set_value);
+        priceInfo['totalPriceEng'] = Math.floor((priceInfo['priceEng'] + priceInfo['taxPriceEng'] + priceInfo['feePriceEng']) * 100) / 100;
       }
     }
     console.log({ priceInfo });
