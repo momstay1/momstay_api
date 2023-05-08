@@ -50,9 +50,9 @@ let OrderProductService = class OrderProductService {
             priceInfo['totalPrice'] = priceInfo['price'] + priceInfo['taxPrice'] + priceInfo['feePrice'];
             if (+(0, lodash_1.get)(dollor_exchange_rate, 'set_value', 0) > 0) {
                 priceInfo['priceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
-                priceInfo['taxPriceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['price'], +dollor_exchange_rate.set_value);
-                priceInfo['feePriceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['price'] + priceInfo['taxPrice'], +dollor_exchange_rate.set_value);
-                priceInfo['totalPriceEng'] = priceInfo['priceEng'] + priceInfo['taxPriceEng'] + priceInfo['feePriceEng'];
+                priceInfo['taxPriceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['taxPrice'], +dollor_exchange_rate.set_value);
+                priceInfo['feePriceEng'] = common_utils_1.commonUtils.calcExchangeRate(priceInfo['feePrice'], +dollor_exchange_rate.set_value);
+                priceInfo['totalPriceEng'] = Math.floor((priceInfo['priceEng'] + priceInfo['taxPriceEng'] + priceInfo['feePriceEng']) * 100) / 100;
             }
         }
         console.log({ priceInfo });

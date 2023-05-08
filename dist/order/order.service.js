@@ -719,23 +719,26 @@ let OrderService = class OrderService {
                 code = 'guest_cancel';
                 break;
         }
-        if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
-            sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
-            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
-            if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+        if (code) {
+            if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
+                sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
+                console.log({ type: 'order', group: 'guest', code: code, lang: guestUser.language });
+                const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
+                if (mail != '' && email_tmpl != '') {
+                    await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
+                }
             }
-        }
-        if ((0, lodash_1.get)(hostUser, 'email', '') != '') {
-            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'host', code: code, lang: 'ko' }, sendInfo);
-            if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+            if ((0, lodash_1.get)(hostUser, 'email', '') != '') {
+                const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'host', code: code, lang: 'ko' }, sendInfo);
+                if (mail != '' && email_tmpl != '') {
+                    await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
+                }
             }
-        }
-        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
-            const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
-            if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+            if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+                const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
+                if (mail != '' && email_tmpl != '') {
+                    await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+                }
             }
         }
     }
