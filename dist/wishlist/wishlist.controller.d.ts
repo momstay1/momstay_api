@@ -7,7 +7,7 @@ export declare class WishlistController {
     constructor(wishlistService: WishlistService);
     create(user: UsersEntity, createWishlistDto: CreateWishlistDto): Promise<any>;
     findAll(user: UsersEntity): Promise<{
-        product: import("../product/entities/product.entity").ProductEntity[];
+        product: {};
         file_info: {};
     }>;
     findOne(id: string): string;
