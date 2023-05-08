@@ -51,17 +51,17 @@ export class WishlistService {
     const wishlist = await this.wishlistRepository.find({
       where: { user_idx: user['idx'] }
     });
-    if (!wishlist) {
-      throw new NotFoundException('wishlist.service.findUserAll: 찜 목록이 없습니다.');
-    }
-    const wishlist_idxs = map(wishlist, o => o['product_idx']);
-    const product = await this.productService.findIdxAll(wishlist_idxs);
+    let product = {};
     let file_info = {};
-    try {
-      file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], wishlist_idxs);
-      file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
-    } catch (error) {
-      console.log('wishlist.service.findUserAll: 위시리스트에 이미지 파일 없음');
+    if (wishlist.length > 0) {
+      const wishlist_idxs = map(wishlist, o => o['product_idx']);
+      product = await this.productService.findIdxAll(wishlist_idxs);
+      try {
+        file_info = await this.fileService.findCategoryForeignAll(['lodgingDetailImg', 'mealsImg'], wishlist_idxs);
+        file_info = commonUtils.getArrayKey(file_info, ['file_foreign_idx', 'file_category'], true);
+      } catch (error) {
+        console.log('wishlist.service.findUserAll: 위시리스트에 이미지 파일 없음');
+      }
     }
     return { product, file_info };
   }
