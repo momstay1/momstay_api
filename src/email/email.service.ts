@@ -138,8 +138,8 @@ export class EmailService {
     const site = await this.settingsService.find('site');
     const info = {
       url: url,
-      site_title: get(site, ['site_' + lang + '_title', 'set_value'], site.site_title.set_value),
-      site_email: get(site, ['site_' + lang + '_email', 'set_value'], site.site_email.set_value),
+      site_title: get(site, ['site_' + lang + '_title', 'set_value'], site?.site_title?.set_value),
+      site_email: get(site, ['site_' + lang + '_email', 'set_value'], site?.site_email?.set_value),
       ...sendInfo
     }
     return info;
