@@ -135,8 +135,9 @@ let EmailService = class EmailService {
         return email_tmpl;
     }
     async mergeSendInfo(lang, sendInfo) {
+        var _a, _b;
         const site = await this.settingsService.find('site');
-        const info = Object.assign({ url: url, site_title: (0, lodash_1.get)(site, ['site_' + lang + '_title', 'set_value'], site.site_title.set_value), site_email: (0, lodash_1.get)(site, ['site_' + lang + '_email', 'set_value'], site.site_email.set_value) }, sendInfo);
+        const info = Object.assign({ url: url, site_title: (0, lodash_1.get)(site, ['site_' + lang + '_title', 'set_value'], (_a = site === null || site === void 0 ? void 0 : site.site_title) === null || _a === void 0 ? void 0 : _a.set_value), site_email: (0, lodash_1.get)(site, ['site_' + lang + '_email', 'set_value'], (_b = site === null || site === void 0 ? void 0 : site.site_email) === null || _b === void 0 ? void 0 : _b.set_value) }, sendInfo);
         return info;
     }
     async findOneEmail({ type, group, code, lang }) {
