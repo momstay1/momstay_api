@@ -698,6 +698,8 @@ export class OrderService {
 
     // 취소 사유
     const cancelReason = 'guest cancel';
+    // 주문 관련 메일
+    await this.guestOrderMail(order.idx, cancelReason);
     // 취소 처리
     await this.cancelProcess(order, cancelReason);
 
@@ -710,8 +712,6 @@ export class OrderService {
       await this.pushNotiService.guestOrderCancelPush(hostUser, po);
     }
 
-    // 주문 관련 메일
-    await this.guestOrderMail(order.idx, cancelReason);
   }
 
   async hostOrderApproval(code: string, userInfo: UsersEntity) {
@@ -749,6 +749,8 @@ export class OrderService {
         'order.service.hostOrderApproval: 이미 승인 처리된 주문입니다.',
       );
     }
+    // 메일에 표시할 내용 설정
+    const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
 
     // 주문 취소 상태 변경
     await this.statusChange(order['idx'], shipping_status);
@@ -765,7 +767,7 @@ export class OrderService {
 
     // 주문 관련 메일
     // 주문 관련 메일
-    await this.hostOrderMail(order.idx, '');
+    await this.hostOrderMail(orderMailSendInfo, '');
   }
 
   async hostOrderCancel(
@@ -799,24 +801,26 @@ export class OrderService {
         'order.service.hostOrderCancel: 변경할 주문이 없습니다.',
       );
     }
-    const today = moment().format('YYYY-MM-DD');
-    const ago20day = moment(order.orderProduct[0].startAt)
-      .add(-20, 'day')
-      .format('YYYY-MM-DD');
-    if (today > ago20day) {
-      const site = await this.settingsService.findOne('site_tel');
-      throw new NotAcceptableException(
-        'order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
-        site.set_value +
-        ')에 문의해주세요.',
-      );
+    if (['host'].includes(user.group.id)) {
+      const today = moment().format('YYYY-MM-DD');
+      const ago20day = moment(order.orderProduct[0].startAt)
+        .add(-20, 'day')
+        .format('YYYY-MM-DD');
+      if (today > ago20day) {
+        const site = await this.settingsService.findOne('site_tel');
+        throw new NotAcceptableException(
+          'order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
+          site.set_value +
+          ')에 문의해주세요.',
+        );
+      }
     }
+
+    // 메일에 표시할 내용 설정
+    const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
 
     // 취소 사유
     const cancelReason = 'host cancel(' + get(updateOrderDto, 'cancelReason', '') + ')';
-
-    // 취소 처리
-    await this.cancelProcess(order, cancelReason);
 
     // 주문 정보 가져오기
     const orderInfo = await this.findOneIdx(+get(order, ['idx']));
@@ -828,10 +832,13 @@ export class OrderService {
 
     // 주문 관련 메일
     if (['root', 'admin'].includes(user.group.id)) {
-      await this.adminOrderMail(order.idx, 'momstay cancel');
+      await this.adminOrderMail(orderMailSendInfo, 'momstay cancel');
     } else {
-      await this.hostOrderMail(order.idx, cancelReason);
+      await this.hostOrderMail(orderMailSendInfo, cancelReason);
     }
+
+    // 취소 처리
+    await this.cancelProcess(order, cancelReason);
   }
 
   // 취소 처리
@@ -922,14 +929,18 @@ export class OrderService {
     );
 
     let po_title = order.orderProduct[0].productOption['title' + lang];
-    let po_title_ko;
-    let po_title_en;
+    // console.log({po_title});
+    // let po_title_ko;
+    // let po_title_en;
     if (order.orderProduct.length > 1) {
-      po_title_ko += po_title + ' 외 ' + order.orderProduct.length + '건';
-      po_title_en += po_title + ' and ' + order.orderProduct.length + ' other case';
+      if (lang == 'ko') {
+        po_title = po_title + ' 외 ' + order.orderProduct.length + '건';
+      } else {
+        po_title = po_title + ' and ' + order.orderProduct.length + ' other case';
+      }
     }
     const sendInfo = {
-      po_title: po_title_ko,
+      po_title: po_title,
       product_title: order.orderProduct[0].productOption.product['title' + lang],
       occupancy_date: order.orderProduct[0].startAt,
       eviction_date: order.orderProduct[0].endAt,
@@ -942,7 +953,7 @@ export class OrderService {
       cancel_reason: '',
     };
 
-    if (order.orderProduct[0].payPriceEng > 0) {
+    if (guestUser.language != 'ko') {
       sendInfo['payment'] = order.orderProduct[0].payPriceEng;
       sendInfo['po_payment'] = order.orderProduct[0].priceEng;
       sendInfo['tax'] = order.orderProduct[0].taxPriceEng;
@@ -955,39 +966,36 @@ export class OrderService {
       order,
       guestUser,
       hostUser,
-      po_title_ko,
-      po_title_en,
       sendInfo,
       site
     };
   }
 
   // 게스트가 이벤트 발생시 메일 발송
-  async guestOrderMail(orderIdx: number, cancelReason: string) {
+  async guestOrderMail(ordIdx: any, cancelReason: string) {
     const {
       order,
       guestUser,
       hostUser,
-      po_title_ko,
-      po_title_en,
       sendInfo,
       site
-    } = await this.orderMailSendInfo(orderIdx);
+    } = await this.orderMailSendInfo(ordIdx);
     sendInfo.cancel_reason = cancelReason;
 
+
+    const status = commonUtils.getStatus([
+      'order_status',
+    ]);
     let code;
-    switch (order.status) {
-      case 2: // 주문 완료
-        code = 'payment';
-        break;
-      case 8: // 주문 취소
-        code = 'guest_cancel';
-        break;
+    if (order.status == status.paymentCompleted) {
+      code = 'payment';
+    }
+    if (cancelReason != '') {
+      code = 'guest_cancel';
     }
 
     if (code) {
       if (get(guestUser, 'email', '') != '') {
-        sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
         // 게스트 주문 완료 메일 발송
         console.log({ type: 'order', group: 'guest', code: code, lang: guestUser.language });
         const { mail, email_tmpl } = await this.emailService.mailSettings(
@@ -1022,16 +1030,14 @@ export class OrderService {
   }
 
   // 호스트가 이벤트 발생시 메일 발송
-  async hostOrderMail(orderIdx: number, cancelReason: string) {
+  async hostOrderMail(orderMailSendInfo: any, cancelReason: string) {
     const {
       order,
       guestUser,
       hostUser,
-      po_title_ko,
-      po_title_en,
       sendInfo,
       site
-    } = await this.orderMailSendInfo(orderIdx);
+    } = orderMailSendInfo;
     sendInfo.cancel_reason = cancelReason;
 
     let code;
@@ -1045,7 +1051,6 @@ export class OrderService {
     }
 
     if (get(guestUser, 'email', '') != '') {
-      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
       // 게스트 주문 완료 메일 발송
       const { mail, email_tmpl } = await this.emailService.mailSettings(
         { type: 'order', group: 'guest', code: code, lang: guestUser.language },
@@ -1078,16 +1083,14 @@ export class OrderService {
   }
 
   // 관리자가 이벤트 발생시 메일 발송
-  async adminOrderMail(orderIdx: number, cancelReason: string) {
+  async adminOrderMail(orderMailSendInfo: any, cancelReason: string) {
     const {
       order,
       guestUser,
       hostUser,
-      po_title_ko,
-      po_title_en,
       sendInfo,
       site
-    } = await this.orderMailSendInfo(orderIdx);
+    } = orderMailSendInfo;
     sendInfo.cancel_reason = cancelReason;
 
     let code;
@@ -1098,7 +1101,6 @@ export class OrderService {
     }
 
     if (get(guestUser, 'email', '') != '') {
-      sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
       // 게스트 주문 완료 메일 발송
       const { mail, email_tmpl } = await this.emailService.mailSettings(
         { type: 'order', group: 'guest', code: code, lang: guestUser.language },
