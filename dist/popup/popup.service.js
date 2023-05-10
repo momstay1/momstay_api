@@ -120,6 +120,7 @@ let PopupService = class PopupService {
         }
         const popup = await this.popupRepository.find({
             where: where,
+            order: { order: 'ASC', createdAt: 'DESC' }
         });
         if (popup.length === 0) {
             throw new common_1.NotFoundException('popup.service.findByIdOrPage: 정보를 찾을 수 없습니다.');
