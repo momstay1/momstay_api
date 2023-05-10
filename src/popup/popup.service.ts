@@ -153,6 +153,7 @@ export class PopupService {
 
     const popup = await this.popupRepository.find({
       where: where,
+      order: { order: 'ASC', createdAt: 'DESC' }
     });
 
     if (popup.length === 0) {
