@@ -621,7 +621,6 @@ let OrderService = class OrderService {
                     ')에 문의해주세요.');
             }
         }
-        return;
         const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
         const cancelReason = 'host cancel(' + (0, lodash_1.get)(updateOrderDto, 'cancelReason', '') + ')';
         const orderInfo = await this.findOneIdx(+(0, lodash_1.get)(order, ['idx']));
