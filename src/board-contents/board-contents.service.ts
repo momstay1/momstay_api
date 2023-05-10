@@ -115,7 +115,6 @@ export class BoardContentsService {
     if (bc['status'] == bcConstants.status.answerWait) {
       bc['status'] = bcConstants.status.answerComplete;
       await this.bcRepository.save(bc);
-
       if (bc.board.idx == inquiryIdx && get(bc, ['user', 'email'], '')) {
         // 1:1 문의 답변 메일 발송
         const { mail, email_tmpl } = await this.emailService.mailSettings(
