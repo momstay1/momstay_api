@@ -599,7 +599,6 @@ let OrderService = class OrderService {
             .leftJoinAndSelect('productOption.product', 'product')
             .leftJoinAndSelect('product.user', 'user')
             .where((qb) => {
-            qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
             qb.andWhere('`order`.code = :code', { code: code });
         })
             .getOne();
@@ -607,6 +606,10 @@ let OrderService = class OrderService {
             throw new common_1.NotFoundException('order.service.hostOrderCancel: 변경할 주문이 없습니다.');
         }
         if (['host'].includes(user.group.id)) {
+            const userIdx = (0, lodash_1.get)(order, ['orderProduct', 0, 'productOption', 'product', 'user', 'idx'], '');
+            if (userIdx != user.idx) {
+                throw new common_1.NotFoundException('order.service.hostOrderCancel: 권한이 없습니다.');
+            }
             const today = moment().format('YYYY-MM-DD');
             const ago20day = moment(order.orderProduct[0].startAt)
                 .add(-20, 'day')
@@ -618,6 +621,7 @@ let OrderService = class OrderService {
                     ')에 문의해주세요.');
             }
         }
+        return;
         const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
         const cancelReason = 'host cancel(' + (0, lodash_1.get)(updateOrderDto, 'cancelReason', '') + ')';
         const orderInfo = await this.findOneIdx(+(0, lodash_1.get)(order, ['idx']));
