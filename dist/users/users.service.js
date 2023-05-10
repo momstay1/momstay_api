@@ -222,13 +222,21 @@ let UsersService = class UsersService {
         if (!id) {
             throw new common_1.NotFoundException('user.service.fineUser: 조회할 정보가 없습니다.');
         }
-        const user = await this.usersRepository.findOne({
+        let user;
+        user = await this.usersRepository.findOne({
             where: (qb) => {
-                qb.where('`email` = :email', { email: id });
-                qb.orWhere('`UsersEntity`.`id` = :id', { id: id });
+                qb.where('`UsersEntity`.`id` = :id', { id: id });
             },
             relations: ['group', 'userSns', 'device', 'block'],
         });
+        if (!(0, lodash_1.get)(user, 'idx', '')) {
+            user = await this.usersRepository.findOne({
+                where: (qb) => {
+                    qb.where('`email` = :email', { email: id });
+                },
+                relations: ['group', 'userSns', 'device', 'block'],
+            });
+        }
         if (!(0, lodash_1.get)(user, 'idx', '')) {
             throw new common_1.NotFoundException('user.service.fineUser: 존재하지 않는 회원 입니다.');
         }
