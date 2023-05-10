@@ -820,7 +820,6 @@ export class OrderService {
         );
       }
     }
-    return;
 
     // 메일에 표시할 내용 설정
     const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
