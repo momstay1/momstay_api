@@ -30,8 +30,8 @@ const fs = require("fs");
 const file_service_1 = require("../file/file.service");
 const uncertifiedStatus = 1;
 const registrationStatus = 2;
-const url = 'http://momstay.nc188.reconers.com';
-const api_url = 'http://momstay_api.nc188.reconers.com';
+const url = 'http://momstay.cf148.reconers.com';
+const api_url = 'http://momstay_api.cf148.reconers.com';
 let EmailService = class EmailService {
     constructor(emailRepository, emailHistoryRepository, emailTmplRepository, emailCodeRepository, settingsService, fileService) {
         this.emailRepository = emailRepository;
