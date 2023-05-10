@@ -791,7 +791,6 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
         qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
@@ -802,6 +801,12 @@ export class OrderService {
       );
     }
     if (['host'].includes(user.group.id)) {
+      const userIdx = get(order, ['orderProduct', 0, 'productOption', 'product', 'user', 'idx'], '');
+      if (userIdx != user.idx) {
+        throw new NotFoundException(
+          'order.service.hostOrderCancel: 권한이 없습니다.',
+        );
+      }
       const today = moment().format('YYYY-MM-DD');
       const ago20day = moment(order.orderProduct[0].startAt)
         .add(-20, 'day')
@@ -815,6 +820,7 @@ export class OrderService {
         );
       }
     }
+    return;
 
     // 메일에 표시할 내용 설정
     const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
