@@ -72,8 +72,6 @@ export declare class OrderService {
         order: OrderEntity;
         guestUser: UsersEntity;
         hostUser: UsersEntity;
-        po_title_ko: any;
-        po_title_en: any;
         sendInfo: {
             po_title: any;
             product_title: any;
@@ -89,9 +87,9 @@ export declare class OrderService {
         };
         site: import("lodash").Dictionary<import("../settings/entities/setting.entity").SettingEntity>;
     }>;
-    guestOrderMail(orderIdx: number, cancelReason: string): Promise<void>;
-    hostOrderMail(orderIdx: number, cancelReason: string): Promise<void>;
-    adminOrderMail(orderIdx: number, cancelReason: string): Promise<void>;
+    guestOrderMail(ordIdx: any, cancelReason: string): Promise<void>;
+    hostOrderMail(orderMailSendInfo: any, cancelReason: string): Promise<void>;
+    adminOrderMail(orderMailSendInfo: any, cancelReason: string): Promise<void>;
     orderVerification(createOrderDto: CreateOrderDto): Promise<any>;
     dashboard(month: string): Promise<any>;
     createExcel(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{

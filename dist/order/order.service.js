@@ -546,13 +546,13 @@ let OrderService = class OrderService {
                 ')에 문의해주세요.');
         }
         const cancelReason = 'guest cancel';
+        await this.guestOrderMail(order.idx, cancelReason);
         await this.cancelProcess(order, cancelReason);
         const po = await this.productOptionService.findIdx(+(0, lodash_1.get)(order, ['orderProduct', '0', 'productOption', 'idx']));
         const hostUser = (0, lodash_1.get)(po, ['product', 'user']);
         if ((0, lodash_1.get)(hostUser, ['device', 'token'], '')) {
             await this.pushNotiService.guestOrderCancelPush(hostUser, po);
         }
-        await this.guestOrderMail(order.idx, cancelReason);
     }
     async hostOrderApproval(code, userInfo) {
         if (!code) {
@@ -577,6 +577,7 @@ let OrderService = class OrderService {
         if (order['status'] == shipping_status) {
             throw new common_1.NotAcceptableException('order.service.hostOrderApproval: 이미 승인 처리된 주문입니다.');
         }
+        const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
         await this.statusChange(order['idx'], shipping_status);
         await this.orderProductService.statusChange(order['idx'], shipping_status);
         const orderInfo = await this.findOneIdx(+(0, lodash_1.get)(order, ['idx']));
@@ -584,7 +585,7 @@ let OrderService = class OrderService {
         if ((0, lodash_1.get)(guestUser, ['device', 'token'], '')) {
             await this.pushNotiService.hostOrderApprovalPush(guestUser, orderInfo);
         }
-        await this.hostOrderMail(order.idx, '');
+        await this.hostOrderMail(orderMailSendInfo, '');
     }
     async hostOrderCancel(code, userInfo, updateOrderDto) {
         if (!code) {
@@ -605,29 +606,32 @@ let OrderService = class OrderService {
         if (!(0, lodash_1.get)(order, 'idx', '')) {
             throw new common_1.NotFoundException('order.service.hostOrderCancel: 변경할 주문이 없습니다.');
         }
-        const today = moment().format('YYYY-MM-DD');
-        const ago20day = moment(order.orderProduct[0].startAt)
-            .add(-20, 'day')
-            .format('YYYY-MM-DD');
-        if (today > ago20day) {
-            const site = await this.settingsService.findOne('site_tel');
-            throw new common_1.NotAcceptableException('order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
-                site.set_value +
-                ')에 문의해주세요.');
+        if (['host'].includes(user.group.id)) {
+            const today = moment().format('YYYY-MM-DD');
+            const ago20day = moment(order.orderProduct[0].startAt)
+                .add(-20, 'day')
+                .format('YYYY-MM-DD');
+            if (today > ago20day) {
+                const site = await this.settingsService.findOne('site_tel');
+                throw new common_1.NotAcceptableException('order.service.hostOrderCancel: 바로결제 취소가 불가능합니다. 1:1문의 또는 고객센터(' +
+                    site.set_value +
+                    ')에 문의해주세요.');
+            }
         }
+        const orderMailSendInfo = await this.orderMailSendInfo(order.idx);
         const cancelReason = 'host cancel(' + (0, lodash_1.get)(updateOrderDto, 'cancelReason', '') + ')';
-        await this.cancelProcess(order, cancelReason);
         const orderInfo = await this.findOneIdx(+(0, lodash_1.get)(order, ['idx']));
         const guestUser = (0, lodash_1.get)(orderInfo, 'user');
         if ((0, lodash_1.get)(guestUser, ['device', 'token'], '')) {
             await this.pushNotiService.hostOrderCancelPush(guestUser, orderInfo);
         }
         if (['root', 'admin'].includes(user.group.id)) {
-            await this.adminOrderMail(order.idx, 'momstay cancel');
+            await this.adminOrderMail(orderMailSendInfo, 'momstay cancel');
         }
         else {
-            await this.hostOrderMail(order.idx, cancelReason);
+            await this.hostOrderMail(orderMailSendInfo, cancelReason);
         }
+        await this.cancelProcess(order, cancelReason);
     }
     async cancelProcess(order, cancelReason) {
         const cancel_status = common_utils_1.commonUtils.getStatus([
@@ -671,14 +675,16 @@ let OrderService = class OrderService {
         const hostUser = order.orderProduct[0].productOption.product.user;
         const lang = common_utils_1.commonUtils.langValue(guestUser.language == 'ko' ? guestUser.language : 'en');
         let po_title = order.orderProduct[0].productOption['title' + lang];
-        let po_title_ko;
-        let po_title_en;
         if (order.orderProduct.length > 1) {
-            po_title_ko += po_title + ' 외 ' + order.orderProduct.length + '건';
-            po_title_en += po_title + ' and ' + order.orderProduct.length + ' other case';
+            if (lang == 'ko') {
+                po_title = po_title + ' 외 ' + order.orderProduct.length + '건';
+            }
+            else {
+                po_title = po_title + ' and ' + order.orderProduct.length + ' other case';
+            }
         }
         const sendInfo = {
-            po_title: po_title_ko,
+            po_title: po_title,
             product_title: order.orderProduct[0].productOption.product['title' + lang],
             occupancy_date: order.orderProduct[0].startAt,
             eviction_date: order.orderProduct[0].endAt,
@@ -690,7 +696,7 @@ let OrderService = class OrderService {
             phone: guestUser.countryCode + ' ' + guestUser.phone,
             cancel_reason: '',
         };
-        if (order.orderProduct[0].payPriceEng > 0) {
+        if (guestUser.language != 'ko') {
             sendInfo['payment'] = order.orderProduct[0].payPriceEng;
             sendInfo['po_payment'] = order.orderProduct[0].priceEng;
             sendInfo['tax'] = order.orderProduct[0].taxPriceEng;
@@ -701,27 +707,25 @@ let OrderService = class OrderService {
             order,
             guestUser,
             hostUser,
-            po_title_ko,
-            po_title_en,
             sendInfo,
             site
         };
     }
-    async guestOrderMail(orderIdx, cancelReason) {
-        const { order, guestUser, hostUser, po_title_ko, po_title_en, sendInfo, site } = await this.orderMailSendInfo(orderIdx);
+    async guestOrderMail(ordIdx, cancelReason) {
+        const { order, guestUser, hostUser, sendInfo, site } = await this.orderMailSendInfo(ordIdx);
         sendInfo.cancel_reason = cancelReason;
+        const status = common_utils_1.commonUtils.getStatus([
+            'order_status',
+        ]);
         let code;
-        switch (order.status) {
-            case 2:
-                code = 'payment';
-                break;
-            case 8:
-                code = 'guest_cancel';
-                break;
+        if (order.status == status.paymentCompleted) {
+            code = 'payment';
+        }
+        if (cancelReason != '') {
+            code = 'guest_cancel';
         }
         if (code) {
             if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
-                sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
                 console.log({ type: 'order', group: 'guest', code: code, lang: guestUser.language });
                 const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
                 if (mail != '' && email_tmpl != '') {
@@ -742,8 +746,8 @@ let OrderService = class OrderService {
             }
         }
     }
-    async hostOrderMail(orderIdx, cancelReason) {
-        const { order, guestUser, hostUser, po_title_ko, po_title_en, sendInfo, site } = await this.orderMailSendInfo(orderIdx);
+    async hostOrderMail(orderMailSendInfo, cancelReason) {
+        const { order, guestUser, hostUser, sendInfo, site } = orderMailSendInfo;
         sendInfo.cancel_reason = cancelReason;
         let code;
         switch (order.status) {
@@ -755,7 +759,6 @@ let OrderService = class OrderService {
                 break;
         }
         if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
-            sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
             const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
             if (mail != '' && email_tmpl != '') {
                 await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
@@ -774,8 +777,8 @@ let OrderService = class OrderService {
             }
         }
     }
-    async adminOrderMail(orderIdx, cancelReason) {
-        const { order, guestUser, hostUser, po_title_ko, po_title_en, sendInfo, site } = await this.orderMailSendInfo(orderIdx);
+    async adminOrderMail(orderMailSendInfo, cancelReason) {
+        const { order, guestUser, hostUser, sendInfo, site } = orderMailSendInfo;
         sendInfo.cancel_reason = cancelReason;
         let code;
         switch (order.status) {
@@ -784,7 +787,6 @@ let OrderService = class OrderService {
                 break;
         }
         if ((0, lodash_1.get)(guestUser, 'email', '') != '') {
-            sendInfo.po_title = guestUser.language == 'ko' ? po_title_ko : po_title_en;
             const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'guest', code: code, lang: guestUser.language }, sendInfo);
             if (mail != '' && email_tmpl != '') {
                 await this.emailService.sendMail(guestUser.email, mail.title, email_tmpl);
