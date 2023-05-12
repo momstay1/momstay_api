@@ -132,7 +132,9 @@ export class UsersService {
       );
     }
 
-    // TODO: 회원 가입 완료 메일 발송 (게스트)
+    // 회원 가입 완료 메일 발송 (게스트)
+    const code = 'signup';
+    this.userMailSettings(user, code);
 
     return { user, file_info };
   }
@@ -475,16 +477,9 @@ export class UsersService {
     user.marketing = '0';
     await this.usersRepository.save(user);
 
-    // TODO: 회원 탈퇴 완료 메일 발송 (게스트)
-    const { mail, email_tmpl } = await this.emailService.mailSettings(
-      { type: 'user', group: 'guest', code: 'leave', lang: language },
-      {
-        user_name: name,
-      }
-    );
-    if (email != '' && mail != '' && email_tmpl != '') {
-      await this.emailService.sendMail(email, mail.title, email_tmpl);
-    }
+    // 회원 탈퇴 완료 메일 발송 (게스트)
+    const code = 'leave';
+    this.userMailSettings({ language, name, email }, code);
   }
 
   async dormant(user: UsersEntity) {
@@ -551,18 +546,6 @@ export class UsersService {
       .execute();
   }
 
-  async signupMail(userInfo: UsersEntity) {
-    const { mail, email_tmpl } = await this.emailService.mailSettings(
-      { type: 'user', group: 'guest', code: 'signup', lang: userInfo.language },
-      {
-        user_name: userInfo.name,
-      }
-    );
-    if (get(userInfo, 'email', '') && mail != '' && email_tmpl != '') {
-      await this.emailService.sendMail(userInfo.email, mail.title, email_tmpl);
-    }
-  }
-
   async dashboard() {
     const today = moment().format('YYYY-MM-DD');
     const user = await this.usersRepository
@@ -591,6 +574,18 @@ export class UsersService {
       .execute();
 
     return user;
+  }
+
+  private async userMailSettings({ language, name, email }, code) {
+    const { mail, email_tmpl } = await this.emailService.mailSettings(
+      { type: 'user', group: 'guest', code: code, lang: language },
+      {
+        user_name: name,
+      }
+    );
+    if (email != '' && mail != '' && email_tmpl != '') {
+      await this.emailService.sendMail(email, mail.title, email_tmpl);
+    }
   }
 
   getPrivateColumn(): string[] {
