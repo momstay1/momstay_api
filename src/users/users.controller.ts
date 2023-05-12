@@ -74,7 +74,6 @@ export class UsersController {
     @UploadedFiles() files: Array<Express.Multer.File>
   ) {
     const data = await this.usersService.create(createUserDto, files);
-    await this.usersService.signupMail(data.user);
     return data;
   }
 
