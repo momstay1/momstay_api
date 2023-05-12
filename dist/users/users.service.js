@@ -107,6 +107,8 @@ let UsersService = class UsersService {
         if (!(0, lodash_1.isEmpty)(files)) {
             file_info = await this.fileService.fileInfoInsert(files, save_user['idx']);
         }
+        const code = 'signup';
+        this.userMailSettings(user, code);
         return { user, file_info };
     }
     async findAll(user, options, search, order) {
@@ -363,12 +365,8 @@ let UsersService = class UsersService {
         user.leaveAt = new Date();
         user.marketing = '0';
         await this.usersRepository.save(user);
-        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'guest', code: 'leave', lang: language }, {
-            user_name: name,
-        });
-        if (email != '' && mail != '' && email_tmpl != '') {
-            await this.emailService.sendMail(email, mail.title, email_tmpl);
-        }
+        const code = 'leave';
+        this.userMailSettings({ language, name, email }, code);
     }
     async dormant(user) {
         const userDormant = await this.userDormantService.dormantUser(user);
@@ -425,14 +423,6 @@ let UsersService = class UsersService {
             .where(' id IN (:ids)', { ids: ids })
             .execute();
     }
-    async signupMail(userInfo) {
-        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'guest', code: 'signup', lang: userInfo.language }, {
-            user_name: userInfo.name,
-        });
-        if ((0, lodash_1.get)(userInfo, 'email', '') && mail != '' && email_tmpl != '') {
-            await this.emailService.sendMail(userInfo.email, mail.title, email_tmpl);
-        }
-    }
     async dashboard() {
         const today = moment().format('YYYY-MM-DD');
         const user = await this.usersRepository
@@ -448,6 +438,14 @@ let UsersService = class UsersService {
             .addSelect('SUM(IF(Date_format(`createdAt`, "%y-%m-%d") = "' + today + '", 1, 0))', 'new_cnt')
             .execute();
         return user;
+    }
+    async userMailSettings({ language, name, email }, code) {
+        const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'guest', code: code, lang: language }, {
+            user_name: name,
+        });
+        if (email != '' && mail != '' && email_tmpl != '') {
+            await this.emailService.sendMail(email, mail.title, email_tmpl);
+        }
     }
     getPrivateColumn() {
         return constants_1.usersConstant.privateColumn;

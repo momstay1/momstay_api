@@ -47,7 +47,6 @@ let UsersController = class UsersController {
     }
     async create(createUserDto, files) {
         const data = await this.usersService.create(createUserDto, files);
-        await this.usersService.signupMail(data.user);
         return data;
     }
     async login(user, token, req) {

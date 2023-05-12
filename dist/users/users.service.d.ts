@@ -55,8 +55,8 @@ export declare class UsersService {
     dormant(user: UsersEntity): Promise<void>;
     dormantRecovery(id: string): Promise<void>;
     removes(ids: any): Promise<void>;
-    signupMail(userInfo: UsersEntity): Promise<void>;
     dashboard(): Promise<any>;
+    private userMailSettings;
     getPrivateColumn(): string[];
     private saveUser;
     private checkUserExists;
