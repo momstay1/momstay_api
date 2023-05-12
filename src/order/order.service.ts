@@ -731,11 +731,18 @@ export class OrderService {
       .leftJoinAndSelect('productOption.product', 'product')
       .leftJoinAndSelect('product.user', 'user')
       .where((qb) => {
-        qb.where('`user`.idx = :userIdx', { userIdx: user['idx'] });
         qb.andWhere('`order`.code = :code', { code: code });
       })
       .getOne();
 
+    if (['host'].includes(user.group.id)) {
+      const userIdx = get(order, ['orderProduct', 0, 'productOption', 'product', 'user', 'idx'], '');
+      if (userIdx != user.idx) {
+        throw new NotFoundException(
+          'order.service.hostOrderCancel: 권한이 없습니다.',
+        );
+      }
+    }
     if (!get(order, 'idx', '')) {
       throw new NotFoundException(
         'order.service.hostOrderApproval: 변경할 주문이 없습니다.',
