@@ -23,7 +23,10 @@ import * as moment from 'moment';
 
 const MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const MESSAGING_URL = 'https://fcm.googleapis.com/v1/projects/momstay-50e27/messages:send';
-let accessToken;
+const tokenInfo = {
+  accessToken: '',
+  date: ''
+};
 const registrationStatus = '200';
 const notificationStatus = '2'; // 알림 동의
 @Injectable()
@@ -71,17 +74,28 @@ export class PushNotificationService {
 
   private async sendFcmMessage(fcmMessage) {
     const http = this.http;
+    const date = moment().format('YYYY-MM-DD');
 
-    if (!accessToken) {
-      console.log({ accessToken });
-      accessToken = await this.getAccessToken();
-      console.log({ accessToken });
+    // if (!accessToken) {
+    //   console.log({ accessToken });
+    //   accessToken = await this.getAccessToken();
+    //   console.log({ accessToken });
+    // }
+
+    console.log('tokenInfo.date: ' + tokenInfo.date);
+    console.log('date: ' + date);
+    if (tokenInfo.date != date) {
+      console.log('accessToken: ' + tokenInfo.accessToken);
+      tokenInfo.accessToken = await this.getAccessToken();
+      tokenInfo.date = date;
+      console.log('accessToken: ' + tokenInfo.accessToken);
+      console.log('tokenInfo.date: ' + tokenInfo.date);
     }
 
     const url = MESSAGING_URL;
     const headersRequest = {
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + accessToken,
+      Authorization: 'Bearer ' + tokenInfo.accessToken,
     };
     const response = await firstValueFrom(
       http.post(url, JSON.stringify(fcmMessage), {
