@@ -142,9 +142,18 @@ let BoardContentsService = class BoardContentsService {
                         status: constants_1.bcConstants.status.registration,
                     });
                 }
-                qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
-                    type: this.getNoneNoticeType(),
-                });
+                if ((0, lodash_1.get)(where, 'type', '')) {
+                    qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
+                        status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'type'))
+                            ? (0, lodash_1.get)(where, 'type')
+                            : [(0, lodash_1.get)(where, 'type')],
+                    });
+                }
+                else {
+                    qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
+                        type: this.getNoneNoticeType(),
+                    });
+                }
             },
             relations: ['user', 'board', 'bscats'],
             take: take,
@@ -279,6 +288,7 @@ let BoardContentsService = class BoardContentsService {
         bc.writer = (0, lodash_1.get)(updateBoardContentDto, ['writer'], '');
         bc.title = (0, lodash_1.get)(updateBoardContentDto, ['title'], '');
         bc.link = (0, lodash_1.get)(updateBoardContentDto, ['link'], '');
+        bc.linkStatus = (0, lodash_1.get)(updateBoardContentDto, ['linkStatus'], '');
         bc.content = (0, lodash_1.get)(updateBoardContentDto, ['content'], '');
         const boardContent = await this.updateBoardContent(bc);
         if ((0, lodash_1.get)(updateBoardContentDto, ['category', 'length']) > 0) {

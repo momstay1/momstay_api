@@ -68,7 +68,8 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: "order", required: false }),
     (0, swagger_1.ApiQuery)({
         name: "search",
-        description: 'search=status:1,2,3<br>',
+        description: 'search=status:1,2,3<br>'
+            + 'search=type:1,2,3<br>',
         required: false
     }),
     __param(0, (0, common_1.Param)('bd_idx')),
