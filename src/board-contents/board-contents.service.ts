@@ -199,10 +199,18 @@ export class BoardContentsService {
             status: bcConstants.status.registration,
           });
         }
+        if (get(where, 'type', '')) {
+          qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
+            status: isArray(get(where, 'type'))
+              ? get(where, 'type')
+              : [get(where, 'type')],
+          });
+        } else {
+          qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
+            type: this.getNoneNoticeType(),
+          });
+        }
         // qb.andWhere('`BoardContentsEntity`.`status` = :status', { status: bcConstants.status.registration })
-        qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
-          type: this.getNoneNoticeType(),
-        });
       },
       relations: ['user', 'board', 'bscats'],
       take: take,
@@ -374,6 +382,7 @@ export class BoardContentsService {
     bc.writer = get(updateBoardContentDto, ['writer'], '');
     bc.title = get(updateBoardContentDto, ['title'], '');
     bc.link = get(updateBoardContentDto, ['link'], '');
+    bc.linkStatus = get(updateBoardContentDto, ['linkStatus'], '');
     bc.content = get(updateBoardContentDto, ['content'], '');
 
     // 게시글 저장
