@@ -54,7 +54,8 @@ export class BoardContentsController {
   @ApiQuery({ name: "order", required: false })
   @ApiQuery({
     name: "search",
-    description: 'search=status:1,2,3<br>',
+    description: 'search=status:1,2,3<br>'
+      + 'search=type:1,2,3<br>',
     required: false
   })
   async findCategoryAll(
