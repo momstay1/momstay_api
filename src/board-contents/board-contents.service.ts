@@ -433,7 +433,7 @@ export class BoardContentsService {
     });
 
     const where = commonUtils.searchSplit(search);
-    where['status'] = get(where, 'status', values(bcConstants.status));
+    where['status'] = get(where, 'status', this.getNoneDelStatus());
     console.log({ where });
 
     const alias = 'bc';
@@ -565,6 +565,16 @@ export class BoardContentsService {
     arr.push(bcConstants.type.link);
     arr.push(bcConstants.type.event);
     arr.push(bcConstants.type.new);
+    return arr;
+  }
+
+  // 삭제된 게시글 제외
+  getNoneDelStatus(): number[] {
+    const arr: number[] = [];
+    arr.push(bcConstants.status.uncertified);
+    arr.push(bcConstants.status.registration);
+    arr.push(bcConstants.status.answerWait);
+    arr.push(bcConstants.status.answerComplete);
     return arr;
   }
 
