@@ -144,7 +144,7 @@ let BoardContentsService = class BoardContentsService {
                 }
                 if ((0, lodash_1.get)(where, 'type', '')) {
                     qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
-                        status: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'type'))
+                        type: (0, lodash_1.isArray)((0, lodash_1.get)(where, 'type'))
                             ? (0, lodash_1.get)(where, 'type')
                             : [(0, lodash_1.get)(where, 'type')],
                     });
