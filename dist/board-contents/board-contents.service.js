@@ -314,7 +314,7 @@ let BoardContentsService = class BoardContentsService {
             where: { bcat_id: (0, typeorm_2.In)([category]) },
         });
         const where = common_utils_1.commonUtils.searchSplit(search);
-        where['status'] = (0, lodash_1.get)(where, 'status', (0, lodash_1.values)(constants_1.bcConstants.status));
+        where['status'] = (0, lodash_1.get)(where, 'status', this.getNoneDelStatus());
         console.log({ where });
         const alias = 'bc';
         let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
@@ -405,6 +405,14 @@ let BoardContentsService = class BoardContentsService {
         arr.push(constants_1.bcConstants.type.link);
         arr.push(constants_1.bcConstants.type.event);
         arr.push(constants_1.bcConstants.type.new);
+        return arr;
+    }
+    getNoneDelStatus() {
+        const arr = [];
+        arr.push(constants_1.bcConstants.status.uncertified);
+        arr.push(constants_1.bcConstants.status.registration);
+        arr.push(constants_1.bcConstants.status.answerWait);
+        arr.push(constants_1.bcConstants.status.answerComplete);
         return arr;
     }
     async createExcel(bd_idx, category, options, search, order) {

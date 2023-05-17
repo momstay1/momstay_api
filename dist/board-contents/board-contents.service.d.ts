@@ -48,6 +48,7 @@ export declare class BoardContentsService {
     private updateBoardContent;
     getPrivateColumn(): any[];
     getNoneNoticeType(): number[];
+    getNoneDelStatus(): number[];
     createExcel(bd_idx: any, category: string, options: PaginationOptions, search: string[], order: any): Promise<{
         file_name: string;
         file_path: string;
