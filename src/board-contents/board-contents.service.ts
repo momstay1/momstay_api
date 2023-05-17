@@ -201,7 +201,7 @@ export class BoardContentsService {
         }
         if (get(where, 'type', '')) {
           qb.andWhere('`BoardContentsEntity`.`type` IN (:type)', {
-            status: isArray(get(where, 'type'))
+            type: isArray(get(where, 'type'))
               ? get(where, 'type')
               : [get(where, 'type')],
           });
