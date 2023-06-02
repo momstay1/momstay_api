@@ -28,9 +28,8 @@ let OrderController = class OrderController {
     async create(user, createOrderDto, req) {
         return await this.orderService.create(user, createOrderDto, req);
     }
-    async iamportNoti(iamportNoti, req) {
-        console.log({ req });
-        console.log({ iamportNoti });
+    async iamportNoti(iamportNoti, req, res) {
+        await this.orderService.iamportNoti(iamportNoti, req, res);
     }
     async test(order_idx, price) {
     }
@@ -84,11 +83,12 @@ __decorate([
 ], OrderController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)('iamport/noti'),
-    (0, swagger_1.ApiOperation)({ summary: 'iamport 결제 후 콜백 API(작업중)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'iamport 결제 후 콜백(웹훅) API(작업중)' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], OrderController.prototype, "iamportNoti", null);
 __decorate([

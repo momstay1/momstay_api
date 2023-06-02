@@ -11,7 +11,7 @@ export declare class OrderController {
         po: import("../product-option/entities/product-option.entity").ProductOptionEntity;
         priceInfo: {};
     }>;
-    iamportNoti(iamportNoti: any, req: any): Promise<void>;
+    iamportNoti(iamportNoti: any, req: any, res: any): Promise<void>;
     test(order_idx: string, price: string): Promise<void>;
     guestFindAll(user: UsersEntity, take: number, page: number, search: string[], order: string): Promise<{
         data: import("../paginate").Pagination<import("./entities/order.entity").OrderEntity>;

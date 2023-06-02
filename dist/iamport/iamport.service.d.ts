@@ -6,4 +6,5 @@ export declare class IamportService {
     delCertification(imp_uid: string): Promise<any>;
     getPaymentByImpUid(imp_uid: string): Promise<any>;
     paymentCancel(imp_uid: string, cancelPrice: number, reason: string): Promise<any>;
+    iamportIPVerification(req_ip: string): Promise<boolean>;
 }

@@ -37,6 +37,7 @@ export declare class OrderService {
         po: import("../product-option/entities/product-option.entity").ProductOptionEntity;
         priceInfo: {};
     }>;
+    iamportNoti(iamportNoti: any, req: any, res: any): Promise<void>;
     ordCreateCode(): Promise<string>;
     adminFindAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<OrderEntity>;
@@ -57,6 +58,7 @@ export declare class OrderService {
         order: OrderEntity;
     }>;
     findOneIdx(idx: number): Promise<OrderEntity>;
+    findOneCode(code: string): Promise<OrderEntity>;
     findOneCodeByNonmember(code: string): Promise<{
         order: OrderEntity;
     }>;

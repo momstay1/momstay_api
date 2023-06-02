@@ -139,6 +139,12 @@ let OrderService = class OrderService {
         await this.guestOrderMail(order.idx, '');
         return { order, orderProduct, po, priceInfo };
     }
+    async iamportNoti(iamportNoti, req, res) {
+        console.log('req.body: ', req.body);
+        console.log('req.ip: ', req.ip);
+        console.log({ iamportNoti });
+        res.send({ status: "success", message: "일반 결제 성공" });
+    }
     async ordCreateCode() {
         const code = moment().format('YYMMDD') + common_utils_1.commonUtils.createCode().toUpperCase();
         const isCode = await this.orderRepository.findOne({
@@ -478,6 +484,27 @@ let OrderService = class OrderService {
         }
         const order = await this.orderRepository.findOne({
             where: { idx: idx },
+            relations: [
+                'user',
+                'user.device',
+                'orderProduct',
+                'orderProduct.productOption',
+                'orderProduct.productOption.product',
+                'orderProduct.productOption.product.user',
+                'orderProduct.productOption.product.user.device',
+            ],
+        });
+        if (!(0, lodash_1.get)(order, 'idx', '')) {
+            throw new common_1.NotFoundException('order.service.findOneIdx: 정보를 찾을 수 없습니다.');
+        }
+        return order;
+    }
+    async findOneCode(code) {
+        if (!code) {
+            throw new common_1.NotFoundException('order.service.findOneCode: 잘못된 정보 입니다.');
+        }
+        const order = await this.orderRepository.findOne({
+            where: { code: code },
             relations: [
                 'user',
                 'user.device',

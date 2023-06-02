@@ -127,6 +127,10 @@ let IamportService = class IamportService {
         console.log({ payment });
         return payment;
     }
+    async iamportIPVerification(req_ip) {
+        const iamport_ip = ['52.78.100.19', '52.78.48.223', '52.78.5.241'];
+        return iamport_ip.includes(req_ip);
+    }
 };
 IamportService = __decorate([
     (0, common_1.Injectable)(),
