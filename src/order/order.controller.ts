@@ -9,6 +9,7 @@ import {
   Req,
   Query,
   HttpCode,
+  Res,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -26,7 +27,7 @@ import { UsersEntity } from 'src/users/entities/user.entity';
 @Controller('order')
 @ApiTags('주문 API')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   @ApiOperation({
@@ -50,11 +51,9 @@ export class OrderController {
 
   // 실제 아임포트 콜백 노티 데이터 확인 후 작업
   @Post('iamport/noti')
-  @ApiOperation({ summary: 'iamport 결제 후 콜백 API(작업중)' })
-  async iamportNoti(@Body() iamportNoti, @Req() req) {
-    console.log({ req });
-    console.log({ iamportNoti });
-    // return await this.orderService.create(createOrderDto, req);
+  @ApiOperation({ summary: 'iamport 결제 후 콜백(웹훅) API(작업중)' })
+  async iamportNoti(@Body() iamportNoti, @Req() req, @Res() res) {
+    await this.orderService.iamportNoti(iamportNoti, req, res);
   }
 
   @Get('test')

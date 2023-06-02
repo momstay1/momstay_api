@@ -141,4 +141,11 @@ export class IamportService {
     return payment;
   }
 
+  async iamportIPVerification(req_ip: string) {
+    // 아임포트 아이피
+    const iamport_ip = ['52.78.100.19', '52.78.48.223', '52.78.5.241'];
+
+    return iamport_ip.includes(req_ip);
+  }
+
 }
