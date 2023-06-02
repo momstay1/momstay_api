@@ -129,6 +129,7 @@ export class OrderService {
         }
         // 주문 검증
         const pg_data = await this.orderVerification(createOrderDto);
+        console.log({ pg_data });
         // pg data 저장
         await this.pgDataService.create(order['code'], pg_data);
 
@@ -181,11 +182,102 @@ export class OrderService {
 
   async iamportNoti(iamportNoti, req, res) {
     // 데이터 확인 로그
-    console.log('req.body: ', req.body);
-    console.log('req.ip: ', req.ip);
     console.log({ iamportNoti });
-    res.send({ status: "success", message: "일반 결제 성공" });
+    try {
+      // iamportNoti
+      // imp_uid: 결제 번호
+      // merchant_uid: 주문번호
+      // status: 결제 결과
+      // status: paid // 결제가 승인되었을 때 or 가상계좌에 결제 금액이 입금되었을 때
+      // status: ready // 가상계좌가 발급되었을 때
+      // status: cancelled // 관리자 콘솔에서 결제 취소 되었을 때
 
+      // 아임포트 웹훅 검증 (요청한 아이피로 검증)
+      if (!this.iamportService.iamportIPVerification(req.ip)) {
+        res.send({ status: "forgery", message: "위조된 결제시도" });
+        throw new BadRequestException(
+          'order.service.iamportNoti: 잘못된 요청입니다.',
+        );
+      }
+
+      // iamport(portone) 결제 정보 조회
+      const { response } = await this.iamportService.getPaymentByImpUid(iamportNoti.imp_uid);
+
+      // 상태 cancelled 인 경우 결제 취소
+      if (iamportNoti.status == 'cancelled') {
+        const message = '포트원(구 아임포트) 관리자 콘솔에서 주문 취소';
+        // 주문 취소 처리
+        await this.iamportService.paymentCancel(
+          iamportNoti.imp_uid,
+          response.amount,
+          message,
+        );
+      } else {
+        if (iamportNoti.status == 'ready') {
+          // 가상계좌 발급 안내 처리
+
+          // 가상계좌 문자 발송
+          res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
+        } else if (iamportNoti.status == 'paid') {
+          // DB 결제 정보 조회
+          const order = await this.findOneCode(iamportNoti.merchant_uid);
+
+          if (order.imp_uid != iamportNoti.imp_uid) {
+            res.send({ status: "forgery", message: "위조된 결제시도" });
+            throw new BadRequestException(
+              'order.service.iamportNoti: 잘못된 요청입니다.',
+            );
+          }
+          // 결제 검증
+          const pg_data = await this.orderVerification(order);
+          // 결제 시간
+          order.paiedAt = moment(pg_data['paid_at']).format(
+            'YYYY-MM-DD HH:mm:ss',
+          );
+
+          await this.paymentProcessing(order);
+          // 결제 완료 처리
+          res.send({ status: "success", message: "일반 결제 성공" });
+        }
+      }
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  }
+
+  async paymentProcessing(order_data: OrderEntity) {
+
+    // 상품 및 옵션 정보 가져오기
+    const po = await this.productOptionService.findIdx(
+      order_data.orderProduct[0].productOption.idx,
+    );
+
+    // if (order_data?.user?.idx) {
+    //   // 회원 주문인 경우 회원 정보 가져오기
+    //   order_data['user'] = await this.userService.findId(order_data.user.idx);
+    // }
+
+    // 주문 수량 체크 기능 필요 (맘스테이는 필요 없음)
+
+    const orderEntity = await this.orderRepository.create(order_data);
+    let order = await this.orderRepository.save(orderEntity);
+    order = await this.findOneIdx(order.idx);
+
+    // 주문 상품 설정 기능 작업중
+    // 추후 주문 상품을 배열로 전달 (한 주문에 여러 주문 상품을 처리하는 경우에 작업 필요)
+    const { orderProduct } =
+      await this.orderProductService.createOrderProduct(
+        order,
+        po,
+        {
+          orderProductIdx: order_data.orderProduct[0].idx,
+          startAt: order_data.orderProduct[0].startAt,
+          endAt: order_data.orderProduct[0].endAt,
+        },
+      );
+    // total 주문 설정 기능 필요
+    // 주문 상품 배열 처리시 total 주문 정보는 주문 상품의 총합으로 처리 필요
+    await this.ordertotalService.orderTotalCreate(order, orderProduct);
   }
 
   async ordCreateCode() {
@@ -1181,7 +1273,7 @@ export class OrderService {
   }
 
   // 주문 검증
-  async orderVerification(createOrderDto: CreateOrderDto) {
+  async orderVerification(createOrderDto: CreateOrderDto | OrderEntity) {
     const { response } = await this.iamportService.getPaymentByImpUid(
       createOrderDto['imp_uid'],
     );
