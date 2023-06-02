@@ -38,6 +38,7 @@ export declare class OrderService {
         priceInfo: {};
     }>;
     iamportNoti(iamportNoti: any, req: any, res: any): Promise<void>;
+    paymentProcessing(order_data: OrderEntity): Promise<void>;
     ordCreateCode(): Promise<string>;
     adminFindAll(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{
         data: Pagination<OrderEntity>;
@@ -92,7 +93,7 @@ export declare class OrderService {
     guestOrderMail(ordIdx: any, cancelReason: string): Promise<void>;
     hostOrderMail(orderMailSendInfo: any, cancelReason: string): Promise<void>;
     adminOrderMail(orderMailSendInfo: any, cancelReason: string): Promise<void>;
-    orderVerification(createOrderDto: CreateOrderDto): Promise<any>;
+    orderVerification(createOrderDto: CreateOrderDto | OrderEntity): Promise<any>;
     dashboard(month: string): Promise<any>;
     createExcel(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{
         file_name: string;

@@ -121,6 +121,7 @@ let OrderService = class OrderService {
                     throw new common_1.NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
                 }
                 const pg_data = await this.orderVerification(createOrderDto);
+                console.log({ pg_data });
                 await this.pgDataService.create(order['code'], pg_data);
                 ord_data['paiedAt'] = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss');
             }
@@ -140,10 +141,49 @@ let OrderService = class OrderService {
         return { order, orderProduct, po, priceInfo };
     }
     async iamportNoti(iamportNoti, req, res) {
-        console.log('req.body: ', req.body);
-        console.log('req.ip: ', req.ip);
         console.log({ iamportNoti });
-        res.send({ status: "success", message: "일반 결제 성공" });
+        try {
+            if (!this.iamportService.iamportIPVerification(req.ip)) {
+                res.send({ status: "forgery", message: "위조된 결제시도" });
+                throw new common_1.BadRequestException('order.service.iamportNoti: 잘못된 요청입니다.');
+            }
+            const { response } = await this.iamportService.getPaymentByImpUid(iamportNoti.imp_uid);
+            if (iamportNoti.status == 'cancelled') {
+                const message = '포트원(구 아임포트) 관리자 콘솔에서 주문 취소';
+                await this.iamportService.paymentCancel(iamportNoti.imp_uid, response.amount, message);
+            }
+            else {
+                if (iamportNoti.status == 'ready') {
+                    res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
+                }
+                else if (iamportNoti.status == 'paid') {
+                    const order = await this.findOneCode(iamportNoti.merchant_uid);
+                    if (order.imp_uid != iamportNoti.imp_uid) {
+                        res.send({ status: "forgery", message: "위조된 결제시도" });
+                        throw new common_1.BadRequestException('order.service.iamportNoti: 잘못된 요청입니다.');
+                    }
+                    const pg_data = await this.orderVerification(order);
+                    order.paiedAt = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss');
+                    await this.paymentProcessing(order);
+                    res.send({ status: "success", message: "일반 결제 성공" });
+                }
+            }
+        }
+        catch (error) {
+            res.status(400).send(error);
+        }
+    }
+    async paymentProcessing(order_data) {
+        const po = await this.productOptionService.findIdx(order_data.orderProduct[0].productOption.idx);
+        const orderEntity = await this.orderRepository.create(order_data);
+        let order = await this.orderRepository.save(orderEntity);
+        order = await this.findOneIdx(order.idx);
+        const { orderProduct } = await this.orderProductService.createOrderProduct(order, po, {
+            orderProductIdx: order_data.orderProduct[0].idx,
+            startAt: order_data.orderProduct[0].startAt,
+            endAt: order_data.orderProduct[0].endAt,
+        });
+        await this.ordertotalService.orderTotalCreate(order, orderProduct);
     }
     async ordCreateCode() {
         const code = moment().format('YYMMDD') + common_utils_1.commonUtils.createCode().toUpperCase();
