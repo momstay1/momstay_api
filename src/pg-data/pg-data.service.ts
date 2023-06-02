@@ -16,8 +16,9 @@ export class PgDataService {
     createPgData['productCode'] = ord_code;
 
     const pg_data = await this.pgDataRepository.create(createPgData);
+    console.log({ pg_data });
     const pg = await this.pgDataRepository.save(pg_data);
-
+    console.log({ pg });
     return pg;
   }
 
