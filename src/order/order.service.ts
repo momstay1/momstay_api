@@ -179,6 +179,15 @@ export class OrderService {
     return { order, orderProduct, po, priceInfo };
   }
 
+  async iamportNoti(iamportNoti, req, res) {
+    // 데이터 확인 로그
+    console.log('req.body: ', req.body);
+    console.log('req.ip: ', req.ip);
+    console.log({ iamportNoti });
+    res.send({ status: "success", message: "일반 결제 성공" });
+
+  }
+
   async ordCreateCode() {
     const code =
       moment().format('YYMMDD') + commonUtils.createCode().toUpperCase();
@@ -607,6 +616,33 @@ export class OrderService {
     }
     const order = await this.orderRepository.findOne({
       where: { idx: idx },
+      relations: [
+        'user',
+        'user.device',
+        'orderProduct',
+        'orderProduct.productOption',
+        'orderProduct.productOption.product',
+        'orderProduct.productOption.product.user',
+        'orderProduct.productOption.product.user.device',
+      ],
+    });
+    if (!get(order, 'idx', '')) {
+      throw new NotFoundException(
+        'order.service.findOneIdx: 정보를 찾을 수 없습니다.',
+      );
+    }
+
+    return order;
+  }
+
+  async findOneCode(code: string) {
+    if (!code) {
+      throw new NotFoundException(
+        'order.service.findOneCode: 잘못된 정보 입니다.',
+      );
+    }
+    const order = await this.orderRepository.findOne({
+      where: { code: code },
       relations: [
         'user',
         'user.device',
