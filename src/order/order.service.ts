@@ -27,6 +27,7 @@ import * as moment from 'moment';
 import { SettingsService } from 'src/settings/settings.service';
 import { EmailService } from 'src/email/email.service';
 
+let order_status;
 @Injectable()
 export class OrderService {
   constructor(
@@ -44,7 +45,9 @@ export class OrderService {
     private readonly settingsService: SettingsService,
     private readonly excelService: ExcelService,
     private readonly emailService: EmailService,
-  ) { }
+  ) {
+    order_status = commonUtils.getStatus('order_status');
+  }
 
   async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
     const ord_data = {};
@@ -118,6 +121,10 @@ export class OrderService {
           'order.service.create: 이미 처리된 주문입니다.',
         );
       }
+      console.log(createOrderDto['status']);
+      console.log(order['paiedAt']);
+      console.log(('' + order['paiedAt']).split(' '));
+      console.log(('' + order['paiedAt']).split(' ')[0]);
       if (
         createOrderDto['status'] == 2 &&
         ('' + order['paiedAt']).split(' ')[0] == '0000-00-00'
@@ -202,16 +209,14 @@ export class OrderService {
 
       // iamport(portone) 결제 정보 조회
       const { response } = await this.iamportService.getPaymentByImpUid(iamportNoti.imp_uid);
+      // DB 결제 정보 조회
+      const order = await this.findOneCode(iamportNoti.merchant_uid);
 
       // 상태 cancelled 인 경우 결제 취소
       if (iamportNoti.status == 'cancelled') {
-        const message = '포트원(구 아임포트) 관리자 콘솔에서 주문 취소';
-        // 주문 취소 처리
-        await this.iamportService.paymentCancel(
-          iamportNoti.imp_uid,
-          response.amount,
-          message,
-        );
+        const message = '관리자 콘솔에서 주문 취소';
+        // 취소 처리
+        await this.cancelProcess(order, message);
       } else {
         if (iamportNoti.status == 'ready') {
           // 가상계좌 발급 안내 처리
@@ -219,8 +224,6 @@ export class OrderService {
           // 가상계좌 문자 발송
           res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
         } else if (iamportNoti.status == 'paid') {
-          // DB 결제 정보 조회
-          const order = await this.findOneCode(iamportNoti.merchant_uid);
 
           if (order.imp_uid != iamportNoti.imp_uid) {
             res.send({ status: "forgery", message: "위조된 결제시도" });
@@ -867,7 +870,7 @@ export class OrderService {
       const userIdx = get(order, ['orderProduct', 0, 'productOption', 'product', 'user', 'idx'], '');
       if (userIdx != user.idx) {
         throw new NotFoundException(
-          'order.service.hostOrderCancel: 권한이 없습니다.',
+          'order.service.hostOrderApproval: 권한이 없습니다.',
         );
       }
     }
