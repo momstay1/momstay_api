@@ -32,6 +32,7 @@ const push_notification_service_1 = require("../push-notification/push-notificat
 const moment = require("moment");
 const settings_service_1 = require("../settings/settings.service");
 const email_service_1 = require("../email/email.service");
+let order_status;
 let OrderService = class OrderService {
     constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService, settingsService, excelService, emailService) {
         this.orderRepository = orderRepository;
@@ -47,6 +48,7 @@ let OrderService = class OrderService {
         this.settingsService = settingsService;
         this.excelService = excelService;
         this.emailService = emailService;
+        order_status = common_utils_1.commonUtils.getStatus('order_status');
     }
     async create(userInfo, createOrderDto, req) {
         const ord_data = {};
@@ -115,6 +117,10 @@ let OrderService = class OrderService {
             if (order['status'] >= 1) {
                 throw new common_1.BadRequestException('order.service.create: 이미 처리된 주문입니다.');
             }
+            console.log(createOrderDto['status']);
+            console.log(order['paiedAt']);
+            console.log(('' + order['paiedAt']).split(' '));
+            console.log(('' + order['paiedAt']).split(' ')[0]);
             if (createOrderDto['status'] == 2 &&
                 ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
                 if (!(0, lodash_1.get)(createOrderDto, 'imp_uid', '')) {
@@ -148,16 +154,16 @@ let OrderService = class OrderService {
                 throw new common_1.BadRequestException('order.service.iamportNoti: 잘못된 요청입니다.');
             }
             const { response } = await this.iamportService.getPaymentByImpUid(iamportNoti.imp_uid);
+            const order = await this.findOneCode(iamportNoti.merchant_uid);
             if (iamportNoti.status == 'cancelled') {
-                const message = '포트원(구 아임포트) 관리자 콘솔에서 주문 취소';
-                await this.iamportService.paymentCancel(iamportNoti.imp_uid, response.amount, message);
+                const message = '관리자 콘솔에서 주문 취소';
+                await this.cancelProcess(order, message);
             }
             else {
                 if (iamportNoti.status == 'ready') {
                     res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
                 }
                 else if (iamportNoti.status == 'paid') {
-                    const order = await this.findOneCode(iamportNoti.merchant_uid);
                     if (order.imp_uid != iamportNoti.imp_uid) {
                         res.send({ status: "forgery", message: "위조된 결제시도" });
                         throw new common_1.BadRequestException('order.service.iamportNoti: 잘못된 요청입니다.');
@@ -639,7 +645,7 @@ let OrderService = class OrderService {
         if (['host'].includes(user.group.id)) {
             const userIdx = (0, lodash_1.get)(order, ['orderProduct', 0, 'productOption', 'product', 'user', 'idx'], '');
             if (userIdx != user.idx) {
-                throw new common_1.NotFoundException('order.service.hostOrderCancel: 권한이 없습니다.');
+                throw new common_1.NotFoundException('order.service.hostOrderApproval: 권한이 없습니다.');
             }
         }
         if (!(0, lodash_1.get)(order, 'idx', '')) {
