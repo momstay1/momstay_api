@@ -155,7 +155,7 @@ let OrderService = class OrderService {
             const order = await this.findOneCode(iamportNoti.merchant_uid);
             if (iamportNoti.status == 'cancelled') {
                 const message = '관리자 콘솔에서 주문 취소';
-                await this.cancelProcess(order, message);
+                await this.cancelProcess(order, message, 'portone');
             }
             else {
                 if (iamportNoti.status == 'ready') {
@@ -712,7 +712,7 @@ let OrderService = class OrderService {
         }
         await this.cancelProcess(order, cancelReason);
     }
-    async cancelProcess(order, cancelReason) {
+    async cancelProcess(order, cancelReason, portone) {
         const cancel_status = common_utils_1.commonUtils.getStatus([
             'order_status',
             'cancellationCompleted',
@@ -726,7 +726,7 @@ let OrderService = class OrderService {
         const cancelPriceEng = (0, lodash_1.reduce)(order.orderProduct, (o, o1) => {
             return o + +o1['payPriceEng'];
         }, 0);
-        if (order['imp_uid']) {
+        if (order['imp_uid'] && !portone) {
             const price = cancelPrice > 0 ? cancelPrice : cancelPriceEng;
             await this.iamportService.paymentCancel(order['imp_uid'], price, cancelReason);
         }
