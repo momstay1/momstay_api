@@ -108,6 +108,7 @@ let OrderService = class OrderService {
             ord_data['code'] = await this.ordCreateCode();
             ord_data['userAgent'] = req.get('user-agent');
             ord_data['pc_mobile'] = common_utils_1.commonUtils.isMobile(createOrderDto['userAgent']);
+            ord_data['paiedAt'] = '0000-00-00 00:00:00';
         }
         else {
             ord_data['idx'] = createOrderDto['idx'];
@@ -126,7 +127,7 @@ let OrderService = class OrderService {
                 if (!(0, lodash_1.get)(createOrderDto, 'imp_uid', '')) {
                     throw new common_1.NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
                 }
-                const pg_data = await this.orderVerification(createOrderDto);
+                const pg_data = await this.orderVerification(order);
                 console.log({ pg_data });
                 await this.pgDataService.create(order['code'], pg_data);
                 ord_data['paiedAt'] = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss');
@@ -163,7 +164,9 @@ let OrderService = class OrderService {
                 if (iamportNoti.status == 'ready') {
                     res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
                 }
-                else if (iamportNoti.status == 'paid') {
+                else if (iamportNoti.status == 'paid'
+                    && order['status'] == 2
+                    && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
                     if (order.imp_uid != iamportNoti.imp_uid) {
                         res.send({ status: "forgery", message: "위조된 결제시도" });
                         throw new common_1.BadRequestException('order.service.iamportNoti: 잘못된 요청입니다.');
@@ -886,15 +889,20 @@ let OrderService = class OrderService {
             }
         }
     }
-    async orderVerification(createOrderDto) {
-        const { response } = await this.iamportService.getPaymentByImpUid(createOrderDto['imp_uid']);
+    async orderVerification(orderInfo) {
+        const { response } = await this.iamportService.getPaymentByImpUid(orderInfo['imp_uid']);
+        console.log('주문 검증 함수 orderVerification: ', { orderInfo });
+        const order = await this.findOneCode(orderInfo.code);
         const result = { status: true, message: '' };
-        if (response['amount'] != createOrderDto['price']) {
+        console.log('주문금액(원): ', order.orderProduct[0].payPrice);
+        console.log('주문금액(달러): ', order.orderProduct[0].payPriceEng);
+        if (response['amount'] != order.orderProduct[0].payPrice
+            && response['amount'] != order.orderProduct[0].payPriceEng) {
             result['status'] = false;
             result['message'] = '실 결제 정보와 다름';
         }
         if (!result['status']) {
-            await this.iamportService.paymentCancel(createOrderDto['imp_uid'], response['amount'], result['message']);
+            await this.cancelProcess(order, result['message']);
             throw new common_1.NotAcceptableException('order.service.orderVerification: ' + result['message']);
         }
         return response;

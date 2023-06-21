@@ -62,11 +62,11 @@ let UsersService = class UsersService {
                 this.emailService.sendMail(email, 'momstay - Email Authentication', `Please enter your email verification code below.
           <br><br>
           Email authentication code : ${code.toUpperCase()}`);
-                result['message'] = '인증 코드 메일 발송 완료';
+                result['message'] = 'Authentication code mail sent complete';
             }
             else {
                 result['status'] = false;
-                result['message'] = '인증 코드 메일 발송 실패';
+                result['message'] = 'Authentication code mail sending failed';
             }
         }
         catch (error) {
@@ -75,11 +75,11 @@ let UsersService = class UsersService {
                 this.emailService.sendMail(email, 'momstay - Email Authentication', `Please enter the email authentication code below to register as a member.
           <br><br>
           Email authentication code : ${code.toUpperCase()}`);
-                result['message'] = '인증 코드 메일 발송 완료';
+                result['message'] = 'Authentication code mail sent complete';
             }
             else {
                 result['status'] = false;
-                result['message'] = '존재하지 않는 이메일';
+                result['message'] = 'non-existent email';
             }
         }
         return { result };

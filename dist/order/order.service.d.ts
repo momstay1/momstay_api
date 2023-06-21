@@ -93,7 +93,7 @@ export declare class OrderService {
     guestOrderMail(ordIdx: any, cancelReason: string): Promise<void>;
     hostOrderMail(orderMailSendInfo: any, cancelReason: string): Promise<void>;
     adminOrderMail(orderMailSendInfo: any, cancelReason: string): Promise<void>;
-    orderVerification(createOrderDto: CreateOrderDto | OrderEntity): Promise<any>;
+    orderVerification(orderInfo: OrderEntity): Promise<any>;
     dashboard(month: string): Promise<any>;
     createExcel(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{
         file_name: string;
