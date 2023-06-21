@@ -111,7 +111,7 @@ export class OrderService {
       ord_data['code'] = await this.ordCreateCode();
       ord_data['userAgent'] = req.get('user-agent');
       ord_data['pc_mobile'] = commonUtils.isMobile(createOrderDto['userAgent']);
-      ord_data['paiedAt'] = '0000-00-00 00:00:00';
+      ord_data['paiedAt'] = null;
     } else {
       ord_data['idx'] = createOrderDto['idx'];
       const order = await this.orderRepository.findOne({
@@ -122,13 +122,9 @@ export class OrderService {
           'order.service.create: 이미 처리된 주문입니다.',
         );
       }
-      console.log(createOrderDto['status']);
-      console.log(order['paiedAt']);
-      console.log(('' + order['paiedAt']).split(' '));
-      console.log(('' + order['paiedAt']).split(' ')[0]);
       if (
         createOrderDto['status'] == 2 &&
-        ('' + order['paiedAt']).split(' ')[0] == '0000-00-00'
+        order['paiedAt'] == null
       ) {
         if (!get(createOrderDto, 'imp_uid', '')) {
           throw new NotFoundException(
@@ -159,7 +155,8 @@ export class OrderService {
     ord_data['user'] = await this.userService.findId(get(userInfo, 'id'));
 
     // 주문 수량 체크 기능 필요 (맘스테이는 필요 없음)
-
+    console.log({ ord_data });
+    console.log(ord_data['paiedAt']);
     const orderEntity = await this.orderRepository.create(ord_data);
     let order = await this.orderRepository.save(orderEntity);
     order = await this.findOneIdx(order['idx']);
@@ -227,7 +224,7 @@ export class OrderService {
         } else if (
           iamportNoti.status == 'paid'
           && order['status'] == 2
-          && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00'
+          && order['paiedAt'] == null
         ) {
 
           if (order.imp_uid != iamportNoti.imp_uid) {
