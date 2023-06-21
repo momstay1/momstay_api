@@ -140,7 +140,7 @@ __decorate([
     __metadata("design:type", String)
 ], OrderEntity.prototype, "userAgent", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'datetime', default: '0' }),
+    (0, typeorm_1.Column)({ type: 'datetime', default: null, nullable: true }),
     __metadata("design:type", Object)
 ], OrderEntity.prototype, "paiedAt", void 0);
 __decorate([
