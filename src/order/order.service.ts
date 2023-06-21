@@ -133,7 +133,7 @@ export class OrderService {
         const pg_data = await this.orderVerification(order);
         console.log({ pg_data });
         // pg data 저장
-        await this.pgDataService.create(order['code'], pg_data);
+        // await this.pgDataService.create(order['code'], pg_data);
 
         // 결제 시간
         ord_data['paiedAt'] = moment(pg_data['paid_at']).format(
