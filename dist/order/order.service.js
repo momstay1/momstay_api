@@ -122,6 +122,7 @@ let OrderService = class OrderService {
                 if (!(0, lodash_1.get)(createOrderDto, 'imp_uid', '')) {
                     throw new common_1.NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
                 }
+                order['imp_uid'] = createOrderDto.imp_uid;
                 const pg_data = await this.orderVerification(order);
                 console.log({ pg_data });
                 await this.pgDataService.create(order['code'], pg_data);
