@@ -129,6 +129,7 @@ export class OrderService {
           );
         }
         // 주문 검증
+        order['imp_uid'] = createOrderDto.imp_uid;
         const pg_data = await this.orderVerification(order);
         console.log({ pg_data });
         // pg data 저장
