@@ -111,6 +111,7 @@ export class OrderService {
       ord_data['code'] = await this.ordCreateCode();
       ord_data['userAgent'] = req.get('user-agent');
       ord_data['pc_mobile'] = commonUtils.isMobile(createOrderDto['userAgent']);
+      ord_data['paiedAt'] = '0000-00-00 00:00:00';
     } else {
       ord_data['idx'] = createOrderDto['idx'];
       const order = await this.orderRepository.findOne({
@@ -135,7 +136,7 @@ export class OrderService {
           );
         }
         // 주문 검증
-        const pg_data = await this.orderVerification(createOrderDto);
+        const pg_data = await this.orderVerification(order);
         console.log({ pg_data });
         // pg data 저장
         await this.pgDataService.create(order['code'], pg_data);
@@ -223,7 +224,11 @@ export class OrderService {
 
           // 가상계좌 문자 발송
           res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
-        } else if (iamportNoti.status == 'paid') {
+        } else if (
+          iamportNoti.status == 'paid'
+          && order['status'] == 2
+          && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00'
+        ) {
 
           if (order.imp_uid != iamportNoti.imp_uid) {
             res.send({ status: "forgery", message: "위조된 결제시도" });
@@ -1276,24 +1281,33 @@ export class OrderService {
   }
 
   // 주문 검증
-  async orderVerification(createOrderDto: CreateOrderDto | OrderEntity) {
+  async orderVerification(orderInfo: OrderEntity) {
     const { response } = await this.iamportService.getPaymentByImpUid(
-      createOrderDto['imp_uid'],
+      orderInfo['imp_uid'],
     );
-    const result = { status: true, message: '' };
 
+    console.log('주문 검증 함수 orderVerification: ', { orderInfo });
+    const order = await this.findOneCode(orderInfo.code);
+    const result = { status: true, message: '' };
+    console.log('주문금액(원): ', order.orderProduct[0].payPrice);
+    console.log('주문금액(달러): ', order.orderProduct[0].payPriceEng);
+    // 결제 금액 계산후 비교
     // 결제 금액과 DB에 저장될 금액이 동일한지 체크
-    if (response['amount'] != createOrderDto['price']) {
+    if (
+      response['amount'] != order.orderProduct[0].payPrice
+      && response['amount'] != order.orderProduct[0].payPriceEng
+    ) {
       result['status'] = false;
       result['message'] = '실 결제 정보와 다름';
     }
 
     if (!result['status']) {
-      await this.iamportService.paymentCancel(
-        createOrderDto['imp_uid'],
-        response['amount'],
-        result['message'],
-      );
+      await this.cancelProcess(order, result['message']);
+      // await this.iamportService.paymentCancel(
+      //   orderInfo['imp_uid'],
+      //   response['amount'],
+      //   result['message'],
+      // );
       throw new NotAcceptableException(
         'order.service.orderVerification: ' + result['message'],
       );
