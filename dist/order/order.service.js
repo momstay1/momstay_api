@@ -125,7 +125,6 @@ let OrderService = class OrderService {
                 order['imp_uid'] = createOrderDto.imp_uid;
                 const pg_data = await this.orderVerification(order);
                 console.log({ pg_data });
-                await this.pgDataService.create(order['code'], pg_data);
                 ord_data['paiedAt'] = moment(pg_data['paid_at']).format('YYYY-MM-DD HH:mm:ss');
             }
         }
