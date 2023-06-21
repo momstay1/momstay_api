@@ -212,7 +212,7 @@ export class OrderService {
       if (iamportNoti.status == 'cancelled') {
         const message = '관리자 콘솔에서 주문 취소';
         // 취소 처리
-        await this.cancelProcess(order, message);
+        await this.cancelProcess(order, message, 'portone');
       } else {
         if (iamportNoti.status == 'ready') {
           // 가상계좌 발급 안내 처리
@@ -981,7 +981,7 @@ export class OrderService {
   }
 
   // 취소 처리
-  async cancelProcess(order, cancelReason) {
+  async cancelProcess(order, cancelReason, portone?) {
     // 취소완료 상태 (8)
     const cancel_status = commonUtils.getStatus([
       'order_status',
@@ -1011,7 +1011,7 @@ export class OrderService {
 
     // 결제 내역 취소
     // 결제 금액 0원 설정시 전액 취소
-    if (order['imp_uid']) {
+    if (order['imp_uid'] && !portone) {
       const price = cancelPrice > 0 ? cancelPrice : cancelPriceEng;
       await this.iamportService.paymentCancel(
         order['imp_uid'],
