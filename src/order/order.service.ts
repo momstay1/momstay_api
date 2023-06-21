@@ -111,7 +111,7 @@ export class OrderService {
       ord_data['code'] = await this.ordCreateCode();
       ord_data['userAgent'] = req.get('user-agent');
       ord_data['pc_mobile'] = commonUtils.isMobile(createOrderDto['userAgent']);
-      ord_data['paiedAt'] = null;
+      ord_data['paiedAt'] = '';
     } else {
       ord_data['idx'] = createOrderDto['idx'];
       const order = await this.orderRepository.findOne({
@@ -122,10 +122,7 @@ export class OrderService {
           'order.service.create: 이미 처리된 주문입니다.',
         );
       }
-      if (
-        createOrderDto['status'] == 2 &&
-        order['paiedAt'] == null
-      ) {
+      if (createOrderDto['status'] == 2 && order['paiedAt'] == '') {
         if (!get(createOrderDto, 'imp_uid', '')) {
           throw new NotFoundException(
             'order.service.create: imp_uid 정보가 없습니다.',
@@ -221,11 +218,7 @@ export class OrderService {
 
           // 가상계좌 문자 발송
           res.send({ status: "vbankIssued", message: "가상계좌 발급 성공" });
-        } else if (
-          iamportNoti.status == 'paid'
-          && order['status'] == 2
-          && order['paiedAt'] == null
-        ) {
+        } else if (iamportNoti.status == 'paid' && order['status'] == 2 && order['paiedAt'] == '') {
 
           if (order.imp_uid != iamportNoti.imp_uid) {
             res.send({ status: "forgery", message: "위조된 결제시도" });
