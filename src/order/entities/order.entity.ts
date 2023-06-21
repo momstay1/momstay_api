@@ -81,7 +81,7 @@ export class OrderEntity {
   @Column({ type: 'text', default: '' })
   userAgent: string;
 
-  @Column({ type: 'datetime', default: null, nullable: true })
+  @Column({ type: 'datetime', default: '', nullable: true })
   paiedAt: Date | string;
   @CreateDateColumn()
   createdAt: Date;
