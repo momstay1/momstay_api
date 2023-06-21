@@ -64,11 +64,11 @@ export class UsersService {
           <br><br>
           Email authentication code : ${code.toUpperCase()}`,
         );
-        result['message'] = '인증 코드 메일 발송 완료';
+        result['message'] = 'Authentication code mail sent complete';
       } else {
         // 회원가입 인증코드 발송 실패
         result['status'] = false;
-        result['message'] = '인증 코드 메일 발송 실패';
+        result['message'] = 'Authentication code mail sending failed';
       }
     } catch (error) {
       if (type == 'sign') {
@@ -81,11 +81,11 @@ export class UsersService {
           <br><br>
           Email authentication code : ${code.toUpperCase()}`,
         );
-        result['message'] = '인증 코드 메일 발송 완료';
+        result['message'] = 'Authentication code mail sent complete';
       } else {
         // 비밀번호 재설정 인증코드 발송 실패
         result['status'] = false;
-        result['message'] = '존재하지 않는 이메일';
+        result['message'] = 'non-existent email';
       }
     }
 
