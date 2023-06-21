@@ -108,7 +108,7 @@ let OrderService = class OrderService {
             ord_data['code'] = await this.ordCreateCode();
             ord_data['userAgent'] = req.get('user-agent');
             ord_data['pc_mobile'] = common_utils_1.commonUtils.isMobile(createOrderDto['userAgent']);
-            ord_data['paiedAt'] = '0000-00-00 00:00:00';
+            ord_data['paiedAt'] = null;
         }
         else {
             ord_data['idx'] = createOrderDto['idx'];
@@ -118,12 +118,8 @@ let OrderService = class OrderService {
             if (order['status'] >= 1) {
                 throw new common_1.BadRequestException('order.service.create: 이미 처리된 주문입니다.');
             }
-            console.log(createOrderDto['status']);
-            console.log(order['paiedAt']);
-            console.log(('' + order['paiedAt']).split(' '));
-            console.log(('' + order['paiedAt']).split(' ')[0]);
             if (createOrderDto['status'] == 2 &&
-                ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
+                order['paiedAt'] == null) {
                 if (!(0, lodash_1.get)(createOrderDto, 'imp_uid', '')) {
                     throw new common_1.NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
                 }
@@ -135,6 +131,8 @@ let OrderService = class OrderService {
         }
         const po = await this.productOptionService.findIdx(+createOrderDto['productOptionIdx']);
         ord_data['user'] = await this.userService.findId((0, lodash_1.get)(userInfo, 'id'));
+        console.log({ ord_data });
+        console.log(ord_data['paiedAt']);
         const orderEntity = await this.orderRepository.create(ord_data);
         let order = await this.orderRepository.save(orderEntity);
         order = await this.findOneIdx(order['idx']);
@@ -166,7 +164,7 @@ let OrderService = class OrderService {
                 }
                 else if (iamportNoti.status == 'paid'
                     && order['status'] == 2
-                    && ('' + order['paiedAt']).split(' ')[0] == '0000-00-00') {
+                    && order['paiedAt'] == null) {
                     if (order.imp_uid != iamportNoti.imp_uid) {
                         res.send({ status: "forgery", message: "위조된 결제시도" });
                         throw new common_1.BadRequestException('order.service.iamportNoti: 잘못된 요청입니다.');
