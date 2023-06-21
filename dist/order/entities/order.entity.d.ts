@@ -32,7 +32,7 @@ export declare class OrderEntity {
     adminMemo: string;
     pc_mobile: string;
     userAgent: string;
-    paiedAt: Date | string;
+    paiedAt: string;
     createdAt: Date;
     updatedAt: Date;
     orderProduct: OrderProductEntity[];
