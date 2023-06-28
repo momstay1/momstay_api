@@ -19,10 +19,13 @@ import { ExcelService } from 'src/excel/excel.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { Cron } from '@nestjs/schedule';
 import { EmailService } from 'src/email/email.service';
+import { MessageService } from 'src/message/message.service';
 
 const applicationStatus = 1;
 const approvalStatus = 2;
 const endStatus = 3;
+let momstay_url;
+let membership_url;
 @Injectable()
 export class MembershipService {
   constructor(
@@ -33,7 +36,11 @@ export class MembershipService {
     private readonly excelService: ExcelService,
     private readonly emailService: EmailService,
     private readonly settingsService: SettingsService,
-  ) { }
+    private readonly messageService: MessageService,
+  ) {
+    momstay_url = commonUtils.getStatus('momstay_url');
+    membership_url = momstay_url + '/host/membership/complete/?type=';
+  }
 
   async create(
     userInfo: UsersEntity,
@@ -103,6 +110,17 @@ export class MembershipService {
         await this.emailService.sendMail(user.email, mail.title, email_tmpl);
       }
     }
+
+    // 알림톡 기능 (호스트에게 멤버쉽 등록 알림톡)
+    const settings = await this.settingsService.find('alimtalk_admin_mobile');
+    const alimtalk_data = await this.settingsAlimtalkData(membership);
+    await this.messageService.send([user.phone], 'host_membershiprequest', alimtalk_data);
+    // 알림톡 기능 (관리자에게 멤버쉽 등록 알림톡)
+    await this.messageService.send(
+      [settings.alimtalk_admin_mobile.set_value],
+      'admin_membershiprequest',
+      alimtalk_data
+    );
 
     return { membership };
   }
@@ -303,6 +321,12 @@ export class MembershipService {
       if (mail != '' && email_tmpl != '') {
         await this.emailService.sendMail(membership.user.email, mail.title, email_tmpl);
       }
+
+      // 멤버십 등록 완료 알림톡
+
+      // 알림톡 기능 (호스트에게 멤버쉽 등록 알림톡)
+      const alimtalk_data = await this.settingsAlimtalkData(membershipInfo);
+      await this.messageService.send([membership.user.phone], 'host_membershipconfirmed', alimtalk_data);
     }
 
     return { membership };
@@ -310,6 +334,18 @@ export class MembershipService {
 
   remove(id: number) {
     return `This action removes a #${id} membership`;
+  }
+
+  async settingsAlimtalkData(membership) {
+    const settings = await this.settingsService.find('membership');
+    return {
+      membership_month: membership.month,    // 멤버십개월
+      membership_price: settings['membership_price_discount_' + membership.month].set_value,    // 멤버십금액
+      membership_bank: settings.membership_bank.set_value,    // 은행명
+      membership_account: settings.membership_account.set_value,    // 계좌번호
+      membership_end_date: membership.end,    // 멤버십종료일
+      link: membership_url + membership.month,    // 링크
+    };
   }
 
   /******************** cron ********************/

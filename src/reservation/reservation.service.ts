@@ -17,6 +17,9 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
 import { ExcelService } from 'src/excel/excel.service';
 import { EmailService } from 'src/email/email.service';
+import { MessageService } from 'src/message/message.service';
+import { SettingsService } from 'src/settings/settings.service';
+import * as moment from 'moment';
 
 const readyStatus = 1;
 const approvalStatus = 2;
@@ -30,6 +33,9 @@ const status = [
   cancelStatus,
   refusalStatus,
 ];
+let momstay_url;
+let guest_reservation_url;
+let host_reservation_url;
 @Injectable()
 export class ReservationService {
   constructor(
@@ -41,7 +47,13 @@ export class ReservationService {
     private readonly pushNotiService: PushNotificationService,
     private readonly excelSerivce: ExcelService,
     private readonly emailService: EmailService,
-  ) { }
+    private readonly messageService: MessageService,
+    private readonly settingsService: SettingsService,
+  ) {
+    momstay_url = commonUtils.getStatus('momstay_url');
+    guest_reservation_url = momstay_url + '/mypage/reservation/details/';
+    host_reservation_url = momstay_url + '/host/reservation/details/';
+  }
 
   async create(userInfo, createReservationDto: CreateReservationDto) {
     // 방 정보 가져오기
@@ -111,6 +123,16 @@ export class ReservationService {
     if (mail != '' && email_tmpl != '') {
       await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
     }
+
+    // 방문예약 등록시 알림톡 발송
+    const alimtalk_data = await this.settingsAlimtalkData(reservation, user);
+    if (user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([user.phone], 'guest_reservationrequest', alimtalk_data);
+    }
+    // 호스트 방문예약 알림 상세 링크
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send([hostUser.phone], 'host_reservationrequest', alimtalk_data);
 
     return { reservation };
   }
@@ -359,6 +381,7 @@ export class ReservationService {
 
     await this.authCheckStatus(userInfo, reservation.user.idx);
 
+    const guest_user = reservation.user;
     await this.changeStatus(confirmationStatus, idx);
     // 호스트에게 방문예약 확정 push 알림 발송
     const { user } = get(reservation, ['productOption', 'product']);
@@ -368,7 +391,15 @@ export class ReservationService {
         reservation,
       );
     }
-    // TODO: 알림톡 기능 (호스트에게 확정 알림톡, 게스트 자신에게 후기 작성 알림톡)
+
+    // 알림톡 기능 (호스트에게 확정 알림톡)
+    const settings = await this.settingsService.find('alimtalk_admin_mobile');
+    const alimtalk_data = await this.settingsAlimtalkData(reservation, guest_user);
+    await this.messageService.send(
+      [user.phone, settings.alimtalk_admin_mobile.set_value],
+      'host_reservationguestconfirmed',
+      alimtalk_data
+    );
     // 방문예약 확정 메일 발송(호스트에게 발송)
     const { mail, email_tmpl } = await this.emailService.mailSettings(
       { type: 'reservation', group: 'host', code: 'guest_complete', lang: 'ko' },
@@ -456,13 +487,23 @@ export class ReservationService {
 
     await this.changeStatus(cancelStatus, idx);
 
+    const guest_user = reservation.user;
+
     // 호스트에게 방문예약 취소 push 알림 발송
     const { user } = get(reservation, ['productOption', 'product']);
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.guestReservationCancelPush(user, reservation);
     }
 
-    // TODO: 알림톡 기능 (호스트에게 취소 알림톡)
+    // 알림톡 기능 (호스트에게 취소 알림톡, 게스트에게 취소 완료 알림톡)
+    const alimtalk_data = await this.settingsAlimtalkData(reservation, guest_user);
+    if (guest_user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([guest_user.phone], 'guest_reservationguestcancel', alimtalk_data);
+    }
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send([user.phone], 'host_reservationguestcancel', alimtalk_data);
+
     // 방문예약 취소 메일 발송 (호스트에게 발송)
     const { mail, email_tmpl } = await this.emailService.mailSettings(
       { type: 'reservation', group: 'host', code: 'guest_cancel', lang: 'ko' },
@@ -494,14 +535,24 @@ export class ReservationService {
 
     await this.changeStatus(refusalStatus, idx);
 
+    const guest_user = reservation.user;
+
     // 게스트에게 방문예약 거절 push 알림 발송
     const { user } = reservation;
     if (get(user, ['device', 'token'], '')) {
       await this.pushNotiService.hostReservationCancelPush(user, reservation);
     }
 
-    // TODO: 알림톡 기능 (게스트에게 거절 알림톡)
-    // TODO: 방문예약 거절 메일 발송 (게스트에게 발송)
+    // 알림톡 기능 (게스트에게 거절 알림톡)
+    const alimtalk_data = await this.settingsAlimtalkData(reservation, guest_user);
+    if (guest_user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([guest_user.phone], 'guest_reservationhostcancel', alimtalk_data);
+    }
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send([user.phone], 'host_reservationhostcancel', alimtalk_data);
+
+    // 방문예약 거절 메일 발송 (게스트에게 발송)
     const lang = commonUtils.langValue(
       reservation.user.language == 'ko' ? reservation.user.language : 'en'
     );
@@ -520,6 +571,22 @@ export class ReservationService {
     if (mail != '' && email_tmpl != '') {
       await this.emailService.sendMail(reservation.user.email, mail.title, email_tmpl);
     }
+  }
+
+  async settingsAlimtalkData(reservation, guset_user) {
+    return {
+      product_title: reservation.productOption.product.title,    // 숙소이름
+      po_title: reservation.productOption.title,   // 방이름
+      occupancy_date: reservation.occupancyAt,   // 입주날짜
+      eviction_date: reservation.evictionAt,    // 퇴거날짜
+      visit_date: reservation.visitDate + ' ' + reservation.visitTime, // 방문날짜
+      contract_period: moment(reservation.evictionAt).diff(reservation.occupancyAt, 'months'),    // 계약기간
+      link: '',   // 방문예약 상세 링크
+      guest_link: guest_reservation_url + reservation.idx,   // 게스트 방문예약 상세 링크
+      host_link: host_reservation_url + reservation.idx,   // 호스트 방문예약 상세 링크
+      guest_name: guset_user.name, // 방문자명
+      phone: guset_user.phone // 연락처
+    };
   }
 
   // 이미 처리된 상태인지 체크

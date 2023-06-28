@@ -14,6 +14,7 @@ import { AdminBoardContentsController } from './admin-board-contents.controller'
 import { ExcelService } from 'src/excel/excel.service';
 import { EmailModule } from 'src/email/email.module';
 import { SettingsModule } from 'src/settings/settings.module';
+import { MessageModule } from 'src/message/message.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { SettingsModule } from 'src/settings/settings.module';
     AdminUsersModule,
     GroupsModule,
     EmailModule,
-    SettingsModule
+    SettingsModule,
+    MessageModule
   ],
   controllers: [
     BoardContentsController,
