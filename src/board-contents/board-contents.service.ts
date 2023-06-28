@@ -22,8 +22,13 @@ import { GroupsService } from 'src/groups/groups.service';
 import { commonBcrypt } from 'src/common/common.bcrypt';
 import { EmailService } from 'src/email/email.service';
 import { SettingsService } from 'src/settings/settings.service';
+import { MessageService } from 'src/message/message.service';
 
 const inquiryIdx = 5;
+let momstay_admin_url;
+let inquiry_admin_url;
+let momstay_url;
+let inquiry_url;
 @Injectable()
 export class BoardContentsService {
   constructor(
@@ -36,7 +41,13 @@ export class BoardContentsService {
     private readonly excelService: ExcelService,
     private readonly emailService: EmailService,
     private readonly settingsService: SettingsService,
-  ) { }
+    private readonly messageService: MessageService,
+  ) {
+    momstay_admin_url = commonUtils.getStatus('momstay_admin_url');
+    inquiry_admin_url = momstay_admin_url + '/customer/inquiry/details/';
+    momstay_url = commonUtils.getStatus('momstay_url');
+    inquiry_url = momstay_url + '/mypage/inquiry/details/';
+  }
 
   /******************
    *
@@ -92,6 +103,17 @@ export class BoardContentsService {
       if (mail != '' && email_tmpl != '') {
         await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
       }
+
+      // 알림톡 기능 (관리자에게 1:1문의 등록 알림톡)
+      const settings = await this.settingsService.find('alimtalk_admin_mobile');
+      const alimtalk_data = {
+        link: inquiry_admin_url + boardContent.idx
+      };
+      await this.messageService.send(
+        [settings.alimtalk_admin_mobile.set_value],
+        'admin_boardinquiry',
+        alimtalk_data
+      );
     }
 
     return boardContent;
@@ -126,6 +148,17 @@ export class BoardContentsService {
         );
         if (mail != '' && email_tmpl != '') {
           await this.emailService.sendMail(bc.user.email, mail.title, email_tmpl);
+        }
+        if (bc.user.language == 'ko') {
+          // 알림톡 기능 (관리자에게 1:1문의 등록 알림톡)
+          const alimtalk_data = {
+            link: inquiry_url + bc.idx
+          };
+          await this.messageService.send(
+            [bc.user.phone],
+            'guest_boardinquiry',
+            alimtalk_data
+          );
         }
       }
     }

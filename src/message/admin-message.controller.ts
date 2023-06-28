@@ -37,20 +37,6 @@ export class AdminMessageController {
     return { message, messageType };
   }
 
-  @Get(':code')
-  @ApiOperation({ summary: '메시지 조회(비즈엠 템플릿 조회) API' })
-  @Auth(['root', 'admin'])
-  @ApiBearerAuth()
-  @ApiParam({
-    name: 'code',
-    description: '비즈엠 템플릿 코드 message.code'
-  })
-  async findOne(
-    @Param('code') code: string,
-  ) {
-    return await this.messageService.messageFindOne(code);
-  }
-
   @Get('test')
   @ApiOperation({ summary: '메시지 발송 테스트 API' })
   async test(
@@ -65,6 +51,20 @@ export class AdminMessageController {
       total_pay_price: 50000
     };
     await this.messageService.send([phone], type, data);
+  }
+
+  @Get(':code')
+  @ApiOperation({ summary: '메시지 조회(비즈엠 템플릿 조회) API' })
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
+  @ApiParam({
+    name: 'code',
+    description: '비즈엠 템플릿 코드 message.code'
+  })
+  async findOne(
+    @Param('code') code: string,
+  ) {
+    return await this.messageService.messageFindOne(code);
   }
 
   // @Get(':id')

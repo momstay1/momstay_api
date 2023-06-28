@@ -15,6 +15,7 @@ import { AdminOrderController } from './admin-order.controller';
 import { SettingsModule } from 'src/settings/settings.module';
 import { EmailModule } from 'src/email/email.module';
 import { ExcelService } from 'src/excel/excel.service';
+import { MessageModule } from 'src/message/message.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { ExcelService } from 'src/excel/excel.service';
     UsersModule,
     PushNotificationModule,
     SettingsModule,
-    EmailModule
+    EmailModule,
+    MessageModule
   ],
   controllers: [OrderController, AdminOrderController],
   providers: [OrderService, IamportService, ExcelService],

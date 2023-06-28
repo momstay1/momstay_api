@@ -26,8 +26,12 @@ import { PushNotificationService } from 'src/push-notification/push-notification
 import * as moment from 'moment';
 import { SettingsService } from 'src/settings/settings.service';
 import { EmailService } from 'src/email/email.service';
+import { MessageService } from 'src/message/message.service';
 
 let order_status;
+let momstay_url;
+let guest_order_url;
+let host_order_url;
 @Injectable()
 export class OrderService {
   constructor(
@@ -45,8 +49,12 @@ export class OrderService {
     private readonly settingsService: SettingsService,
     private readonly excelService: ExcelService,
     private readonly emailService: EmailService,
+    private readonly messageService: MessageService,
   ) {
     order_status = commonUtils.getStatus('order_status');
+    momstay_url = commonUtils.getStatus('momstay_url');
+    guest_order_url = momstay_url + '/mypage/order/details/';
+    host_order_url = momstay_url + '/host/order/details/';
   }
 
   async create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req) {
@@ -179,6 +187,21 @@ export class OrderService {
 
     // 주문 관련 메일
     await this.guestOrderMail(order.idx, '');
+
+    // 알림톡 기능 (게스트에게 결제 완료 알림톡)
+    const settings = await this.settingsService.find('alimtalk_admin_mobile');
+    const alimtalk_data = await this.settingsAlimtalkData(order);
+    if (order.user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([order.user.phone], 'guest_ordercomplete', alimtalk_data);
+    }
+    // 알림톡 기능 (호스트에게 결제 완료 알림톡)
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send(
+      [user.phone, settings.alimtalk_admin_mobile.set_value],
+      'host_ordercomplete',
+      alimtalk_data
+    );
 
     return { order, orderProduct, po, priceInfo };
   }
@@ -839,6 +862,20 @@ export class OrderService {
       await this.pushNotiService.guestOrderCancelPush(hostUser, po);
     }
 
+    // 알림톡 기능 (게스트에게 주문 취소 알림톡)
+    const settings = await this.settingsService.find('alimtalk_admin_mobile');
+    const alimtalk_data = await this.settingsAlimtalkData(order);
+    if (order.user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([order.user.phone], 'guest_orderguestcancel', alimtalk_data);
+    }
+    // 알림톡 기능 (호스트 및 관리자에게 주문 취소 알림톡)
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send(
+      [hostUser.phone, settings.alimtalk_admin_mobile.set_value],
+      'host_orderguestcancel',
+      alimtalk_data
+    );
   }
 
   async hostOrderApproval(code: string, userInfo: UsersEntity) {
@@ -900,8 +937,22 @@ export class OrderService {
     }
 
     // 주문 관련 메일
-    // 주문 관련 메일
     await this.hostOrderMail(orderMailSendInfo, '');
+
+    // 알림톡 기능 (게스트에게 입주 확정 알림톡)
+    const settings = await this.settingsService.find('alimtalk_admin_mobile');
+    const alimtalk_data = await this.settingsAlimtalkData(order);
+    if (order.user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([order.user.phone], 'guest_orderconfirmed', alimtalk_data);
+    }
+    // 알림톡 기능 (호스트 및 관리자에게 입주 확정 알림톡)
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send(
+      [user.phone, settings.alimtalk_admin_mobile.set_value],
+      'host_orderconfirmed',
+      alimtalk_data
+    );
   }
 
   async hostOrderCancel(
@@ -914,7 +965,7 @@ export class OrderService {
         'order.service.hostOrderCancel: 변경할 정보가 없습니다.',
       );
     }
-    // 호스트 정보 가져오기
+    // 호스트 또는 관리자 정보 가져오기
     const user = await this.userService.findId(get(userInfo, 'id'));
 
     // 주문 및 주문 정보 가져오기
@@ -978,6 +1029,27 @@ export class OrderService {
 
     // 취소 처리
     await this.cancelProcess(order, cancelReason);
+
+    // 알림톡 기능 (게스트에게 주문 거절 알림톡)
+    let guest_message_type = 'guest_orderhostcancel';
+    let host_message_type = 'host_orderhostcancel';
+    if (commonUtils.isAdmin(user.group.id)) {
+      guest_message_type = 'guest_orderadmincancel';
+      host_message_type = 'admin_orderadmincancel';
+    }
+    const settings = await this.settingsService.find('alimtalk_admin_mobile');
+    const alimtalk_data = await this.settingsAlimtalkData(order);
+    if (order.user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      await this.messageService.send([order.user.phone], guest_message_type, alimtalk_data);
+    }
+    // 알림톡 기능 (호스트 및 관리자에게 주문 거절 알림톡)
+    alimtalk_data.link = alimtalk_data.host_link;
+    await this.messageService.send(
+      [user.phone, settings.alimtalk_admin_mobile.set_value],
+      host_message_type,
+      alimtalk_data
+    );
   }
 
   // 취소 처리
@@ -1341,5 +1413,25 @@ export class OrderService {
     return this.excelService.createExcel(data, {
       type: 'order',
     });
+  }
+
+  async settingsAlimtalkData(order) {
+    return {
+      product_title: order.orderProduct.productOption.product.title,    // 숙소이름
+      po_title: order.orderProduct.title,   // 방이름
+      occupancy_date: order.orderProduct.startAt,   // 입주날짜
+      eviction_date: order.orderProduct.endAt,    // 퇴거날짜
+      link: '',   // 방문예약 상세 링크
+      guest_link: guest_order_url + order.idx,   // 게스트 주문 상세 링크
+      host_link: host_order_url + order.idx,   // 호스트 주문 상세 링크
+      guest_name: order.user.name, // 신청자명
+      phone: order.user.phone, // 연락처
+      payment: order.orderProduct.payPrice, // 결제 금액
+      po_payment: order.orderProduct.price, // 방 금액
+      tax: order.orderProduct.taxPrice, // 부가세
+      fee: order.orderProduct.feePrice, // 수수료
+      cancel_reason_host: order.orderProduct.cancelReason, // 입주 거절 사유 
+      cancel_reason_guest: order.orderProduct.cancelReason, // 입주 거절 사유
+    };
   }
 }

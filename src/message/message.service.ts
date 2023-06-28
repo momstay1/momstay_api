@@ -78,7 +78,7 @@ export class MessageService {
           smsOnly: sendType == 'sms' ? 'Y' : 'N',
           smsKind: 'L',
           msgSms: msg,
-          smsSender: senderNumber,
+          // smsSender: senderNumber,
           smsLmsTit: siteTitle,
         };
 
@@ -110,7 +110,6 @@ export class MessageService {
         datas.push(send_data);
       }
     }
-
     if (datas.length > 0) {
       const http = this.http;
       const url = bizmHost + bizmUrl.send;
@@ -165,22 +164,52 @@ export class MessageService {
   // 메시지 내용 치환
   replaceMessage(template: string, data) {
     const originTxt = {
-      shop: "#{쇼핑몰이름}",
-      name_order: "#{주문자명}",
-      user_name: "#{회원명}",
-      ord_code: "#{주문번호}",
-      ord_bank: "#{은행명}",
-      ord_depositer: "#{예금주}",
-      ord_account: "#{계좌번호}",
-      total_pay_price: "#{결제금액}",
-      ordp_title: "#{상품명}",
-      parcel_company: "#{택배사}",
-      ordpc_parcel_num: "#{송장번호}",
-      parcel_trace: "#{배송조회링크}",
-      end_date: "#{만료일}",
-      point: "#{적립금}",
-      coupon: "#{쿠폰}",
-      user_group: "#{등급}"
+      // shop: "#{쇼핑몰이름}",
+      // name_order: "#{주문자명}",
+      // user_name: "#{회원명}",
+      // ord_code: "#{주문번호}",
+      // ord_bank: "#{은행명}",
+      // ord_depositer: "#{예금주}",
+      // ord_account: "#{계좌번호}",
+      // total_pay_price: "#{결제금액}",
+      // ordp_title: "#{상품명}",
+      // parcel_company: "#{택배사}",
+      // ordpc_parcel_num: "#{송장번호}",
+      // parcel_trace: "#{배송조회링크}",
+      // end_date: "#{만료일}",
+      // point: "#{적립금}",
+      // coupon: "#{쿠폰}",
+      // user_group: "#{등급}",
+      url: '#{사이트URL}',
+      site_title: '#{회사명}',
+      site_email: '#{관리자 이메일}',
+      product_title: '#{숙소이름}',
+      po_title: '#{방이름}',
+      guest_name: '#{방문자명}',
+      order_name: '#{신청인명}',
+      visit_date: '#{방문날짜}',
+      occupancy_date: '#{입주날짜}',
+      eviction_date: '#{퇴거날짜}',
+      contract_period: '#{계약기간}',
+      phone: '#{연락처}',
+      user_name: '#{회원이름}',
+      user_id: '#{회원아이디}',
+      dormant_date: '#{전환 예정일}',
+      membership_month: '#{멤버십개월}',
+      membership_price: '#{멤버십금액}',
+      membership_bank: '#{은행명}',
+      membership_account: '#{계좌번호}',
+      membership_end_date: '#{멤버십종료일}',
+      board_title: '#{게시판이름}',
+      inquiry_content: '#{문의내용}',
+      answer_content: '#{답변내용}',
+      payment: '#{결제금액}',
+      po_payment: '#{방금액}',
+      tax: '#{부가세}',
+      fee: '#{수수료}',
+      cancel_reason_host: '#{거절사유}',
+      cancel_reason_guest: '#{입주 거절 사유}',
+      link: '#{링크}',
     };
     let message = template;
     for (const key in originTxt) {

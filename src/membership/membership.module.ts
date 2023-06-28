@@ -9,6 +9,7 @@ import { ProductModule } from 'src/product/product.module';
 import { ExcelService } from 'src/excel/excel.service';
 import { EmailModule } from 'src/email/email.module';
 import { SettingsModule } from 'src/settings/settings.module';
+import { MessageModule } from 'src/message/message.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { SettingsModule } from 'src/settings/settings.module';
     ProductModule,
     SettingsModule,
     EmailModule,
-    SettingsModule
+    SettingsModule,
+    MessageModule
   ],
   controllers: [MembershipController, AdminMembershipController],
   providers: [MembershipService, ExcelService],
