@@ -8,6 +8,8 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationEntity } from './entities/reservation.entity';
 import { ExcelService } from 'src/excel/excel.service';
 import { EmailService } from 'src/email/email.service';
+import { MessageService } from 'src/message/message.service';
+import { SettingsService } from 'src/settings/settings.service';
 export declare class ReservationService {
     private reservationRepository;
     private readonly productOptionService;
@@ -16,7 +18,9 @@ export declare class ReservationService {
     private readonly pushNotiService;
     private readonly excelSerivce;
     private readonly emailService;
-    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService, excelSerivce: ExcelService, emailService: EmailService);
+    private readonly messageService;
+    private readonly settingsService;
+    constructor(reservationRepository: Repository<ReservationEntity>, productOptionService: ProductOptionService, usersService: UsersService, fileService: FileService, pushNotiService: PushNotificationService, excelSerivce: ExcelService, emailService: EmailService, messageService: MessageService, settingsService: SettingsService);
     create(userInfo: any, createReservationDto: CreateReservationDto): Promise<{
         reservation: ReservationEntity;
     }>;
@@ -43,6 +47,19 @@ export declare class ReservationService {
     update(userInfo: any, idx: number): Promise<void>;
     guestCancel(userInfo: any, idx: number): Promise<void>;
     hostCancel(userInfo: any, idx: number): Promise<void>;
+    settingsAlimtalkData(reservation: any, guset_user: any): Promise<{
+        product_title: any;
+        po_title: any;
+        occupancy_date: any;
+        eviction_date: any;
+        visit_date: string;
+        contract_period: number;
+        link: string;
+        guest_link: any;
+        host_link: any;
+        guest_name: any;
+        phone: any;
+    }>;
     processCheckStatus(status: any): Promise<void>;
     authCheckStatus({ group, id }: {
         group: any;

@@ -26,9 +26,6 @@ let AdminMessageController = class AdminMessageController {
         const messageType = await this.messageService.messageTypeFindAll();
         return { message, messageType };
     }
-    async findOne(code) {
-        return await this.messageService.messageFindOne(code);
-    }
     async test(phone, type) {
         const data = {
             shop: 1111,
@@ -38,6 +35,9 @@ let AdminMessageController = class AdminMessageController {
             total_pay_price: 50000
         };
         await this.messageService.send([phone], type, data);
+    }
+    async findOne(code) {
+        return await this.messageService.messageFindOne(code);
     }
     async update(idx, code, status, tmpl) {
         return await this.messageService.update(+idx, code, status, tmpl);
@@ -63,6 +63,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminMessageController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('test'),
+    (0, swagger_1.ApiOperation)({ summary: '메시지 발송 테스트 API' }),
+    __param(0, (0, common_1.Query)('phone')),
+    __param(1, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], AdminMessageController.prototype, "test", null);
+__decorate([
     (0, common_1.Get)(':code'),
     (0, swagger_1.ApiOperation)({ summary: '메시지 조회(비즈엠 템플릿 조회) API' }),
     (0, role_decorator_1.Auth)(['root', 'admin']),
@@ -76,15 +85,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminMessageController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Get)('test'),
-    (0, swagger_1.ApiOperation)({ summary: '메시지 발송 테스트 API' }),
-    __param(0, (0, common_1.Query)('phone')),
-    __param(1, (0, common_1.Query)('type')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], AdminMessageController.prototype, "test", null);
 __decorate([
     (0, common_1.Patch)(':idx'),
     (0, swagger_1.ApiOperation)({ summary: '메시지 상태 및 템플릿 수정 API' }),

@@ -6,9 +6,9 @@ export declare class AdminMessageController {
         message: {};
         messageType: import("./entities/message-type.entity").MessageTypeEntity[];
     }>;
+    test(phone: string, type: string): Promise<void>;
     findOne(code: string): Promise<{
         result: {};
     }>;
-    test(phone: string, type: string): Promise<void>;
     update(idx: string, code: string, status: string, tmpl: string): Promise<void>;
 }

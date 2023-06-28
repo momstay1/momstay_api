@@ -32,9 +32,13 @@ const push_notification_service_1 = require("../push-notification/push-notificat
 const moment = require("moment");
 const settings_service_1 = require("../settings/settings.service");
 const email_service_1 = require("../email/email.service");
+const message_service_1 = require("../message/message.service");
 let order_status;
+let momstay_url;
+let guest_order_url;
+let host_order_url;
 let OrderService = class OrderService {
-    constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService, settingsService, excelService, emailService) {
+    constructor(orderRepository, productService, usersService, productOptionService, userService, orderProductService, ordertotalService, iamportService, pgDataService, pushNotiService, settingsService, excelService, emailService, messageService) {
         this.orderRepository = orderRepository;
         this.productService = productService;
         this.usersService = usersService;
@@ -48,7 +52,11 @@ let OrderService = class OrderService {
         this.settingsService = settingsService;
         this.excelService = excelService;
         this.emailService = emailService;
+        this.messageService = messageService;
         order_status = common_utils_1.commonUtils.getStatus('order_status');
+        momstay_url = common_utils_1.commonUtils.getStatus('momstay_url');
+        guest_order_url = momstay_url + '/mypage/order/details/';
+        host_order_url = momstay_url + '/host/order/details/';
     }
     async create(userInfo, createOrderDto, req) {
         const ord_data = {};
@@ -142,6 +150,14 @@ let OrderService = class OrderService {
             await this.pushNotiService.guestOrderPush(user, po);
         }
         await this.guestOrderMail(order.idx, '');
+        const settings = await this.settingsService.find('alimtalk_admin_mobile');
+        const alimtalk_data = await this.settingsAlimtalkData(order);
+        if (order.user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([order.user.phone], 'guest_ordercomplete', alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([user.phone, settings.alimtalk_admin_mobile.set_value], 'host_ordercomplete', alimtalk_data);
         return { order, orderProduct, po, priceInfo };
     }
     async iamportNoti(iamportNoti, req, res) {
@@ -624,6 +640,14 @@ let OrderService = class OrderService {
         if ((0, lodash_1.get)(hostUser, ['device', 'token'], '')) {
             await this.pushNotiService.guestOrderCancelPush(hostUser, po);
         }
+        const settings = await this.settingsService.find('alimtalk_admin_mobile');
+        const alimtalk_data = await this.settingsAlimtalkData(order);
+        if (order.user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([order.user.phone], 'guest_orderguestcancel', alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([hostUser.phone, settings.alimtalk_admin_mobile.set_value], 'host_orderguestcancel', alimtalk_data);
     }
     async hostOrderApproval(code, userInfo) {
         if (!code) {
@@ -662,6 +686,14 @@ let OrderService = class OrderService {
             await this.pushNotiService.hostOrderApprovalPush(guestUser, orderInfo);
         }
         await this.hostOrderMail(orderMailSendInfo, '');
+        const settings = await this.settingsService.find('alimtalk_admin_mobile');
+        const alimtalk_data = await this.settingsAlimtalkData(order);
+        if (order.user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([order.user.phone], 'guest_orderconfirmed', alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([user.phone, settings.alimtalk_admin_mobile.set_value], 'host_orderconfirmed', alimtalk_data);
     }
     async hostOrderCancel(code, userInfo, updateOrderDto) {
         if (!code) {
@@ -711,6 +743,20 @@ let OrderService = class OrderService {
             await this.hostOrderMail(orderMailSendInfo, cancelReason);
         }
         await this.cancelProcess(order, cancelReason);
+        let guest_message_type = 'guest_orderhostcancel';
+        let host_message_type = 'host_orderhostcancel';
+        if (common_utils_1.commonUtils.isAdmin(user.group.id)) {
+            guest_message_type = 'guest_orderadmincancel';
+            host_message_type = 'admin_orderadmincancel';
+        }
+        const settings = await this.settingsService.find('alimtalk_admin_mobile');
+        const alimtalk_data = await this.settingsAlimtalkData(order);
+        if (order.user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([order.user.phone], guest_message_type, alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([user.phone, settings.alimtalk_admin_mobile.set_value], host_message_type, alimtalk_data);
     }
     async cancelProcess(order, cancelReason, portone) {
         const cancel_status = common_utils_1.commonUtils.getStatus([
@@ -925,6 +971,25 @@ let OrderService = class OrderService {
             type: 'order',
         });
     }
+    async settingsAlimtalkData(order) {
+        return {
+            product_title: order.orderProduct.productOption.product.title,
+            po_title: order.orderProduct.title,
+            occupancy_date: order.orderProduct.startAt,
+            eviction_date: order.orderProduct.endAt,
+            link: '',
+            guest_link: guest_order_url + order.idx,
+            host_link: host_order_url + order.idx,
+            guest_name: order.user.name,
+            phone: order.user.phone,
+            payment: order.orderProduct.payPrice,
+            po_payment: order.orderProduct.price,
+            tax: order.orderProduct.taxPrice,
+            fee: order.orderProduct.feePrice,
+            cancel_reason_host: order.orderProduct.cancelReason,
+            cancel_reason_guest: order.orderProduct.cancelReason,
+        };
+    }
 };
 OrderService = __decorate([
     (0, common_1.Injectable)(),
@@ -941,7 +1006,8 @@ OrderService = __decorate([
         push_notification_service_1.PushNotificationService,
         settings_service_1.SettingsService,
         excel_service_1.ExcelService,
-        email_service_1.EmailService])
+        email_service_1.EmailService,
+        message_service_1.MessageService])
 ], OrderService);
 exports.OrderService = OrderService;
 //# sourceMappingURL=order.service.js.map

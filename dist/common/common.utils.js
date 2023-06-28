@@ -180,6 +180,8 @@ exports.commonUtils = {
     },
     getStatus(key) {
         const data = {};
+        data['momstay_url'] = 'http://momstay.cf148.reconers.com';
+        data['momstay_admin_url'] = 'http://momstay_admin.cf148.reconers.com';
         data['tax'] = 10;
         data['fee'] = 5;
         data['order_status'] = {

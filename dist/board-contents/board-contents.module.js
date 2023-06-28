@@ -23,6 +23,7 @@ const admin_board_contents_controller_1 = require("./admin-board-contents.contro
 const excel_service_1 = require("../excel/excel.service");
 const email_module_1 = require("../email/email.module");
 const settings_module_1 = require("../settings/settings.module");
+const message_module_1 = require("../message/message.module");
 let BoardContentsModule = class BoardContentsModule {
 };
 BoardContentsModule = __decorate([
@@ -36,7 +37,8 @@ BoardContentsModule = __decorate([
             admin_users_module_1.AdminUsersModule,
             groups_module_1.GroupsModule,
             email_module_1.EmailModule,
-            settings_module_1.SettingsModule
+            settings_module_1.SettingsModule,
+            message_module_1.MessageModule
         ],
         controllers: [
             board_contents_controller_1.BoardContentsController,

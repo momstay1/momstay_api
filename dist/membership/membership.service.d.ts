@@ -9,6 +9,7 @@ import { ProductService } from 'src/product/product.service';
 import { ExcelService } from 'src/excel/excel.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { EmailService } from 'src/email/email.service';
+import { MessageService } from 'src/message/message.service';
 export declare class MembershipService {
     private membershipHistoryRepository;
     private readonly userService;
@@ -16,7 +17,8 @@ export declare class MembershipService {
     private readonly excelService;
     private readonly emailService;
     private readonly settingsService;
-    constructor(membershipHistoryRepository: Repository<MembershipHistoryEntity>, userService: UsersService, productService: ProductService, excelService: ExcelService, emailService: EmailService, settingsService: SettingsService);
+    private readonly messageService;
+    constructor(membershipHistoryRepository: Repository<MembershipHistoryEntity>, userService: UsersService, productService: ProductService, excelService: ExcelService, emailService: EmailService, settingsService: SettingsService, messageService: MessageService);
     create(userInfo: UsersEntity, createMembershipDto: CreateMembershipDto): Promise<{
         membership: MembershipHistoryEntity;
     }>;
@@ -37,6 +39,14 @@ export declare class MembershipService {
         membership: MembershipHistoryEntity;
     }>;
     remove(id: number): string;
+    settingsAlimtalkData(membership: any): Promise<{
+        membership_month: any;
+        membership_price: string;
+        membership_bank: string;
+        membership_account: string;
+        membership_end_date: any;
+        link: any;
+    }>;
     checkMembership(): Promise<void>;
     createExcel(options: PaginationOptions, search: string[], order: string): Promise<{
         file_name: string;

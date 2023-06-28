@@ -10,6 +10,7 @@ import { BoardContentsEntity } from './entities/board-content.entity';
 import { Pagination, PaginationOptions } from 'src/paginate';
 import { EmailService } from 'src/email/email.service';
 import { SettingsService } from 'src/settings/settings.service';
+import { MessageService } from 'src/message/message.service';
 export declare class BoardContentsService {
     private bcRepository;
     private readonly usersService;
@@ -19,7 +20,8 @@ export declare class BoardContentsService {
     private readonly excelService;
     private readonly emailService;
     private readonly settingsService;
-    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService, excelService: ExcelService, emailService: EmailService, settingsService: SettingsService);
+    private readonly messageService;
+    constructor(bcRepository: Repository<BoardContentsEntity>, usersService: UsersService, boardsService: BoardsService, bscatsService: BoardSelectedCategoriesService, bcatsService: BoardCategoriesService, excelService: ExcelService, emailService: EmailService, settingsService: SettingsService, messageService: MessageService);
     create(userInfo: any, bc: CreateBoardContentDto): Promise<any>;
     statusChange(statusChange: any): Promise<void>;
     statusAnswer(bcIdx: number, answerContent: string): Promise<void>;

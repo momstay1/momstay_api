@@ -29,9 +29,14 @@ const lodash_1 = require("lodash");
 const common_bcrypt_1 = require("../common/common.bcrypt");
 const email_service_1 = require("../email/email.service");
 const settings_service_1 = require("../settings/settings.service");
+const message_service_1 = require("../message/message.service");
 const inquiryIdx = 5;
+let momstay_admin_url;
+let inquiry_admin_url;
+let momstay_url;
+let inquiry_url;
 let BoardContentsService = class BoardContentsService {
-    constructor(bcRepository, usersService, boardsService, bscatsService, bcatsService, excelService, emailService, settingsService) {
+    constructor(bcRepository, usersService, boardsService, bscatsService, bcatsService, excelService, emailService, settingsService, messageService) {
         this.bcRepository = bcRepository;
         this.usersService = usersService;
         this.boardsService = boardsService;
@@ -40,6 +45,11 @@ let BoardContentsService = class BoardContentsService {
         this.excelService = excelService;
         this.emailService = emailService;
         this.settingsService = settingsService;
+        this.messageService = messageService;
+        momstay_admin_url = common_utils_1.commonUtils.getStatus('momstay_admin_url');
+        inquiry_admin_url = momstay_admin_url + '/customer/inquiry/details/';
+        momstay_url = common_utils_1.commonUtils.getStatus('momstay_url');
+        inquiry_url = momstay_url + '/mypage/inquiry/details/';
     }
     async create(userInfo, bc) {
         const board = await this.boardsService.findBoard({ idx: bc.bd_idx });
@@ -69,6 +79,11 @@ let BoardContentsService = class BoardContentsService {
             if (mail != '' && email_tmpl != '') {
                 await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
             }
+            const settings = await this.settingsService.find('alimtalk_admin_mobile');
+            const alimtalk_data = {
+                link: inquiry_admin_url + boardContent.idx
+            };
+            await this.messageService.send([settings.alimtalk_admin_mobile.set_value], 'admin_boardinquiry', alimtalk_data);
         }
         return boardContent;
     }
@@ -93,6 +108,12 @@ let BoardContentsService = class BoardContentsService {
                 });
                 if (mail != '' && email_tmpl != '') {
                     await this.emailService.sendMail(bc.user.email, mail.title, email_tmpl);
+                }
+                if (bc.user.language == 'ko') {
+                    const alimtalk_data = {
+                        link: inquiry_url + bc.idx
+                    };
+                    await this.messageService.send([bc.user.phone], 'guest_boardinquiry', alimtalk_data);
                 }
             }
         }
@@ -435,7 +456,8 @@ BoardContentsService = __decorate([
         board_categories_service_1.BoardCategoriesService,
         excel_service_1.ExcelService,
         email_service_1.EmailService,
-        settings_service_1.SettingsService])
+        settings_service_1.SettingsService,
+        message_service_1.MessageService])
 ], BoardContentsService);
 exports.BoardContentsService = BoardContentsService;
 //# sourceMappingURL=board-contents.service.js.map

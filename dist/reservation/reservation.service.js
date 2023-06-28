@@ -26,6 +26,9 @@ const typeorm_2 = require("typeorm");
 const reservation_entity_1 = require("./entities/reservation.entity");
 const excel_service_1 = require("../excel/excel.service");
 const email_service_1 = require("../email/email.service");
+const message_service_1 = require("../message/message.service");
+const settings_service_1 = require("../settings/settings.service");
+const moment = require("moment");
 const readyStatus = 1;
 const approvalStatus = 2;
 const confirmationStatus = 3;
@@ -38,8 +41,11 @@ const status = [
     cancelStatus,
     refusalStatus,
 ];
+let momstay_url;
+let guest_reservation_url;
+let host_reservation_url;
 let ReservationService = class ReservationService {
-    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService, excelSerivce, emailService) {
+    constructor(reservationRepository, productOptionService, usersService, fileService, pushNotiService, excelSerivce, emailService, messageService, settingsService) {
         this.reservationRepository = reservationRepository;
         this.productOptionService = productOptionService;
         this.usersService = usersService;
@@ -47,6 +53,11 @@ let ReservationService = class ReservationService {
         this.pushNotiService = pushNotiService;
         this.excelSerivce = excelSerivce;
         this.emailService = emailService;
+        this.messageService = messageService;
+        this.settingsService = settingsService;
+        momstay_url = common_utils_1.commonUtils.getStatus('momstay_url');
+        guest_reservation_url = momstay_url + '/mypage/reservation/details/';
+        host_reservation_url = momstay_url + '/host/reservation/details/';
     }
     async create(userInfo, createReservationDto) {
         const po = await this.productOptionService.findIdx(createReservationDto.productOptionIdx);
@@ -89,6 +100,13 @@ let ReservationService = class ReservationService {
         if (mail != '' && email_tmpl != '') {
             await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
         }
+        const alimtalk_data = await this.settingsAlimtalkData(reservation, user);
+        if (user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([user.phone], 'guest_reservationrequest', alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([hostUser.phone], 'host_reservationrequest', alimtalk_data);
         return { reservation };
     }
     async hostFindAll(options, userInfo, order) {
@@ -268,11 +286,15 @@ let ReservationService = class ReservationService {
     async guestConfirmation(userInfo, idx) {
         const reservation = await this.findOneIdx(idx);
         await this.authCheckStatus(userInfo, reservation.user.idx);
+        const guest_user = reservation.user;
         await this.changeStatus(confirmationStatus, idx);
         const { user } = (0, lodash_1.get)(reservation, ['productOption', 'product']);
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationConfirmationPush(user, reservation);
         }
+        const settings = await this.settingsService.find('alimtalk_admin_mobile');
+        const alimtalk_data = await this.settingsAlimtalkData(reservation, guest_user);
+        await this.messageService.send([user.phone, settings.alimtalk_admin_mobile.set_value], 'host_reservationguestconfirmed', alimtalk_data);
         const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'host', code: 'guest_complete', lang: 'ko' }, {
             po_title: reservation.productOption.title,
             product_title: reservation.productOption.product.title,
@@ -324,10 +346,18 @@ let ReservationService = class ReservationService {
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.user.idx);
         await this.changeStatus(cancelStatus, idx);
+        const guest_user = reservation.user;
         const { user } = (0, lodash_1.get)(reservation, ['productOption', 'product']);
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestReservationCancelPush(user, reservation);
         }
+        const alimtalk_data = await this.settingsAlimtalkData(reservation, guest_user);
+        if (guest_user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([guest_user.phone], 'guest_reservationguestcancel', alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([user.phone], 'host_reservationguestcancel', alimtalk_data);
         const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'host', code: 'guest_cancel', lang: 'ko' }, {
             po_title: reservation.productOption.title,
             product_title: reservation.productOption.product.title,
@@ -346,10 +376,18 @@ let ReservationService = class ReservationService {
         await this.processCheckStatus(reservation.status);
         await this.authCheckStatus(userInfo, reservation.productOption.product.user.idx);
         await this.changeStatus(refusalStatus, idx);
+        const guest_user = reservation.user;
         const { user } = reservation;
         if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.hostReservationCancelPush(user, reservation);
         }
+        const alimtalk_data = await this.settingsAlimtalkData(reservation, guest_user);
+        if (guest_user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            await this.messageService.send([guest_user.phone], 'guest_reservationhostcancel', alimtalk_data);
+        }
+        alimtalk_data.link = alimtalk_data.host_link;
+        await this.messageService.send([user.phone], 'host_reservationhostcancel', alimtalk_data);
         const lang = common_utils_1.commonUtils.langValue(reservation.user.language == 'ko' ? reservation.user.language : 'en');
         const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'reservation', group: 'guest', code: 'host_cancel', lang: reservation.user.language }, {
             po_title: reservation.productOption['title' + lang],
@@ -363,6 +401,21 @@ let ReservationService = class ReservationService {
         if (mail != '' && email_tmpl != '') {
             await this.emailService.sendMail(reservation.user.email, mail.title, email_tmpl);
         }
+    }
+    async settingsAlimtalkData(reservation, guset_user) {
+        return {
+            product_title: reservation.productOption.product.title,
+            po_title: reservation.productOption.title,
+            occupancy_date: reservation.occupancyAt,
+            eviction_date: reservation.evictionAt,
+            visit_date: reservation.visitDate + ' ' + reservation.visitTime,
+            contract_period: moment(reservation.evictionAt).diff(reservation.occupancyAt, 'months'),
+            link: '',
+            guest_link: guest_reservation_url + reservation.idx,
+            host_link: host_reservation_url + reservation.idx,
+            guest_name: guset_user.name,
+            phone: guset_user.phone
+        };
     }
     async processCheckStatus(status) {
         if (status != readyStatus) {
@@ -426,7 +479,9 @@ ReservationService = __decorate([
         file_service_1.FileService,
         push_notification_service_1.PushNotificationService,
         excel_service_1.ExcelService,
-        email_service_1.EmailService])
+        email_service_1.EmailService,
+        message_service_1.MessageService,
+        settings_service_1.SettingsService])
 ], ReservationService);
 exports.ReservationService = ReservationService;
 //# sourceMappingURL=reservation.service.js.map

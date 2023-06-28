@@ -27,17 +27,23 @@ const excel_service_1 = require("../excel/excel.service");
 const settings_service_1 = require("../settings/settings.service");
 const schedule_1 = require("@nestjs/schedule");
 const email_service_1 = require("../email/email.service");
+const message_service_1 = require("../message/message.service");
 const applicationStatus = 1;
 const approvalStatus = 2;
 const endStatus = 3;
+let momstay_url;
+let membership_url;
 let MembershipService = class MembershipService {
-    constructor(membershipHistoryRepository, userService, productService, excelService, emailService, settingsService) {
+    constructor(membershipHistoryRepository, userService, productService, excelService, emailService, settingsService, messageService) {
         this.membershipHistoryRepository = membershipHistoryRepository;
         this.userService = userService;
         this.productService = productService;
         this.excelService = excelService;
         this.emailService = emailService;
         this.settingsService = settingsService;
+        this.messageService = messageService;
+        momstay_url = common_utils_1.commonUtils.getStatus('momstay_url');
+        membership_url = momstay_url + '/host/membership/complete/?type=';
     }
     async create(userInfo, createMembershipDto) {
         const user = await this.userService.findId(userInfo['id']);
@@ -86,6 +92,10 @@ let MembershipService = class MembershipService {
                 await this.emailService.sendMail(user.email, mail.title, email_tmpl);
             }
         }
+        const settings = await this.settingsService.find('alimtalk_admin_mobile');
+        const alimtalk_data = await this.settingsAlimtalkData(membership);
+        await this.messageService.send([user.phone], 'host_membershiprequest', alimtalk_data);
+        await this.messageService.send([settings.alimtalk_admin_mobile.set_value], 'admin_membershiprequest', alimtalk_data);
         return { membership };
     }
     async findAll(options, search, order) {
@@ -225,11 +235,24 @@ let MembershipService = class MembershipService {
             if (mail != '' && email_tmpl != '') {
                 await this.emailService.sendMail(membership.user.email, mail.title, email_tmpl);
             }
+            const alimtalk_data = await this.settingsAlimtalkData(membershipInfo);
+            await this.messageService.send([membership.user.phone], 'host_membershipconfirmed', alimtalk_data);
         }
         return { membership };
     }
     remove(id) {
         return `This action removes a #${id} membership`;
+    }
+    async settingsAlimtalkData(membership) {
+        const settings = await this.settingsService.find('membership');
+        return {
+            membership_month: membership.month,
+            membership_price: settings['membership_price_discount_' + membership.month].set_value,
+            membership_bank: settings.membership_bank.set_value,
+            membership_account: settings.membership_account.set_value,
+            membership_end_date: membership.end,
+            link: membership_url + membership.month,
+        };
     }
     async checkMembership() {
         console.log('[cron] checkMembership: ', moment().format('YYYY-MM-DD HH:mm:ss'));
@@ -277,7 +300,8 @@ MembershipService = __decorate([
         product_service_1.ProductService,
         excel_service_1.ExcelService,
         email_service_1.EmailService,
-        settings_service_1.SettingsService])
+        settings_service_1.SettingsService,
+        message_service_1.MessageService])
 ], MembershipService);
 exports.MembershipService = MembershipService;
 //# sourceMappingURL=membership.service.js.map

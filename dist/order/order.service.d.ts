@@ -16,6 +16,7 @@ import { UsersEntity } from 'src/users/entities/user.entity';
 import { PushNotificationService } from 'src/push-notification/push-notification.service';
 import { SettingsService } from 'src/settings/settings.service';
 import { EmailService } from 'src/email/email.service';
+import { MessageService } from 'src/message/message.service';
 export declare class OrderService {
     private orderRepository;
     private readonly productService;
@@ -30,7 +31,8 @@ export declare class OrderService {
     private readonly settingsService;
     private readonly excelService;
     private readonly emailService;
-    constructor(orderRepository: Repository<OrderEntity>, productService: ProductService, usersService: UsersService, productOptionService: ProductOptionService, userService: UsersService, orderProductService: OrderProductService, ordertotalService: OrderTotalService, iamportService: IamportService, pgDataService: PgDataService, pushNotiService: PushNotificationService, settingsService: SettingsService, excelService: ExcelService, emailService: EmailService);
+    private readonly messageService;
+    constructor(orderRepository: Repository<OrderEntity>, productService: ProductService, usersService: UsersService, productOptionService: ProductOptionService, userService: UsersService, orderProductService: OrderProductService, ordertotalService: OrderTotalService, iamportService: IamportService, pgDataService: PgDataService, pushNotiService: PushNotificationService, settingsService: SettingsService, excelService: ExcelService, emailService: EmailService, messageService: MessageService);
     create(userInfo: UsersEntity, createOrderDto: CreateOrderDto, req: any): Promise<{
         order: OrderEntity;
         orderProduct: import("../order-product/entities/order-product.entity").OrderProductEntity;
@@ -98,5 +100,22 @@ export declare class OrderService {
     createExcel(userInfo: UsersEntity, options: PaginationOptions, search: string[], order: string): Promise<{
         file_name: string;
         file_path: string;
+    }>;
+    settingsAlimtalkData(order: any): Promise<{
+        product_title: any;
+        po_title: any;
+        occupancy_date: any;
+        eviction_date: any;
+        link: string;
+        guest_link: any;
+        host_link: any;
+        guest_name: any;
+        phone: any;
+        payment: any;
+        po_payment: any;
+        tax: any;
+        fee: any;
+        cancel_reason_host: any;
+        cancel_reason_guest: any;
     }>;
 }

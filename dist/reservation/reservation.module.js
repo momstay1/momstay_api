@@ -19,6 +19,8 @@ const push_notification_module_1 = require("../push-notification/push-notificati
 const admin_reservation_controller_1 = require("./admin-reservation.controller");
 const excel_service_1 = require("../excel/excel.service");
 const email_module_1 = require("../email/email.module");
+const message_module_1 = require("../message/message.module");
+const settings_module_1 = require("../settings/settings.module");
 let ReservationModule = class ReservationModule {
 };
 ReservationModule = __decorate([
@@ -29,7 +31,9 @@ ReservationModule = __decorate([
             users_module_1.UsersModule,
             file_module_1.FileModule,
             push_notification_module_1.PushNotificationModule,
-            email_module_1.EmailModule
+            email_module_1.EmailModule,
+            message_module_1.MessageModule,
+            settings_module_1.SettingsModule
         ],
         controllers: [reservation_controller_1.ReservationController, admin_reservation_controller_1.AdminReservationController],
         providers: [reservation_service_1.ReservationService, excel_service_1.ExcelService],
