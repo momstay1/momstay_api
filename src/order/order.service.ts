@@ -113,6 +113,9 @@ export class OrderService {
     if (get(createOrderDto, 'adminMemo', ''))
       ord_data['adminMemo'] = get(createOrderDto, 'adminMemo');
 
+    const status = commonUtils.getStatus([
+      'order_status',
+    ]);
     // 주문 설정
     if (!get(createOrderDto, 'idx', 0)) {
       // 주문 최초 등록
@@ -125,12 +128,12 @@ export class OrderService {
       const order = await this.orderRepository.findOne({
         idx: ord_data['idx'],
       });
-      if (order['status'] >= 1) {
+      if (order['status'] >= status.waitingForPayment) {
         throw new BadRequestException(
           'order.service.create: 이미 처리된 주문입니다.',
         );
       }
-      if (createOrderDto['status'] == 2 && order['paiedAt'] == '') {
+      if (createOrderDto['status'] == status.paymentCompleted && order['paiedAt'] == '') {
         if (!get(createOrderDto, 'imp_uid', '')) {
           throw new NotFoundException(
             'order.service.create: imp_uid 정보가 없습니다.',
@@ -188,20 +191,22 @@ export class OrderService {
     // 주문 관련 메일
     await this.guestOrderMail(order.idx, '');
 
-    // 알림톡 기능 (게스트에게 결제 완료 알림톡)
-    const settings = await this.settingsService.find('alimtalk_admin_mobile');
-    const alimtalk_data = await this.settingsAlimtalkData(order);
-    if (order.user.language == 'ko') {
-      alimtalk_data.link = alimtalk_data.guest_link;
-      await this.messageService.send([order.user.phone], 'guest_ordercomplete', alimtalk_data);
+    if (order.status == status.paymentCompleted) {
+      // 알림톡 기능 (게스트에게 결제 완료 알림톡)
+      const settings = await this.settingsService.find('alimtalk_admin_mobile');
+      const alimtalk_data = await this.settingsAlimtalkData(order);
+      if (order.user.language == 'ko') {
+        alimtalk_data.link = alimtalk_data.guest_link;
+        await this.messageService.send([order.user.phone], 'guest_ordercomplete', alimtalk_data);
+      }
+      // 알림톡 기능 (호스트에게 결제 완료 알림톡)
+      alimtalk_data.link = alimtalk_data.host_link;
+      await this.messageService.send(
+        [user.phone, settings.alimtalk_admin_mobile.set_value],
+        'host_ordercomplete',
+        alimtalk_data
+      );
     }
-    // 알림톡 기능 (호스트에게 결제 완료 알림톡)
-    alimtalk_data.link = alimtalk_data.host_link;
-    await this.messageService.send(
-      [user.phone, settings.alimtalk_admin_mobile.set_value],
-      'host_ordercomplete',
-      alimtalk_data
-    );
 
     return { order, orderProduct, po, priceInfo };
   }
