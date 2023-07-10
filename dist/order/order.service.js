@@ -112,6 +112,9 @@ let OrderService = class OrderService {
             ord_data['remitter'] = (0, lodash_1.get)(createOrderDto, 'remitter');
         if ((0, lodash_1.get)(createOrderDto, 'adminMemo', ''))
             ord_data['adminMemo'] = (0, lodash_1.get)(createOrderDto, 'adminMemo');
+        const status = common_utils_1.commonUtils.getStatus([
+            'order_status',
+        ]);
         if (!(0, lodash_1.get)(createOrderDto, 'idx', 0)) {
             ord_data['code'] = await this.ordCreateCode();
             ord_data['userAgent'] = req.get('user-agent');
@@ -123,10 +126,10 @@ let OrderService = class OrderService {
             const order = await this.orderRepository.findOne({
                 idx: ord_data['idx'],
             });
-            if (order['status'] >= 1) {
+            if (order['status'] >= status.waitingForPayment) {
                 throw new common_1.BadRequestException('order.service.create: 이미 처리된 주문입니다.');
             }
-            if (createOrderDto['status'] == 2 && order['paiedAt'] == '') {
+            if (createOrderDto['status'] == status.paymentCompleted && order['paiedAt'] == '') {
                 if (!(0, lodash_1.get)(createOrderDto, 'imp_uid', '')) {
                     throw new common_1.NotFoundException('order.service.create: imp_uid 정보가 없습니다.');
                 }
@@ -150,14 +153,16 @@ let OrderService = class OrderService {
             await this.pushNotiService.guestOrderPush(user, po);
         }
         await this.guestOrderMail(order.idx, '');
-        const settings = await this.settingsService.find('alimtalk_admin_mobile');
-        const alimtalk_data = await this.settingsAlimtalkData(order);
-        if (order.user.language == 'ko') {
-            alimtalk_data.link = alimtalk_data.guest_link;
-            await this.messageService.send([order.user.phone], 'guest_ordercomplete', alimtalk_data);
+        if (order.status == status.paymentCompleted) {
+            const settings = await this.settingsService.find('alimtalk_admin_mobile');
+            const alimtalk_data = await this.settingsAlimtalkData(order);
+            if (order.user.language == 'ko') {
+                alimtalk_data.link = alimtalk_data.guest_link;
+                await this.messageService.send([order.user.phone], 'guest_ordercomplete', alimtalk_data);
+            }
+            alimtalk_data.link = alimtalk_data.host_link;
+            await this.messageService.send([user.phone, settings.alimtalk_admin_mobile.set_value], 'host_ordercomplete', alimtalk_data);
         }
-        alimtalk_data.link = alimtalk_data.host_link;
-        await this.messageService.send([user.phone, settings.alimtalk_admin_mobile.set_value], 'host_ordercomplete', alimtalk_data);
         return { order, orderProduct, po, priceInfo };
     }
     async iamportNoti(iamportNoti, req, res) {
