@@ -1417,21 +1417,21 @@ export class OrderService {
 
   async settingsAlimtalkData(order) {
     return {
-      product_title: order.orderProduct.productOption.product.title,    // 숙소이름
-      po_title: order.orderProduct.title,   // 방이름
-      occupancy_date: order.orderProduct.startAt,   // 입주날짜
-      eviction_date: order.orderProduct.endAt,    // 퇴거날짜
+      product_title: order?.orderProduct[0]?.productOption?.product?.title,    // 숙소이름
+      po_title: order?.orderProduct[0]?.title,   // 방이름
+      occupancy_date: order?.orderProduct[0]?.startAt,   // 입주날짜
+      eviction_date: order?.orderProduct[0]?.endAt,    // 퇴거날짜
       link: '',   // 방문예약 상세 링크
       guest_link: guest_order_url + order.idx,   // 게스트 주문 상세 링크
       host_link: host_order_url + order.idx,   // 호스트 주문 상세 링크
       guest_name: order.user.name, // 신청자명
       phone: order.user.phone, // 연락처
-      payment: order.orderProduct.payPrice, // 결제 금액
-      po_payment: order.orderProduct.price, // 방 금액
-      tax: order.orderProduct.taxPrice, // 부가세
-      fee: order.orderProduct.feePrice, // 수수료
-      cancel_reason_host: order.orderProduct.cancelReason, // 입주 거절 사유 
-      cancel_reason_guest: order.orderProduct.cancelReason, // 입주 거절 사유
+      payment: order?.orderProduct[0]?.payPrice, // 결제 금액
+      po_payment: order?.orderProduct[0]?.price, // 방 금액
+      tax: order?.orderProduct[0]?.taxPrice, // 부가세
+      fee: order?.orderProduct[0]?.feePrice, // 수수료
+      cancel_reason_host: order?.orderProduct[0]?.cancelReason, // 입주 거절 사유 
+      cancel_reason_guest: order?.orderProduct[0]?.cancelReason, // 입주 거절 사유
     };
   }
 }
