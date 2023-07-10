@@ -972,22 +972,23 @@ let OrderService = class OrderService {
         });
     }
     async settingsAlimtalkData(order) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         return {
-            product_title: order.orderProduct.productOption.product.title,
-            po_title: order.orderProduct.title,
-            occupancy_date: order.orderProduct.startAt,
-            eviction_date: order.orderProduct.endAt,
+            product_title: (_c = (_b = (_a = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _a === void 0 ? void 0 : _a.productOption) === null || _b === void 0 ? void 0 : _b.product) === null || _c === void 0 ? void 0 : _c.title,
+            po_title: (_d = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _d === void 0 ? void 0 : _d.title,
+            occupancy_date: (_e = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _e === void 0 ? void 0 : _e.startAt,
+            eviction_date: (_f = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _f === void 0 ? void 0 : _f.endAt,
             link: '',
             guest_link: guest_order_url + order.idx,
             host_link: host_order_url + order.idx,
             guest_name: order.user.name,
             phone: order.user.phone,
-            payment: order.orderProduct.payPrice,
-            po_payment: order.orderProduct.price,
-            tax: order.orderProduct.taxPrice,
-            fee: order.orderProduct.feePrice,
-            cancel_reason_host: order.orderProduct.cancelReason,
-            cancel_reason_guest: order.orderProduct.cancelReason,
+            payment: (_g = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _g === void 0 ? void 0 : _g.payPrice,
+            po_payment: (_h = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _h === void 0 ? void 0 : _h.price,
+            tax: (_j = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _j === void 0 ? void 0 : _j.taxPrice,
+            fee: (_k = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _k === void 0 ? void 0 : _k.feePrice,
+            cancel_reason_host: (_l = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _l === void 0 ? void 0 : _l.cancelReason,
+            cancel_reason_guest: (_m = order === null || order === void 0 ? void 0 : order.orderProduct[0]) === null || _m === void 0 ? void 0 : _m.cancelReason,
         };
     }
 };
