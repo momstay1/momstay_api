@@ -56,7 +56,7 @@ export class ProductService {
     // 생활 및 편의 정보 가져오기
     let productInfo;
     let product_info_idxs;
-    if (get(createProductDto, 'productInfoIdx', '')) {
+    if (get(createProductDto, 'productInfoIdx', '') && createProductDto.productInfoIdx != 'null') {
       const productInfoIdx = get(createProductDto, 'productInfoIdx').split(',');
       productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
       // 필터 검색시 쿼리가 복잡해짐에 따라 간단한 검색 쿼리 사용을 위함
