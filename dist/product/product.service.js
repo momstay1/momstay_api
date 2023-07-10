@@ -49,7 +49,7 @@ let ProductService = class ProductService {
     async create(createProductDto, files) {
         let productInfo;
         let product_info_idxs;
-        if ((0, lodash_1.get)(createProductDto, 'productInfoIdx', '')) {
+        if ((0, lodash_1.get)(createProductDto, 'productInfoIdx', '') && createProductDto.productInfoIdx != 'null') {
             const productInfoIdx = (0, lodash_1.get)(createProductDto, 'productInfoIdx').split(',');
             productInfo = await this.productInfoService.findAllIdxs(productInfoIdx);
             product_info_idxs = (0, lodash_1.sortBy)((0, lodash_1.map)(productInfoIdx, (o) => +o));
