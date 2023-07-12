@@ -17,7 +17,7 @@ import { FileService } from 'src/file/file.service';
 
 const uncertifiedStatus = 1;
 const registrationStatus = 2;
-const url = 'http://momstay.cf148.reconers.com';
+const url = 'https://momstay.net';
 const api_url = 'http://momstay_api.cf148.reconers.com';
 @Injectable()
 export class EmailService {

@@ -186,7 +186,7 @@ export const commonUtils = {
     const data = {};
 
     // 사이트 URL
-    data['momstay_url'] = 'http://momstay.cf148.reconers.com';
+    data['momstay_url'] = 'https://momstay.net';
     data['momstay_admin_url'] = 'http://momstay_admin.cf148.reconers.com';
     // 부가세
     data['tax'] = 10;
