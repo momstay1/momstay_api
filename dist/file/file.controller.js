@@ -44,7 +44,7 @@ let FileController = class FileController {
     }
     async getFile(name, res) {
         const file = await this.fileService.findOneName(name);
-        return res.sendFile(file.file_full_path);
+        return res.sendFile(file.file_watermark_path || file.file_full_path);
     }
     async getWatermarkFile(name, res) {
         const file = await this.fileService.findOneName(name);

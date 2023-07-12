@@ -53,7 +53,7 @@ const watermarkCategory = [
     'site_og'
 ];
 const img_url = '/file/img/';
-const site_api_url = 'http://momstay.cf148.reconers.com';
+const site_api_url = 'http://momstay_api.cf148.reconers.com';
 let FileService = class FileService {
     constructor(fileRepository) {
         this.fileRepository = fileRepository;
