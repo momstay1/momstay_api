@@ -81,7 +81,7 @@ export class FileController {
   @ApiOperation({ summary: '이미지 파일 API' })
   async getFile(@Param('name') name: string, @Res() res) {
     const file = await this.fileService.findOneName(name);
-    return res.sendFile(file.file_full_path);
+    return res.sendFile(file.file_watermark_path || file.file_full_path);
   }
 
   @Get('watermark_img/:name')

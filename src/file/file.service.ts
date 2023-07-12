@@ -50,7 +50,7 @@ const watermarkCategory = [
 
 // const sharp = require('sharp');
 const img_url = '/file/img/';
-const site_api_url = 'http://momstay.cf148.reconers.com';
+const site_api_url = 'http://momstay_api.cf148.reconers.com';
 @Injectable()
 export class FileService {
   constructor(
