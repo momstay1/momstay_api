@@ -402,7 +402,7 @@ export class FileService {
     console.log('이미지 용량 및 사이즈 축소');
     console.log('이미지 경로: ', file.file_full_path);
     const fileBuffer = fs.readFileSync(file.file_full_path);
-    const image = sharp(fileBuffer);
+    const image = sharp(fileBuffer, { failOn: 'truncated' });
     const { format, width, height } = await image.metadata();
 
     if (width >= 1200) {
@@ -428,10 +428,12 @@ export class FileService {
     console.log('이미지 워터마크');
     console.log('이미지 경로: ', file_data.file_full_path);
     const fileBuffer = fs.readFileSync(file_data.file_full_path);
-    const image = sharp(fileBuffer);
+    const image = sharp(fileBuffer, { failOn: 'truncated' });
     const { width, height } = await image.metadata();
 
-    const watermark = sharp('./src/file/watermark/watermark.png');
+    const watermark_img_path = './src/file/watermark/watermark.png';
+    const watermarkFileBuffer = fs.readFileSync(watermark_img_path);
+    const watermark = sharp(watermarkFileBuffer, { failOn: 'truncated' });
     const multipleNum = width < height ? 3 : 4;
     console.log({ multipleNum });
     // 워터마크 이미지 리사이즈
