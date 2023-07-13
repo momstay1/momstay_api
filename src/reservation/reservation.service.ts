@@ -126,13 +126,14 @@ export class ReservationService {
 
     // 방문예약 등록시 알림톡 발송
     const alimtalk_data = await this.settingsAlimtalkData(reservation, user);
-    if (user.language == 'ko') {
-      alimtalk_data.link = alimtalk_data.guest_link;
-      await this.messageService.send([user.phone], 'guest_reservationrequest', alimtalk_data);
-    }
     // 호스트 방문예약 알림 상세 링크
     alimtalk_data.link = alimtalk_data.host_link;
     await this.messageService.send([hostUser.phone], 'host_reservationrequest', alimtalk_data);
+    if (user.language == 'ko') {
+      alimtalk_data.link = alimtalk_data.guest_link;
+      alimtalk_data.phone = hostUser.phone;
+      await this.messageService.send([user.phone], 'guest_reservationrequest', alimtalk_data);
+    }
 
     return { reservation };
   }
