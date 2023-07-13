@@ -428,7 +428,7 @@ export class FileService {
     console.log('이미지 워터마크');
     console.log('이미지 경로: ', file_data.file_full_path);
     const fileBuffer = fs.readFileSync(file_data.file_full_path);
-    const image = await sharp(fileBuffer);
+    const image = sharp(fileBuffer);
     const { width, height } = await image.metadata();
 
     const watermark = sharp('./src/file/watermark/watermark.png');
@@ -436,7 +436,7 @@ export class FileService {
     console.log({ multipleNum });
     // 워터마크 이미지 리사이즈
     console.log('워터마크 이미지 리사이즈');
-    watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
+    await watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
     const watermarkBuffer = await watermark.toBuffer();
 
     console.log('이미지에 워터마크 추가');
@@ -447,6 +447,7 @@ export class FileService {
       }])
       .toFile(file_data.file_watermark_path, (err, info) => {
         console.log(`워터마크된 이미지 info : ${JSON.stringify(info, null, 2)}`);
+        console.log(`워터마크된 이미지 err : ${JSON.stringify(err, null, 2)}`);
       })
       .toBuffer()
     console.log('이미지에 워터마크 추가 완료');
