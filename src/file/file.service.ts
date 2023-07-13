@@ -399,8 +399,8 @@ export class FileService {
 
   // 이미지 용량 및 사이즈 축소
   async sharpFile(file) {
-    // const fileBuffer = fs.readFileSync(file.destination + '/' + filename);
-    const image = await sharp(file.path)
+    const fileBuffer = fs.readFileSync(file.path);
+    const image = await sharp(fileBuffer)
     const { format, width, height } = await image.metadata();
 
     if (width >= 1200) {
@@ -421,7 +421,8 @@ export class FileService {
   // 이미지 워터마크
   async fileWatermark(file_data) {
     console.log(file_data.file_full_path);
-    const image = await sharp(file_data.file_full_path);
+    const fileBuffer = fs.readFileSync(file_data.file_full_path);
+    const image = await sharp(fileBuffer);
     const { width, height } = await image.metadata();
 
     const watermark = sharp('./src/file/watermark/watermark.png');
