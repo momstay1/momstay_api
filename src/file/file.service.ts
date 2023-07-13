@@ -307,7 +307,7 @@ export class FileService {
 
         // 이미지 용량 및 사이즈 줄이기
         if (file_data.file_is_img) {
-          await this.sharpFile(files[i][j]);
+          await this.sharpFile(file_data);
           if (watermarkCategory.includes(i)) {
             const watermark_name = raw_name[0] + '_watermark.' + raw_name[1];
             file_data['file_watermark_name'] = watermark_name;
@@ -399,28 +399,34 @@ export class FileService {
 
   // 이미지 용량 및 사이즈 축소
   async sharpFile(file) {
-    const fileBuffer = fs.readFileSync(file.path);
-    const image = await sharp(fileBuffer)
+    console.log('이미지 용량 및 사이즈 축소');
+    console.log('이미지 경로: ', file.file_full_path);
+    const fileBuffer = fs.readFileSync(file.file_full_path);
+    const image = sharp(fileBuffer);
     const { format, width, height } = await image.metadata();
 
     if (width >= 1200) {
+      console.log('이미지 넓이: ', { width });
       await image.resize(1200, null, { fit: 'contain' });
-    }
-    if (height >= 1200) {
+    } else if (height >= 1200) {
+      console.log('이미지 높이: ', { height });
       await image.resize(null, 1200, { fit: 'contain' });
     }
+    console.log('이미지 퀄리티 85% 줄이기');
     await image.withMetadata()
       .toFormat(format, { quality: 85 })
-      .toFile(file.path, (err, info) => {
+      .toFile(file.file_full_path, (err, info) => {
         console.log(`파일 압축 info :${JSON.stringify(info, null, 2)}`);
         console.log(`파일 압축 err :${JSON.stringify(err, null, 2)}`);
       })
       .toBuffer()
+    console.log('이미지 용량 및 사이즈 축소 완료');
   }
 
   // 이미지 워터마크
   async fileWatermark(file_data) {
-    console.log(file_data.file_full_path);
+    console.log('이미지 워터마크');
+    console.log('이미지 경로: ', file_data.file_full_path);
     const fileBuffer = fs.readFileSync(file_data.file_full_path);
     const image = await sharp(fileBuffer);
     const { width, height } = await image.metadata();
@@ -429,9 +435,11 @@ export class FileService {
     const multipleNum = width < height ? 3 : 4;
     console.log({ multipleNum });
     // 워터마크 이미지 리사이즈
+    console.log('워터마크 이미지 리사이즈');
     watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
     const watermarkBuffer = await watermark.toBuffer();
 
+    console.log('이미지에 워터마크 추가');
     const watermarked = await image
       .composite([{
         input: watermarkBuffer,
@@ -441,6 +449,7 @@ export class FileService {
         console.log(`워터마크된 이미지 info : ${JSON.stringify(info, null, 2)}`);
       })
       .toBuffer()
+    console.log('이미지에 워터마크 추가 완료');
   }
 
   // post 또는 patch 요청시 변경된 파일 제거
