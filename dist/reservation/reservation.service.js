@@ -101,12 +101,13 @@ let ReservationService = class ReservationService {
             await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
         }
         const alimtalk_data = await this.settingsAlimtalkData(reservation, user);
-        if (user.language == 'ko') {
-            alimtalk_data.link = alimtalk_data.guest_link;
-            await this.messageService.send([user.phone], 'guest_reservationrequest', alimtalk_data);
-        }
         alimtalk_data.link = alimtalk_data.host_link;
         await this.messageService.send([hostUser.phone], 'host_reservationrequest', alimtalk_data);
+        if (user.language == 'ko') {
+            alimtalk_data.link = alimtalk_data.guest_link;
+            alimtalk_data.phone = hostUser.phone;
+            await this.messageService.send([user.phone], 'guest_reservationrequest', alimtalk_data);
+        }
         return { reservation };
     }
     async hostFindAll(options, userInfo, order) {
