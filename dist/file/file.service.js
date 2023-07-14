@@ -353,7 +353,7 @@ let FileService = class FileService {
         const { width, height } = await image.metadata();
         const watermark_img_local_path = './src/file/watermark/watermark.png';
         const watermark_img_path = '/home/momstay_api/wwwhost/src/file/watermark/watermark.png';
-        const watermark = sharp(watermark_img_local_path, { failOnError: false });
+        const watermark = sharp(watermark_img_path, { failOnError: false });
         const multipleNum = width < height ? 3 : 4;
         console.log('워터마크 이미지 리사이즈');
         await watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
