@@ -435,8 +435,8 @@ export class FileService {
     const watermark_img_local_path = './src/file/watermark/watermark.png';
     const watermark_img_path = '/home/momstay_api/wwwhost/src/file/watermark/watermark.png';
     // const watermarkFileBuffer = fs.readFileSync(watermark_img_path);
-    const watermark = sharp(watermark_img_local_path, { failOnError: false });
-    // const watermark = sharp(watermark_img_path, { failOnError: false });
+    // const watermark = sharp(watermark_img_local_path, { failOnError: false });
+    const watermark = sharp(watermark_img_path, { failOnError: false });
     const multipleNum = width < height ? 3 : 4;
     // 워터마크 이미지 리사이즈
     console.log('워터마크 이미지 리사이즈');
