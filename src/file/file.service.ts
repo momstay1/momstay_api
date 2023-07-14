@@ -401,9 +401,9 @@ export class FileService {
   async sharpFile(file) {
     console.log('이미지 용량 및 사이즈 축소');
     console.log('이미지 경로: ', file.file_full_path);
-    const fileBuffer = fs.readFileSync(file.file_full_path);
-    // const image = sharp(file.file_full_path, { failOnError: false });
-    const image = sharp(fileBuffer, { failOnError: false });
+    // const fileBuffer = fs.readFileSync(file.file_full_path);
+    const image = sharp(file.file_full_path, { failOnError: false });
+    // const image = sharp(fileBuffer, { failOnError: false });
     const { format, width, height } = await image.metadata();
 
     if (width >= 1200) {
