@@ -401,8 +401,9 @@ export class FileService {
   async sharpFile(file) {
     console.log('이미지 용량 및 사이즈 축소');
     console.log('이미지 경로: ', file.file_full_path);
-    // const fileBuffer = fs.readFileSync(file.file_full_path);
-    const image = sharp(file.file_full_path, { failOnError: false });
+    const fileBuffer = fs.readFileSync(file.file_full_path);
+    // const image = sharp(file.file_full_path, { failOnError: false });
+    const image = sharp(fileBuffer, { failOnError: false });
     const { format, width, height } = await image.metadata();
 
     if (width >= 1200) {
@@ -431,20 +432,21 @@ export class FileService {
     const image = sharp(file_data.file_full_path, { failOnError: false });
     const { width, height } = await image.metadata();
 
-    // const watermark_img_local_path = './src/file/watermark/watermark.png';
+    const watermark_img_local_path = './src/file/watermark/watermark.png';
     const watermark_img_path = '/home/momstay_api/wwwhost/src/file/watermark/watermark.png';
     // const watermarkFileBuffer = fs.readFileSync(watermark_img_path);
-    const watermark = sharp(watermark_img_path, { failOnError: false });
+    const watermark = sharp(watermark_img_local_path, { failOnError: false });
+    // const watermark = sharp(watermark_img_path, { failOnError: false });
     const multipleNum = width < height ? 3 : 4;
-    console.log({ multipleNum });
     // 워터마크 이미지 리사이즈
     console.log('워터마크 이미지 리사이즈');
     await watermark.resize(+(width / multipleNum).toFixed(), null, { fit: 'contain' });
     const watermarkBuffer = await watermark.toBuffer();
 
     console.log('이미지에 워터마크 추가');
-    const watermarked = await image
-      .withMetadata()
+
+    await image
+      .rotate(null)
       .composite([{
         input: watermarkBuffer,
         gravity: 'southeast', // 워터마크 위치 오른쪽 밑
@@ -453,7 +455,6 @@ export class FileService {
         console.log(`워터마크된 이미지 info : ${JSON.stringify(info, null, 2)}`);
         console.log(`워터마크된 이미지 err : ${JSON.stringify(err, null, 2)}`);
       })
-    // .toBuffer()
     console.log('이미지에 워터마크 추가 완료');
   }
 
