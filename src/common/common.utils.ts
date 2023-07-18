@@ -208,11 +208,12 @@ export const commonUtils = {
     };
     // order 상태 텍스트
     data['order_status_text'] = {
-      1: '결제대기',
-      2: '결제완료',
-      3: '배송준비',
-      4: '배송중(호스트 승인)',
-      6: '구매확정(입주 확정)',
+      1: '',
+      2: '결제 대기',
+      3: '',
+      4: '결제 완료',
+      // 6: '구매확정(입주 확정)',
+      8: '결제 취소',
     };
     // order product 상태 텍스트
     data['order_product_status_text'] = {
