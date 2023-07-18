@@ -39,7 +39,7 @@
                     "order": 400,
                     "title": "주문자 이메일",
                     "column": "user.email",
-                    "width": 100
+                    "width": 120
                 },
                 {
                     "order": 300,
@@ -54,7 +54,12 @@
                     "column": "custom.orderPayPrice",
                     "width": 100
                 },
-                { "order": 100, "title": "주문일", "column": "createdAt", "width": 200 }
+                {
+                    "order": 100,
+                    "title": "주문일",
+                    "column": "custom.createdAt",
+                    "width": 200
+                }
             ]
         }
     ],
@@ -86,7 +91,12 @@
             "width": 100,
             "convertTo": "membership_status_text"
         },
-        { "order": 100, "title": "등록일", "column": "createdAt", "width": 100 }
+        {
+            "order": 100,
+            "title": "등록일",
+            "column": "custom.createdAt",
+            "width": 100
+        }
     ],
     "board_5": [
         { "order": 500, "title": "문의내용", "column": "content", "width": 300 },
@@ -109,13 +119,18 @@
             "width": 100,
             "convertTo": "board_status_text"
         },
-        { "order": 100, "title": "등록일", "column": "createdAt", "width": 100 }
+        {
+            "order": 100,
+            "title": "등록일",
+            "column": "custom.createdAt",
+            "width": 100
+        }
     ],
     "reservation": [
         {
             "order": 600,
             "title": "방이름",
-            "column": "productOption.product.title",
+            "column": "productOption.title",
             "width": 200
         },
         {
@@ -140,13 +155,7 @@
         {
             "order": 200,
             "title": "예약일",
-            "column": "visitDate",
-            "width": 200
-        },
-        {
-            "order": 100,
-            "title": "예약시간",
-            "column": "visitTime",
+            "column": "custom.visitDateTime",
             "width": 200
         }
     ],
@@ -205,7 +214,7 @@
             "column": "custom.monthPrice",
             "width": 100
         },
-        { "order": 300, "title": "지역", "column": "addr1", "width": 100 },
+        { "order": 300, "title": "지역", "column": "addr1", "width": 250 },
         {
             "order": 200,
             "title": "멤버십 이용 상태",
@@ -233,14 +242,14 @@
             "order": 500,
             "title": "숙소 이름",
             "column": "product.title",
-            "width": 100
+            "width": 150
         },
-        { "order": 400, "title": "방 이름", "column": "title", "width": 100 },
+        { "order": 400, "title": "방 이름", "column": "title", "width": 200 },
         {
             "order": 300,
             "title": "월별 요금",
             "column": "custom.priceAddUnit",
-            "width": 100
+            "width": 200
         },
         {
             "order": 200,

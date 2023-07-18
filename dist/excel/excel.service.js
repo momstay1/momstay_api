@@ -177,27 +177,38 @@ let ExcelService = class ExcelService {
                 switch (customCol) {
                     case 'monthPrice':
                         const { minPrice, maxPrice } = getMinMaxPrice(data['productOption']);
-                        const formatMinPrice = common_utils_1.commonUtils.formatPrice(minPrice);
-                        const formatMaxPrice = common_utils_1.commonUtils.formatPrice(maxPrice);
-                        return `${formatMinPrice} ~ ${formatMaxPrice} 원`;
+                        if (typeof maxPrice === 'undefined') {
+                            return `등록된 방이 없습니다.`;
+                        }
+                        const formatMinPrice = common_utils_1.commonUtils.formatPrice(minPrice / 10000);
+                        const formatMaxPrice = common_utils_1.commonUtils.formatPrice(maxPrice / 10000);
+                        if (minPrice === maxPrice) {
+                            return `${formatMaxPrice} 만원`;
+                        }
+                        return `${formatMinPrice} ~ ${formatMaxPrice} 만원`;
                     case 'priceAddUnit':
-                        const formatPriceMonth = common_utils_1.commonUtils.formatPrice(data['priceMonth']);
-                        return `${formatPriceMonth}원`;
+                        const koFormatPriceMonth = common_utils_1.commonUtils.formatPrice(data['priceMonth']);
+                        const enFormatPriceMonth = common_utils_1.commonUtils.formatPrice(data['priceMonthEng']);
+                        return `${koFormatPriceMonth}￦ / ${enFormatPriceMonth}$`;
                     case 'mebershipSelectedPrice':
                         const selectedPrice = getMembershipPrice(data['month'], settingsData);
                         const formatSelectedPrice = common_utils_1.commonUtils.formatPrice(selectedPrice);
                         return `${formatSelectedPrice}원 (${data['month']}개월)`;
                     case 'reviewStar':
                         return `${data['star'] / 2}점`;
+                    case 'visitDateTime':
+                        return `${data['visitDate']} ${data['visitTime']}`;
+                    case 'createdAt':
+                        const formatDate = moment(data['createdAt']).format('YYYY-MM-DD HH:mm:ss');
+                        return `${formatDate}`;
                 }
             }
             function getMinMaxPrice(array) {
-                let minPrice = 0;
-                let maxPrice = 0;
+                let minPrice, maxPrice;
                 array.map((obj) => {
-                    if (minPrice === 0)
+                    if (typeof minPrice === 'undefined')
                         minPrice = obj.priceMonth;
-                    if (maxPrice === 0)
+                    if (typeof maxPrice === 'undefined')
                         maxPrice = obj.priceMonth;
                     if (minPrice > obj.priceMonth)
                         minPrice = obj.priceMonth;
@@ -272,6 +283,9 @@ let ExcelService = class ExcelService {
                     case 'orderPayPrice':
                         const formatPayPrice = common_utils_1.commonUtils.formatPrice(itemData['payPrice']);
                         return `${formatPayPrice}원`;
+                    case 'createdAt':
+                        const formatDate = moment(data['createdAt']).format('YYYY-MM-DD HH:mm:ss');
+                        return `${formatDate}`;
                 }
             }
         }
