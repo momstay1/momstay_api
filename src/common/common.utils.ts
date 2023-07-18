@@ -216,11 +216,12 @@ export const commonUtils = {
     };
     // order product 상태 텍스트
     data['order_product_status_text'] = {
-      1: '결제대기',
-      2: '결제완료',
-      3: '배송준비',
-      4: '배송중(호스트 승인)',
-      6: '구매확정(입주 확정)',
+      // 1: '',
+      2: '결제 대기',
+      // 3: '',
+      4: '결제 완료',
+      // 6: '구매확정(입주 확정)',
+      8: '결제 취소',
     };
     // user 상태 텍스트
     data['user_status_text'] = {
@@ -247,11 +248,11 @@ export const commonUtils = {
     };
     // 방문 예약 상태 텍스트
     data['reservation_status_text'] = {
-      1: '예약대기',
-      2: '예약승인',
-      3: '예약확정',
-      4: '예약취소',
-      5: '예약거부',
+      1: '예약 대기',
+      2: '예약 승인',
+      3: '입주 확정',
+      4: '예약 취소',
+      5: '예약 거부',
     };
     // 후기 등록 텍스트
     data['review_status_text'] = {
@@ -260,8 +261,8 @@ export const commonUtils = {
     };
     // 멤버십 상태 텍스트
     data['membership_status_text'] = {
-      1: '신청',
-      2: '승인',
+      1: '확인대기',
+      2: '확인완료',
       3: '종료',
     };
     // 숙소 유형 텍스트
@@ -273,20 +274,20 @@ export const commonUtils = {
     };
     // 숙소 게시 상태 텍스트
     data['product_status_text'] = {
-      0: '미등록',
-      1: '미사용',
-      2: '사용',
+      0: '작성중',
+      1: '미등록',
+      2: '등록',
     };
     // 숙소 멤버십 이용상태 텍스트
     data['product_membership_text'] = {
       0: '-',
-      1: '이용',
+      1: '사용',
     };
     // 방 게시 상태 텍스트
     data['product_option_status_text'] = {
-      0: '미등록',
-      1: '미사용',
-      2: '사용',
+      0: '작성중',
+      1: '미등록',
+      2: '등록',
     };
     // 방 투숙 상태 텍스트
     data['product_option_stayStatus_text'] = {
