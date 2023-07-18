@@ -1390,7 +1390,7 @@ export class OrderService {
       .createQueryBuilder()
       .select('SUM(IF(`status` = 2, 1, 0))', 'payment_cnt')
       .addSelect('SUM(IF(`status` = 8, 1, 0))', 'cancel_cnt')
-      .addSelect('SUM(IF(`status` = 6, 1, 0))', 'confirmed_cnt')
+      .addSelect('SUM(IF(`status` = 4, 1, 0))', 'confirmed_cnt')
       .where((qb) => {
         qb.where('DATE_FORMAT(`createdAt`, "%Y-%m") = :month', {
           month: month,
