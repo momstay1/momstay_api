@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { IsOptional, Matches } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 
 export class UpdateUserDto extends CreateUserDto {
@@ -16,6 +16,7 @@ export class UpdateUserDto extends CreateUserDto {
   readonly id: string;
 
   @IsOptional()
+  @Matches(/^(?=.*[a-zA-Z])(?=.*[~!@#$%^&*()_+|<>?:{}])(?=.*[0-9]).{8,25}$/)
   @ApiProperty({ description: '비밀번호', required: false })
   readonly password: string;
 
