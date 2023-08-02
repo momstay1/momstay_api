@@ -15,7 +15,7 @@ export class LoginUserDto {
   readonly id: string;
 
   @IsString()
-  @Matches(/^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,25}$/)
+  @Matches(/^(?=.*[a-zA-Z])(?=.*[~!@#$%^&*()_+|<>?:{}])(?=.*[0-9]).{8,25}$/)
   @ApiProperty({ description: '비밀번호' })
   readonly password: string;
 
