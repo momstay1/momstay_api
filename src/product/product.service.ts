@@ -195,6 +195,7 @@ export class ProductService {
         ),
         (o) => '' + o.file_idx,
       );
+      console.log({ productFileIdxs });
       // const delFileIdxs = productFileIdxs.filter(
       //   (o) => !fileIdxs.includes(o),
       // );

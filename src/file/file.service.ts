@@ -216,12 +216,12 @@ export class FileService {
   async removes(idxs: string[]) {
     try {
       const files = await this.findIndexs(idxs);
-      await this.deleteFile(files);
-      await this.deleteStorageFile(files);
       await this.fileRepository.createQueryBuilder()
         .delete()
         .where(" file_idx IN (:idxs)", { idxs: idxs })
         .execute()
+      await this.deleteFile(files);
+      // await this.deleteStorageFile(files);
     } catch (error) {
       console.log({ error });
       console.log('삭제할 파일이 없습니다', { idxs });
