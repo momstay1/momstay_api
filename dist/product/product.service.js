@@ -165,6 +165,7 @@ let ProductService = class ProductService {
         let fileIdxs = fileIdx.split(',');
         try {
             const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(['lodgingDetailImg', 'mealsImg'], '' + product['idx']), (o) => '' + o.file_idx);
+            console.log({ productFileIdxs });
             if (productFileIdxs.length > 0) {
                 await this.fileService.removes(productFileIdxs);
             }

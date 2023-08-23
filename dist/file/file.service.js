@@ -177,12 +177,11 @@ let FileService = class FileService {
     async removes(idxs) {
         try {
             const files = await this.findIndexs(idxs);
-            await this.deleteFile(files);
-            await this.deleteStorageFile(files);
             await this.fileRepository.createQueryBuilder()
                 .delete()
                 .where(" file_idx IN (:idxs)", { idxs: idxs })
                 .execute();
+            await this.deleteFile(files);
         }
         catch (error) {
             console.log({ error });
