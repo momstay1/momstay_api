@@ -57,5 +57,5 @@ pm2 reload momstay-api<br>
 <br>
 
 서버최초실행<br>
-pm2 start ecosystem.config.js --only minters_api --env production<br>
+pm2 start ecosystem.config.js --only momstay_api --env production<br>
 <br><br><br>
