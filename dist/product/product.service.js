@@ -162,24 +162,15 @@ let ProductService = class ProductService {
         const productEntity = await this.productRepository.create(product_data);
         const product = await this.productRepository.save(productEntity);
         const fileIdx = (0, lodash_1.get)(createProductDto, 'filesIdx', '');
-        let fileIdxs = [];
-        if (fileIdx) {
-            console.log('-----------------------파일 제거-----------------------');
-            console.log({ fileIdx });
-            try {
-                const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(['lodgingDetailImg', 'mealsImg'], '' + product['idx']), (o) => '' + o.file_idx);
-                console.log({ productFileIdxs });
-                fileIdxs = fileIdx.split(',');
-                console.log({ fileIdxs });
-                const delFileIdxs = productFileIdxs.filter((o) => !fileIdxs.includes(o));
-                console.log({ delFileIdxs });
-                if (delFileIdxs.length > 0) {
-                    await this.fileService.removes(delFileIdxs);
-                }
+        let fileIdxs = fileIdx.split(',');
+        try {
+            const productFileIdxs = (0, lodash_1.map)(await this.fileService.findCategory(['lodgingDetailImg', 'mealsImg'], '' + product['idx']), (o) => '' + o.file_idx);
+            if (productFileIdxs.length > 0) {
+                await this.fileService.removes(productFileIdxs);
             }
-            catch (error) {
-                console.log({ error });
-            }
+        }
+        catch (error) {
+            console.log({ error });
         }
         let new_file;
         if (!(0, lodash_1.isEmpty)(files)) {
