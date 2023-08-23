@@ -184,34 +184,43 @@ export class ProductService {
     const productEntity = await this.productRepository.create(product_data);
     const product = await this.productRepository.save(productEntity);
 
-    // 파일 제거
+    // 기존 파일 제거
     const fileIdx = get(createProductDto, 'filesIdx', '');
-    let fileIdxs = [];
-    if (fileIdx) {
-      console.log('-----------------------파일 제거-----------------------');
-      console.log({ fileIdx });
-      try {
-        const productFileIdxs = map(
-          await this.fileService.findCategory(
-            ['lodgingDetailImg', 'mealsImg'],
-            '' + product['idx'],
-          ),
-          (o) => '' + o.file_idx,
-        );
-        console.log({ productFileIdxs });
-        fileIdxs = fileIdx.split(',');
-        console.log({ fileIdxs });
-        const delFileIdxs = productFileIdxs.filter(
-          (o) => !fileIdxs.includes(o),
-        );
-        console.log({ delFileIdxs });
-        if (delFileIdxs.length > 0) {
-          await this.fileService.removes(delFileIdxs);
-        }
-      } catch (error) {
-        console.log({ error });
+    let fileIdxs = fileIdx.split(',');
+    try {
+      const productFileIdxs = map(
+        await this.fileService.findCategory(
+          ['lodgingDetailImg', 'mealsImg'],
+          '' + product['idx'],
+        ),
+        (o) => '' + o.file_idx,
+      );
+      // const delFileIdxs = productFileIdxs.filter(
+      //   (o) => !fileIdxs.includes(o),
+      // );
+      if (productFileIdxs.length > 0) {
+        await this.fileService.removes(productFileIdxs);
       }
+    } catch (error) {
+      console.log({ error });
     }
+    // if (fileIdx) {
+    //   console.log('-----------------------파일 제거-----------------------');
+    //   console.log({ fileIdx });
+    //   try {
+    //     console.log({ productFileIdxs });
+    //     console.log({ fileIdxs });
+    //     const delFileIdxs = productFileIdxs.filter(
+    //       (o) => !fileIdxs.includes(o),
+    //     );
+    //     console.log({ delFileIdxs });
+    //     if (delFileIdxs.length > 0) {
+    //       await this.fileService.removes(delFileIdxs);
+    //     }
+    //   } catch (error) {
+    //     console.log({ error });
+    //   }
+    // }
 
     // 새 첨부파일 등록
     let new_file;
