@@ -100,14 +100,14 @@ export class MembershipService {
     }
 
     const site = await this.settingsService.find('site');
-    if (get(site, ['site_ko_email', 'set_value'], '')) {
+    if (get(site, ['site_info_email', 'set_value'], '')) {
       // 관리자 메일 발송
       const { mail, email_tmpl } = await this.emailService.mailSettings(
         { type: 'user', group: 'admin', code: 'membership', lang: user.language },
         {}
       );
       if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(user.email, mail.title, email_tmpl);
+        await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
       }
     }
 
