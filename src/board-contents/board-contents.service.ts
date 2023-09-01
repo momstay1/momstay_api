@@ -92,7 +92,7 @@ export class BoardContentsService {
     }
 
     const site = await this.settingsService.find('site');
-    if (board.idx == inquiryIdx && get(site, ['site_ko_email', 'set_value'], '')) {
+    if (board.idx == inquiryIdx && get(site, ['site_info_email', 'set_value'], '')) {
       // 1:1 문의 관리자 메일 발송
       const { mail, email_tmpl } = await this.emailService.mailSettings(
         { type: 'board', group: 'admin', code: 'inquiry', lang: 'ko' },
@@ -101,7 +101,7 @@ export class BoardContentsService {
         }
       );
       if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+        await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
       }
 
       // 알림톡 기능 (관리자에게 1:1문의 등록 알림톡)

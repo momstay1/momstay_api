@@ -1232,14 +1232,14 @@ export class OrderService {
           await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
         }
       }
-      if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+      if (get(site, ['site_info_email', 'set_value'], '') != '') {
         // 호스트 주문 완료 메일 발송
         const { mail, email_tmpl } = await this.emailService.mailSettings(
           { type: 'order', group: 'admin', code: code, lang: 'ko' },
           sendInfo
         );
         if (mail != '' && email_tmpl != '') {
-          await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+          await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
         }
       }
     }
@@ -1286,14 +1286,14 @@ export class OrderService {
         await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
       }
     }
-    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+    if (get(site, ['site_info_email', 'set_value'], '') != '') {
       // 호스트 주문 완료 메일 발송
       const { mail, email_tmpl } = await this.emailService.mailSettings(
         { type: 'order', group: 'admin', code: code, lang: 'ko' },
         sendInfo
       );
       if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+        await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
       }
     }
   }
@@ -1336,14 +1336,14 @@ export class OrderService {
         await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
       }
     }
-    if (get(site, ['site_ko_email', 'set_value'], '') != '') {
+    if (get(site, ['site_info_email', 'set_value'], '') != '') {
       // 호스트 주문 완료 메일 발송
       const { mail, email_tmpl } = await this.emailService.mailSettings(
         { type: 'order', group: 'admin', code: code, lang: 'ko' },
         sendInfo
       );
       if (mail != '' && email_tmpl != '') {
-        await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+        await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
       }
     }
   }
