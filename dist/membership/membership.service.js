@@ -86,10 +86,10 @@ let MembershipService = class MembershipService {
             }
         }
         const site = await this.settingsService.find('site');
-        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '')) {
+        if ((0, lodash_1.get)(site, ['site_info_email', 'set_value'], '')) {
             const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'user', group: 'admin', code: 'membership', lang: user.language }, {});
             if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(user.email, mail.title, email_tmpl);
+                await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
             }
         }
         const settings = await this.settingsService.find('alimtalk_admin_mobile');

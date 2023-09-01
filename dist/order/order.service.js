@@ -868,10 +868,10 @@ let OrderService = class OrderService {
                     await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
                 }
             }
-            if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+            if ((0, lodash_1.get)(site, ['site_info_email', 'set_value'], '') != '') {
                 const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
                 if (mail != '' && email_tmpl != '') {
-                    await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+                    await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
                 }
             }
         }
@@ -900,10 +900,10 @@ let OrderService = class OrderService {
                 await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
             }
         }
-        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+        if ((0, lodash_1.get)(site, ['site_info_email', 'set_value'], '') != '') {
             const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
             if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+                await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
             }
         }
     }
@@ -928,10 +928,10 @@ let OrderService = class OrderService {
                 await this.emailService.sendMail(hostUser.email, mail.title, email_tmpl);
             }
         }
-        if ((0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '') != '') {
+        if ((0, lodash_1.get)(site, ['site_info_email', 'set_value'], '') != '') {
             const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'order', group: 'admin', code: code, lang: 'ko' }, sendInfo);
             if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+                await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
             }
         }
     }

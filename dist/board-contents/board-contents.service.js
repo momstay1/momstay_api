@@ -72,12 +72,12 @@ let BoardContentsService = class BoardContentsService {
             }
         }
         const site = await this.settingsService.find('site');
-        if (board.idx == inquiryIdx && (0, lodash_1.get)(site, ['site_ko_email', 'set_value'], '')) {
+        if (board.idx == inquiryIdx && (0, lodash_1.get)(site, ['site_info_email', 'set_value'], '')) {
             const { mail, email_tmpl } = await this.emailService.mailSettings({ type: 'board', group: 'admin', code: 'inquiry', lang: 'ko' }, {
                 board_title: board.name
             });
             if (mail != '' && email_tmpl != '') {
-                await this.emailService.sendMail(site.site_ko_email.set_value, mail.title, email_tmpl);
+                await this.emailService.sendMail(site.site_info_email.set_value, mail.title, email_tmpl);
             }
             const settings = await this.settingsService.find('alimtalk_admin_mobile');
             const alimtalk_data = {
