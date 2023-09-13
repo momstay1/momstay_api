@@ -183,7 +183,7 @@ exports.commonUtils = {
         data['momstay_url'] = 'https://momstay.net';
         data['momstay_admin_url'] = 'http://momstay_admin.cf148.reconers.com';
         data['tax'] = 10;
-        data['fee'] = 5;
+        data['fee'] = 10;
         data['order_status'] = {
             waitingForPayment: 1,
             paymentCompleted: 2,

@@ -12,6 +12,7 @@ const order_total_service_1 = require("./order-total.service");
 const order_total_controller_1 = require("./order-total.controller");
 const typeorm_1 = require("@nestjs/typeorm");
 const order_total_entity_1 = require("./entities/order-total.entity");
+const admin_order_total_controller_1 = require("./admin-order-total.controller");
 let OrderTotalModule = class OrderTotalModule {
 };
 OrderTotalModule = __decorate([
@@ -19,7 +20,7 @@ OrderTotalModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forFeature([order_total_entity_1.OrderTotalEntity]),
         ],
-        controllers: [order_total_controller_1.OrderTotalController],
+        controllers: [order_total_controller_1.OrderTotalController, admin_order_total_controller_1.AdminOrderTotalController],
         providers: [order_total_service_1.OrderTotalService],
         exports: [order_total_service_1.OrderTotalService]
     })

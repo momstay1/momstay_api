@@ -12,6 +12,32 @@ export declare class OrderTotalService {
     priceChange(orderIdx: number, cancelPrice: number, cancelPriceEng: number): Promise<void>;
     findAll(): string;
     findOne(id: number): string;
+    salesCalc(date: string, type: string): Promise<{
+        year: any[];
+        month: any[];
+        day: any[];
+    }>;
+    salesStatisticsYear(year?: string): Promise<{
+        sales_statistics: {
+            year: any[];
+            month: any[];
+            day: any[];
+        };
+    }>;
+    salesStatisticsMonth(year: string): Promise<{
+        sales_statistics: {
+            year: any[];
+            month: any[];
+            day: any[];
+        };
+    }>;
+    salesStatisticsDay(yearMonth: string): Promise<{
+        sales_statistics: {
+            year: any[];
+            month: any[];
+            day: any[];
+        };
+    }>;
     findOneOrderIdx(orderIdx: number): Promise<OrderTotalEntity>;
     update(id: number, updateOrderTotalDto: UpdateOrderTotalDto): string;
     remove(id: number): string;

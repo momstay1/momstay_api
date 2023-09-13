@@ -18,6 +18,7 @@ const typeorm_1 = require("@nestjs/typeorm");
 const lodash_1 = require("lodash");
 const typeorm_2 = require("typeorm");
 const order_total_entity_1 = require("./entities/order-total.entity");
+const moment = require("moment");
 let OrderTotalService = class OrderTotalService {
     constructor(orderTotalRepository) {
         this.orderTotalRepository = orderTotalRepository;
@@ -66,6 +67,73 @@ let OrderTotalService = class OrderTotalService {
     }
     findOne(id) {
         return `This action returns a #${id} orderTotal`;
+    }
+    async salesCalc(date, type) {
+        let monent_format, sql_format;
+        switch (type) {
+            case 'year':
+                monent_format = 'YYYY';
+                sql_format = '%Y';
+                break;
+            case 'month':
+                monent_format = 'YYYY-MM';
+                sql_format = '%Y';
+                break;
+            case 'day':
+                monent_format = 'YYYY-MM-DD';
+                sql_format = '%Y-%m';
+                break;
+        }
+        const alias = 'order_total';
+        const [results, total] = await this.orderTotalRepository.createQueryBuilder(alias)
+            .leftJoinAndSelect('order', 'order', alias + '.orderIdx=order.idx')
+            .where(qb => {
+            qb.where('DATE_FORMAT(`' + alias + '`.`createdAt`, "' + sql_format + '") = :date', { date: date });
+            qb.andWhere('order.status > 0');
+        })
+            .orderBy(alias + '.createdAt', 'DESC')
+            .getManyAndCount();
+        const sales_statistics = {
+            year: [],
+            month: [],
+            day: [],
+        };
+        const statistics = {};
+        if (results.length > 0) {
+            for (const key in results) {
+                const date_key = moment(results[key].createdAt).format(monent_format);
+                if (!statistics[date_key]) {
+                    statistics[date_key] = {
+                        date: date_key,
+                        number: 0,
+                        pay_price: 0,
+                        cancel_price: 0,
+                        pay_price_eng: 0.00,
+                        cancel_price_eng: 0.00,
+                    };
+                }
+                statistics[date_key].number++;
+                statistics[date_key].pay_price += +results[key].totalPrice;
+                statistics[date_key].cancel_price += +results[key].totalCancelPrice;
+                statistics[date_key].pay_price_eng += +results[key].totalPriceEng;
+                statistics[date_key].cancel_price_eng += +results[key].totalCancelPriceEng;
+            }
+            sales_statistics[type] = (0, lodash_1.sortBy)(statistics, 'date').reverse();
+        }
+        return sales_statistics;
+    }
+    async salesStatisticsYear(year) {
+        year = year ? year : '2023';
+        const sales_statistics = await this.salesCalc(year, 'year');
+        return { sales_statistics };
+    }
+    async salesStatisticsMonth(year) {
+        const sales_statistics = await this.salesCalc(year, 'month');
+        return { sales_statistics };
+    }
+    async salesStatisticsDay(yearMonth) {
+        const sales_statistics = await this.salesCalc(yearMonth, 'day');
+        return { sales_statistics };
     }
     async findOneOrderIdx(orderIdx) {
         if (!orderIdx) {
