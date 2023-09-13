@@ -191,7 +191,7 @@ export const commonUtils = {
     // 부가세
     data['tax'] = 10;
     // 맘스테이 수수료
-    data['fee'] = 5;
+    data['fee'] = 10;
     // 1:결제대기, 2:결제완료, 3:배송준비, 4:배송중(호스트 승인), 6:구매확정, 7:취소요청, 8:취소완료, 9:반품요청, 10:반품완료, 11:교환요청, 12:교환완료
     data['order_status'] = {
       waitingForPayment: 1,
