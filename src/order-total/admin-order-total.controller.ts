@@ -9,19 +9,19 @@ import { Auth } from 'src/common/decorator/role.decorator';
 @ApiTags('총주문 (관리자) API')
 export class AdminOrderTotalController {
   constructor(private readonly orderTotalService: OrderTotalService) { }
-
+  // TODO: 실 서버 반영시 관리자 권한 주석 해제
   @Get('sales_statistics/year/')
   @ApiOperation({ summary: '관리자_연도별 매출 통계 API' })
-  // @Auth(['root', 'admin'])
-  // @ApiBearerAuth()
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   async salesStatisticsYear() {
     return await this.orderTotalService.salesStatisticsYear();
   }
 
   @Get('sales_statistics/month/:year')
   @ApiOperation({ summary: '관리자_월별 매출 통계 API' })
-  // @Auth(['root', 'admin'])
-  // @ApiBearerAuth()
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiParam({
     name: 'year',
     description: '검색할 년도',
@@ -32,8 +32,8 @@ export class AdminOrderTotalController {
 
   @Get('sales_statistics/day/:yearMonth')
   @ApiOperation({ summary: '관리자_일별 매출 통계 API' })
-  // @Auth(['root', 'admin'])
-  // @ApiBearerAuth()
+  @Auth(['root', 'admin'])
+  @ApiBearerAuth()
   @ApiParam({
     name: 'yearMonth',
     description: '검색할 년월',
