@@ -116,8 +116,8 @@ export class OrderTotalService {
         statistics[date_key].number++;
         statistics[date_key].pay_price += +results[key].totalPrice;
         statistics[date_key].cancel_price += +results[key].totalCancelPrice;
-        statistics[date_key].pay_price_eng += +results[key].totalPriceEng;
-        statistics[date_key].cancel_price_eng += +results[key].totalCancelPriceEng;
+        statistics[date_key].pay_price_eng += +(+results[key].totalPriceEng).toFixed(2);
+        statistics[date_key].cancel_price_eng += +(+results[key].totalCancelPriceEng).toFixed(2);
       }
       // 날짜기준 순서 정렬
       sales_statistics[type] = sortBy(statistics, 'date').reverse();
