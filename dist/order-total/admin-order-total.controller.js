@@ -16,6 +16,7 @@ exports.AdminOrderTotalController = void 0;
 const common_1 = require("@nestjs/common");
 const order_total_service_1 = require("./order-total.service");
 const swagger_1 = require("@nestjs/swagger");
+const role_decorator_1 = require("../common/decorator/role.decorator");
 let AdminOrderTotalController = class AdminOrderTotalController {
     constructor(orderTotalService) {
         this.orderTotalService = orderTotalService;
@@ -33,6 +34,8 @@ let AdminOrderTotalController = class AdminOrderTotalController {
 __decorate([
     (0, common_1.Get)('sales_statistics/year/'),
     (0, swagger_1.ApiOperation)({ summary: '관리자_연도별 매출 통계 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -40,6 +43,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)('sales_statistics/month/:year'),
     (0, swagger_1.ApiOperation)({ summary: '관리자_월별 매출 통계 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiParam)({
         name: 'year',
         description: '검색할 년도',
@@ -52,6 +57,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)('sales_statistics/day/:yearMonth'),
     (0, swagger_1.ApiOperation)({ summary: '관리자_일별 매출 통계 API' }),
+    (0, role_decorator_1.Auth)(['root', 'admin']),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiParam)({
         name: 'yearMonth',
         description: '검색할 년월',

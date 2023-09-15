@@ -115,8 +115,8 @@ let OrderTotalService = class OrderTotalService {
                 statistics[date_key].number++;
                 statistics[date_key].pay_price += +results[key].totalPrice;
                 statistics[date_key].cancel_price += +results[key].totalCancelPrice;
-                statistics[date_key].pay_price_eng += +results[key].totalPriceEng;
-                statistics[date_key].cancel_price_eng += +results[key].totalCancelPriceEng;
+                statistics[date_key].pay_price_eng += +(+results[key].totalPriceEng).toFixed(2);
+                statistics[date_key].cancel_price_eng += +(+results[key].totalCancelPriceEng).toFixed(2);
             }
             sales_statistics[type] = (0, lodash_1.sortBy)(statistics, 'date').reverse();
         }
