@@ -185,6 +185,8 @@ let ProductService = class ProductService {
         let file_info;
         console.log('-----------------------파일 정보 가져오기-----------------------');
         console.log({ fileIdxs });
+        fileIdxs = fileIdxs.filter(o => !!o);
+        console.log({ fileIdxs });
         if (fileIdxs.length > 0) {
             file_info = await this.fileService.findIndexs(fileIdxs);
             console.log({ file_info });
