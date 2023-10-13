@@ -195,12 +195,13 @@ export class ProductService {
         ),
         (o) => '' + o.file_idx,
       );
-      console.log({ productFileIdxs });
-      // const delFileIdxs = productFileIdxs.filter(
-      //   (o) => !fileIdxs.includes(o),
-      // );
-      if (productFileIdxs.length > 0) {
-        await this.fileService.removes(productFileIdxs);
+      // console.log({ productFileIdxs });
+      const delFileIdxs = productFileIdxs.filter(
+        (o) => !fileIdxs.includes(o),
+      );
+      console.log({ delFileIdxs });
+      if (delFileIdxs.length > 0) {
+        await this.fileService.removes(delFileIdxs);
       }
     } catch (error) {
       console.log({ error });
