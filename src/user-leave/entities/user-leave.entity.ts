@@ -7,6 +7,8 @@ export class UserLeaveEntity {
 
   @Column({ length: 255, default: '', comment: '탈퇴한 회원 id' })
   id: string;
+  @Column({ default: 0, comment: '탈퇴한 회원의 user idx' })
+  user_idx: number;
   @Column({ type: 'text', comment: '탈퇴한 회원 사유' })
   reason: string;
   @Column({ type: 'text', comment: '회원 정보' })
