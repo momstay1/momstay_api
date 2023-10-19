@@ -12,7 +12,7 @@ exports.usersConstant = {
         leave: 9,
     },
     default: {
-        group_idx: 2,
+        group_idx: 4,
     },
 };
 //# sourceMappingURL=constants.js.map

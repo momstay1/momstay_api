@@ -452,9 +452,10 @@ let UsersService = class UsersService {
     }
     async saveUser(createUserDto) {
         const addPrefixUserDto = createUserDto;
-        const groupIdx = createUserDto.group
-            ? createUserDto.group
-            : constants_1.usersConstant.default.group_idx;
+        let groupIdx = createUserDto.group;
+        console.log({ groupIdx });
+        if (!groupIdx)
+            groupIdx = constants_1.usersConstant.default.group_idx;
         const group = await this.groupService.findOne(groupIdx);
         if (group.id == 'host') {
             addPrefixUserDto.hostAt = new Date(moment().format('YYYY-MM-DD HH:mm:ss'));
