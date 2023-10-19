@@ -44,7 +44,7 @@ export class UserLeaveService {
     order_by[alias + '.createdAt'] = get(order_by, alias + '.createdAt', 'DESC');
 
     const [results, total] = await this.userLeaveRepository.createQueryBuilder('users_leave')
-      .leftJoin('users', 'users', '`users`.idx = `users_leave`.idx')
+      .leftJoin('users', 'users', '`users`.idx = `users_leave`.user_idx')
       .leftJoinAndSelect('users.group', 'group')
       .where(qb => {
         qb.where('`users`.`status` = :status', { status: usersConstant.status.leave })

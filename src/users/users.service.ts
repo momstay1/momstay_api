@@ -633,11 +633,14 @@ export class UsersService {
       '[cron] deleteUniqueKey: ',
       moment().format('YYYY-MM-DD HH:mm:ss'),
     );
+    // 탈퇴한지 2년 지난 탈퇴회원 정보 제거
+    const twoYearAgo = moment().add(-2, 'y').format('YYYY-MM-DD');
+    console.log({ twoYearAgo });
     await this.usersRepository
       .createQueryBuilder()
       .update(UsersEntity)
       .set({ id: '', uniqueKey: '', certifiInfo: '' })
-      .where(' status = :status', { status: usersConstant.status.leave })
+      .where(' status = :status AND DATE_FORMAT(leaveAt, \'%Y-%m-%d\') = :leaveAt', { status: usersConstant.status.leave, leaveAt: twoYearAgo })
       .execute();
   }
 
