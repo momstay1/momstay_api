@@ -22,6 +22,10 @@ __decorate([
     __metadata("design:type", String)
 ], UserLeaveEntity.prototype, "id", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 0, comment: '탈퇴한 회원의 user idx' }),
+    __metadata("design:type", Number)
+], UserLeaveEntity.prototype, "user_idx", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'text', comment: '탈퇴한 회원 사유' }),
     __metadata("design:type", String)
 ], UserLeaveEntity.prototype, "reason", void 0);

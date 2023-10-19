@@ -31,6 +31,7 @@ let UserLeaveService = class UserLeaveService {
     async leaveUser(user, reason) {
         const leave_data = {
             id: user['id'],
+            user_idx: user['idx'],
             reason: reason,
             userInfo: JSON.stringify(user)
         };
@@ -45,7 +46,7 @@ let UserLeaveService = class UserLeaveService {
         let order_by = common_utils_1.commonUtils.orderSplit(order, alias);
         order_by[alias + '.createdAt'] = (0, lodash_1.get)(order_by, alias + '.createdAt', 'DESC');
         const [results, total] = await this.userLeaveRepository.createQueryBuilder('users_leave')
-            .leftJoin('users', 'users', '`users`.id = `users_leave`.id')
+            .leftJoin('users', 'users', '`users`.idx = `users_leave`.idx')
             .leftJoinAndSelect('users.group', 'group')
             .where(qb => {
             qb.where('`users`.`status` = :status', { status: constants_1.usersConstant.status.leave });
