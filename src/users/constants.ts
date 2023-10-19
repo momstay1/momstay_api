@@ -9,6 +9,6 @@ export const usersConstant = {
     leave: 9, // 회원 탈퇴 상태
   },
   default: {
-    group_idx: 2, // 회원 기본 그룹
+    group_idx: 4, // 회원 기본 그룹
   },
 };

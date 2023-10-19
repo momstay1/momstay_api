@@ -595,9 +595,9 @@ export class UsersService {
   //회원 정보 저장
   private async saveUser(createUserDto): Promise<any> {
     const addPrefixUserDto = createUserDto;
-    const groupIdx = createUserDto.group
-      ? createUserDto.group
-      : usersConstant.default.group_idx;
+    let groupIdx = createUserDto.group
+    console.log({ groupIdx });
+    if (!groupIdx) groupIdx = usersConstant.default.group_idx;
     const group = await this.groupService.findOne(groupIdx);
     if (group.id == 'host') {
       // 호스트로 회원 가입시 호스트 날짜 기록
