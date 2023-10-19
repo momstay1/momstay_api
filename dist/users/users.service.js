@@ -472,11 +472,13 @@ let UsersService = class UsersService {
     }
     async deleteUniqueKey() {
         console.log('[cron] deleteUniqueKey: ', moment().format('YYYY-MM-DD HH:mm:ss'));
+        const twoYearAgo = moment().add(-2, 'y').format('YYYY-MM-DD');
+        console.log({ twoYearAgo });
         await this.usersRepository
             .createQueryBuilder()
             .update(user_entity_1.UsersEntity)
             .set({ id: '', uniqueKey: '', certifiInfo: '' })
-            .where(' status = :status', { status: constants_1.usersConstant.status.leave })
+            .where(' status = :status AND DATE_FORMAT(leaveAt, \'%Y-%m-%d\') = :leaveAt', { status: constants_1.usersConstant.status.leave, leaveAt: twoYearAgo })
             .execute();
     }
     async dormantNotice() {
