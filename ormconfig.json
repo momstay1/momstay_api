@@ -2,9 +2,9 @@
   "type": "mysql",
   "host": "127.0.0.1",
   "port": 3306,
-  "username": "sosohaja_api",
-  "password": "Ththgkwk123!",
-  "database": "sosohaja_api",
+  "username": "momstay_api",
+  "password": "Akatmxpdl123!",
+  "database": "momstay_api",
   "entities": [
     "dist/**/*.entity{.ts,.js}"
   ],
@@ -17,5 +17,6 @@
   },
   "synchronize": true,
   "ssl": false,
+  "timezone": "Asia/Seoul",
   "logging": false
 }
