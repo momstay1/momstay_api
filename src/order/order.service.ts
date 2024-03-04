@@ -191,7 +191,7 @@ export class OrderService {
     // 주문 관련 메일
     await this.guestOrderMail(order.idx, '');
 
-    if (order.status == status.paymentCompleted) {
+    if (get(createOrderDto, 'status', 0) == status.paymentCompleted) {
       // 알림톡 기능 (게스트에게 결제 완료 알림톡)
       const settings = await this.settingsService.find('alimtalk_admin_mobile');
       const alimtalk_data = await this.settingsAlimtalkData(order);
