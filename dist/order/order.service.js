@@ -153,7 +153,7 @@ let OrderService = class OrderService {
             await this.pushNotiService.guestOrderPush(user, po);
         }
         await this.guestOrderMail(order.idx, '');
-        if (order.status == status.paymentCompleted) {
+        if ((0, lodash_1.get)(createOrderDto, 'status', 0) == status.paymentCompleted) {
             const settings = await this.settingsService.find('alimtalk_admin_mobile');
             const alimtalk_data = await this.settingsAlimtalkData(order);
             if (order.user.language == 'ko') {
