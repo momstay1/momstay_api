@@ -71,6 +71,7 @@ let MessageService = class MessageService {
                     smsOnly: sendType == 'sms' ? 'Y' : 'N',
                     smsKind: 'L',
                     msgSms: msg,
+                    smsSender: senderNumber,
                     smsLmsTit: siteTitle,
                 };
                 if (msg_button.length > 0) {
