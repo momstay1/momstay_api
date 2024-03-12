@@ -78,7 +78,7 @@ export class MessageService {
           smsOnly: sendType == 'sms' ? 'Y' : 'N',
           smsKind: 'L',
           msgSms: msg,
-          // smsSender: senderNumber,
+          smsSender: senderNumber,
           smsLmsTit: siteTitle,
         };
 
