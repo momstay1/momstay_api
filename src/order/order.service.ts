@@ -184,7 +184,7 @@ export class OrderService {
 
     // 호스트에게 push 알림 발송
     const { user } = get(po, ['product']);
-    if (get(user, ['device', 'token'], '')) {
+    if (get(createOrderDto, 'status', 0) == status.paymentCompleted && get(user, ['device', 'token'], '')) {
       await this.pushNotiService.guestOrderPush(user, po);
     }
 
