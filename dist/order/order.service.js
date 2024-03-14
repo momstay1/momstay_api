@@ -149,7 +149,7 @@ let OrderService = class OrderService {
         const { orderProduct, priceInfo } = await this.orderProductService.createOrderProduct(order, po, createOrderDto);
         await this.ordertotalService.orderTotalCreate(order, orderProduct);
         const { user } = (0, lodash_1.get)(po, ['product']);
-        if ((0, lodash_1.get)(user, ['device', 'token'], '')) {
+        if ((0, lodash_1.get)(createOrderDto, 'status', 0) == status.paymentCompleted && (0, lodash_1.get)(user, ['device', 'token'], '')) {
             await this.pushNotiService.guestOrderPush(user, po);
         }
         await this.guestOrderMail(order.idx, '');
